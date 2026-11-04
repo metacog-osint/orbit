@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit — Space Domain Awareness &amp; Maneuver Compare</title>
+<meta name="description" content="Orbital maneuver comparison, GCAT owner-code hygiene, subsatellite release detection, and TLE gap source health.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <a href="https://theintelligence.company/">All programs</a>
+      <a href="data/feed.geojson">Contract v2 Feed</a>
+      <a href="data/snapshot.json">Snapshot JSON</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Maneuver Compare, subsatellite releases, and catalog hygiene.</h1>
+    <p class="lede">Compares consecutive SGP4 / GP element sets to detect in-track, cross-track, and radial thruster
+      burns (&Delta;v in m/s), separates routine station-keeping and launch-sibling dispersion from co-orbital inspection
+      activity, and maps ownership through Jonathan McDowell's GCAT (`SU` vs. `RU`, unnumbered active objects).</p>
+    <div class="tiles" id="tiles" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="man-h">
+    <div class="card-head">
+      <h2 id="man-h">Maneuver Compare (30-Day Detections)</h2>
+      <p class="muted small">Each detection shows maneuver type, estimated &Delta;v, calibrated confidence, and a hypothesis-framed meaning sentence.</p>
+    </div>
+    <div id="maneuvers"></div>
+  </section>
+
+  <div class="two">
+    <section class="card" aria-labelledby="cat-h">
+      <div class="card-head">
+        <h2 id="cat-h">GCAT Catalog &amp; Owner-Code Hygiene</h2>
+        <p class="muted small">Separates legacy Soviet (`SU`) from Russian (`RU`) objects, tracks unnumbered active payloads, and groups co-orbiting launch siblings.</p>
+      </div>
+      <div id="catalog"></div>
+    </section>
+
+    <section class="card" aria-labelledby="gap-h">
+      <div class="card-head">
+        <h2 id="gap-h">Source Health: TLE Tracking Gaps (&ge;48 h)</h2>
+        <p class="muted small">An untracked TLE gap looks identical to zero maneuvers; objects below have degraded maneuver confidence.</p>
+      </div>
+      <div id="gaps"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (`orbit-1.0`) — A project of The Intelligence Company. Sources: Jonathan McDowell GCAT (CC BY 4.0), CelesTrak / USSF 18 SDS.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

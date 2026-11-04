@@ -1,0 +1,581 @@
+{
+  "type": "FeatureCollection",
+  "contract": "tic-feed/2",
+  "program": "orbit",
+  "generated_at": "2026-11-01T12:00:00Z",
+  "licence": "CC BY 4.0 (GCAT); Public orbital element data (CelesTrak / 18 SDS); Orbit code MIT",
+  "attribution": "Orbit, The Intelligence Company (GCAT, CelesTrak / 18 SDS)",
+  "language_key": "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.2,
+          51.8
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:maneuver:s59773:2026-10-31T18",
+        "program": "orbit",
+        "title": "Kosmos-2576 (NORAD 59773, RU): in-track maneuver Δv=3.49 m/s (LEO)",
+        "summary": "Kosmos-2576 (NORAD 59773, RU, LEO): in-track maneuver of 3.49 m/s (Δa=6.22 km, Δi=0.0012°) detected between 2026-10-30T18:00Z and 2026-10-31T18:00Z (confidence 95%). Hypothesis: An in-track burn alters semi-major axis and orbital period, which usually indicates along-track re-phasing, ground-track repeat timing adjustment, or closing/opening distance to a co-orbital object.",
+        "kind": "assessment",
+        "tier": "warning",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "sampled",
+        "us_person_data": "none",
+        "status_class": "assessed",
+        "product_category": "warning",
+        "data_as_of": "2026-10-31T18:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "countries": [
+          "RU"
+        ],
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical",
+          "informational"
+        ],
+        "ncf": [
+          "provide_satellite_access",
+          "provide_pnt"
+        ],
+        "requirement_ids": [
+          "OR-PIR-1",
+          "OR-EEI-1"
+        ],
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.9,
+        "precision_class": "point",
+        "measures": {
+          "delta_v_ms": 3.49,
+          "delta_a_km": 6.223,
+          "delta_inc_deg": 0.0012,
+          "tle_gap_hours": 24.0
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S59773"
+        },
+        "sources": [
+          {
+            "id": "celestrak-gp",
+            "publisher": "CelesTrak / USSF 18 SDS",
+            "title": "GP Orbital Element Sets",
+            "url": "https://celestrak.org/NORAD/elements/",
+            "licence": "Public orbital element data",
+            "grade": "A1",
+            "independence_group": "ussf-18sds",
+            "source_type": "telemetry",
+            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          },
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0",
+            "grade": "A1",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ],
+        "change_from_prior": "new",
+        "change_reason": "Detected in-track burn (Δv=3.49 m/s) between consecutive GP epochs.",
+        "warning_problem_id": "OR-WP-1",
+        "indicator_id": "OR-IND-1",
+        "hypothesis_id": "OR-H-1A",
+        "direction": "supports",
+        "indicator_state": "present",
+        "probability": 0.95,
+        "likelihood_term": "very_likely",
+        "confidence": "moderate",
+        "confidence_basis": {
+          "rubric": "tic-confidence-1.0",
+          "factors": {
+            "independent_lines": 2,
+            "contradicted": false,
+            "coverage_fraction": 0.9,
+            "grades": [
+              "A1"
+            ],
+            "alternatives_rejected": 1,
+            "method_scored": false,
+            "assumptions": "holds",
+            "ease_of_faking": "low",
+            "horizon_days": 0.0
+          },
+          "caps": [
+            "expertise"
+          ],
+          "raise_by": [
+            "a further independent line of evidence (have 2, High needs 3)",
+            "a scored Verdict record for this method version"
+          ]
+        },
+        "alternatives": [
+          {
+            "hypothesis": "Deliberate orbital re-phasing, ground-track retargeting, or co-orbital approach",
+            "tell_apart": "Sustained closing drift rate toward another active payload or repeat ground-track lock."
+          },
+          {
+            "hypothesis": "Routine constellation slot maintenance or debris-avoidance burn",
+            "tell_apart": "Return to nominal orbital slot without proximity approach or subsatellite release."
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.4,
+          0.1
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:maneuver:s55820:2026-10-31T12",
+        "program": "orbit",
+        "title": "Luch-5X (Olymp-K No. 2) (NORAD 55820, RU): cross-track maneuver Δv=3.85 m/s (GEO)",
+        "summary": "Luch-5X (Olymp-K No. 2) (NORAD 55820, RU, GEO): cross-track maneuver of 3.85 m/s (Δa=44.91 km, Δi=0.065°) detected between 2026-10-29T12:00Z and 2026-10-31T12:00Z (confidence 45%). Hypothesis: A cross-track out-of-plane burn alters inclination or right ascension of the ascending node (RAAN), which usually indicates orbital plane realignment, sun-synchronous local-time-of-ascending-node maintenance, or plane matching.",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "none",
+        "status_class": "reported",
+        "product_category": "current",
+        "data_as_of": "2026-10-31T12:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "countries": [
+          "RU"
+        ],
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical",
+          "informational"
+        ],
+        "ncf": [
+          "provide_satellite_access",
+          "provide_pnt"
+        ],
+        "requirement_ids": [
+          "OR-PIR-1",
+          "OR-EEI-1"
+        ],
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.5,
+        "precision_class": "point",
+        "measures": {
+          "delta_v_ms": 3.85,
+          "delta_a_km": 44.915,
+          "delta_inc_deg": 0.065,
+          "tle_gap_hours": 48.0
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S55820"
+        },
+        "sources": [
+          {
+            "id": "celestrak-gp",
+            "publisher": "CelesTrak / USSF 18 SDS",
+            "title": "GP Orbital Element Sets",
+            "url": "https://celestrak.org/NORAD/elements/",
+            "licence": "Public orbital element data",
+            "grade": "A1",
+            "independence_group": "ussf-18sds",
+            "source_type": "telemetry",
+            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          },
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0",
+            "grade": "A1",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.0,
+          28.2
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:maneuver:s61901:2026-10-31T18",
+        "program": "orbit",
+        "title": "Yaogan-43 Group 03A (NORAD 61901, CN): in-track maneuver Δv=1.0 m/s (LEO)",
+        "summary": "Yaogan-43 Group 03A (NORAD 61901, CN, LEO): in-track maneuver of 1.0 m/s (Δa=1.81 km, Δi=0.0002°) detected between 2026-10-28T06:00Z and 2026-10-31T18:00Z (confidence 45%). Hypothesis: An in-track burn alters semi-major axis and orbital period, which usually indicates along-track re-phasing, ground-track repeat timing adjustment, or closing/opening distance to a co-orbital object.",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "none",
+        "status_class": "reported",
+        "product_category": "current",
+        "data_as_of": "2026-10-31T18:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "countries": [
+          "CN"
+        ],
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical",
+          "informational"
+        ],
+        "ncf": [
+          "provide_satellite_access",
+          "provide_pnt"
+        ],
+        "requirement_ids": [
+          "OR-PIR-1",
+          "OR-EEI-1"
+        ],
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.5,
+        "precision_class": "point",
+        "measures": {
+          "delta_v_ms": 1.0,
+          "delta_a_km": 1.808,
+          "delta_inc_deg": 0.0002,
+          "tle_gap_hours": 84.0
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S61901"
+        },
+        "sources": [
+          {
+            "id": "celestrak-gp",
+            "publisher": "CelesTrak / USSF 18 SDS",
+            "title": "GP Orbital Element Sets",
+            "url": "https://celestrak.org/NORAD/elements/",
+            "licence": "Public orbital element data",
+            "grade": "A1",
+            "independence_group": "ussf-18sds",
+            "source_type": "telemetry",
+            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          },
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0",
+            "grade": "A1",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.8,
+          52.1
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:subsat:s61890:2026-10-30",
+        "program": "orbit",
+        "title": "Subsatellite deployment cataloged: Kosmos-2576 Subsatellite-A (from Kosmos-2576 (59773), RU)",
+        "summary": "GCAT cataloged Kosmos-2576 Subsatellite-A (S61890, NORAD 61890, owner RU) separating from host Kosmos-2576 (59773) in LEO.",
+        "kind": "assessment",
+        "tier": "warning",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "sampled",
+        "us_person_data": "none",
+        "status_class": "assessed",
+        "product_category": "warning",
+        "data_as_of": "2026-10-30T00:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "change_from_prior": "new",
+        "change_reason": "Newly cataloged subsatellite Kosmos-2576 Subsatellite-A (S61890) separating from host Kosmos-2576 (59773).",
+        "countries": [
+          "RU"
+        ],
+        "pmesii_pt": [
+          "military"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "warning_problem_id": "OR-WP-1",
+        "indicator_id": "OR-IND-2",
+        "hypothesis_id": "OR-H-1A",
+        "direction": "supports",
+        "indicator_state": "present",
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.85,
+        "probability": 0.85,
+        "likelihood_term": "very_likely",
+        "confidence": "moderate",
+        "confidence_basis": {
+          "rubric": "tic-confidence-1.0",
+          "factors": {
+            "independent_lines": 2,
+            "contradicted": false,
+            "coverage_fraction": 0.85,
+            "grades": [
+              "A1"
+            ],
+            "alternatives_rejected": 1,
+            "method_scored": false,
+            "assumptions": "holds",
+            "ease_of_faking": "low",
+            "horizon_days": 0.0
+          },
+          "caps": [
+            "expertise"
+          ],
+          "raise_by": [
+            "a further independent line of evidence (have 2, High needs 3)",
+            "a scored Verdict record for this method version"
+          ]
+        },
+        "alternatives": [
+          {
+            "hypothesis": "Co-orbital inspector subsatellite or calibration target release",
+            "tell_apart": "Independent station-keeping or bidirectional proximity maneuvers relative to the host."
+          },
+          {
+            "hypothesis": "Passive debris fragment or adapter separation",
+            "tell_apart": "High area-to-mass ballistic decay without thruster burns."
+          }
+        ],
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S61890"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0",
+            "grade": "A1",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.4,
+          0.1
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:gap:s55820:2026-10-31",
+        "program": "orbit",
+        "title": "TLE tracking gap (48.0 h): Luch-5X (Olymp-K No. 2) (NORAD 55820)",
+        "summary": "Source health flag: Luch-5X (Olymp-K No. 2) (NORAD 55820, RU) had a 48.0 h TLE tracking gap (>=48 h threshold); an untracked window looks identical to zero maneuvers.",
+        "kind": "observation",
+        "tier": "anomaly",
+        "baseline_ref": "celestrak-gp-48h-max-epoch-cadence",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "none",
+        "status_class": "reported",
+        "product_category": "current",
+        "data_as_of": "2026-10-31T12:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "countries": [
+          "RU"
+        ],
+        "pmesii_pt": [
+          "military"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "informational"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "requirement_ids": [
+          "OR-EEI-2"
+        ],
+        "indicator_id": "OR-IND-4",
+        "hypothesis_id": "OR-H-1C",
+        "direction": "supports",
+        "indicator_state": "present",
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.45,
+        "precision_class": "point",
+        "measures": {
+          "tle_gap_hours": 48.0
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S55820"
+        },
+        "sources": [
+          {
+            "id": "celestrak-gp",
+            "publisher": "CelesTrak / USSF 18 SDS",
+            "title": "GP Orbital Element Sets",
+            "url": "https://celestrak.org/NORAD/elements/",
+            "licence": "Public orbital element data",
+            "grade": "A1",
+            "independence_group": "ussf-18sds",
+            "source_type": "telemetry",
+            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.0,
+          28.2
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "id": "orbit:gap:s61901:2026-10-31",
+        "program": "orbit",
+        "title": "TLE tracking gap (84.0 h): Yaogan-43 Group 03A (NORAD 61901)",
+        "summary": "Source health flag: Yaogan-43 Group 03A (NORAD 61901, CN) had a 84.0 h TLE tracking gap (>=48 h threshold); an untracked window looks identical to zero maneuvers.",
+        "kind": "observation",
+        "tier": "anomaly",
+        "baseline_ref": "celestrak-gp-48h-max-epoch-cadence",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "none",
+        "status_class": "reported",
+        "product_category": "current",
+        "data_as_of": "2026-10-31T18:00:00Z",
+        "published_at": "2026-11-01T12:00:00Z",
+        "valid_until": "2026-11-02T12:00:00Z",
+        "countries": [
+          "CN"
+        ],
+        "pmesii_pt": [
+          "military"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "informational"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "requirement_ids": [
+          "OR-EEI-2"
+        ],
+        "indicator_id": "OR-IND-4",
+        "hypothesis_id": "OR-H-1C",
+        "direction": "supports",
+        "indicator_state": "present",
+        "method_version": "orbit-1.0",
+        "coverage_fraction": 0.45,
+        "precision_class": "point",
+        "measures": {
+          "tle_gap_hours": 84.0
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#S61901"
+        },
+        "sources": [
+          {
+            "id": "celestrak-gp",
+            "publisher": "CelesTrak / USSF 18 SDS",
+            "title": "GP Orbital Element Sets",
+            "url": "https://celestrak.org/NORAD/elements/",
+            "licence": "Public orbital element data",
+            "grade": "A1",
+            "independence_group": "ussf-18sds",
+            "source_type": "telemetry",
+            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
+            "accessed_at": "2026-11-01T12:00:00Z"
+          }
+        ]
+      }
+    }
+  ]
+}

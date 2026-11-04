@@ -1,0 +1,40 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "review_by": "2027-02-01",
+  "requirements": [
+    {
+      "id": "OR-REQ-1",
+      "type": "standing",
+      "question": "Which watched satellites in LEO, MEO, HEO, or GEO are executing non-routine orbital maneuvers, co-orbital approaches, or new multi-object deployments?"
+    },
+    {
+      "id": "OR-PIR-1",
+      "type": "pir",
+      "parent": "OR-REQ-1",
+      "question": "Which watched payloads have executed an in-track, cross-track, or radial maneuver exceeding station-keeping thresholds (delta_v >= 1.5 m/s or calibrated confidence >= 0.75) in the past 30 days?",
+      "series": ["celestrak_gp_history", "gcat_satcat"]
+    },
+    {
+      "id": "OR-PIR-2",
+      "type": "pir",
+      "parent": "OR-REQ-1",
+      "question": "Which new launches, subsatellite deployments, or unnumbered active objects have entered the GCAT/CelesTrak catalogs?",
+      "series": ["gcat_satcat", "gcat_active"]
+    },
+    {
+      "id": "OR-EEI-1",
+      "type": "eei",
+      "parent": "OR-PIR-1",
+      "question": "What is the maneuver type (in-track, cross-track, radial), estimated delta-v (m/s), and sibling-launch context for the maneuvering object?",
+      "series": ["celestrak_gp_history", "gcat_satcat"]
+    },
+    {
+      "id": "OR-EEI-2",
+      "type": "eei",
+      "parent": "OR-PIR-1",
+      "question": "Does the watched satellite have a TLE tracking gap >=48 hours that degrades maneuver detection confidence?",
+      "series": ["celestrak_gp_history"]
+    }
+  ]
+}

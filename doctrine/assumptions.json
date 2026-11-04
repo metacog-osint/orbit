@@ -1,0 +1,18 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "assumptions": [
+    {
+      "id": "OR-ASM-1",
+      "assumption": "Public CelesTrak / 18 SDS GP element sets update frequently enough on watched objects to distinguish discrete thruster burns from secular perturbation drift.",
+      "status": "holds",
+      "test": "Flag any watched object whose TLE gap exceeds 48 hours (OR-IND-4) and cap maneuver confidence at Low when a gap spans the detection window."
+    },
+    {
+      "id": "OR-ASM-2",
+      "assumption": "Mapping owner codes through Jonathan McDowell's GCAT rather than CelesTrak's 'CIS' bucket prevents legacy Soviet debris from polluting active Russian payload metrics.",
+      "status": "holds",
+      "test": "Verify that GCAT owner codes separate Soviet (SU) from Russian Federation (RU) objects and preserve unnumbered active objects."
+    }
+  ]
+}

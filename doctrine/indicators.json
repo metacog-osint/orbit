@@ -1,0 +1,84 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "indicators": [
+    {
+      "id": "OR-IND-1",
+      "text": "TLE epoch-to-epoch comparison detects a non-routine in-track, cross-track, or radial maneuver (delta_v >= 1.5 m/s) with calibrated confidence >= 0.75 on a watched non-sibling payload.",
+      "series": "celestrak_gp_history",
+      "rule": "delta_v_ms >= 1.5 and confidence >= 0.75 and not routine_station_keeping",
+      "gentry": {
+        "predictive": true,
+        "diagnostic": true,
+        "unambiguous": true,
+        "collectable": true
+      }
+    },
+    {
+      "id": "OR-IND-2",
+      "text": "GCAT daily snapshot records a newly cataloged subsatellite or payload separating from an existing host object in orbit.",
+      "series": "gcat_satcat",
+      "rule": "is_subsatellite_deployment == true",
+      "gentry": {
+        "predictive": true,
+        "diagnostic": true,
+        "unambiguous": true,
+        "collectable": true
+      }
+    },
+    {
+      "id": "OR-IND-3",
+      "text": "Objects sharing the same international launch designator separate steadily after launch (routine sibling dispersion).",
+      "series": "gcat_satcat",
+      "rule": "same_launch_designator == true and days_since_launch <= 30",
+      "gentry": {
+        "predictive": false,
+        "diagnostic": true,
+        "unambiguous": true,
+        "collectable": true
+      }
+    },
+    {
+      "id": "OR-IND-4",
+      "text": "Watched satellite TLE history contains a tracking gap >= 48 hours between consecutive element sets.",
+      "series": "celestrak_gp_history",
+      "rule": "tle_gap_hours >= 48.0",
+      "gentry": {
+        "predictive": false,
+        "diagnostic": true,
+        "unambiguous": true,
+        "collectable": true
+      }
+    }
+  ],
+  "warning_problems": [
+    {
+      "id": "OR-WP-1",
+      "title": "Non-routine orbital maneuver or co-orbital inspection activity",
+      "watch_condition": "Continuous comparison of consecutive TLE/GP element sets across watched reconnaissance, inspector, and GEO communications/early-warning satellites.",
+      "issue_on_change": "Issue a warning item when a watched object executes a maneuver with delta_v >= 1.5 m/s and calibrated confidence >= 0.75 outside routine station-keeping.",
+      "deactivation": "Orbit stabilizes for 14 days with no further delta-v or drift toward another active payload.",
+      "frozen": "2026-11-01",
+      "hypotheses": [
+        {
+          "id": "OR-H-1A",
+          "title": "Deliberate orbital re-phasing, ground-track retargeting, or co-orbital inspection approach",
+          "emerging": ["OR-IND-1", "OR-IND-2"],
+          "not_emerging": ["OR-IND-3", "OR-IND-4"]
+        },
+        {
+          "id": "OR-H-1B",
+          "title": "Routine constellation slot maintenance, debris avoidance, or post-launch sibling dispersion",
+          "emerging": ["OR-IND-3"],
+          "not_emerging": ["OR-IND-2"]
+        },
+        {
+          "id": "OR-H-1C",
+          "title": "TLE fit noise, solar-storm atmospheric drag spike, or cross-tagging across a tracking gap (artefact)",
+          "emerging": ["OR-IND-4"],
+          "not_emerging": ["OR-IND-1"]
+        }
+      ]
+    }
+  ]
+}
