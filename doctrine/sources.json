@@ -1,0 +1,24 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "sources": [
+    {
+      "id": "gcat-mcdowell",
+      "name": "Jonathan McDowell's General Catalog of Artificial Space Objects (GCAT)",
+      "url": "https://planet4589.org/space/gcat/",
+      "licence": "CC BY 4.0 (Jonathan McDowell / planet4589.org)",
+      "use": "ingest",
+      "grade": "A1",
+      "independence_group": "gcat"
+    },
+    {
+      "id": "celestrak-gp",
+      "name": "CelesTrak / 18th Space Defense Squadron GP Element Sets",
+      "url": "https://celestrak.org/NORAD/elements/",
+      "licence": "Public orbital element data (18 SDS / CelesTrak)",
+      "use": "ingest",
+      "grade": "A1",
+      "independence_group": "ussf-18sds"
+    }
+  ]
+}

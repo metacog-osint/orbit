@@ -1,0 +1,18 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "rules": [
+    {
+      "match": { "event_type": "co_orbital_maneuver" },
+      "ncf": ["provide_satellite_access", "provide_pnt", "provide_defense_materiel"]
+    },
+    {
+      "match": { "event_type": "catalog_launch" },
+      "ncf": ["provide_satellite_access"]
+    },
+    {
+      "match": { "event_type": "tle_gap" },
+      "ncf": ["provide_satellite_access"]
+    }
+  ]
+}

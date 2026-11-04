@@ -1,0 +1,22 @@
+{
+  "program": "orbit",
+  "version": "1.0",
+  "interests": [
+    {
+      "id": "OR-INT-1",
+      "about": "Space weather and geomagnetic storm alerts from Noisefloor explain sudden LEO atmospheric drag spikes that can mimic small in-track maneuvers.",
+      "programs": ["noisefloor"],
+      "anywhere": true,
+      "tiers": ["anomaly", "warning"],
+      "indicator_id": "OR-IND-4"
+    },
+    {
+      "id": "OR-INT-2",
+      "about": "NGA navigational warnings (NAVAREA hazard zones) from Cordon corroborate upcoming rocket launches and stage drop zones.",
+      "programs": ["cordon"],
+      "anywhere": true,
+      "tiers": ["routine", "anomaly", "warning"],
+      "indicator_id": "OR-IND-2"
+    }
+  ]
+}
