@@ -4,6 +4,7 @@
   "use strict";
   var T = window.TicTime;
   var snap = null;
+  var sources = null; // data/sources.json: the register's ingested sources with their Admiralty grades
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -147,7 +148,13 @@
     var box = document.getElementById("upcoming-table");
     var rows = (snap.upcoming || []).map(function (x) {
       var tr = el("tr");
-      cell(tr, fmt(x.net) + (x.net_precision && x.net_precision !== "Minute" && x.net_precision !== "Second" ? " (" + x.net_precision.toLowerCase() + ")" : ""));
+      var when = el("div");
+      when.appendChild(el("div", "", fmt(x.net)));
+      var cd = el("div", "cd small");
+      cd.setAttribute("data-net", x.net || "");
+      cd.setAttribute("data-prec", x.net_precision || "");
+      when.appendChild(cd);
+      cell(tr, when);
       cell(tr, x.name);
       cell(tr, who((x.provider_countries || []).map(function (c) { return mark(c, null); }), x.provider || ""));
       cell(tr, x.orbit || "");
@@ -157,7 +164,59 @@
     });
     if (!rows.length) return empty(box, "No launches listed for the next 14 days.");
     box.textContent = "";
-    box.appendChild(table(["No earlier than", "Launch", "Provider", "Orbit", "Site", "Status"], rows));
+    box.appendChild(table(["No earlier than (NET)", "Launch", "Provider", "Orbit", "Site", "Status"], rows));
+    tick();
+  }
+
+  /* Countdown to each NET, on the viewer's clock, refreshed each minute. It is never finer than the NET itself:
+     Launch Library 2 gives each NET a precision (Second, Minute, Hour, Day, Week, Month and coarser). */
+  var PREC = { Second: "exact", Minute: "exact", Hour: "hour", "Morning (local)": "hour", "Afternoon (local)": "hour",
+    Day: "day" };
+  function precWords(p) {
+    if (!p) return "precision not given";
+    if (p === "Second" || p === "Minute") return "to the " + p.toLowerCase();
+    if (p === "Hour") return "to the hour";
+    if (p === "Day") return "to the day";
+    return p.toLowerCase().replace(" (local)", ", local time") + " only";
+  }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function span(ms, unit) {
+    if (unit === "day") {
+      var dd = Math.round(ms / 86400000);
+      return dd < 1 ? "under 1 day" : "about " + dd + (dd === 1 ? " day" : " days");
+    }
+    if (unit === "hour") {
+      var hh = Math.round(ms / 3600000);
+      if (hh < 1) return "under 1 h";
+      return "about " + (hh >= 24 ? Math.floor(hh / 24) + " d " + (hh % 24) + " h" : hh + " h");
+    }
+    var m = Math.floor(ms / 60000), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+    if (m < 1) return "under 1 m";
+    if (d) return d + " d " + pad2(h) + " h " + pad2(mm) + " m";
+    if (h) return h + " h " + pad2(mm) + " m";
+    return mm + " m";
+  }
+  function countdown(netIso, prec, now) {
+    var t = Date.parse(netIso);
+    if (isNaN(t)) return "";
+    var unit = PREC[prec];
+    if (!unit) return "No countdown: NET " + precWords(prec);
+    var ms = t - now;
+    if (ms > 0) return "T\u2212 " + span(ms, unit) + " \u00b7 NET " + precWords(prec);
+    return (unit === "exact" ? "NET passed " + span(-ms, unit) + " ago" : "NET passed") +
+      " \u00b7 status as last read";
+  }
+  function tick() {
+    var now = Date.now();
+    var cds = document.querySelectorAll("#upcoming-table .cd");
+    for (var i = 0; i < cds.length; i++) {
+      cds[i].textContent = countdown(cds[i].getAttribute("data-net"), cds[i].getAttribute("data-prec"), now);
+    }
+  }
+  function startTicking() {
+    // Align to the top of each minute so every countdown steps together.
+    setTimeout(function () { tick(); setInterval(tick, 60000); }, 60000 - (Date.now() % 60000) + 50);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) tick(); });
   }
 
   function reentryTable() {
@@ -251,22 +310,48 @@
       "codes; SU is the Soviet Union, kept apart from the Russian Federation (RU)."));
   }
 
+  function sourceOf(lane) {
+    var list = (sources && sources.sources) || [];
+    for (var i = 0; i < list.length; i++) if ((list[i].lanes || []).indexOf(lane) >= 0) return list[i];
+    return null;
+  }
   function lanes() {
     var box = document.getElementById("lanes");
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)" };
-    var ul = el("ul", "plain small");
+    var ul = el("ul", "plain small lanes");
     Object.keys(snap.lanes || {}).forEach(function (k) {
-      var s = snap.lanes[k];
+      var s = snap.lanes[k], src = sourceOf(k);
+      var li = el("li");
+      var head = el("div", "lane-head");
+      if (src && src.url) {
+        var a = el("a", "", names[k] || k); a.href = src.url; a.rel = "noopener"; head.appendChild(a);
+      } else head.appendChild(el("span", "", names[k] || k));
+      if (src && src.grade) {
+        var gb = el("span", "badge grade", "Grade " + src.grade);
+        gb.title = "Admiralty grade: source reliability " + src.grade.charAt(0) + " (" + src.reliability +
+          "), information credibility " + src.grade.slice(1) + " (" + src.credibility + ")";
+        head.appendChild(gb);
+        head.appendChild(el("span", "muted", src.reliability.toLowerCase() + " source; information " +
+          src.credibility.toLowerCase()));
+      }
+      li.appendChild(head);
       var when = s.fetched_at ? "read " + fmt(s.fetched_at) : "never read";
-      var txt = (names[k] || k) + ": " + s.status + (s.from_previous ? " (showing the last good copy)" : "") +
+      var txt = "Status " + s.status + (s.from_previous ? " (showing the last good copy)" : "") +
         "; " + when + (s.checked_at ? ", checked " + fmt(s.checked_at) : "");
       if (s.status === "failed" && s.error) txt += ". Error: " + s.error;
-      ul.appendChild(el("li", s.status === "failed" ? "" : "", txt));
+      li.appendChild(el("div", "", txt));
+      if (src && src.licence) li.appendChild(el("div", "muted", "Terms: " + src.licence));
+      ul.appendChild(li);
     });
     var g = snap.gcat_updated || {};
     if (g.satcat) ul.appendChild(el("li", "muted", "GCAT tables stamped " + g.satcat + " UTC (GCAT's own update time)."));
     box.appendChild(ul);
+    if (sources && sources.sources && sources.sources.length) {
+      box.appendChild(el("p", "muted small", "Grades are Orbit's, on the NATO Admiralty system: source reliability " +
+        "A (completely reliable) to F (cannot be judged) and information credibility 1 (confirmed by other sources) " +
+        "to 6 (cannot be judged), graded separately."));
+    }
   }
 
   function render() {
@@ -277,8 +362,14 @@
 
   if (T && T.mountSettings) T.mountSettings(document.getElementById("time-settings"));
   if (T && T.onChange) T.onChange(render);
+  // The grades are an extra: the page draws without them if data/sources.json does not load.
+  var gotSources = fetch("data/sources.json", { cache: "no-cache" })
+    .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   fetch("data/snapshot.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
-    snap = d; render();
+    snap = d;
+    return gotSources;
+  }).then(function (sd) {
+    sources = sd; render(); startTicking();
   }).catch(function (e) {
     document.getElementById("tiles").textContent = "Could not load data/snapshot.json: " + e;
   });

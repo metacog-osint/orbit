@@ -38,6 +38,8 @@ LANE_FIELDS = {
 EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": []}
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
+# Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
+LANE_SOURCE = {"catalog": "gcat-mcdowell", "upcoming": "ll2-thespacedevs"}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -142,6 +144,26 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
     return snap
 
 
+def sources_doc(root: Path = ROOT) -> dict:
+    """The ingested sources from the register, each with its Admiralty grade spelled out, for the page."""
+    reg = json.loads((root / "doctrine" / "sources.json").read_text(encoding="utf-8"))
+    vocab = json.loads((root / "doctrine" / "kit" / "vocab" / "grading.json").read_text(encoding="utf-8"))
+    adm = vocab["admiralty"]
+    lanes_of: dict[str, list[str]] = {}
+    for lane, sid in LANE_SOURCE.items():
+        lanes_of.setdefault(sid, []).append(lane)
+    out = []
+    for src in reg["sources"]:
+        if src.get("use") != "ingest":
+            continue
+        grade = src.get("grade") or ""
+        rel, cred = (grade[:1], grade[1:]) if len(grade) == 2 else ("", "")
+        out.append({"id": src["id"], "name": src["name"], "url": src["url"], "licence": src.get("licence", ""),
+                    "grade": grade, "reliability": adm["reliability"].get(rel, ""),
+                    "credibility": adm["credibility"].get(cred, ""), "lanes": lanes_of.get(src["id"], [])})
+    return {"basis": adm["basis"], "sources": out}
+
+
 def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str]:
     snap_path = root / "data" / "snapshot.json"
     if snapshot is None:
@@ -154,7 +176,8 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     def dump(obj) -> str:
         return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
 
-    files = {"data/snapshot.json": dump(snapshot), "data/feed.geojson": dump(feed_doc)}
+    files = {"data/snapshot.json": dump(snapshot), "data/feed.geojson": dump(feed_doc),
+             "data/sources.json": dump(sources_doc(root))}
     src_dir = root / "site_src"
     if src_dir.exists():
         for p in sorted(src_dir.rglob("*")):
