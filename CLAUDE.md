@@ -3,8 +3,9 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 13 Nov 2026: first live slice built on branch `live/first-slice`, not committed** (Tom's yes needed for
-commit and push, each). `main` and `origin/main` are the 1 Nov seed snapshot (`ee05012`). Not deployed: no Pages
+**State, 13 Nov 2026: first live slice committed and pushed on branch `live/first-slice` (`6907b28`, on Tom's
+"commit and push", about 1:15 PM CST; a fresh clone passes all 16 tests).** Not merged: `main` and `origin/main` are
+the 1 Nov seed snapshot (`ee05012`). Not deployed: no Pages
 project, no DNS record, no workflow, no hub, registry, COP or `tic-dispatch` entry. Untracked and to stay that
 way: `GEMINI.md` and `data/`.
 
