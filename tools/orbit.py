@@ -9,7 +9,7 @@
 collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
 from_previous) or stays empty, and the snapshot's "lanes" block says which.
 
-Lanes (method orbit-2.0):
+Lanes (method orbit-2.1):
   catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
             day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
             if none has changed. About 37 MB when it does.
@@ -74,9 +74,10 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
                            "refusing a short reading")
     today = gcat.today_utc()
     sites = gcat.sites_table(gcat.parse_tsv(bodies["sites"]))
+    orgs = gcat.orgs_table(gcat.parse_tsv(bodies["orgs"]))
     result = {
         "gcat_updated": {name: gcat.updated_stamp(bodies[name]) for name in gcat.URLS},
-        "launches": gcat.recent_launches(gcat.parse_tsv(bodies["launch"]), objs, sites, today),
+        "launches": gcat.recent_launches(gcat.parse_tsv(bodies["launch"]), objs, sites, today, orgs=orgs),
         "reentries": gcat.recent_reentries(objs, today),
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
