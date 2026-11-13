@@ -1,0 +1,83 @@
+name: update
+# DRAFT, 13 Nov 2026: written and not yet run. It does nothing until it is on main, and it deploys nothing until
+# Tom creates the Cloudflare Pages project `orbit` and sets the secrets below. Copied from Headwind's update.yml.
+#
+# Four times a day (meant to be started by the hub's tic-dispatch Worker, because GitHub fires schedules 4-9 h
+# late; its own cron is the fallback), on every push to main, and by hand: the tests, the last run's state from
+# this repository's Actions cache, a live collection, the site build and feed check, then a deploy of site/ to
+# Cloudflare Pages.
+#
+# Load on sources: GCAT republishes once a day (about 00:20 UTC) from Jonathan McDowell's own server. The catalog
+# lane asks each file's Last-Modified date first and downloads nothing (about 37 MB otherwise) unless one has
+# changed, so only the first run after his update downloads. Never add --force here. Launch Library 2 is one
+# request a run (free limit 15 an hour).
+#
+# State: Orbit reports catalog changes as the difference between two of its own readings, skips GCAT when it has
+# not changed, and a failed lane keeps its last good copy. All three need the run before: data/snapshot.json and
+# data/state/catalog_index.json.gz (about 1.3 MB). They are kept in the Actions cache, which is private to this
+# repository. Each run saves a new cache entry and the next run restores the newest. GitHub drops an entry nobody
+# has read for 7 days; with no entry a run is a first reading, sets the baseline, reports no catalog change and
+# says so in a warning. State is saved after the feed check and before the deploy, so a failed deploy does not
+# lose a change.
+#
+# Secrets: CLOUDFLARE_PAGES_TOKEN (Cloudflare Pages: Edit), and the account ID as repo variable
+# CLOUDFLARE_ACCOUNT_ID. Without them everything runs except the deploy. No source needs a key. Collected data is
+# not committed.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v7
+        with: { node-version: "22" }
+      - name: Tests
+        run: python -m unittest discover -s tests
+      - name: Last run's state from the Actions cache (none on the first run)
+        id: state
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            data/snapshot.json
+            data/state
+          key: orbit-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: orbit-state-
+      - name: Say so when there was no state
+        if: steps.state.outputs.cache-matched-key == ''
+        run: echo "::warning::No state in the Actions cache, so this run is a first reading and can report no catalog change."
+      - name: Live collection (a failed lane keeps its last good copy and says so on the page)
+        run: python tools/orbit.py collect
+      - name: Build site/
+        run: python tools/orbit.py build
+      - name: Feed check
+        run: python tools/orbit.py check
+      - name: Keep this run's state for the next run
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            data/snapshot.json
+            data/state
+          key: orbit-state-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Deploy site/ to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare secrets not set; skipping deploy"; exit 0
+          fi
+          npx --yes wrangler@4.151.3 pages deploy site --project-name orbit --branch main \
+            --commit-hash "$GITHUB_SHA" --commit-message "update $GITHUB_SHA" --commit-dirty=true

@@ -4,9 +4,9 @@ The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, p
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
 **State, 13 Nov 2026: first live slice committed and pushed on branch `live/first-slice` (`6907b28`, on Tom's
-"commit and push", about 1:15 PM CST; a fresh clone passes all 16 tests).** Not merged: `main` and `origin/main` are
-the 1 Nov seed snapshot (`ee05012`). Not deployed: no Pages
-project, no DNS record, no workflow, no hub, registry, COP or `tic-dispatch` entry. Untracked and to stay that
+"commit and push", 1:11 PM CST; a fresh clone passes all 16 tests).** Not merged: `main` and `origin/main` are
+the 1 Nov seed snapshot (`ee05012`). Deploy workflow committed and pushed on the same branch 13 Nov, about 1:40 PM CST
+(see Deploy prep); it has never run on GitHub. Not deployed: no Pages project, no DNS record, no workflow on `main`, no hub, registry, COP or `tic-dispatch` entry. Untracked and to stay that
 way: `GEMINI.md` and `data/`.
 
 **Planned scope** (`D:\Projects\_ideas\new-programs.md`, program row and roadmap step 14): catalog changes,
@@ -55,10 +55,39 @@ v0.3.0, needs PyTorch) locally on SJ-21 / BeiDou-2 G2 (Jan 2022) with Tom's Spac
 Space-Track's terms (maneuver-detect's README says they bar redistributing data or derived analysis); keep the
 watch list in private config. Tom sets any credentials himself.
 
+## Deploy prep (13 Nov 2026, about 1:25 PM CST)
+- **`.github/workflows/update.yml`: a draft that has never run on GitHub.** It is Headwind's working workflow with
+  the names changed (diffed line by line): tests, last state from the Actions cache, collect, build, check, save
+  state, deploy to Pages project `orbit`. Every 6 h at :41, on push to `main`, and by hand. It does nothing until
+  it is on `main`; it deploys nothing until the Cloudflare secrets are set. No source needs a key.
+- **State lives in the repository's private Actions cache**, as in Headwind: `data/snapshot.json` and
+  `data/state/` (1.5 MB measured). Nothing to publish, and no `restore` command needed.
+- **Simulated locally from two fresh clones** of `287802c`: run 1 (no state) tests OK, both lanes ok, check PASS;
+  run 2 (state copied in, no raw copies) GCAT `unchanged`, check PASS. Whether GitHub's runners can reach
+  planet4589.org and ll.thespacedevs.com is not tested until the first run.
+- **Checked read-only:** `orbit.theintelligence.company` has no DNS record. Tom's Cloudflare account has no Pages
+  project named `orbit`. `orbit.pages.dev` already answers (someone else's), so a new project `orbit` will get a
+  suffixed address, as Headwind got `headwind-2lx.pages.dev`.
+
+**Steps to go live, each needing Tom's yes:**
+1. ~~Commit and push the workflow on `live/first-slice` (inert there).~~ Done 13 Nov on Tom's "commit and push".
+2. Merge `live/first-slice` into `main` and push. That starts the first run: collect and check, deploy skipped.
+3. Create the Pages project: `npx --yes wrangler@4.151.3 pages project create orbit --production-branch main
+   --force` (without `--force`, wrangler 4.151.3 hands the command to Workers and creates nothing; Headwind's
+   note). Then a first deploy by hand from a local build: `npx --yes wrangler@4.151.3 pages deploy site
+   --project-name orbit --branch main`.
+4. Secrets, set by Tom: `CLOUDFLARE_PAGES_TOKEN` (Pages: Edit; Headwind still lacks it too, so one token can
+   serve both) and repo variable `CLOUDFLARE_ACCOUNT_ID` (Headwind's was copied from Blackout's).
+5. Custom domain: add `orbit.theintelligence.company` to the Pages project, then a Squarespace record
+   `CNAME orbit -> <project>.pages.dev` (in the browser; Squarespace may ask Tom to sign in again).
+6. Suite wiring, each in its own repo and session: `tic-dispatch` entry (hub repo, `dispatch/`), house bar
+   `PROGRAMS` in `theintelligence-company\site\shared\tic-nav.js`, the suite registry row, COP's drawing entry
+   and feed list. Describe Orbit there from what is live (launches, schedule, reentries, catalog changes; no
+   manoeuvres).
+
 ## Open for Tom
-Commit and push the branch; Space-Track account and terms; the watch list; Launch Library 2 has no stated data
-licence (credited, images not used); deploy decisions (Pages project, DNS `orbit`, workflow on `tic-dispatch`,
-hub and COP entries).
+Space-Track account and terms; the watch list; Launch Library 2 has no stated data licence (credited, images not
+used); the deploy steps above.
 
 ## Rules
 - Standard library only for the live lanes. Tests stay offline.
