@@ -12,7 +12,11 @@ deploy ran from the Headwind folder and briefly put Headwind's site there). Tom 
 variable `CLOUDFLARE_ACCOUNT_ID`; run 43512732788 (3:40 PM CST) deployed Orbit, and every run now deploys.
 Custom domain `orbit.theintelligence.company`: added through the Pages API and Squarespace `CNAME orbit ->
 orbit-q2t.pages.dev` (4 hrs, after Tom's Google re-verification), about 3:55 PM CST;
-**active with HTTPS and HSTS since 3:57 PM CST** (https://orbit.theintelligence.company checked: 200, Orbit's page). Not yet: hub, registry, COP or `tic-dispatch` entry. Untracked and to stay that
+**active with HTTPS and HSTS since 3:57 PM CST** (https://orbit.theintelligence.company checked: 200, Orbit's page). **Listed across the suite 13 Nov** (Tom's "approve, push and deploy"): house bar `tic-nav.js` v1.9 (`Space ·
+orbital activity`, beta; Orbit's copy `aa932dc`), hub listing and `tic-dispatch` start at :55 past 00/06/12/18 UTC
+(hub `c70271c`, `5cfa03a`), registry kit 0.4.8 (tic-doctrine `895fcf1`), COP layer (`a7c80ec`, open list
+`3788906`; COP shows Orbit fresh, 21 items, 20 on the map). Tom still has to add `orbit` to the `tic-dispatch`
+token's repository access; until then the dispatcher's start 404s and Orbit runs on its own cron. Untracked and to stay that
 way: `GEMINI.md` and `data/`.
 
 **Planned scope** (`D:\Projects\_ideas\new-programs.md`, program row and roadmap step 14): catalog changes,
@@ -31,11 +35,11 @@ python -m unittest discover -s tests       # 16 offline tests, real fixtures fro
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.0`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.1`; details in `doctrine/method.md`)
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
-| `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites` (about 37 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
-| `upcoming` | `launches.py` | Launch Library 2, one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
+| `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
+| `upcoming` | `launches.py` | Launch Library 2, detailed mode (about 450 KB; only it carries provider countries), one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
 
 - **GCAT republishes once a day (about 00:20 UTC).** The lane asks Last-Modified first and downloads nothing if
   no file changed (status `unchanged`). Do not pass `--force` in a schedule: the files are on Jonathan
@@ -53,6 +57,20 @@ Launches of the last 7 days at the launch site (GCAT site coordinates, precision
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days
 old, by launch; owner changes) for two days after the reading that found them. All `observation`, `routine`,
 `us_person_data: organizations` (they name agencies and companies). 21 items on 13 Nov, check PASS.
+
+## Flags and actor colours (13 Nov 2026, `orbit-2.1`)
+- **Every country mark is flag + code + a colour bar.** Flags: flag-icons 7.6.0 (MIT, licence in
+  `site_src/flags/LICENSE.txt`), 4x3 SVGs copied unchanged for the 113 countries GCAT owners and launch
+  agencies use, plus GF and MH (Launch Library 2 pad countries). A code with no flag file shows its code only
+  (the image removes itself on error). GCAT has no flag for DD (East Germany) or DR. SU (Soviet Union) gets its
+  own mark with no flag, never Russia's; intergovernmental owners (I-ESA and the rest) get their code, no flag.
+- **Colour is kept for three actors: US blue, China orange, Russia and the USSR aqua; everyone else neutral.**
+  Tokens `--g-us`, `--g-cn`, `--g-ru`, `--g-other` in `style.css`, light and dark. That set passes the dataviz
+  validator with every pair compared, in both modes; adding a fourth or fifth colour (Europe, Japan, India) failed
+  the colour-blind or normal-vision floor. Do not add colours without re-running it.
+- **Where:** payloads grouped by owner, the vehicle's launching agency, the site's country, the scheduled launch's
+  provider and pad, reentry owners, and the bar chart of objects in orbit by owner (`hygiene.in_orbit_owners`,
+  top 20 kept, 15 drawn; payloads solid, the rest pale).
 
 ## Not live: manoeuvres (`orbit/maneuver.py`, not run)
 The seed engine differences consecutive element sets at a 0.35 m/s threshold that drag and fit noise exceed in

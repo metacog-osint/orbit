@@ -29,6 +29,7 @@ URLS = {
     "tmpcat": f"{BASE}/cat/tmpcat.tsv",
     "launch": f"{BASE}/launch/launch.tsv",
     "sites": f"{BASE}/tables/sites.tsv",
+    "orgs": f"{BASE}/tables/orgs.tsv",
 }
 CITATION = "Data from GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0"
 
@@ -246,11 +247,39 @@ def sites_table(rows: list[dict]) -> dict[str, dict]:
         current = r.get("TStop", "") in ("*", "-", "")
         if code not in out or current:
             out[code] = {"name": r.get("ShortName") or r.get("Name") or code, "full_name": r.get("Name", ""),
-                         "lat": lat, "lon": lon, "state": r.get("StateCode", "")}
+                         "lat": lat, "lon": lon, "state": r.get("StateCode", ""),
+                         "country": iso_country(r.get("StateCode", ""))}
     return out
 
 
-def recent_launches(launch_rows: list[dict], objs: list[dict], sites: dict, today: date, days: int = 30) -> list[dict]:
+def orgs_table(rows: list[dict]) -> dict[str, dict]:
+    """GCAT organisation code -> {name, state}. Where a code has several rows, the current one wins."""
+    out = {}
+    for r in rows:
+        code = (r.get("Code") or "").strip()
+        if not code:
+            continue
+        current = r.get("TStop", "") in ("*", "-", "")
+        if code not in out or current:
+            out[code] = {"name": r.get("ShortName") or r.get("Name") or code, "state": r.get("StateCode", "")}
+    return out
+
+
+def launchers(agency: str, orgs: dict) -> list[dict]:
+    """The launch agencies GCAT names for a launch ('ZHSH/CALT' is two), each with its GCAT state and ISO country."""
+    out = []
+    for code in (agency or "").split("/"):
+        code = code.strip()
+        if not code or code == "-":
+            continue
+        org = orgs.get(code) or {}
+        state = org.get("state", "")
+        out.append({"code": code, "name": org.get("name", code), "state": state, "country": iso_country(state)})
+    return out
+
+
+def recent_launches(launch_rows: list[dict], objs: list[dict], sites: dict, today: date, days: int = 30,
+                    orgs: dict | None = None) -> list[dict]:
     """Orbital, deep-space and near-orbital launches GCAT dates within the last `days` days, newest first."""
     payloads = defaultdict(list)
     for o in objs:
@@ -279,6 +308,7 @@ def recent_launches(launch_rows: list[dict], objs: list[dict], sites: dict, toda
             "flight": r.get("Flight", "") if r.get("Flight", "") != "-" else "",
             "mission": r.get("Mission", "") if r.get("Mission", "") != "-" else "",
             "agency": r.get("Agency", ""),
+            "launchers": launchers(r.get("Agency", ""), orgs or {}),
             "category": r.get("Category", ""),
             "kind": {"O": "orbital", "D": "deep space", "N": "near-orbital"}[code[0]],
             "outcome": outcome,
@@ -316,6 +346,7 @@ def hygiene(objs: list[dict]) -> dict:
     in_orbit = [o for o in objs if o["status"] in ("O", "OX", "AO")]
     by_state_all = Counter(o["state"] for o in sat)
     by_state_orbit = Counter(o["state"] for o in in_orbit)
+    payloads_orbit = Counter(o["state"] for o in in_orbit if o["type"] == "P")
     unnumbered_in_orbit = [o for o in in_orbit if not o["norad"]]
     norad_claims = defaultdict(list)
     for o in sat:  # auxcat repeats the number of the object a piece is associated with, so it is left out
@@ -328,6 +359,8 @@ def hygiene(objs: list[dict]) -> dict:
         "russian_ru": by_state_all.get("RU", 0),
         "in_orbit": len(in_orbit),
         "in_orbit_by_state": dict(by_state_orbit.most_common(15)),
+        "in_orbit_owners": [{"state": st, "country": iso_country(st), "total": n, "payloads": payloads_orbit.get(st, 0)}
+                            for st, n in by_state_orbit.most_common(20)],
         "in_orbit_soviet_su": by_state_orbit.get("SU", 0),
         "in_orbit_russian_ru": by_state_orbit.get("RU", 0),
         "unnumbered_in_orbit": len(unnumbered_in_orbit),

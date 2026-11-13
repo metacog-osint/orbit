@@ -39,6 +39,44 @@
   }
   function empty(box, text) { box.textContent = ""; box.appendChild(el("p", "muted small", text)); }
 
+  /* Country marks. Colour is kept for the three largest actors (US, China, Russia with the USSR); every mark also
+     carries its code and, where flag-icons has one, the flag, so colour never carries identity alone. */
+  var BIG = { US: "us", CN: "cn", RU: "ru" };
+  var REGION = null;
+  try { REGION = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) { REGION = null; }
+  function countryName(cc) {
+    try { return (REGION && REGION.of(cc)) || cc; } catch (e) { return cc; }
+  }
+  function mark(country, state) {
+    var label, title, group = "other", flag = null;
+    if (state === "SU") {
+      label = "SU"; group = "ru";
+      title = "Soviet Union (GCAT keeps Soviet objects apart from the Russian Federation's)";
+    } else if (state && state.indexOf("I-") === 0) {
+      label = state.slice(2); title = label + " (intergovernmental)";
+    } else if (country) {
+      label = country; title = countryName(country); group = BIG[country] || "other"; flag = country.toLowerCase();
+    } else {
+      label = state || "?"; title = state ? "GCAT owner code " + state : "Unknown";
+    }
+    var s = el("span", "cc g-" + group);
+    s.title = title;
+    if (flag) {
+      var img = document.createElement("img");
+      img.src = "flags/" + flag + ".svg"; img.alt = ""; img.loading = "lazy"; img.width = 16; img.height = 12;
+      img.onerror = function () { if (img.parentNode) img.parentNode.removeChild(img); };
+      s.appendChild(img);
+    }
+    s.appendChild(document.createTextNode(label));
+    return s;
+  }
+  function who(marks, name) {
+    var d = el("div", "who");
+    marks.forEach(function (m) { d.appendChild(m); });
+    if (name) d.appendChild(el("span", "nm", name));
+    return d;
+  }
+
   function tiles() {
     var box = document.getElementById("tiles");
     box.textContent = "";
@@ -69,12 +107,32 @@
       var what = el("div");
       what.appendChild(el("div", "", [x.flight, x.mission && x.mission !== x.flight ? "(" + x.mission + ")" : ""].join(" ").trim() || x.launch_tag));
       var pls = x.payloads || [];
-      what.appendChild(el("div", "pl", pls.length
-        ? pls.slice(0, 6).map(function (p) { return p.name + " (" + p.state + ")"; }).join(", ") + (pls.length > 6 ? ", +" + (pls.length - 6) + " more" : "")
-        : "Payloads not yet cataloged"));
+      if (!pls.length) what.appendChild(el("div", "pl", "Payloads not yet cataloged"));
+      var owners = [], byOwner = {};
+      pls.forEach(function (p) {
+        var k = p.state || "?";
+        if (!byOwner[k]) { byOwner[k] = { country: p.country, state: p.state, names: [] }; owners.push(k); }
+        byOwner[k].names.push(p.name);
+      });
+      owners.forEach(function (k) {
+        var o = byOwner[k], line = el("div", "pl");
+        line.appendChild(mark(o.country, o.state));
+        line.appendChild(el("span", "", o.names.slice(0, 6).join(", ") +
+          (o.names.length > 6 ? ", +" + (o.names.length - 6) + " more" : "")));
+        what.appendChild(line);
+      });
       cell(tr, what);
-      cell(tr, x.vehicle);
-      cell(tr, (x.site && x.site.name) || x.site_code);
+      var veh = el("div");
+      veh.appendChild(el("div", "", x.vehicle));
+      var ls = x.launchers || [];
+      var seen = {};
+      var lm = ls.filter(function (l) { var k = l.state + "|" + l.country; if (seen[k]) return false; seen[k] = 1; return true; })
+        .map(function (l) { return mark(l.country, l.state); });
+      if (ls.length) veh.appendChild(who(lm,
+        ls.map(function (l) { return l.name; }).join(" / ")));
+      cell(tr, veh);
+      var st = x.site || {};
+      cell(tr, who(st.country || st.state ? [mark(st.country, st.state)] : [], st.name || x.site_code));
       var out = el("span", x.outcome === "success" ? "badge" : "badge badge-warn", x.outcome);
       cell(tr, out);
       cell(tr, x.launch_tag, "muted");
@@ -82,7 +140,7 @@
     });
     if (!rows.length) return empty(box, "No orbital launches in GCAT's list for the last 7 days.");
     box.textContent = "";
-    box.appendChild(table(["When", "Flight and payloads", "Vehicle", "Site", "Outcome", "GCAT"], rows));
+    box.appendChild(table(["When", "Flight and payloads (by owner)", "Vehicle and launcher", "Site", "Outcome", "GCAT"], rows));
   }
 
   function upcomingTable() {
@@ -91,14 +149,15 @@
       var tr = el("tr");
       cell(tr, fmt(x.net) + (x.net_precision && x.net_precision !== "Minute" && x.net_precision !== "Second" ? " (" + x.net_precision.toLowerCase() + ")" : ""));
       cell(tr, x.name);
+      cell(tr, who((x.provider_countries || []).map(function (c) { return mark(c, null); }), x.provider || ""));
       cell(tr, x.orbit || "");
-      cell(tr, x.location || x.pad);
+      cell(tr, who(x.pad_country ? [mark(x.pad_country, null)] : [], x.location || x.pad));
       cell(tr, el("span", "badge", x.status));
       return tr;
     });
     if (!rows.length) return empty(box, "No launches listed for the next 14 days.");
     box.textContent = "";
-    box.appendChild(table(["No earlier than", "Launch", "Orbit", "Site", "Status"], rows));
+    box.appendChild(table(["No earlier than", "Launch", "Provider", "Orbit", "Site", "Status"], rows));
   }
 
   function reentryTable() {
@@ -110,7 +169,7 @@
       var tr = el("tr");
       cell(tr, dayOnly(x.reentry_date) + (x.reentry_uncertain ? " ~" : ""));
       cell(tr, x.name);
-      cell(tr, x.state);
+      cell(tr, mark(x.country, x.state));
       cell(tr, x.norad || x.jcat, "muted");
       return tr;
     });
@@ -156,7 +215,40 @@
         (dupes.length ? " (" + dupes.slice(0, 5).join(", ") + ")" : "") + "."));
       box.appendChild(el("h3", "small", "Owner codes"));
       box.appendChild(dl);
+      ownerChart(box, h);
     }
+  }
+
+  function ownerChart(box, h) {
+    var rows = h.in_orbit_owners;
+    if (!rows || !rows.length) return;
+    rows = rows.slice(0, 15);
+    var max = rows[0].total || 1;
+    box.appendChild(el("h3", "small", "Objects in orbit by owner (GCAT, top " + rows.length + ")"));
+    var g = el("div", "owners");
+    g.setAttribute("role", "table");
+    g.setAttribute("aria-label", "Objects in orbit by owner: total and payloads");
+    rows.forEach(function (o) {
+      var group = o.state === "SU" ? "ru" : (BIG[o.country] || "other");
+      var r = el("div", "row");
+      r.setAttribute("role", "row");
+      var rest = o.total - o.payloads;
+      var label = mark(o.country, o.state);
+      var tip = (label.title || o.state) + ": " + o.total.toLocaleString() + " objects in orbit, " +
+        o.payloads.toLocaleString() + " payloads and " + rest.toLocaleString() + " rocket stages, components and debris";
+      r.title = tip;
+      var c1 = el("div"); c1.setAttribute("role", "cell"); c1.appendChild(label);
+      var bar = el("div", "bar"); bar.setAttribute("role", "cell"); bar.setAttribute("aria-label", tip);
+      if (o.payloads) { var p = el("div", "seg pay g-" + group); p.style.width = (100 * o.payloads / max) + "%"; bar.appendChild(p); }
+      if (rest) { var q = el("div", "seg rest g-" + group); q.style.width = (100 * rest / max) + "%"; bar.appendChild(q); }
+      var n = el("div", "n", o.total.toLocaleString() + " (" + o.payloads.toLocaleString() + " payloads)");
+      n.setAttribute("role", "cell");
+      r.appendChild(c1); r.appendChild(bar); r.appendChild(n);
+      g.appendChild(r);
+    });
+    box.appendChild(g);
+    box.appendChild(el("p", "muted small", "Solid: payloads. Pale: rocket stages, components and debris. GCAT owner " +
+      "codes; SU is the Soviet Union, kept apart from the Russian Federation (RU)."));
   }
 
   function lanes() {

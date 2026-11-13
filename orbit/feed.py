@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.0"
+METHOD = "orbit-2.1"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -107,7 +107,7 @@ def _launch_item(x: dict, generated: str, accessed: str) -> dict:
                     f"{' (time approximate)' if x['time_uncertain'] else ''}; GCAT launch {x['launch_tag']}, "
                     f"agency {x['agency']}, category {x['category']}.{outcome} {pl_text}"),
         "data_as_of": when,
-        "countries": _countries(site_cc, *payload_ccs),
+        "countries": _countries(site_cc, *(l.get("country") for l in x.get("launchers") or []), *payload_ccs),
         "requirement_ids": ["OR-PIR-2"],
         "coverage_fraction": 1.0,
         "precision_class": "approximate",

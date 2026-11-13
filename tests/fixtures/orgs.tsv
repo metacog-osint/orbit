@@ -1,0 +1,12 @@
+#Code	UCode	StateCode	Type	Class	TStart	TStop	ShortName	Name	Location	Longitude	Latitude	Error	Parent	ShortEName	EName	UName
+# Updated 2026 Nov 13 0020:25
+CALT	CALT	CN	O/LA/LV/PL/E/LS	C	1957 Nov 11	-	CALT	Zhongguo yunzaihuojian jishu yanjiu yuan	Beijing:Nanyuan	    116.3900 	   39.7800 	0.0200 	CASC	CALT	Chinese Academy of Launch Vehicle Technology (CASC 1st Acad)	中国运载火箭技术研究院
+FKA	MOM	RU	O/LA/PL	C	2004	2016 Jan  1	Roskosmos	Federal'noe kosmicheskoe agentstvo Rossii (Roskosmos)	Moskva	     37.6200 	   55.7500 	0.0200 	-	-	Roskosmos	Федеральное космическое агентство (Роскосмос)
+ISRO	ISRO	IN	O/LA/LV/PL/W/E/LS/S	C	1969	-	ISRO	Indian Space Research Organization	Bangalore	     77.5800 	   12.9800 	0.0200 	-	-	-	Indian Space Research Organization
+NSIL	NSIL	IN	O/LA	B	2019	-	New Space India	New Space India Ltd.	Bengaluru	     77.5800 	   12.9800 	0.0200 	-	New Space India	New Space India Ltd	New Space India Ltd.
+RLABN	RLABN	NZ	O/LA/LV/PL/E/LS/S	B	2009	-	Rocket Lab	Rocket Lab Ltd.	Parnell, Auckland, North Island	    174.7800 	  -36.8700 	0.0200 	RLABU	-	-	Rocket Lab Ltd.
+SAST	SBA	CN	O/LA/LV/PL	B	1993	-	SAST	Shanghai hangtian jishu yanjiuyuan	Shanghai:Minghan	    121.3800 	   31.1100 	0.0200 	CASC	-	Shanghai Academy of Space Technology (CASC 8th Acad)	上海航天技术研究院
+SPX	SPX	US	O/LA/LV/PL/E/LS/S	B	2007 Aug	-	SpaceX	SpaceX	Hawthorne, California	   -118.3500 	   33.9200 	0.0200 	-	-	-	SpaceX
+XIDO	XIDO	CN	LA/LV	B	2015?	-	Xinghe Dongli	Xinghe Dongli (Beijing) kongjian keji YG	Beijing	    116.3800 	   39.9200 	0.0200 	-	Galactic Energy	Galactic Energy Co.	星河动力（北京）空间科技有限公司
+ZHSH	ZHSH	CN	O/LA	B	2025	-	Zhongguo Shanghuo	Zhongguo hangtian keji jituan shangye huojian YG	Shanghai:Minghan	    121.3800 	   31.1100 	0.0200 	CASC	CACL	CASC Commercial Rocket YG	中国航天科技集团商业火箭有限公司
+ZKYT	ZKYT	CN	O	B	2018	2022 Jun	Zhongke TJ YG	Beijing Zhongke Yuhang Tansuo Jishu YG	Beijing:Haidian	    116.3000 	   39.9600 	0.0200 	-	CAS Space	Beijing CAS Space Exploration Tech. Co. Ltd.	北京中科宇航探索技术有限公司

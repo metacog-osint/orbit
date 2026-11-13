@@ -1,8 +1,8 @@
-# Orbit method (`orbit-2.0`, 13 Nov 2026)
+# Orbit method (`orbit-2.1`, 13 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
-and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` is the first
+and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
 live slice: launches, scheduled launches, reentries and catalog changes. Manoeuvres and counterspace events are
 not built.
 
@@ -13,8 +13,8 @@ baseline of its own readings yet, so nothing is called an anomaly, and it makes 
 
 | Lane | Source | What Orbit takes |
 |---|---|---|
-| `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
-| `upcoming` | Launch Library 2 (The Space Devs) | Launches scheduled in the next 14 days |
+| `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
+| `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
 
 GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
@@ -36,7 +36,13 @@ nothing (about 37 MB) unless one has changed.
 5. **A temporary (`tmpcat`) entry that disappears** is counted as closed, not removed: GCAT moves it to a
    numbered catalog under a new id.
 6. **Reentry dates are GCAT's** and are often approximate (`?` in GCAT, `~` on the page).
-7. **A scheduled launch is the provider's or press's schedule**, as Launch Library 2 lists it. It moves, and
+7. **Who launched and who owns (`orbit-2.1`).** A launch's launching country is its GCAT agency's state code
+   from `orgs.tsv` (`ZHSH/CALT` names two agencies); its site's country is the site's state code; each payload's
+   owner is its own GCAT state. A scheduled launch's provider country is Launch Library 2's, and its site country
+   is the pad's. The two sources can differ: GCAT files Rocket Lab's launches under its New Zealand company
+   (RLABN, NZ), Launch Library 2 under the US. Each is shown as its source gives it. Launch items in the feed
+   now list the launching country with the site and payload owners.
+8. **A scheduled launch is the provider's or press's schedule**, as Launch Library 2 lists it. It moves, and
    some military launches are listed late or not at all.
 
 ## Not live: manoeuvres

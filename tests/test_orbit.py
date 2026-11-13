@@ -27,7 +27,7 @@ FIX = ROOT / "tests" / "fixtures"
 TODAY = date(2026, 11, 13)
 NOW = datetime(2026, 11, 13, 18, 0, tzinfo=timezone.utc)
 FILES = {"satcat": "satcat.tsv", "satcat100k": "satcat100k.tsv", "auxcat": "auxcat.tsv", "tmpcat": "tmpcat.tsv",
-         "launch": "launch.tsv", "sites": "sites.tsv"}
+         "launch": "launch.tsv", "sites": "sites.tsv", "orgs": "orgs.tsv"}
 
 
 def body(name: str) -> bytes:
@@ -62,6 +62,7 @@ class Catalog(unittest.TestCase):
     def setUp(self):
         self.objs = gcat.objects(tables())
         self.sites = gcat.sites_table(gcat.parse_tsv(body("sites.tsv")))
+        self.orgs = gcat.orgs_table(gcat.parse_tsv(body("orgs.tsv")))
 
     def test_every_catalog_is_read(self):
         cats = {o["cat"] for o in self.objs}
@@ -80,11 +81,30 @@ class Catalog(unittest.TestCase):
         newest = list(got)[0]
         self.assertEqual(newest, "2026-255")
 
+    def test_launchers_and_site_countries(self):
+        got = {x["launch_tag"]: x for x in gcat.recent_launches(gcat.parse_tsv(body("launch.tsv")), self.objs,
+                                                                self.sites, TODAY, orgs=self.orgs)}
+        f9 = got["2026-255"]
+        self.assertEqual([(l["code"], l["country"]) for l in f9["launchers"]], [("SPX", "US")])
+        self.assertEqual(f9["site"]["country"], "US")
+        self.assertEqual(f9["payloads"][0]["country"], "US")
+        self.assertEqual({l["country"] for l in got["2026-254"]["launchers"]}, {"CN"})
+        joint = next(x for x in got.values() if "/" in x["agency"])
+        self.assertEqual(len(joint["launchers"]), 2)  # 'ZHSH/CALT' names two agencies
+        self.assertEqual(gcat.launchers("NOSUCH", self.orgs), [{"code": "NOSUCH", "name": "NOSUCH", "state": "",
+                                                                "country": None}])
+
     def test_hygiene_counts_only_us_catalog_numbers_for_duplicates(self):
         h = gcat.hygiene(self.objs)
         # auxcat A00002 carries 00003, the number of the object it is associated with: not a duplicate claim
         self.assertNotIn("00003", h["duplicate_catalog_numbers"])
         self.assertIn("satcat100k", h["objects_by_catalog"])
+        owners = h["in_orbit_owners"]
+        self.assertTrue(owners)
+        self.assertTrue(all(o["payloads"] <= o["total"] for o in owners))
+        self.assertEqual([o["total"] for o in owners], sorted((o["total"] for o in owners), reverse=True))
+        su = [o for o in owners if o["state"] == "SU"]
+        self.assertTrue(all(o["country"] == "RU" for o in su))  # SU kept as its own row, placed in Russia
 
     def test_diff_reports_late_objects_owner_changes_and_ignores_temporary_graduations(self):
         idx = gcat.build_index(self.objs)
@@ -124,11 +144,15 @@ class Upcoming(unittest.TestCase):
         self.assertEqual(len(rows), 4)
         soyuz = next(r for r in rows if r["name"].startswith("Soyuz 2.1b/Fregat-M"))
         self.assertEqual(soyuz["pad_country"], "RU")
+        self.assertEqual(soyuz["provider_countries"], ["RU"])
+        electron = next(r for r in rows if r["name"].startswith("Electron"))
+        self.assertEqual((electron["provider_countries"], electron["pad_country"]), (["US"], "NZ"))
         self.assertIsNotNone(soyuz["lat"])
         self.assertTrue(all(r["net"] for r in rows))
         later = launches.within(rows, datetime(2026, 11, 30, tzinfo=timezone.utc))
         self.assertEqual(later, [])
         self.assertIn("net__lte=2026-11-27", launches.url(NOW))
+        self.assertIn("mode=detailed", launches.url(NOW))
 
     def test_bad_reply(self):
         with self.assertRaises(ValueError):

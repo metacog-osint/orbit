@@ -15,6 +15,12 @@
   --ink: var(--text);
   --line: var(--border);
   --alarm: #b3261e;
+  /* Actor colours (validated colour-blind safe, every pair, on the light panel): US, China, Russia and USSR.
+     Everyone else is neutral and known by flag and code. */
+  --g-us: #2a78d6;
+  --g-cn: #eb6834;
+  --g-ru: #1baf7a;
+  --g-other: #a7adb5;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -30,6 +36,10 @@
     --link: #79b8ff;
     --badge: #1e293b;
     --alarm: #ff8a80;
+    --g-us: #3987e5;
+    --g-cn: #d95926;
+    --g-ru: #199e70;
+    --g-other: #7d8794;
   }
 }
 * { box-sizing: border-box; }
@@ -74,3 +84,34 @@ tr:target { background: var(--warn-bg); }
 ul.plain { margin: 0; padding-left: 18px; }
 .foot { padding: 24px 0; border-top: 1px solid var(--border); margin-top: 24px; }
 @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .hero h1 { font-size: 1.3rem; } }
+
+/* Country marks: flag (when there is one), code, and an actor colour bar on the left. */
+.cc { display: inline-flex; align-items: center; gap: 4px; padding: 0 5px 0 4px; margin: 1px 4px 1px 0;
+  border-left: 3px solid var(--g-other); background: var(--badge); border-radius: 2px; font-size: 0.74rem;
+  line-height: 1.5; white-space: nowrap; color: var(--text); font-variant-numeric: tabular-nums; }
+.cc img { width: 16px; height: 12px; display: block; border-radius: 1px; box-shadow: 0 0 0 1px rgba(0,0,0,0.12); }
+.g-us { border-left-color: var(--g-us); }
+.g-cn { border-left-color: var(--g-cn); }
+.g-ru { border-left-color: var(--g-ru); }
+.who { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0; }
+.who .nm { margin-right: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 10px 0 0; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 5px;
+  vertical-align: -1px; }
+.sw.g-us { background: var(--g-us); } .sw.g-cn { background: var(--g-cn); }
+.sw.g-ru { background: var(--g-ru); } .sw.g-other { background: var(--g-other); }
+
+/* Objects in orbit by owner: one bar per owner, payloads solid, everything else pale, 2px gap between. */
+.owners { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 10px; align-items: center;
+  font-size: 0.8rem; margin-top: 8px; }
+.owners .bar { display: flex; gap: 2px; height: 12px; min-width: 0; }
+.owners .seg { height: 100%; border-radius: 0 4px 4px 0; }
+.owners .seg.pay { border-radius: 0; }
+.owners .seg.pay:last-child { border-radius: 0 4px 4px 0; }
+.owners .seg.rest { opacity: 0.45; }
+.owners .seg.g-us { background: var(--g-us); } .owners .seg.g-cn { background: var(--g-cn); }
+.owners .seg.g-ru { background: var(--g-ru); } .owners .seg.g-other { background: var(--g-other); }
+.owners .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.owners .row { display: contents; }
+.owners .row:hover > * { background: var(--badge); }
+@media (max-width: 520px) { .owners { grid-template-columns: max-content 1fr; } .owners .n { grid-column: 2; text-align: left; } }
