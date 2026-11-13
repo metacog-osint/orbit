@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "1.0",
+  "version": "2.0",
   "indicators": [
     {
       "id": "OR-IND-1",
@@ -12,19 +12,21 @@
         "diagnostic": true,
         "unambiguous": true,
         "collectable": true
-      }
+      },
+      "note": "Not live: part of the manoeuvre lane."
     },
     {
       "id": "OR-IND-2",
-      "text": "GCAT daily snapshot records a newly cataloged subsatellite or payload separating from an existing host object in orbit.",
-      "series": "gcat_satcat",
-      "rule": "is_subsatellite_deployment == true",
+      "text": "Orbit's comparison of two GCAT readings finds a new payload or debris entry from a launch more than 30 days old, possibly from a host object already in orbit.",
+      "series": "gcat_catalog_diff",
+      "rule": "new JCAT entry whose launch date is more than 30 days before the reading (gcat.diff, late_groups)",
       "gentry": {
         "predictive": true,
-        "diagnostic": true,
-        "unambiguous": true,
+        "diagnostic": false,
+        "unambiguous": false,
         "collectable": true
-      }
+      },
+      "note": "Not diagnostic on its own: breakups and late identifications look the same as releases."
     },
     {
       "id": "OR-IND-3",
@@ -48,7 +50,8 @@
         "diagnostic": true,
         "unambiguous": true,
         "collectable": true
-      }
+      },
+      "note": "Not live: part of the manoeuvre lane."
     }
   ],
   "warning_problems": [
@@ -63,20 +66,34 @@
         {
           "id": "OR-H-1A",
           "title": "Deliberate orbital re-phasing, ground-track retargeting, or co-orbital inspection approach",
-          "emerging": ["OR-IND-1", "OR-IND-2"],
-          "not_emerging": ["OR-IND-3", "OR-IND-4"]
+          "emerging": [
+            "OR-IND-1",
+            "OR-IND-2"
+          ],
+          "not_emerging": [
+            "OR-IND-3",
+            "OR-IND-4"
+          ]
         },
         {
           "id": "OR-H-1B",
           "title": "Routine constellation slot maintenance, debris avoidance, or post-launch sibling dispersion",
-          "emerging": ["OR-IND-3"],
-          "not_emerging": ["OR-IND-2"]
+          "emerging": [
+            "OR-IND-3"
+          ],
+          "not_emerging": [
+            "OR-IND-2"
+          ]
         },
         {
           "id": "OR-H-1C",
           "title": "TLE fit noise, solar-storm atmospheric drag spike, or cross-tagging across a tracking gap (artefact)",
-          "emerging": ["OR-IND-4"],
-          "not_emerging": ["OR-IND-1"]
+          "emerging": [
+            "OR-IND-4"
+          ],
+          "not_emerging": [
+            "OR-IND-1"
+          ]
         }
       ]
     }

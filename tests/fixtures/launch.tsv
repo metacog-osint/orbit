@@ -1,0 +1,18 @@
+#Launch_Tag	Launch_JD	Launch_Date	LV_Type	Variant	Fairing	Flight_ID	Flight	Mission	FlightCode	Platform	Launch_Site	Launch_Pad	Ascent_Site	Ascent_Pad	Perigee	Apogee	Apoflag	Inc	Azimuth	Range	RangeFlag	Dest	OrbMass	OrbPay	Agency	LaunchCode	FailCode	Group	Category	LTCite	Cite	Notes
+# Updated 2026 Nov 13 0020:52
+2026-240 	2461336.93 	2026 Oct 23 1015	Chang Zheng 6A	-	-	Y30	Yaogan 50-03	Yaogan 50-03	-	-	TYSC	LC9A	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   2.000 	SAST	OS  	-	G	Sat LEO O	nasaspaceflight.com	-	-
+2026-241 	2461337.31 	2026 Oct 23 1925	Chang Zheng 4B	-	-	Y81	YG53/YG56	YG53/YG56	-	-	JQ	LC43/94	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   2.000 	SAST	OS  	-	G	Sat LEO L	nasaspaceflight.com	-	-
+2026-242 	2461337.45 	2026 Oct 23 2248:44	Falcon 9	FT5	-	xxx/B1063.36 F699	Starlink-427	Starlink Group 15-15	V2MO 15-15 (27 Ku)	-	VSFBS	SLC4E	-	-	    135	    271	 	 70.0 	   -	    -	 	-	   0.000 	  15.500 	SPX	OS  	-	C M	Sat LEO D	SpaceX	-	-
+2026-243 	2461338.59 	2026 Oct 25 0203	Chang Zheng 8A	-	-	Y12	WHDW 28	WHDW 28	-	-	HCSLS	LC1	-	-	    150	   1108	 	 50.0 	   -	    -	 	-	   0.000 	   6.000 	ZHSH/CALT	OS  	-	G M	Sat LEO O	nasaspaceflight.com	-	-
+2026-244 	2461340.81 	2026 Oct 27 0725:23	Falcon 9	FT5	-	xxx/B1082.26 F700	Starlink-428	Starlink Group 15-16	V2MO 15-16 (27 Ku)	-	VSFBS	SLC4E	-	-	    135	    271	 	 70.0 	   -	    -	 	-	   0.000 	  15.500 	SPX	OS  	-	C M	Sat LEO D	SpaceX	-	-
+2026-245 	2461344.26 	2026 Oct 30 1821	GSLV Mk II	c	-	GSLV-F18	NVS-03	IRNSS-1L	-	-	SHAR	SLP	-	-	    178	  37896	 	 20.7 	   -	    -	 	-	   0.000 	   2.232 	ISRO/NSIL	OS  	-	CO/G	Sat GTO O	Wire	-	-
+2026-246 	2461344.67 	2026 Oct 31 0404:34	Falcon 9	FT5	-	xxx/B1093.18 F701	Starlink-429	Starlink Group 15-18	V2MO 15-18 (27 Ku)	-	VSFBS	SLC4E	-	-	    135	    271	 	 70.0 	   -	    -	 	-	   0.000 	  15.500 	SPX	OS  	-	C M	Sat LEO D	SpaceX	-	-
+2026-247 	2461347.20 	2026 Nov  2 1641	Electron	-	-	99	The Sea God Surveys	QPS-SAR-20	-	-	MAHIA	LC1A	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   0.120 	RLABN	OS  	-	C	Sat LEO OO	Wire	-	-
+2026-248 	2461347.51 	2026 Nov  3 0015:18	Lijian-2	-	-	Y2	Qianfan Jigui 21	Qianfan Jigui 21	-	-	JQ	LC140	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   5.000 	ZKYT	OS  	-	C	Sat LEO O	nasaspaceflight.com	-	-
+2026-249 	2461350.17 	2026 Nov  5 1558	Chang Zheng 2C	-	-	Y84	YG51 7-9	YG51	-	-	XSC	LC3	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   2.000 	CALT	OS  	-	G	Sat LEO O	nasaspaceflight.com	-	-
+2026-250 	2461351.48 	2026 Nov  6 2337	Gushenxing-2	-	-	Y3	Guanlan Shiyan	Guanlan Shiyan	-	-	JQ	-	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   0.800 	XIDO	OS  	-	C	Sat LEO D	nasaspaceflight.com	-	-
+2026-251 	2461351.53 	2026 Nov  7 0048:42	Falcon 9	FT5	-	xxx/B1095.8  F702	USSF-432	SBST R-4	-	-	VSFBS	SLC4E	-	-	    300	    300	?	 70.0 	   -	    -	 	-	   0.000 	  16.000 	SPX	OS  	-	CX/G	Sat LEO D	nasaspaceflight.com	-	-
+2026-252 	2461352.06 	2026 Nov  7 1325?	Soyuz-2-1B	Fregat	-	-	Kosmos-2621	Glonass	-	-	GIK-1	LC43/3	-	-	     56	    222	 	 64.8 	   -	    -	 	-	   0.000 	   5.930 	FKA	OS  	-	G	Sat MEO SO	nasaspaceflight.com	-	-
+2026-253 	2461353.35 	2026 Nov  8 2024	Chang Zheng 12	-	-	Y11	WHDW 29	WHDW 29	-	-	HCSLS	LC2	-	-	    180	    929	 	 50.0 	   -	    -	 	-	   0.000 	   2.000 	ZHSH/SAST	OS  	-	G M	Sat LEO P	nasaspaceflight.com	xinhuanet.com	-
+2026-254 	2461355.99 	2026 Nov 11 1141	Chang Zheng 2D	b	-	Y108	Tanluzhe	Tanluzhe	-	-	JQ	LC43/94	-	-	      -	      -	 	-	   -	    -	 	-	   0.000 	   1.300 	SAST	OS  	-	G	Sat SSO D	nasaspaceflight.com	-	-
+2026-255 	2461356.69 	2026 Nov 12 0436:30	Falcon 9	FT5	-	xxx/B1103.7  F703	USSF-627	SBST R-5	-	-	VSFBS	SLC4E	-	-	    300	    300	?	 70.0 	   -	    -	 	-	   0.000 	  16.000 	SPX	OS  	-	CX/G	Sat LEO D	nasaspaceflight.com	-	-

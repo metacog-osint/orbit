@@ -1,12 +1,25 @@
 """Orbit CLI: collect, build, and check.
 
-    python tools/orbit.py collect
-    python tools/orbit.py build
-    python tools/orbit.py check
+    python tools/orbit.py collect            # fetch every live lane, write data/snapshot.json
+    python tools/orbit.py collect --only upcoming
+    python tools/orbit.py collect --force    # read GCAT even if its files have not changed
+    python tools/orbit.py build              # build site/ from data/snapshot.json
+    python tools/orbit.py check              # validate the registers and lint the feed
+
+collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
+from_previous) or stays empty, and the snapshot's "lanes" block says which.
+
+Lanes (method orbit-2.0):
+  catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
+            day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
+            if none has changed. About 37 MB when it does.
+  upcoming  Launch Library 2: launches scheduled in the next 14 days. One request.
+The manoeuvre lane (orbit/maneuver.py) is not run: see doctrine/method.md.
 """
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import sys
 from pathlib import Path
@@ -15,197 +28,137 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import feed, gcat, maneuver  # noqa: E402
+from orbit import feed, fetch, gcat, launches  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
-SEED_SNAPSHOT = {
-    "generated_at": "2026-11-01T12:00:00Z",
-    "raw_gcat": [
-        {
-            "jcat": "S59773",
-            "norad": "59773",
-            "name": "Kosmos-2576",
-            "celestrak_owner": "CIS",
-            "gcat_state": "RU",
-            "orbit_class": "LEO",
-            "launch_designator": "2024-092A",
-            "launch_date": "2024-05-16",
-            "status": "O",
-            "subpoint_lat": 51.8,
-            "subpoint_lon": 39.2,
-        },
-        {
-            "jcat": "S61890",
-            "norad": "61890",
-            "name": "Kosmos-2576 Subsatellite-A",
-            "celestrak_owner": "CIS",
-            "gcat_state": "RU",
-            "orbit_class": "LEO",
-            "launch_designator": "2024-092J",
-            "launch_date": "2026-10-30",
-            "status": "O",
-            "is_subsatellite_deployment": True,
-            "parent_object": "Kosmos-2576 (59773)",
-            "subpoint_lat": 52.1,
-            "subpoint_lon": 39.8,
-        },
-        {
-            "jcat": "S55820",
-            "norad": "55820",
-            "name": "Luch-5X (Olymp-K No. 2)",
-            "celestrak_owner": "CIS",
-            "gcat_state": "RU",
-            "orbit_class": "GEO",
-            "launch_designator": "2023-031A",
-            "launch_date": "2023-03-12",
-            "status": "O",
-            "subpoint_lat": 0.1,
-            "subpoint_lon": 16.4,
-        },
-        {
-            "jcat": "S19450",
-            "norad": "19450",
-            "name": "Kosmos-1966 (Soviet Oko Debris)",
-            "celestrak_owner": "CIS",
-            "gcat_state": "SU",
-            "orbit_class": "HEO",
-            "launch_designator": "1988-076A",
-            "launch_date": "1988-08-30",
-            "status": "O",
-            "subpoint_lat": 62.0,
-            "subpoint_lon": 88.0,
-        },
-        {
-            "jcat": "A11402",
-            "norad": None,
-            "name": "Shiyan-28B Unnumbered Inspector",
-            "celestrak_owner": "PRC",
-            "gcat_state": "CN",
-            "orbit_class": "GEO",
-            "launch_designator": "2026-144B",
-            "launch_date": "2026-10-18",
-            "status": "O",
-            "subpoint_lat": 0.2,
-            "subpoint_lon": 112.5,
-        },
-        {
-            "jcat": "S61901",
-            "norad": "61901",
-            "name": "Yaogan-43 Group 03A",
-            "celestrak_owner": "PRC",
-            "gcat_state": "CN",
-            "orbit_class": "LEO",
-            "launch_designator": "2026-150",
-            "launch_date": "2026-10-22",
-            "status": "O",
-            "subpoint_lat": 28.2,
-            "subpoint_lon": 102.0,
-        },
-        {
-            "jcat": "S61902",
-            "norad": "61902",
-            "name": "Yaogan-43 Group 03B",
-            "celestrak_owner": "PRC",
-            "gcat_state": "CN",
-            "orbit_class": "LEO",
-            "launch_designator": "2026-150",
-            "launch_date": "2026-10-22",
-            "status": "O",
-            "subpoint_lat": 28.4,
-            "subpoint_lon": 102.3,
-        },
-    ],
-    "raw_tle_histories": [
-        {
-            "jcat": "S59773",
-            "norad": "59773",
-            "name": "Kosmos-2576",
-            "owner_clean": "RU",
-            "country": "RU",
-            "orbit_class": "LEO",
-            "launch_designator": "2024-092A",
-            "days_since_launch": 534,
-            "subpoint_lat": 51.8,
-            "subpoint_lon": 39.2,
-            "epochs": [
-                {"epoch": "2026-10-30T18:00:00Z", "mean_motion": 15.3820, "inclination_deg": 97.2500, "eccentricity": 0.00120},
-                {"epoch": "2026-10-31T18:00:00Z", "mean_motion": 15.3610, "inclination_deg": 97.2512, "eccentricity": 0.00125},
-            ],
-        },
-        {
-            "jcat": "S55820",
-            "norad": "55820",
-            "name": "Luch-5X (Olymp-K No. 2)",
-            "owner_clean": "RU",
-            "country": "RU",
-            "orbit_class": "GEO",
-            "launch_designator": "2023-031A",
-            "days_since_launch": 965,
-            "subpoint_lat": 0.1,
-            "subpoint_lon": 16.4,
-            "epochs": [
-                {"epoch": "2026-10-29T12:00:00Z", "mean_motion": 1.00270, "inclination_deg": 0.0800, "eccentricity": 0.00015},
-                {"epoch": "2026-10-31T12:00:00Z", "mean_motion": 1.00110, "inclination_deg": 0.1450, "eccentricity": 0.00022},
-            ],
-        },
-        {
-            "jcat": "S61901",
-            "norad": "61901",
-            "name": "Yaogan-43 Group 03A",
-            "owner_clean": "CN",
-            "country": "CN",
-            "orbit_class": "LEO",
-            "launch_designator": "2026-150",
-            "days_since_launch": 10,
-            "subpoint_lat": 28.2,
-            "subpoint_lon": 102.0,
-            "epochs": [
-                {"epoch": "2026-10-28T06:00:00Z", "mean_motion": 15.2200, "inclination_deg": 35.0010, "eccentricity": 0.00080},
-                {"epoch": "2026-10-31T18:00:00Z", "mean_motion": 15.2140, "inclination_deg": 35.0012, "eccentricity": 0.00082},
-            ],
-        },
-    ],
+LANE_FIELDS = {
+    "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes"],
+    "upcoming": ["upcoming"],
 }
+EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": []}
+INDEX = Path("state") / "catalog_index.json.gz"
+MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 
 
-def build_snapshot(raw: dict | None = None) -> dict:
-    raw = raw or SEED_SNAPSHOT
-    cat = gcat.normalize_gcat_catalog(raw.get("raw_gcat", []))
-    siblings_map = cat["hygiene_summary"]["multi_sibling_launches"]
-    m_res = maneuver.evaluate_tle_history(raw.get("raw_tle_histories", []), siblings_map=siblings_map)
-    return {
-        "generated_at": raw.get("generated_at", "2026-11-01T12:00:00Z"),
-        "catalog": cat,
-        "maneuvers": m_res["detections"],
-        "source_health_flags": m_res["source_health_flags"],
+def _read_index(data_dir: Path) -> dict | None:
+    p = data_dir / INDEX
+    if not p.exists():
+        return None
+    return json.loads(gzip.decompress(p.read_bytes()).decode("utf-8"))
+
+
+def _write_index(data_dir: Path, doc: dict) -> None:
+    p = data_dir / INDEX
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(gzip.compress(json.dumps(doc, separators=(",", ":"), ensure_ascii=False).encode("utf-8"), 6))
+
+
+def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header=None):
+    data_dir = raw_dir.parent
+    stamps = {name: (header or fetch.last_modified)(url) for name, url in gcat.URLS.items()}
+    prev_lane = (prev.get("lanes") or {}).get("catalog") or {}
+    index_doc = _read_index(data_dir)
+    if (not force and index_doc and prev_lane.get("last_modified") == stamps
+            and prev_lane.get("status") in ("ok", "unchanged")):
+        return None, [], stamps  # nothing new: the caller keeps the last reading
+
+    bodies, recs = {}, []
+    for name, url in gcat.URLS.items():
+        body, rec = fetch.fetch(f"gcat-{name}", url, raw_dir, "tsv", getter=getter, gz=True)
+        bodies[name] = body
+        recs.append(rec)
+    tables = {name: gcat.parse_tsv(bodies[name]) for name in gcat.CATALOGS}
+    objs = gcat.objects(tables)
+    if index_doc and len(objs) < MIN_KEEP * len(index_doc["objects"]):
+        raise RuntimeError(f"GCAT read {len(objs)} objects against {len(index_doc['objects'])} last time; "
+                           "refusing a short reading")
+    today = gcat.today_utc()
+    sites = gcat.sites_table(gcat.parse_tsv(bodies["sites"]))
+    result = {
+        "gcat_updated": {name: gcat.updated_stamp(bodies[name]) for name in gcat.URLS},
+        "launches": gcat.recent_launches(gcat.parse_tsv(bodies["launch"]), objs, sites, today),
+        "reentries": gcat.recent_reentries(objs, today),
+        "hygiene": gcat.hygiene(objs),
+        "catalog_changes": {},
     }
+    if index_doc:
+        result["catalog_changes"] = {"previous_reading_at": index_doc["read_at"],
+                                     **gcat.diff(index_doc["objects"], objs, today)}
+    _write_index(data_dir, {"read_at": recs[0]["fetched_at"], "gcat_updated": result["gcat_updated"],
+                            "objects": gcat.build_index(objs)})
+    return result, recs, stamps
 
 
-def collect() -> dict:
-    normalized = build_snapshot(SEED_SNAPSHOT)
-    data_dir = ROOT / "data"
+def _lane_upcoming(raw_dir: Path, prev: dict, getter, **_):
+    now = launches.now_utc()
+    body, rec = fetch.fetch("ll2-upcoming", launches.url(now), raw_dir, "json", getter=getter)
+    return {"upcoming": launches.within(launches.parse(body), now)}, [rec], None
+
+
+LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming}
+
+
+def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
+    data_dir = root / "data"
+    raw_dir = data_dir / "raw"
+    snap_path = data_dir / "snapshot.json"
+    prev = json.loads(snap_path.read_text(encoding="utf-8")) if snap_path.exists() else {}
+    now = fetch.now_utc()
+    snap = {"generated_at": now, "method_version": feed.METHOD, "lanes": {}}
+    for lane, fn in LANES.items():
+        fields = LANE_FIELDS[lane]
+        prev_lane = (prev.get("lanes") or {}).get(lane) or {}
+
+        def keep_previous():
+            for k in fields:
+                snap[k] = prev.get(k, EMPTY[k])
+
+        if only and lane not in only:
+            keep_previous()
+            snap["lanes"][lane] = {**prev_lane, "from_previous": True} if prev_lane else {"status": "not run"}
+            continue
+        try:
+            kwargs = {"force": force, "header": header} if lane == "catalog" else {}
+            result, recs, stamps = fn(raw_dir, prev, getter, **kwargs)
+            if result is None:
+                keep_previous()
+                snap["lanes"][lane] = {**prev_lane, "status": "unchanged", "checked_at": now, "from_previous": False}
+                continue
+            snap.update(result)
+            snap["lanes"][lane] = {"status": "ok", "fetched_at": now, "from_previous": False,
+                                   "fetches": [{k: r[k] for k in ("url", "sha256", "bytes")} for r in recs]}
+            if stamps:
+                snap["lanes"][lane]["last_modified"] = stamps
+        except Exception as exc:
+            had = bool(prev_lane.get("fetched_at"))
+            for k in fields:
+                snap[k] = prev.get(k, EMPTY[k]) if had else EMPTY[k]
+            snap["lanes"][lane] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"[:300],
+                                   "failed_at": now, "from_previous": had, "fetched_at": prev_lane.get("fetched_at"),
+                                   "last_modified": prev_lane.get("last_modified")}
     data_dir.mkdir(parents=True, exist_ok=True)
-    (data_dir / "snapshot.json").write_text(
-        json.dumps(normalized, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
-    )
-    return normalized
+    snap_path.write_text(json.dumps(snap, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    return snap
 
 
-def build_site(root: Path = ROOT) -> dict[str, str]:
+def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str]:
     snap_path = root / "data" / "snapshot.json"
-    snap = json.loads(snap_path.read_text(encoding="utf-8")) if snap_path.exists() else build_snapshot()
-    feed_doc = feed.build_feed(snap)
+    if snapshot is None:
+        if not snap_path.exists():
+            raise SystemExit("No data/snapshot.json. Run `python tools/orbit.py collect` first; "
+                             "Orbit does not build from made-up data.")
+        snapshot = json.loads(snap_path.read_text(encoding="utf-8"))
+    feed_doc = feed.build_feed(snapshot)
 
-    files = {
-        "data/snapshot.json": json.dumps(snap, indent=2, ensure_ascii=False) + "\n",
-        "data/feed.geojson": json.dumps(feed_doc, indent=2, ensure_ascii=False) + "\n",
-    }
+    def dump(obj) -> str:
+        return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
+
+    files = {"data/snapshot.json": dump(snapshot), "data/feed.geojson": dump(feed_doc)}
     src_dir = root / "site_src"
     if src_dir.exists():
         for p in sorted(src_dir.rglob("*")):
             if p.is_file():
                 files[p.relative_to(src_dir).as_posix()] = p.read_text(encoding="utf-8")
-
     out_dir = root / "site"
     out_dir.mkdir(parents=True, exist_ok=True)
     for rel, text in files.items():
@@ -220,7 +173,7 @@ def check_all(root: Path = ROOT) -> list[str]:
     regs = registers.ids(root / "doctrine")
     feed_path = root / "site" / "data" / "feed.geojson"
     if not feed_path.exists():
-        build_site(root)
+        return errs + ["site/data/feed.geojson is missing: run collect and build first"]
     feed_doc = json.loads(feed_path.read_text(encoding="utf-8"))
     for feat in feed_doc.get("features", []):
         fid = (feat.get("properties") or {}).get("id", "?")
@@ -231,20 +184,27 @@ def check_all(root: Path = ROOT) -> list[str]:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="Orbit Space Domain Awareness & Maneuver Compare monitor.")
+    ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("collect")
+    c = sub.add_parser("collect")
+    c.add_argument("--only", nargs="*", choices=sorted(LANES), help="run only these lanes; keep the rest as they were")
+    c.add_argument("--force", action="store_true", help="read GCAT even if its files have not changed")
     sub.add_parser("build")
     sub.add_parser("check")
     args = ap.parse_args(argv)
 
     if args.cmd == "collect":
-        snap = collect()
-        print(
-            f"Collected {len(snap['catalog']['objects'])} GCAT objects, "
-            f"{len(snap['maneuvers'])} maneuvers, {len(snap['source_health_flags'])} TLE gap flags."
-        )
-        return 0
+        snap = collect(only=args.only, force=args.force)
+        for lane, st in snap["lanes"].items():
+            extra = f" ({st.get('error')})" if st.get("status") == "failed" else ""
+            print(f"  {lane:9s} {st.get('status')}{' [last good copy]' if st.get('from_previous') else ''}{extra}")
+        ch = snap.get("catalog_changes") or {}
+        h = snap.get("hygiene") or {}
+        print(f"Collected {len(snap['launches'])} launches (30 days), {len(snap['reentries'])} reentries (30 days), "
+              f"{len(snap['upcoming'])} scheduled launches (14 days); {h.get('in_orbit', 0)} objects in orbit. "
+              + (f"Catalog changes since {ch['previous_reading_at']}: {ch['added']} added, {ch['removed']} removed, "
+                 f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))
+        return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

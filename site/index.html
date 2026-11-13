@@ -3,60 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orbit — Space Domain Awareness &amp; Maneuver Compare</title>
-<meta name="description" content="Orbital maneuver comparison, GCAT owner-code hygiene, subsatellite release detection, and TLE gap source health.">
+<title>Orbit · The Intelligence Company</title>
+<meta name="description" content="Orbital launches, scheduled launches, reentries and satellite catalog changes, from GCAT and Launch Library 2.">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<script src="tic-time.js"></script>
+<script src="tic-nav.js" defer data-current="orbit"></script>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-row">
     <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
     <nav class="top-nav">
-      <a href="https://theintelligence.company/">All programs</a>
-      <a href="data/feed.geojson">Contract v2 Feed</a>
-      <a href="data/snapshot.json">Snapshot JSON</a>
+      <a href="data/feed.geojson">Feed (contract v2)</a>
+      <a href="data/snapshot.json">Snapshot</a>
+      <span id="time-settings"></span>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
   <section class="hero">
-    <h1>Maneuver Compare, subsatellite releases, and catalog hygiene.</h1>
-    <p class="lede">Compares consecutive SGP4 / GP element sets to detect in-track, cross-track, and radial thruster
-      burns (&Delta;v in m/s), separates routine station-keeping and launch-sibling dispersion from co-orbital inspection
-      activity, and maps ownership through Jonathan McDowell's GCAT (`SU` vs. `RU`, unnumbered active objects).</p>
+    <h1>What changed in Earth orbit.</h1>
+    <p class="lede">Orbital launches, launches scheduled in the next two weeks, reentries, and changes to the public
+      satellite catalog between Orbit's own readings. Everything here is measured or reported by the sources named
+      on it; Orbit adds no judgment. <span id="asof"></span></p>
     <div class="tiles" id="tiles" aria-live="polite"></div>
   </section>
 
-  <section class="card" aria-labelledby="man-h">
+  <p class="notice small">Not live yet: manoeuvre detection. It waits on a test of the open maneuver-detect method
+    and on the terms for the orbital history it needs. Until then Orbit reports no manoeuvres and makes no
+    warnings.</p>
+
+  <section class="card" id="launches" aria-labelledby="la-h">
     <div class="card-head">
-      <h2 id="man-h">Maneuver Compare (30-Day Detections)</h2>
-      <p class="muted small">Each detection shows maneuver type, estimated &Delta;v, calibrated confidence, and a hypothesis-framed meaning sentence.</p>
+      <h2 id="la-h">Orbital launches, last 7 days</h2>
+      <p class="muted small">From GCAT's launch list. Payloads are those GCAT has cataloged so far; new ones are
+        often added a day or more after launch.</p>
     </div>
-    <div id="maneuvers"></div>
+    <div class="tbl-wrap" id="launch-table"></div>
+  </section>
+
+  <section class="card" id="upcoming" aria-labelledby="up-h">
+    <div class="card-head">
+      <h2 id="up-h">Scheduled launches, next 14 days</h2>
+      <p class="muted small">From Launch Library 2. Scheduled times are the provider's or the press's and often
+        move; some military launches are listed late or not at all.</p>
+    </div>
+    <div class="tbl-wrap" id="upcoming-table"></div>
   </section>
 
   <div class="two">
-    <section class="card" aria-labelledby="cat-h">
+    <section class="card" id="reentries" aria-labelledby="re-h">
       <div class="card-head">
-        <h2 id="cat-h">GCAT Catalog &amp; Owner-Code Hygiene</h2>
-        <p class="muted small">Separates legacy Soviet (`SU`) from Russian (`RU`) objects, tracks unnumbered active payloads, and groups co-orbiting launch siblings.</p>
+        <h2 id="re-h">Reentries, last 7 days</h2>
+        <p class="muted small">Payloads GCAT has dated as reentered. Dates are often approximate (marked ~).</p>
       </div>
-      <div id="catalog"></div>
+      <div class="tbl-wrap" id="reentry-table"></div>
     </section>
 
-    <section class="card" aria-labelledby="gap-h">
+    <section class="card" id="catalog" aria-labelledby="cat-h">
       <div class="card-head">
-        <h2 id="gap-h">Source Health: TLE Tracking Gaps (&ge;48 h)</h2>
-        <p class="muted small">An untracked TLE gap looks identical to zero maneuvers; objects below have degraded maneuver confidence.</p>
+        <h2 id="cat-h">Catalog changes and owner codes</h2>
+        <p class="muted small">Changes between Orbit's last two readings of GCAT. Owners come from GCAT, which keeps
+          Soviet (SU) objects apart from Russian (RU) ones.</p>
       </div>
-      <div id="gaps"></div>
+      <div id="catalog-body"></div>
     </section>
   </div>
+
+  <section class="card" aria-labelledby="src-h">
+    <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
+    <div id="lanes"></div>
+  </section>
 </main>
 
 <footer class="wrap foot small muted">
-  <p>Orbit (`orbit-1.0`) — A project of The Intelligence Company. Sources: Jonathan McDowell GCAT (CC BY 4.0), CelesTrak / USSF 18 SDS.</p>
+  <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>). Publicly available information only.</p>
 </footer>
 <script src="app.js"></script>
 </body>

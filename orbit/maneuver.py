@@ -1,4 +1,15 @@
-"""Maneuver Compare engine: detects in-track, cross-track, and radial maneuvers from TLE epoch pairs."""
+"""Maneuver Compare engine from the 1 Nov 2026 seed build. NOT RUN by tools/orbit.py (13 Nov 2026 review).
+
+Kept for reference only. Why it is not live:
+  - It differences two consecutive element sets and calls anything at or above 0.35 m/s a manoeuvre. In low
+    orbit, drag and ordinary element-set fit noise move mean motion by more than that between sets, so on live
+    data it would report false manoeuvres.
+  - "calibrated_confidence" is a fixed formula, not a calibration against known manoeuvres.
+  - Its inputs were made up. A real history needs Space-Track GP history (terms reported to bar publishing
+    derived analysis; not yet read) or an archive Orbit builds itself from a source it may republish.
+The plan's first step is to run maneuver-detect (MIT, astro-tools) on SJ-21 and BeiDou-2 G2 (January 2022)
+locally and judge whether it is believable. See doctrine/method.md.
+"""
 from __future__ import annotations
 
 import math

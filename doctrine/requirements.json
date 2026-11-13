@@ -1,40 +1,81 @@
 {
   "program": "orbit",
-  "version": "1.0",
+  "version": "2.0",
   "review_by": "2027-02-01",
   "requirements": [
     {
       "id": "OR-REQ-1",
       "type": "standing",
-      "question": "Which watched satellites in LEO, MEO, HEO, or GEO are executing non-routine orbital maneuvers, co-orbital approaches, or new multi-object deployments?"
+      "question": "What is changing in Earth orbit: which launches, releases, reentries, catalog changes and (once the lane is live) non-routine manoeuvres, by whom?"
     },
     {
       "id": "OR-PIR-1",
       "type": "pir",
       "parent": "OR-REQ-1",
       "question": "Which watched payloads have executed an in-track, cross-track, or radial maneuver exceeding station-keeping thresholds (delta_v >= 1.5 m/s or calibrated confidence >= 0.75) in the past 30 days?",
-      "series": ["celestrak_gp_history", "gcat_satcat"]
+      "series": [
+        "celestrak_gp_history",
+        "gcat_satcat"
+      ],
+      "note": "Not live (13 Nov 2026): the manoeuvre lane waits on the maneuver-detect test and Space-Track's terms. See method.md."
     },
     {
       "id": "OR-PIR-2",
       "type": "pir",
       "parent": "OR-REQ-1",
-      "question": "Which new launches, subsatellite deployments, or unnumbered active objects have entered the GCAT/CelesTrak catalogs?",
-      "series": ["gcat_satcat", "gcat_active"]
+      "question": "Which orbital launches has GCAT recorded in the last 7 days, from which sites, with which payloads and owner states?",
+      "series": [
+        "gcat_launch",
+        "gcat_satcat"
+      ]
     },
     {
       "id": "OR-EEI-1",
       "type": "eei",
       "parent": "OR-PIR-1",
       "question": "What is the maneuver type (in-track, cross-track, radial), estimated delta-v (m/s), and sibling-launch context for the maneuvering object?",
-      "series": ["celestrak_gp_history", "gcat_satcat"]
+      "series": [
+        "celestrak_gp_history",
+        "gcat_satcat"
+      ],
+      "note": "Not live: part of the manoeuvre lane."
     },
     {
       "id": "OR-EEI-2",
       "type": "eei",
       "parent": "OR-PIR-1",
       "question": "Does the watched satellite have a TLE tracking gap >=48 hours that degrades maneuver detection confidence?",
-      "series": ["celestrak_gp_history"]
+      "series": [
+        "celestrak_gp_history"
+      ],
+      "note": "Not live: part of the manoeuvre lane."
+    },
+    {
+      "id": "OR-PIR-3",
+      "type": "pir",
+      "parent": "OR-REQ-1",
+      "question": "Which launches are scheduled in the next 14 days, from which pads, by which providers, to which orbits?",
+      "series": [
+        "ll2_upcoming"
+      ]
+    },
+    {
+      "id": "OR-EEI-3",
+      "type": "eei",
+      "parent": "OR-PIR-2",
+      "question": "Which objects has GCAT newly cataloged from launches more than 30 days old (releases from a host, breakups, late identifications), and which objects changed owner or owner state?",
+      "series": [
+        "gcat_catalog_diff"
+      ]
+    },
+    {
+      "id": "OR-EEI-4",
+      "type": "eei",
+      "parent": "OR-PIR-2",
+      "question": "Which objects has GCAT dated as reentered in the last 7 days, by type and owner state?",
+      "series": [
+        "gcat_satcat"
+      ]
     }
   ]
 }

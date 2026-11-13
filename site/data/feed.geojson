@@ -2,9 +2,10 @@
   "type": "FeatureCollection",
   "contract": "tic-feed/2",
   "program": "orbit",
-  "generated_at": "2026-11-01T12:00:00Z",
-  "licence": "CC BY 4.0 (GCAT); Public orbital element data (CelesTrak / 18 SDS); Orbit code MIT",
-  "attribution": "Orbit, The Intelligence Company (GCAT, CelesTrak / 18 SDS)",
+  "generated_at": "2026-11-13T18:42:08Z",
+  "method_version": "orbit-2.0",
+  "licence": "GCAT data CC BY 4.0 (J. McDowell, planet4589.org/space/gcat); Launch Library 2 data from The Space Devs (free access, no licence stated)",
+  "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat) and Launch Library 2 (The Space Devs)",
   "language_key": "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md",
   "features": [
     {
@@ -12,344 +13,26 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          39.2,
-          51.8
+          -120.61,
+          34.63
         ]
       },
       "properties": {
         "contract": "tic-feed/2",
-        "id": "orbit:maneuver:s59773:2026-10-31T18",
         "program": "orbit",
-        "title": "Kosmos-2576 (NORAD 59773, RU): in-track maneuver Δv=3.49 m/s (LEO)",
-        "summary": "Kosmos-2576 (NORAD 59773, RU, LEO): in-track maneuver of 3.49 m/s (Δa=6.22 km, Δi=0.0012°) detected between 2026-10-30T18:00Z and 2026-10-31T18:00Z (confidence 95%). Hypothesis: An in-track burn alters semi-major axis and orbital period, which usually indicates along-track re-phasing, ground-track repeat timing adjustment, or closing/opening distance to a co-orbital object.",
-        "kind": "assessment",
-        "tier": "warning",
-        "status": "actual",
-        "msg_type": "new",
-        "human_review": "sampled",
-        "us_person_data": "none",
-        "status_class": "assessed",
-        "product_category": "warning",
-        "data_as_of": "2026-10-31T18:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
-        "countries": [
-          "RU"
-        ],
-        "pmesii_pt": [
-          "military",
-          "infrastructure"
-        ],
-        "ascope": [
-          "capabilities"
-        ],
-        "ie_aspect": [
-          "physical",
-          "informational"
-        ],
-        "ncf": [
-          "provide_satellite_access",
-          "provide_pnt"
-        ],
-        "requirement_ids": [
-          "OR-PIR-1",
-          "OR-EEI-1"
-        ],
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.9,
-        "precision_class": "point",
-        "measures": {
-          "delta_v_ms": 3.49,
-          "delta_a_km": 6.223,
-          "delta_inc_deg": 0.0012,
-          "tle_gap_hours": 24.0
-        },
-        "visual": {
-          "type": "table",
-          "url": "https://orbit.theintelligence.company/#S59773"
-        },
-        "sources": [
-          {
-            "id": "celestrak-gp",
-            "publisher": "CelesTrak / USSF 18 SDS",
-            "title": "GP Orbital Element Sets",
-            "url": "https://celestrak.org/NORAD/elements/",
-            "licence": "Public orbital element data",
-            "grade": "A1",
-            "independence_group": "ussf-18sds",
-            "source_type": "telemetry",
-            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          },
-          {
-            "id": "gcat-mcdowell",
-            "publisher": "Jonathan McDowell (GCAT)",
-            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
-            "url": "https://planet4589.org/space/gcat/",
-            "licence": "CC BY 4.0",
-            "grade": "A1",
-            "independence_group": "gcat",
-            "source_type": "registry",
-            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          }
-        ],
-        "change_from_prior": "new",
-        "change_reason": "Detected in-track burn (Δv=3.49 m/s) between consecutive GP epochs.",
-        "warning_problem_id": "OR-WP-1",
-        "indicator_id": "OR-IND-1",
-        "hypothesis_id": "OR-H-1A",
-        "direction": "supports",
-        "indicator_state": "present",
-        "probability": 0.95,
-        "likelihood_term": "very_likely",
-        "confidence": "moderate",
-        "confidence_basis": {
-          "rubric": "tic-confidence-1.0",
-          "factors": {
-            "independent_lines": 2,
-            "contradicted": false,
-            "coverage_fraction": 0.9,
-            "grades": [
-              "A1"
-            ],
-            "alternatives_rejected": 1,
-            "method_scored": false,
-            "assumptions": "holds",
-            "ease_of_faking": "low",
-            "horizon_days": 0.0
-          },
-          "caps": [
-            "expertise"
-          ],
-          "raise_by": [
-            "a further independent line of evidence (have 2, High needs 3)",
-            "a scored Verdict record for this method version"
-          ]
-        },
-        "alternatives": [
-          {
-            "hypothesis": "Deliberate orbital re-phasing, ground-track retargeting, or co-orbital approach",
-            "tell_apart": "Sustained closing drift rate toward another active payload or repeat ground-track lock."
-          },
-          {
-            "hypothesis": "Routine constellation slot maintenance or debris-avoidance burn",
-            "tell_apart": "Return to nominal orbital slot without proximity approach or subsatellite release."
-          }
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          16.4,
-          0.1
-        ]
-      },
-      "properties": {
-        "contract": "tic-feed/2",
-        "id": "orbit:maneuver:s55820:2026-10-31T12",
-        "program": "orbit",
-        "title": "Luch-5X (Olymp-K No. 2) (NORAD 55820, RU): cross-track maneuver Δv=3.85 m/s (GEO)",
-        "summary": "Luch-5X (Olymp-K No. 2) (NORAD 55820, RU, GEO): cross-track maneuver of 3.85 m/s (Δa=44.91 km, Δi=0.065°) detected between 2026-10-29T12:00Z and 2026-10-31T12:00Z (confidence 45%). Hypothesis: A cross-track out-of-plane burn alters inclination or right ascension of the ascending node (RAAN), which usually indicates orbital plane realignment, sun-synchronous local-time-of-ascending-node maintenance, or plane matching.",
         "kind": "observation",
         "tier": "routine",
         "status": "actual",
         "msg_type": "new",
         "human_review": "none",
-        "us_person_data": "none",
+        "us_person_data": "organizations",
         "status_class": "reported",
         "product_category": "current",
-        "data_as_of": "2026-10-31T12:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
-        "countries": [
-          "RU"
-        ],
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
         "pmesii_pt": [
           "military",
           "infrastructure"
-        ],
-        "ascope": [
-          "capabilities"
-        ],
-        "ie_aspect": [
-          "physical",
-          "informational"
-        ],
-        "ncf": [
-          "provide_satellite_access",
-          "provide_pnt"
-        ],
-        "requirement_ids": [
-          "OR-PIR-1",
-          "OR-EEI-1"
-        ],
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.5,
-        "precision_class": "point",
-        "measures": {
-          "delta_v_ms": 3.85,
-          "delta_a_km": 44.915,
-          "delta_inc_deg": 0.065,
-          "tle_gap_hours": 48.0
-        },
-        "visual": {
-          "type": "table",
-          "url": "https://orbit.theintelligence.company/#S55820"
-        },
-        "sources": [
-          {
-            "id": "celestrak-gp",
-            "publisher": "CelesTrak / USSF 18 SDS",
-            "title": "GP Orbital Element Sets",
-            "url": "https://celestrak.org/NORAD/elements/",
-            "licence": "Public orbital element data",
-            "grade": "A1",
-            "independence_group": "ussf-18sds",
-            "source_type": "telemetry",
-            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          },
-          {
-            "id": "gcat-mcdowell",
-            "publisher": "Jonathan McDowell (GCAT)",
-            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
-            "url": "https://planet4589.org/space/gcat/",
-            "licence": "CC BY 4.0",
-            "grade": "A1",
-            "independence_group": "gcat",
-            "source_type": "registry",
-            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          102.0,
-          28.2
-        ]
-      },
-      "properties": {
-        "contract": "tic-feed/2",
-        "id": "orbit:maneuver:s61901:2026-10-31T18",
-        "program": "orbit",
-        "title": "Yaogan-43 Group 03A (NORAD 61901, CN): in-track maneuver Δv=1.0 m/s (LEO)",
-        "summary": "Yaogan-43 Group 03A (NORAD 61901, CN, LEO): in-track maneuver of 1.0 m/s (Δa=1.81 km, Δi=0.0002°) detected between 2026-10-28T06:00Z and 2026-10-31T18:00Z (confidence 45%). Hypothesis: An in-track burn alters semi-major axis and orbital period, which usually indicates along-track re-phasing, ground-track repeat timing adjustment, or closing/opening distance to a co-orbital object.",
-        "kind": "observation",
-        "tier": "routine",
-        "status": "actual",
-        "msg_type": "new",
-        "human_review": "none",
-        "us_person_data": "none",
-        "status_class": "reported",
-        "product_category": "current",
-        "data_as_of": "2026-10-31T18:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
-        "countries": [
-          "CN"
-        ],
-        "pmesii_pt": [
-          "military",
-          "infrastructure"
-        ],
-        "ascope": [
-          "capabilities"
-        ],
-        "ie_aspect": [
-          "physical",
-          "informational"
-        ],
-        "ncf": [
-          "provide_satellite_access",
-          "provide_pnt"
-        ],
-        "requirement_ids": [
-          "OR-PIR-1",
-          "OR-EEI-1"
-        ],
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.5,
-        "precision_class": "point",
-        "measures": {
-          "delta_v_ms": 1.0,
-          "delta_a_km": 1.808,
-          "delta_inc_deg": 0.0002,
-          "tle_gap_hours": 84.0
-        },
-        "visual": {
-          "type": "table",
-          "url": "https://orbit.theintelligence.company/#S61901"
-        },
-        "sources": [
-          {
-            "id": "celestrak-gp",
-            "publisher": "CelesTrak / USSF 18 SDS",
-            "title": "GP Orbital Element Sets",
-            "url": "https://celestrak.org/NORAD/elements/",
-            "licence": "Public orbital element data",
-            "grade": "A1",
-            "independence_group": "ussf-18sds",
-            "source_type": "telemetry",
-            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          },
-          {
-            "id": "gcat-mcdowell",
-            "publisher": "Jonathan McDowell (GCAT)",
-            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
-            "url": "https://planet4589.org/space/gcat/",
-            "licence": "CC BY 4.0",
-            "grade": "A1",
-            "independence_group": "gcat",
-            "source_type": "registry",
-            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          39.8,
-          52.1
-        ]
-      },
-      "properties": {
-        "contract": "tic-feed/2",
-        "id": "orbit:subsat:s61890:2026-10-30",
-        "program": "orbit",
-        "title": "Subsatellite deployment cataloged: Kosmos-2576 Subsatellite-A (from Kosmos-2576 (59773), RU)",
-        "summary": "GCAT cataloged Kosmos-2576 Subsatellite-A (S61890, NORAD 61890, owner RU) separating from host Kosmos-2576 (59773) in LEO.",
-        "kind": "assessment",
-        "tier": "warning",
-        "status": "actual",
-        "msg_type": "new",
-        "human_review": "sampled",
-        "us_person_data": "none",
-        "status_class": "assessed",
-        "product_category": "warning",
-        "data_as_of": "2026-10-30T00:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
-        "change_from_prior": "new",
-        "change_reason": "Newly cataloged subsatellite Kosmos-2576 Subsatellite-A (S61890) separating from host Kosmos-2576 (59773).",
-        "countries": [
-          "RU"
-        ],
-        "pmesii_pt": [
-          "military"
         ],
         "ascope": [
           "capabilities"
@@ -360,69 +43,37 @@
         "ncf": [
           "provide_satellite_access"
         ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-255",
+        "title": "Orbital launch: Falcon 9, USSF-627 (SBST R-5), from Vandenberg",
+        "summary": "Falcon 9 launched USSF-627 (SBST R-5) from South Base, Vandenberg Space Force Base, California pad SLC4E at 2026-11-12 04:36 UTC; GCAT launch 2026-255, agency SPX, category Sat LEO D. GCAT has cataloged 23 payload(s): USA 749 (US), USA 750 (US), USA 751 (US), USA 752 (US), USA 753 (US), USA 754 (US), USA 755 (US), USA 756 (US) and 15 more.",
+        "data_as_of": "2026-11-12T04:36:30Z",
+        "countries": [
+          "US"
+        ],
         "requirement_ids": [
           "OR-PIR-2"
         ],
-        "warning_problem_id": "OR-WP-1",
-        "indicator_id": "OR-IND-2",
-        "hypothesis_id": "OR-H-1A",
-        "direction": "supports",
-        "indicator_state": "present",
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.85,
-        "probability": 0.85,
-        "likelihood_term": "very_likely",
-        "confidence": "moderate",
-        "confidence_basis": {
-          "rubric": "tic-confidence-1.0",
-          "factors": {
-            "independent_lines": 2,
-            "contradicted": false,
-            "coverage_fraction": 0.85,
-            "grades": [
-              "A1"
-            ],
-            "alternatives_rejected": 1,
-            "method_scored": false,
-            "assumptions": "holds",
-            "ease_of_faking": "low",
-            "horizon_days": 0.0
-          },
-          "caps": [
-            "expertise"
-          ],
-          "raise_by": [
-            "a further independent line of evidence (have 2, High needs 3)",
-            "a scored Verdict record for this method version"
-          ]
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
+        "measures": {
+          "payloads_cataloged": 23
         },
-        "alternatives": [
-          {
-            "hypothesis": "Co-orbital inspector subsatellite or calibration target release",
-            "tell_apart": "Independent station-keeping or bidirectional proximity maneuvers relative to the host."
-          },
-          {
-            "hypothesis": "Passive debris fragment or adapter separation",
-            "tell_apart": "High area-to-mass ballistic decay without thruster burns."
-          }
-        ],
-        "precision_class": "point",
         "visual": {
           "type": "table",
-          "url": "https://orbit.theintelligence.company/#S61890"
+          "url": "https://orbit.theintelligence.company/#launch-2026-255"
         },
         "sources": [
           {
             "id": "gcat-mcdowell",
             "publisher": "Jonathan McDowell (GCAT)",
-            "title": "General Catalog of Artificial Space Objects (satcat.tsv / active.tsv)",
+            "title": "General Catalog of Artificial Space Objects",
             "url": "https://planet4589.org/space/gcat/",
-            "licence": "CC BY 4.0",
-            "grade": "A1",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
             "independence_group": "gcat",
             "source_type": "registry",
-            "descriptor": "Daily satellite catalog with Soviet (SU) vs Russian (RU) owner-code hygiene and unnumbered object tracking.",
-            "accessed_at": "2026-11-01T12:00:00Z"
+            "accessed_at": "2026-11-13T18:41:43Z"
           }
         ]
       }
@@ -432,147 +83,1351 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          16.4,
-          0.1
+          100.31,
+          41.31
         ]
       },
       "properties": {
         "contract": "tic-feed/2",
-        "id": "orbit:gap:s55820:2026-10-31",
         "program": "orbit",
-        "title": "TLE tracking gap (48.0 h): Luch-5X (Olymp-K No. 2) (NORAD 55820)",
-        "summary": "Source health flag: Luch-5X (Olymp-K No. 2) (NORAD 55820, RU) had a 48.0 h TLE tracking gap (>=48 h threshold); an untracked window looks identical to zero maneuvers.",
         "kind": "observation",
-        "tier": "anomaly",
-        "baseline_ref": "celestrak-gp-48h-max-epoch-cadence",
+        "tier": "routine",
         "status": "actual",
         "msg_type": "new",
         "human_review": "none",
-        "us_person_data": "none",
+        "us_person_data": "organizations",
         "status_class": "reported",
         "product_category": "current",
-        "data_as_of": "2026-10-31T12:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
-        "countries": [
-          "RU"
-        ],
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
         "pmesii_pt": [
-          "military"
+          "military",
+          "infrastructure"
         ],
         "ascope": [
           "capabilities"
         ],
         "ie_aspect": [
-          "informational"
+          "physical"
         ],
         "ncf": [
           "provide_satellite_access"
         ],
-        "requirement_ids": [
-          "OR-EEI-2"
-        ],
-        "indicator_id": "OR-IND-4",
-        "hypothesis_id": "OR-H-1C",
-        "direction": "supports",
-        "indicator_state": "present",
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.45,
-        "precision_class": "point",
-        "measures": {
-          "tle_gap_hours": 48.0
-        },
-        "visual": {
-          "type": "table",
-          "url": "https://orbit.theintelligence.company/#S55820"
-        },
-        "sources": [
-          {
-            "id": "celestrak-gp",
-            "publisher": "CelesTrak / USSF 18 SDS",
-            "title": "GP Orbital Element Sets",
-            "url": "https://celestrak.org/NORAD/elements/",
-            "licence": "Public orbital element data",
-            "grade": "A1",
-            "independence_group": "ussf-18sds",
-            "source_type": "telemetry",
-            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
-            "accessed_at": "2026-11-01T12:00:00Z"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          102.0,
-          28.2
-        ]
-      },
-      "properties": {
-        "contract": "tic-feed/2",
-        "id": "orbit:gap:s61901:2026-10-31",
-        "program": "orbit",
-        "title": "TLE tracking gap (84.0 h): Yaogan-43 Group 03A (NORAD 61901)",
-        "summary": "Source health flag: Yaogan-43 Group 03A (NORAD 61901, CN) had a 84.0 h TLE tracking gap (>=48 h threshold); an untracked window looks identical to zero maneuvers.",
-        "kind": "observation",
-        "tier": "anomaly",
-        "baseline_ref": "celestrak-gp-48h-max-epoch-cadence",
-        "status": "actual",
-        "msg_type": "new",
-        "human_review": "none",
-        "us_person_data": "none",
-        "status_class": "reported",
-        "product_category": "current",
-        "data_as_of": "2026-10-31T18:00:00Z",
-        "published_at": "2026-11-01T12:00:00Z",
-        "valid_until": "2026-11-02T12:00:00Z",
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-254",
+        "title": "Orbital launch: Chang Zheng 2D, Tanluzhe, from Jiuquan",
+        "summary": "Chang Zheng 2D launched Tanluzhe from Jiuquan Space Center, Nei Monggol Zizhiqu, China pad LC43/94 at 2026-11-11 11:41 UTC; GCAT launch 2026-254, agency SAST, category Sat SSO D. GCAT has cataloged 4 payload(s): Tanluzhe A (CN), Tanluzhe B (CN), Tanluzhe C (CN), Tanluzhe D (CN).",
+        "data_as_of": "2026-11-11T11:41:00Z",
         "countries": [
           "CN"
         ],
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
+        "measures": {
+          "payloads_cataloged": 4
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#launch-2026-254"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.9308,
+          19.5968
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
         "pmesii_pt": [
-          "military"
+          "military",
+          "infrastructure"
         ],
         "ascope": [
           "capabilities"
         ],
         "ie_aspect": [
-          "informational"
+          "physical"
         ],
         "ncf": [
           "provide_satellite_access"
         ],
-        "requirement_ids": [
-          "OR-EEI-2"
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-253",
+        "title": "Orbital launch: Chang Zheng 12, WHDW 29, from Hainan CLS",
+        "summary": "Chang Zheng 12 launched WHDW 29 from Hainan Shangye Hangtian Fashe Chang (Hainan Commercial Space Launch Site) pad LC2 at 2026-11-08 20:24 UTC; GCAT launch 2026-253, agency ZHSH/SAST, category Sat LEO P. GCAT has cataloged 9 payload(s): WHDW 27-01 (CN), WHDW 27-02 (CN), WHDW 27-03 (CN), WHDW 27-04 (CN), WHDW 27-05 (CN), WHDW 27-06 (CN), WHDW 27-07 (CN), WHDW 27-08 (CN) and 1 more.",
+        "data_as_of": "2026-11-08T20:24:00Z",
+        "countries": [
+          "CN"
         ],
-        "indicator_id": "OR-IND-4",
-        "hypothesis_id": "OR-H-1C",
-        "direction": "supports",
-        "indicator_state": "present",
-        "method_version": "orbit-1.0",
-        "coverage_fraction": 0.45,
-        "precision_class": "point",
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
         "measures": {
-          "tle_gap_hours": 84.0
+          "payloads_cataloged": 9
         },
         "visual": {
           "type": "table",
-          "url": "https://orbit.theintelligence.company/#S61901"
+          "url": "https://orbit.theintelligence.company/#launch-2026-253"
         },
         "sources": [
           {
-            "id": "celestrak-gp",
-            "publisher": "CelesTrak / USSF 18 SDS",
-            "title": "GP Orbital Element Sets",
-            "url": "https://celestrak.org/NORAD/elements/",
-            "licence": "Public orbital element data",
-            "grade": "A1",
-            "independence_group": "ussf-18sds",
-            "source_type": "telemetry",
-            "descriptor": "Consecutive SGP4 general perturbations element sets for Maneuver Compare delta-v analysis.",
-            "accessed_at": "2026-11-01T12:00:00Z"
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          40.5,
+          62.9
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-252",
+        "title": "Orbital launch: Soyuz-2-1B, Kosmos-2621 (Glonass), from Plesetsk",
+        "summary": "Soyuz-2-1B launched Kosmos-2621 (Glonass) from 1-y Gosudarstvenniy Ispitatelniy Kosmodrom MO RF pad LC43/3 at 2026-11-07 13:25 UTC (time approximate); GCAT launch 2026-252, agency FKA, category Sat MEO SO. GCAT has cataloged 1 payload(s): Kosmos-2621 (RU).",
+        "data_as_of": "2026-11-07T13:25:00Z",
+        "countries": [
+          "RU"
+        ],
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
+        "measures": {
+          "payloads_cataloged": 1
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#launch-2026-252"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120.61,
+          34.63
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-251",
+        "title": "Orbital launch: Falcon 9, USSF-432 (SBST R-4), from Vandenberg",
+        "summary": "Falcon 9 launched USSF-432 (SBST R-4) from South Base, Vandenberg Space Force Base, California pad SLC4E at 2026-11-07 00:48 UTC; GCAT launch 2026-251, agency SPX, category Sat LEO D. GCAT has cataloged 23 payload(s): USA 726 (US), USA 727 (US), USA 728 (US), USA 729 (US), USA 730 (US), USA 731 (US), USA 732 (US), USA 733 (US) and 15 more.",
+        "data_as_of": "2026-11-07T00:48:42Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
+        "measures": {
+          "payloads_cataloged": 23
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#launch-2026-251"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100.31,
+          41.31
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T18:42:08Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:launch:2026-250",
+        "title": "Orbital launch: Gushenxing-2, Guanlan Shiyan, from Jiuquan",
+        "summary": "Gushenxing-2 launched Guanlan Shiyan from Jiuquan Space Center, Nei Monggol Zizhiqu, China at 2026-11-06 23:37 UTC; GCAT launch 2026-250, agency XIDO, category Sat LEO D. GCAT has cataloged 4 payload(s): Guanlan Shiyan Xing (CN), Yunyao-1 28 (CN), Zhongbei Daxue 1 (CN), Juntian-1 06A (CN).",
+        "data_as_of": "2026-11-06T23:37:00Z",
+        "countries": [
+          "CN"
+        ],
+        "requirement_ids": [
+          "OR-PIR-2"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "approximate",
+        "measures": {
+          "payloads_cataloged": 4
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#launch-2026-250"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.15799,
+          25.99677
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-14T06:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:0f867f0c-5422-4d44-93b8-d7faaae7019b",
+        "title": "Scheduled launch: Starship | Starlink Group 31-2 (Starship Flight 15) (TBC), 2026-11-13 22:45 UTC",
+        "summary": "Launch Library 2 lists Starship | Starlink Group 31-2 (Starship Flight 15) for 2026-11-13 22:45 UTC (status To Be Confirmed; NET precision Minute) from Orbital Launch Pad 2, SpaceX Starbase, TX, USA. Provider SpaceX. Mission: Communications, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-10T22:06:46Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/0f867f0c-5422-4d44-93b8-d7faaae7019b/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          128.333932,
+          51.884395
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-14T07:50:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:bff2fc91-eddd-4dfc-af26-ac0674cfab4d",
+        "title": "Scheduled launch: Soyuz 2.1b/Fregat-M | MKA Kinosputnik, KOEN and others (Go), 2026-11-14 01:16 UTC",
+        "summary": "Launch Library 2 lists Soyuz 2.1b/Fregat-M | MKA Kinosputnik, KOEN and others for 2026-11-14 01:16 UTC (status Go for Launch; NET precision Minute) from Cosmodrome Site 1S, Vostochny Cosmodrome, Siberia, Russian Federation. Provider Russian Federal Space Agency (ROSCOSMOS). Mission: Technology, Sun-Synchronous Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-13T15:37:56Z",
+        "countries": [
+          "RU"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/bff2fc91-eddd-4dfc-af26-ac0674cfab4d/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          177.864469,
+          -39.262833
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-14T11:30:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:db3500ac-965b-4ad8-b417-cb8d8d005586",
+        "title": "Scheduled launch: Electron | The Mountain God Rises (iQPS Launch 10) (Go), 2026-11-14 05:30 UTC",
+        "summary": "Launch Library 2 lists Electron | The Mountain God Rises (iQPS Launch 10) for 2026-11-14 05:30 UTC (status Go for Launch; NET precision Minute) from Rocket Lab Launch Complex 1A, Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand. Provider Rocket Lab. Mission: Earth Science, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-13T00:15:49Z",
+        "countries": [
+          "NZ"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/db3500ac-965b-4ad8-b417-cb8d8d005586/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.58303644,
+          28.58341025
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-15T00:01:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:ef9850ad-1096-425b-9d27-f7bbd186e61a",
+        "title": "Scheduled launch: Vulcan VC6L | Amazon Leo (LV-01) (Go), 2026-11-14 17:32 UTC",
+        "summary": "Launch Library 2 lists Vulcan VC6L | Amazon Leo (LV-01) for 2026-11-14 17:32 UTC (status Go for Launch; NET precision Second) from Space Launch Complex 41, Cape Canaveral SFS, FL, USA. Provider United Launch Alliance. Mission: Communications, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-13T14:54:33Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/ef9850ad-1096-425b-9d27-f7bbd186e61a/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120.611,
+          34.632
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-18T13:14:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:76617033-4dc0-4448-b50c-e5b0d5a18539",
+        "title": "Scheduled launch: Falcon 9 Block 5 | USSF-317 (Go), 2026-11-18 03:14 UTC",
+        "summary": "Launch Library 2 lists Falcon 9 Block 5 | USSF-317 for 2026-11-18 03:14 UTC (status Go for Launch; NET precision Minute) from Space Launch Complex 4E, Vandenberg SFB, CA, USA. Provider SpaceX. Mission: Government/Top Secret, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-13T01:52:13Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/76617033-4dc0-4448-b50c-e5b0d5a18539/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          111.589567,
+          38.863128
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-19T05:05:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:e0a11eb1-0bda-4872-b36b-140247fd5c60",
+        "title": "Scheduled launch: Long March 2D | Unknown Payload (Go), 2026-11-18 22:50 UTC",
+        "summary": "Launch Library 2 lists Long March 2D | Unknown Payload for 2026-11-18 22:50 UTC (status Go for Launch; NET precision Hour) from Launch Complex 9, Taiyuan Satellite Launch Center, People's Republic of China. Provider China Aerospace Science and Technology Corporation. Mission: Unknown, Unknown. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-12T19:18:17Z",
+        "countries": [
+          "CN"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/e0a11eb1-0bda-4872-b36b-140247fd5c60/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.930753,
+          19.597275
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-20T20:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:a2975167-7c6f-4403-99e1-b40df17c8140",
+        "title": "Scheduled launch: Long March 8A | SatNet LEO Group TBD? (TBC), 2026-11-20 11:00 UTC",
+        "summary": "Launch Library 2 lists Long March 8A | SatNet LEO Group TBD? for 2026-11-20 11:00 UTC (status To Be Confirmed; NET precision Hour) from Commercial LC-1, Wenchang Space Launch Site, People's Republic of China. Provider China Aerospace Science and Technology Corporation. Mission: Communications, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-10-30T13:59:24Z",
+        "countries": [
+          "CN"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/a2975167-7c6f-4403-99e1-b40df17c8140/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120.611,
+          34.632
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-21T19:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:951a341f-236b-42fe-a667-4ab2fcf36eac",
+        "title": "Scheduled launch: Falcon 9 Block 5 | NROL-136 (Go), 2026-11-21 12:30 UTC",
+        "summary": "Launch Library 2 lists Falcon 9 Block 5 | NROL-136 for 2026-11-21 12:30 UTC (status Go for Launch; NET precision Minute) from Space Launch Complex 4E, Vandenberg SFB, CA, USA. Provider SpaceX. Mission: Government/Top Secret, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-12T19:21:00Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/951a341f-236b-42fe-a667-4ab2fcf36eac/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.786838,
+          5.256319
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-23T06:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:7bdc412b-c965-4517-a131-f57a01189803",
+        "title": "Scheduled launch: Ariane 64 Block 2 | Amazon Leo (LE-04) (TBD), 2026-11-23 00:00 UTC",
+        "summary": "Launch Library 2 lists Ariane 64 Block 2 | Amazon Leo (LE-04) for 2026-11-23 00:00 UTC (status To Be Determined; NET precision Day) from Ariane Launch Area 4, Guiana Space Centre, French Guiana. Provider Arianespace. Mission: Communications, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-10-15T05:35:18Z",
+        "countries": [
+          "FR"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/7bdc412b-c965-4517-a131-f57a01189803/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120.611,
+          34.632
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-24T02:04:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:460d9db7-eaf6-4cd9-b095-cff433534c09",
+        "title": "Scheduled launch: Falcon 9 Block 5 | USSF-266 (Go), 2026-11-23 16:04 UTC",
+        "summary": "Launch Library 2 lists Falcon 9 Block 5 | USSF-266 for 2026-11-23 16:04 UTC (status Go for Launch; NET precision Minute) from Space Launch Complex 4E, Vandenberg SFB, CA, USA. Provider SpaceX. Mission: Government/Top Secret, Polar Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-11-13T17:46:32Z",
+        "countries": [
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/460d9db7-eaf6-4cd9-b095-cff433534c09/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          63.564003,
+          45.996034
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-24T11:03:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:8dd5de11-831b-445f-86f0-bffefe0550d9",
+        "title": "Scheduled launch: Soyuz 2.1b | Progress MS-36 (97P) (TBC), 2026-11-24 05:03 UTC",
+        "summary": "Launch Library 2 lists Soyuz 2.1b | Progress MS-36 (97P) for 2026-11-24 05:03 UTC (status To Be Confirmed; NET precision Minute) from 31/6, Baikonur Cosmodrome, Republic of Kazakhstan. Provider Russian Federal Space Agency (ROSCOSMOS). Mission: Resupply, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-06-08T21:46:36Z",
+        "countries": [
+          "KZ"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/8dd5de11-831b-445f-86f0-bffefe0550d9/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.936481,
+          19.59755
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-24T16:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:5ce59e3a-c343-430f-ae4e-e608ba536754",
+        "title": "Scheduled launch: Long March 12 | SatNet LEO Group TBD? (TBC), 2026-11-24 07:00 UTC",
+        "summary": "Launch Library 2 lists Long March 12 | SatNet LEO Group TBD? for 2026-11-24 07:00 UTC (status To Be Confirmed; NET precision Hour) from Commercial LC-2, Wenchang Space Launch Site, People's Republic of China. Provider China Aerospace Science and Technology Corporation. Mission: Communications, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-10-30T13:59:29Z",
+        "countries": [
+          "CN"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/5ce59e3a-c343-430f-ae4e-e608ba536754/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100.290944,
+          40.957893
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-25T06:00:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:c9605b67-8a53-4239-a8ae-577fe3b79799",
+        "title": "Scheduled launch: Long March 2F/G | Shenzhou 24 (TBD), 2026-11-25 00:00 UTC",
+        "summary": "Launch Library 2 lists Long March 2F/G | Shenzhou 24 for 2026-11-25 00:00 UTC (status To Be Determined; NET precision Day) from Launch Area 91 (SLS-1 / 921), Jiuquan Satellite Launch Center, People's Republic of China. Provider China Aerospace Science and Technology Corporation. Mission: Human Exploration, Low Earth Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-10-24T14:00:00Z",
+        "countries": [
+          "CN"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/c9605b67-8a53-4239-a8ae-577fe3b79799/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.5895,
+          69.1084
+        ]
+      },
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-27T03:30:00Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:upcoming:dff42a2e-f047-48d7-b260-3888d3a4fe33",
+        "title": "Scheduled launch: Spectrum | AT-Astra and Others (Spectrum Flight 3) (TBC), 2026-11-26 20:00 UTC",
+        "summary": "Launch Library 2 lists Spectrum | AT-Astra and Others (Spectrum Flight 3) for 2026-11-26 20:00 UTC (status To Be Confirmed; NET precision Hour) from Orbital Launch Pad, Andøya Spaceport. Provider Isar Aerospace. Mission: Technology, Sun-Synchronous Orbit. A scheduled time is the provider's or press's, not Orbit's, and often moves.",
+        "data_as_of": "2026-10-29T21:51:22Z",
+        "countries": [
+          "NO"
+        ],
+        "requirement_ids": [
+          "OR-PIR-3"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "point",
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#upcoming"
+        },
+        "sources": [
+          {
+            "id": "ll2-thespacedevs",
+            "publisher": "The Space Devs (Launch Library 2)",
+            "title": "Launch Library 2: upcoming launches",
+            "url": "https://ll.thespacedevs.com/2.3.0/launches/dff42a2e-f047-48d7-b260-3888d3a4fe33/",
+            "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
+            "grade": "B2",
+            "independence_group": "thespacedevs",
+            "source_type": "aggregator",
+            "accessed_at": "2026-11-13T18:42:08Z"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "contract": "tic-feed/2",
+        "program": "orbit",
+        "kind": "observation",
+        "tier": "routine",
+        "status": "actual",
+        "msg_type": "new",
+        "human_review": "none",
+        "us_person_data": "organizations",
+        "status_class": "reported",
+        "product_category": "current",
+        "published_at": "2026-11-13T18:42:08Z",
+        "valid_until": "2026-11-14T18:42:08Z",
+        "pmesii_pt": [
+          "military",
+          "infrastructure"
+        ],
+        "ascope": [
+          "capabilities"
+        ],
+        "ie_aspect": [
+          "physical"
+        ],
+        "ncf": [
+          "provide_satellite_access"
+        ],
+        "method_version": "orbit-2.0",
+        "id": "orbit:reentries:2026-11-13",
+        "title": "Reentries dated by GCAT since 2026-11-06: 17 objects, 13 payloads",
+        "summary": "GCAT dates 17 reentries since 2026-11-06 (13 payload, 4 rocket stage; by owner state US 15, CN 2). Payloads: Starlink 4598 (US, 2026-11-11), Starlink 1496 (US, 2026-11-11), Starlink 1284 (US, 2026-11-11), Starlink 1267 (US, 2026-11-11), Starlink 32264 (US, 2026-11-10), Starlink 1400 (US, 2026-11-10), Starlink 1274 (US, 2026-11-10), Starlink 5701 (US, 2026-11-09), Starlink 4607 (US, 2026-11-08), Starlink 1730 (US, 2026-11-07), Starlink 1338 (US, 2026-11-07), Starlink 36253 (US, 2026-11-06) and 1 more. GCAT's dates are often approximate and are revised as reports arrive.",
+        "data_as_of": "2026-11-13T18:41:43Z",
+        "countries": [
+          "CN",
+          "US"
+        ],
+        "requirement_ids": [
+          "OR-EEI-4"
+        ],
+        "coverage_fraction": 1.0,
+        "precision_class": "none",
+        "measures": {
+          "reentries": 17,
+          "payloads": 13
+        },
+        "visual": {
+          "type": "table",
+          "url": "https://orbit.theintelligence.company/#reentries"
+        },
+        "sources": [
+          {
+            "id": "gcat-mcdowell",
+            "publisher": "Jonathan McDowell (GCAT)",
+            "title": "General Catalog of Artificial Space Objects",
+            "url": "https://planet4589.org/space/gcat/",
+            "licence": "CC BY 4.0. Data from GCAT (J. McDowell, planet4589.org/space/gcat)",
+            "grade": "A2",
+            "independence_group": "gcat",
+            "source_type": "registry",
+            "accessed_at": "2026-11-13T18:41:43Z"
           }
         ]
       }

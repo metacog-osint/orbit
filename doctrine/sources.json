@@ -1,24 +1,42 @@
 {
   "program": "orbit",
-  "version": "1.0",
+  "version": "2.0",
   "sources": [
     {
       "id": "gcat-mcdowell",
-      "name": "Jonathan McDowell's General Catalog of Artificial Space Objects (GCAT)",
+      "name": "Jonathan McDowell's General Catalog of Artificial Space Objects (GCAT): satcat, satcat100k, auxcat, tmpcat, launch list, sites",
       "url": "https://planet4589.org/space/gcat/",
-      "licence": "CC BY 4.0 (Jonathan McDowell / planet4589.org)",
+      "licence": "CC BY 4.0; cite as 'Data from GCAT (J. McDowell, planet4589.org/space/gcat)' (read on the GCAT page 13 Nov 2026)",
       "use": "ingest",
-      "grade": "A1",
-      "independence_group": "gcat"
+      "grade": "A2",
+      "independence_group": "gcat",
+      "commercial_ok": true
+    },
+    {
+      "id": "ll2-thespacedevs",
+      "name": "Launch Library 2, The Space Devs: upcoming launches",
+      "url": "https://thespacedevs.com/llapi",
+      "licence": "Free access to the whole database, 15 requests an hour without a key; no data licence stated (read 13 Nov 2026). Images not used.",
+      "use": "ingest",
+      "grade": "B2",
+      "independence_group": "thespacedevs",
+      "commercial_ok": "unknown"
+    },
+    {
+      "id": "space-track",
+      "name": "Space-Track.org (18th/19th Space Defense Squadron): GP history",
+      "url": "https://www.space-track.org/",
+      "licence": "Account required. Terms reported to bar redistributing data or derived analysis (maneuver-detect README, 13 Nov 2026); not read by Orbit yet",
+      "use": "excluded",
+      "note": "Held for the local manoeuvre test only; nothing derived from it is published until the terms are read."
     },
     {
       "id": "celestrak-gp",
-      "name": "CelesTrak / 18th Space Defense Squadron GP Element Sets",
+      "name": "CelesTrak GP element sets",
       "url": "https://celestrak.org/NORAD/elements/",
-      "licence": "Public orbital element data (18 SDS / CelesTrak)",
-      "use": "ingest",
-      "grade": "A1",
-      "independence_group": "ussf-18sds"
+      "licence": "Not yet checked",
+      "use": "excluded",
+      "note": "Candidate source for a public element-set history archived by Orbit going forward."
     }
   ]
 }
