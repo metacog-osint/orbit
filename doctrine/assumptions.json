@@ -1,18 +1,31 @@
 {
   "program": "orbit",
-  "version": "1.0",
+  "version": "2.0",
   "assumptions": [
     {
       "id": "OR-ASM-1",
       "assumption": "Public CelesTrak / 18 SDS GP element sets update frequently enough on watched objects to distinguish discrete thruster burns from secular perturbation drift.",
-      "status": "holds",
-      "test": "Flag any watched object whose TLE gap exceeds 48 hours (OR-IND-4) and cap maneuver confidence at Low when a gap spans the detection window."
+      "status": "untested",
+      "test": "Flag any watched object whose TLE gap exceeds 48 hours (OR-IND-4) and cap maneuver confidence at Low when a gap spans the detection window.",
+      "note": "Manoeuvre lane not live."
     },
     {
       "id": "OR-ASM-2",
-      "assumption": "Mapping owner codes through Jonathan McDowell's GCAT rather than CelesTrak's 'CIS' bucket prevents legacy Soviet debris from polluting active Russian payload metrics.",
+      "assumption": "GCAT's State column keeps Soviet (SU) objects apart from Russian Federation (RU) objects, where CelesTrak's owner code merges them as CIS.",
       "status": "holds",
-      "test": "Verify that GCAT owner codes separate Soviet (SU) from Russian Federation (RU) objects and preserve unnumbered active objects."
+      "test": "Count SU and RU in each reading (hygiene block). Read 13 Nov 2026: 16,148 SU and 9,183 RU in satcat."
+    },
+    {
+      "id": "OR-ASM-3",
+      "assumption": "GCAT catalogs payloads from a new launch within days, so 'not yet cataloged' on a launch item is a lag, not an absence.",
+      "status": "untested",
+      "test": "Track days from launch to first payload entry across readings; 13 Nov 2026 the four Tanluzhe objects of 11 Nov were in tmpcat two days after launch."
+    },
+    {
+      "id": "OR-ASM-4",
+      "assumption": "A Launch Library 2 schedule entry reflects the provider's or press's public schedule; dates move and some launches (notably Chinese and Russian military) are listed late or not at all.",
+      "status": "untestable",
+      "test": "untestable"
     }
   ]
 }

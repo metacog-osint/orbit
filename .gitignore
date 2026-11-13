@@ -5,3 +5,4 @@ __pycache__/
 private/
 *.local.md
 .claude/
+data/

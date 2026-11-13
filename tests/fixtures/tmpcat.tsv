@@ -1,0 +1,55 @@
+#JCAT	Satcat	Launch_Tag	Piece	Type	Name	PLName	LDate	Parent	SDate	Primary	DDate	Status	Dest	Owner	State	Manufacturer	Bus	Motor	Mass	MassFlag	DryMass	DryFlag	TotMass	TotFlag	Length	LFlag	Diameter	DFlag	Span	SpanFlag	Shape	ODate	Perigee	PF	Apogee	AF	Inc	IF	OpOrbit	OQUAL	AltNames
+# Updated 2026 Nov 13 0021:53
+T00001    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00002    	NNA	2026-227	2026-227	P       ?   	Kensat	Kensat	2026 Oct  1	A11991	2026 Oct  1 1926:43	Earth	-	O	-	KCHAN	US	KCHAN	Cubesat 2U	-	       2 	?	      2 	?	       2 	?	   0.2 	 	  0.1 	 	    0.2 	 	Box	2026 Oct  7	     515	 	     516	 	 97.45 	 	LLEO/S	-	-
+T00003    	NNA	2026-088	2026-088L	P       ?   	MAGNARO-II B	Piscis	2026 Apr 23	S68798	2026 Apr 23 0402?	Earth	-	AO	-	NAG	J	NAG	Cubesat 1U	-	       1.500	 	      1.500	 	       1.500	 	   0.150	 	  0.1 	 	    0.150	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00004    	NNA A	2026-113	2026-113C	CP T T      	Shenzhou 23 Guidao Cang	Shenzhou 23 orbital module	2026 May 24	S69180	2026 May 24 1508	Earth	-	AO	-	CMSEO	CN	CAST	Shenzhou OM	-	    1842 	?	   1500 	?	    1842 	?	   2.3 	 	  2.8 	 	    4.3 	 	Cyl + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00005    	NNA	2026-227	2026-227	P       ?   	ETNS	ETNS	2026 Oct  1	A11994	2026 Oct  2 1148?	Earth	-	O	-	CITED	AR	CITED	Cubesat 1U	-	       1 	 	      1 	 	       1 	 	   0.1 	 	  0.1 	 	    0.1 	 	Box	2026 Oct 20	     509	 	     517	 	 97.45 	 	LLEO/S	-	-
+T00006    	NNA	2026-227	2026-227	P       ?   	ERMINAZ-2Z	ERMINAZ-2Z	2026 Oct  1	A11994	2026 Oct  2 1148?	Earth	-	O	-	AMDL	D	AMDL	PQ	-	       0.250	 	      0.250	 	       0.250	 	   0.050	 	  0.050	 	    0.050	 	Box	2026 Oct  7	     513	 	     516	 	 97.44 	 	LLEO/S	-ps	tc
+T00007    	NNA	2026-067	2026-067	P       ?   	Vegafly-1	Vegafly-1	2026 Mar 30	A11790*	2026 Mar 30 1157:15	Earth	-	O	-	VSGA	VN	VSGA	PocketQube 1P	-	       0.250	 	      0.250	 	       0.250	 	   0.050	 	  0.050	 	    0.1 	 	Box+2 ant	2026 Apr 14	     507	 	     512	 	 97.44 	 	LLEO/S	-	-
+T00008    	NNA	2026-067	2026-067	P       ?   	Lilium-4	Lilium-4	2026 Mar 30	A11790	2026 Mar 30 1202:38	Earth	-	O	-	NCKU	TW	SATORO	Cubesat 6U	-	      12 	 	     12 	 	      12 	 	   0.3 	 	  0.2 	 	    0.3 	 	Box	2026 Apr 14	     511	 	     518	 	 97.44 	 	LLEO/S	-	-
+T00009    	NNA	2026-067	2026-067CX	P       ?   	Helloworld-1	Helloworld-1	2026 Mar 30	A11790*	2026 Mar 30 1157:15	Earth	-	O	-	UPKOI	US	UPKOI	PocketQube 1P	-	       0.250	 	      0.250	 	       0.250	 	   0.050	 	  0.050	 	    0.1 	 	Box+2 ant	2026 Apr 14	     508	 	     512	 	 97.45 	 	LLEO/S	-	-
+T00010    	NNA	2026-254	2026-254	P           	Tanluzhe B	Tanluzhe B	2026 Nov 11	S101330	2026 Nov 11 1158?	Earth	-	AO	-	CAS	CN	SECM	Tanluzhe-B	-	     100 	?	    100 	?	     100 	?	   0.2 	?	  1.0 	?	    1.0 	?	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00011    	NNA	2026-254	2026-254	P           	Tanluzhe C	Tanluzhe C	2026 Nov 11	S101330	2026 Nov 11 1158?	Earth	-	AO	-	CAS	CN	SECM	Tanluzhe-B	-	     100 	?	    100 	?	     100 	?	   0.2 	?	  1.0 	?	    1.0 	?	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00012    	NNA	2026-254	2026-254	P           	Tanluzhe D	Tanluzhe D	2026 Nov 11	S101330	2026 Nov 11 1158?	Earth	-	AO	-	CAS	CN	SECM	Tanluzhe-B	-	     100 	?	    100 	?	     100 	?	   0.2 	?	  1.0 	?	    1.0 	?	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00013    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00014    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00015    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00016    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00017    	NNA	2025-274	2025-274Q	P       ?   	Duri	SNUGLITE-III	2025 Nov 26	S66661	2025 Dec  4?	Earth	-	AO	-	SNU	KR	SNU	Cubesat 3U	-	       3.600	 	      3.600	 	       3.600	 	   0.3 	 	  0.1 	 	    0.3 	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00018    	NNA	2026-079	1998-067	P    D  ?   	Qubesat-2	Qubesat-2	2026 Apr 11	A11814*	2026 Apr 11 1200	Earth	-	AO	-	UCB	US	UCB	Cubesat 2U	-	       2 	?	      2 	?	       2 	?	   0.2 	 	  0.1 	 	    0.2 	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00019    	NNA	2026-227	2026-227	P       ?   	UTNH	UTNH	2026 Oct  1	A11993	2026 Oct  1 1940	Earth	-	AO	-	UTNH	AR	UTNH	PQ	-	       0.250	 	      0.250	 	       0.250	 	   0.050	 	  0.050	 	    0.050	 	Box	2026 Oct  8	     511	 	     516	 	 97.44 	 	LLEO/S	-	-
+T00020    	NNA	2026-067	2026-067DA	P       ?   	MARS-1B	MARS-1B	2026 Mar 30	S68830	2026 Sep?	Earth	-	O	-	LUOUT	US	LUOUT	Cubesat 3U	-	       5 	?	      5 	?	       5 	?	   0.3 	 	  0.1 	 	    0.3 	 	Box	2026 Sep 23	     485	 	     501	 	 97.46 	 	LLEO/S	-	-
+T00021    	NNA	2026-156	2026-156	P       ?   	SENTINEL-1	SENTINEL-1	2026 Jul  7	A11917	2026 Jul  7 0806:31	Earth	-	O	-	ETHD	D	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	2026 Jul  7	     594	 	     598	 	 97.76 	 	LLEO/S	-	-
+T00022    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00023    	NNA	2025-276	2025-276DZ	P       ?   	3UCUBED-A	3UCUBED-A	2025 Nov 28	A11695	2025 Nov 28 1948:21	Earth	-	O	-	UNH	US	UNH	Cubesat 3U	-	       5 	 	      5 	 	       5 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box	2025 Dec 18	     514	 	     518	 	 97.44 	 	LLEO/S	-	-
+T00024    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00025    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00026    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00027    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00028    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00029    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00030    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00031    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00032    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00033    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00034    	NNA	2026-227	2026-227	P       ?   	Flock 4j-11	Dove 2588	2026 Oct  1	A11998	2026 Oct  1 1930	Earth	-	AO	-	PLAN	US	PLAN	Cubesat 3U	-	       5.700	 	      5.700	 	       5.700	 	   0.3 	 	  0.1 	 	    0.3 	 	Box+2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00035    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00036    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00037    	NNA	2026-227	2026-227	P       ?   	Flock 4j-14	Dove 25a4	2026 Oct  1	A11998	2026 Oct  1 1930	Earth	-	AO	-	PLAN	US	PLAN	Cubesat 3U	-	       5.700	 	      5.700	 	       5.700	 	   0.3 	 	  0.1 	 	    0.3 	 	Box+2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00038    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00039    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00040    	NNA	2026-227	2026-227	P       ?   	SENTINEL-2	OSIRIS-C	2026 Oct  1	A11993	2026 Oct  1 1940	Earth	-	AO	-	ETHD	D	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00041    	NNA	2026-227	2026-227	P       ?   	SENTINEL-3	OSIRIS-D	2026 Oct  1	A11993	2026 Oct  1 1940	Earth	-	AO	-	ETHD	D	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00042    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00043    	NNA	2026-227	2026-227	P       ?   	SENTINEL-5	OSIRIS-F	2026 Oct  1	A11993	2026 Oct  1 1940	Earth	-	AO	-	ETHD	D	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00044    	NNA	2026-227	2026-227	P       ?   	Protostar Subsat	Protostar Subsat	2026 Oct  1	S100950	2026 Oct  1 1940	Earth	-	AO	-	STARC	US	STARC	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00045    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00046    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00047    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00048    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00049    	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+T00050    	NNA	2026-227	2026-227	P       ?   	PRISM-A	PRISM-A	2026 Oct  1	A11994	2026 Oct  2 1148?	Earth	-	AO	-	ETHUS	US	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00051    	NNA	2026-227	2026-227	P       ?   	BEECON-A	BEECON-A	2026 Oct  1	A11994	2026 Oct  2 1148?	Earth	-	AO	-	ETHUS	US	ETHUS	Cubesat 3U	-	       4 	 	      4 	 	       4 	 	   0.3 	 	  0.1 	 	    0.3 	 	Box + 2 pan	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00052    	NNA A	2026-233	1998-067	P    D  ?   	Proves-Maia	Proves-Maia	2026 Oct 13	A11817*	2026 Oct 13 1140?	Earth	-	AO	-	TSU	US	TSU	Cubesat 1U	-	       1 	 	      1 	 	       1 	 	   0.1 	 	  0.1 	 	    0.1 	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-
+T00053    	NNA A	2026-233	1998-067	P    D  ?   	Proves-Taygeta	Proves-Taygeta	2026 Oct 13	A11817*	2026 Oct 13 1140?	Earth	-	AO	-	BRONC	US	BRONC	Cubesat 1U	-	       1 	 	      1 	 	       1 	 	   0.1 	 	  0.1 	 	    0.1 	 	Box	-	       0	 	       0	 	  0.00 	 	-	-	-

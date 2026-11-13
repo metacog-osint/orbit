@@ -1,0 +1,10 @@
+#Site	Code	UCode	Type	StateCode	TStart	TStop	ShortName	Name	Location	Longitude	Latitude	Error	Parent	ShortEName	EName	Group	UName
+# Updated 2026 Nov 13 0020:25
+GIK-1	-	GIK-1	LS	RU	1994 Nov  1	*	Plesetsk	1-y Gosudarstvenniy Ispitatelniy Kosmodrom MO RF	Plesetsk, Rossiya	     40.5000 	   62.9000 	0.0200 	RVSN	Plesetsk	-	PL	1-y Gosudarstvenniy Ispitatelniy Kosmodrom MO RF
+HCSLS	-	HCSLS	LS	CN	2024	*	Hainan CLS	Hainan Shangye Hangtian Fashe Chang (Hainan Commercial Space Launch Site)	Wenchang, Hainan	    110.9308 	   19.5968 	0.0001 	HICAL	-	-	-	海南商业航天发射场
+JQ	-	JQ	LS	CN	1968	*	Jiuquan	Jiuquan Space Center, Nei Monggol Zizhiqu, China	-	    100.3100 	   41.3100 	0.0400 	CN	-	-	-	Jiuquan Space Center, Nei Monggol Zizhiqu, China
+MAHIA	-	MAHIA	LS	NZ	2017 May	-	Mahia	Rocket Lab Launch Complex 1, Onenui Station, Mahia Peninsula	Mahia Peninsula, N Island	    177.8655 	  -39.2609 	0.0001 	RLABN	-	-	-	Rocket Lab Launch Complex 1, Onenui Station, Mahia Peninsula
+SHAR	-	SHAR	LS	IN	1971 Oct  9	2002	Sriharikota	Satish Dhawan Space Ctr, Sriharikota, Andhra Pradesh, India	-	     80.3030 	   13.6210 	0.0200 	ISRO	-	-	-	Satish Dhawan Space Ctr, Sriharikota, Andhra Pradesh, India
+TYSC	-	TYSC	LS	CN	1988	*	Taiyuan	Taiyuan weixing fashe zhongxin	Wuzhai, Shanxi, China	    111.6000 	   38.8500 	0.1000 	CN	-	Taiyuan Space Center	-	Taiyuan weixing fashe zhongxin
+VSFBS	-	PA	LS	US	2021 May 14	*	Vandenberg	South Base, Vandenberg Space Force Base, California	-	   -120.6100 	   34.6300 	0.0200 	USSF	-	-	WTR	South Base, Vandenberg Space Force Base, California
+XSC	-	XSC	LS	CN	1984	*	Xichang	Xichang Space Center (Songlin), Sichuan, China	-	    102.0291 	   28.2472 	0.0001 	CN	-	-	-	Xichang Space Center (Songlin), Sichuan, China
