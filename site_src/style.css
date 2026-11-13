@@ -115,3 +115,11 @@ ul.plain { margin: 0; padding-left: 18px; }
 .owners .row { display: contents; }
 .owners .row:hover > * { background: var(--badge); }
 @media (max-width: 520px) { .owners { grid-template-columns: max-content 1fr; } .owners .n { grid-column: 2; text-align: left; } }
+
+/* Countdown under each scheduled NET; never finer than the NET's own precision. */
+.cd { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Sources and freshness: one block per lane, with the source's Admiralty grade. */
+ul.lanes > li { margin-bottom: 8px; }
+.lane-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.badge.grade { font-weight: 600; font-variant-numeric: tabular-nums; }

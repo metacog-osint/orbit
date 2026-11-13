@@ -264,6 +264,17 @@ class Registers(unittest.TestCase):
     def test_doctrine_registers(self):
         self.assertEqual(registers.check(ROOT / "doctrine"), [])
 
+    def test_page_sources_carry_grades_for_every_lane(self):
+        doc = cli.sources_doc(ROOT)
+        by_id = {s["id"]: s for s in doc["sources"]}
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs"})  # excluded sources stay off the page
+        self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
+        self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
+        self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
+        self.assertEqual(by_id["ll2-thespacedevs"]["credibility"], "Probably true")
+        lanes = sorted(lane for s in doc["sources"] for lane in s["lanes"])
+        self.assertEqual(lanes, sorted(cli.LANE_FIELDS))
+
     def test_feed_items_lint(self):
         snap = json.loads((FIX / "ll2_upcoming.json").read_text(encoding="utf-8"))
         rows = launches.parse(json.dumps(snap).encode())

@@ -31,7 +31,7 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 16 offline tests, real fixtures from 13 Nov
+python -m unittest discover -s tests       # 18 offline tests, real fixtures from 13 Nov
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
@@ -71,6 +71,16 @@ old, by launch; owner changes) for two days after the reading that found them. A
 - **Where:** payloads grouped by owner, the vehicle's launching agency, the site's country, the scheduled launch's
   provider and pad, reentry owners, and the bar chart of objects in orbit by owner (`hygiene.in_orbit_owners`,
   top 20 kept, 15 drawn; payloads solid, the rest pale).
+
+## Source grades and NET countdowns (13 Nov 2026, page only; method unchanged)
+- **Sources and freshness shows each lane's Admiralty grade**: GCAT A2, Launch Library 2 B2. `build` writes
+  `site/data/sources.json` from `doctrine/sources.json` (ingested sources only) with the wording from the kit's
+  `vocab/grading.json`; `LANE_SOURCE` in `tools/orbit.py` ties each lane to its register id. The page draws
+  without grades if that file fails to load.
+- **Each scheduled launch has a countdown to its NET** on the viewer's clock, refreshed at the top of each
+  minute, never finer than Launch Library 2's NET precision: Second/Minute to the minute, Hour (and
+  Morning/Afternoon) as "about", Day as "about N days", Week or coarser no countdown. A passed NET reads
+  "NET passed ... ago, status as last read" (the status is from Orbit's last read, up to 6 h old).
 
 ## Not live: manoeuvres (`orbit/maneuver.py`, not run)
 The seed engine differences consecutive element sets at a 0.35 m/s threshold that drag and fit noise exceed in
