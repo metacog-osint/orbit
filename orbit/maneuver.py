@@ -28,10 +28,10 @@ import math
 from datetime import datetime, timedelta, timezone
 from statistics import median
 
-PUBLISH = False  # held until Tom approves the Space-Track disclaimer (doctrine/spacetrack-disclaimer.md)
-ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSPACECOM), redistributed under USSPACECOM's "
-               "blanket approval for basic SSA data. Orbit-change analysis: The Intelligence Company, not reviewed or "
-               "endorsed by USSPACECOM. Not for operational use.")  # DRAFT wording, section 3 of the disclaimer
+PUBLISH = True  # Tom approved the disclaimer, 14 Nov 2026 (doctrine/spacetrack-disclaimer.md); False holds the lane
+ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, "
+               "redistributed under USSPACECOM's blanket approval for basic SSA data. Orbit-change analysis: The "
+               "Intelligence Company, not reviewed or endorsed by USSPACECOM. Not for operational use.")  # section 3
 
 MU = 398600.4418  # km^3/s^2
 RE = 6378.137     # km

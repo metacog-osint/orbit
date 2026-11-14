@@ -121,6 +121,8 @@
      ["Scheduled, next 14 days", (snap.upcoming || []).length, "upcoming"],
      ["Launch hazard areas in force", hazardAreas().length, "hazards"],
      ["Payload reentries, 7 days", reentries.length, "reentries"],
+     ["Orbit changes, watched, 30 days", (snap.maneuvers || {}).read_at ? (snap.maneuvers.events || []).length : "–",
+      "maneuvers"],
      ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–", "catalog"]].forEach(function (t) {
       var d = el("a", "tile");
       d.href = "#" + t[2];
@@ -301,6 +303,58 @@
   function dayYear(isoDate) {
     return T ? T.format(isoDate + "T12:00:00Z", { year: true, time: false }) : isoDate;
   }
+  // Orbit changes in watched objects (Space-Track element sets, Orbit's analysis). Wording approved by Tom, 14 Nov 2026.
+  var DOMINANT = { "in-track": "along track", "cross-track": "plane change", "eccentricity": "orbit shape" };
+  function lonText(x) { return x == null ? "" : Math.abs(x).toFixed(1) + "\u00b0" + (x < 0 ? "W" : "E"); }
+  function driftText(x) {
+    if (x == null) return "";
+    if (Math.abs(x) < 0.005) return "holding station";
+    return "drifting " + Math.abs(x).toFixed(2) + "\u00b0/day " + (x < 0 ? "west" : "east");
+  }
+  function maneuverCard() {
+    var box = document.getElementById("maneuver-body");
+    var mv = (snap && snap.maneuvers) || {};
+    var lane = (snap.lanes || {}).maneuver || {};
+    if (!mv.read_at) {
+      return empty(box, lane.status === "off" ? "Not read: " + (lane.reason || "the lane is off") + "." :
+        "Not read yet: changes appear after Orbit's next reading of Space-Track.");
+    }
+    box.textContent = "";
+    var ev = mv.events || [];
+    box.appendChild(el("p", "small", mv.watched + " watched " + (mv.watched === 1 ? "object" : "objects") + "; " +
+      ev.length + (ev.length === 1 ? " change" : " changes") + " listed in the last " + mv.window_days + " days; " +
+      (mv.stale ? mv.stale + " without a new element set for 3 days or more (an untracked object looks the same " +
+        "as a quiet one). " : "all with a recent element set. ") + "Read " + fmt(mv.read_at) + "."));
+    if (!ev.length) return;
+    var rows = ev.map(function (e) {
+      var tr = el("tr");
+      var who = el("div");
+      who.appendChild(mark(e.cc, e.state));
+      who.appendChild(document.createTextNode(e.gcat_name || e.name || ("NORAD " + e.norad)));
+      who.appendChild(el("div", "pl", "NORAD " + e.norad + (e.object_id ? ", " + e.object_id : "") +
+        (e.regime ? ", " + e.regime : "")));
+      cell(tr, who);
+      var when = el("div", "", fmt(e.from));
+      when.appendChild(el("div", "pl", "to " + fmt(e.to) + (e.pairs > 1 ? " (" + e.pairs + " set pairs)" : "")));
+      cell(tr, when);
+      var ch = el("div", "", "about " + (e.dv_ms >= 10 ? Math.round(e.dv_ms) : e.dv_ms.toFixed(2)) + " m/s, mostly " +
+        (DOMINANT[e.dominant] || e.dominant));
+      ch.appendChild(el("div", "pl", "semi-major axis " + (e.da_km > 0 ? "+" : "") + (Math.abs(e.da_km) >= 100 ? Math.round(e.da_km).toLocaleString() : e.da_km.toFixed(1)) +
+        " km, inclination " + (e.di_deg > 0 ? "+" : "") + e.di_deg + "\u00b0"));
+      cell(tr, ch);
+      var pos = el("div");
+      if (e.geo) {
+        pos.appendChild(document.createTextNode(lonText(e.geo.lon_before) + " to " + lonText(e.geo.lon_after)));
+        pos.appendChild(el("div", "pl", driftText(e.geo.drift_before) + ", then " + driftText(e.geo.drift_after)));
+      }
+      cell(tr, pos);
+      cell(tr, el("span", "muted small", "Space-Track.org (USSPACECOM) element sets; Intelligence Company analysis."));
+      return tr;
+    });
+    box.appendChild(table(["Object", "When", "Change", "Longitude (geostationary)", "Source"], rows));
+    fold(box, rows, 10, "changes", "maneuvers");
+  }
+
   function counterspaceCard() {
     var box = document.getElementById("asat-body");
     var cs = (snap && snap.counterspace) || {};
@@ -641,7 +695,8 @@
     var box = document.getElementById("lanes");
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
-      navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history" };
+      navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history",
+      maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
     var ul = el("ul", "plain small lanes");
@@ -696,6 +751,7 @@
       var txt = "Status " + s.status + (s.from_previous ? " (showing the last good copy)" : "") +
         "; " + when + (s.checked_at ? ", checked " + fmt(s.checked_at) : "");
       if (s.status === "failed" && s.error) txt += ". Error: " + s.error;
+      if (s.status === "off" && s.reason) txt += ". Not read: " + s.reason;
       li.appendChild(el("div", "", txt));
       if (!multi && srcs[0] && srcs[0].licence) li.appendChild(el("div", "muted", "Terms: " + srcs[0].licence));
       ul.appendChild(li);
@@ -712,7 +768,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); counterspaceCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); counterspaceCard(); reentryTable(); catalogBody(); lanes();
     startMap();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();

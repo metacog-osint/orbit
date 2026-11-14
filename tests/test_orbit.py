@@ -528,7 +528,7 @@ class Registers(unittest.TestCase):
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi",
-                                      "swf-counterspace"})
+                                      "swf-counterspace", "space-track"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
@@ -771,7 +771,8 @@ class ManeuverLane(unittest.TestCase):
         return json.loads((self.tmp / "data" / "state" / "spacetrack" / "held_lane.json").read_text(encoding="utf-8"))
 
     def test_held_lane_stays_off_the_snapshot(self):
-        snap = self.run_lane()
+        with mock.patch.object(maneuver, "PUBLISH", False):
+            snap = self.run_lane()
         self.assertNotIn("maneuver", snap["lanes"])
         self.assertNotIn("maneuvers", snap)
         self.assertNotIn("49330", (self.tmp / "data" / "snapshot.json").read_text(encoding="utf-8"))
@@ -793,8 +794,10 @@ class ManeuverLane(unittest.TestCase):
 
     def test_off_without_credentials(self):
         with mock.patch.object(cli.spacetrack, "credentials", return_value=None):
-            self.run_lane()
-        self.assertEqual(self.held()["lane"]["status"], "off")
+            snap = self.run_lane()
+        self.assertEqual(snap["lanes"]["maneuver"]["status"], "off")
+        self.assertIn("no Space-Track credentials", snap["lanes"]["maneuver"]["reason"])
+        self.assertEqual(snap["maneuvers"], {})
         self.assertEqual(FakeClient.log, [])
 
     def test_published_snapshot_never_names_the_watch_list_in_urls(self):

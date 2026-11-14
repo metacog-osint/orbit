@@ -32,6 +32,7 @@
     <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
     <a href="#reentries">Reentries <b data-n="reentries"></b></a>
     <a href="#catalog">Catalog</a>
+    <a href="#maneuvers">Orbit changes <b data-n="maneuvers"></b></a>
     <a href="#asat">ASAT history</a>
     <a href="#sources">Sources</a>
   </div>
@@ -125,6 +126,30 @@
     </section>
   </div>
 
+  <section class="card" id="maneuvers" aria-labelledby="mn-h">
+    <div class="card-head">
+      <h2 id="mn-h">Orbit changes in watched satellites, last 30 days</h2>
+      <div class="notice small source-note">
+        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
+          Squadron.</strong> Element sets are USSPACECOM's, redistributed under its blanket approval for basic space
+          situational awareness data, which requires this citation. The orbit changes listed here are The
+          Intelligence Company's own analysis of those element sets. They are not USSPACECOM's, and USSPACECOM and
+          Space-Track have not reviewed, endorsed or checked them.</p>
+        <p>A listed change means a watched object's published orbit moved by more than its element sets usually
+          move. It is not a confirmed manoeuvre, a statement of intent or a warning: a re-fit after a tracking gap, a
+          mislabelled element set or, in low orbit, storm-driven drag can do the same. Not for conjunction
+          assessment, collision avoidance or any operational use. Satellite operators should use Space-Track's own
+          services.</p>
+      </div>
+      <p class="muted small">How Orbit marks a change: each pair of consecutive element sets is measured against
+        that object's own usual set-to-set movement, after its steady drift is taken out. The change is given as the
+        velocity it implies (along track, plane change, or orbit shape), which is a rough size, not a burn record.
+        In geostationary orbit only changes of 0.25 m/s or more are listed. Changes less than a day apart are shown
+        as one. Quiet watched objects are counted, not named.</p>
+    </div>
+    <div class="tbl-wrap" id="maneuver-body"></div>
+  </section>
+
   <section class="card" id="asat" aria-labelledby="asat-h">
     <div class="card-head">
       <h2 id="asat-h"><span class="ref">Reference · </span>Anti-satellite tests in space, 1959 to date</h2>
@@ -136,9 +161,6 @@
     <div id="asat-body"></div>
   </section>
 
-  <p class="notice small">Not live yet: manoeuvre detection. Orbit's method has been checked on a known case, and its
-    results wait on approval of the source credit and disclaimer. Until then Orbit reports no manoeuvres and makes no
-    warnings.</p>
 
   <section class="card" id="sources" aria-labelledby="src-h">
     <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
@@ -154,7 +176,8 @@
     regrouped and reformatted by Orbit. Anti-satellite test history from Secure World Foundation, Global
     Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
     <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
-    CC BY-NC 4.0, reformatted by Orbit. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    CC BY-NC 4.0, reformatted by Orbit. Satellite element sets from Space-Track.org, United States Space Command
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
     <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
     &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
 </footer>
