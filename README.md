@@ -1,13 +1,15 @@
 # Orbit
 
 The Intelligence Company's space layer: what changed in Earth orbit. Orbital launches, launches scheduled in the
-next 14 days, reentries, and changes to the public satellite catalog between Orbit's own readings. Measured or
-reported, never judged.
+next 14 days, launch hazard and space-debris areas from navigational warnings, reentries, and changes to the public
+satellite catalog between Orbit's own readings, with a map of sites, pads and hazard areas. Measured or reported,
+never judged. Live at https://orbit.theintelligence.company.
 
-Sources: GCAT (data from J. McDowell, planet4589.org/space/gcat, CC BY 4.0) and Launch Library 2 (The Space
-Devs). Method: `doctrine/method.md`.
+Sources: GCAT (data from J. McDowell, planet4589.org/space/gcat, CC BY 4.0), Launch Library 2 (The Space Devs),
+NGA Maritime Safety Information, and the Japan Coast Guard (NAVAREA XI; 出典：海上保安庁ホームページ). Map: MapLibre
+GL JS (BSD-3), Natural Earth, OpenFreeMap, OpenMapTiles, OpenStreetMap contributors. Method: `doctrine/method.md`.
 
-Not live yet: manoeuvre detection, counterspace events. Not deployed.
+Not live yet: manoeuvre detection, counterspace events.
 
 ## Commands
 

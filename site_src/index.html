@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Orbit · The Intelligence Company</title>
-<meta name="description" content="Orbital launches, scheduled launches, reentries and satellite catalog changes, from GCAT and Launch Library 2.">
+<meta name="description" content="Orbital launches, scheduled launches, launch hazard warnings, reentries and satellite catalog changes, from GCAT, Launch Library 2, NGA and the Japan Coast Guard.">
+<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
@@ -26,8 +27,9 @@
 <main class="wrap">
   <section class="hero">
     <h1>What changed in Earth orbit.</h1>
-    <p class="lede">Orbital launches, launches scheduled in the next two weeks, reentries, and changes to the public
-      satellite catalog between Orbit's own readings. Everything here is measured or reported by the sources named
+    <p class="lede">Orbital launches, launches scheduled in the next two weeks, the launch hazard and space-debris
+      areas navigational warnings announce, reentries, and changes to the public satellite catalog between Orbit's
+      own readings. Everything here is measured or reported by the sources named
       on it; Orbit adds no judgment. <span id="asof"></span></p>
     <div class="tiles" id="tiles" aria-live="polite"></div>
     <p class="legend small muted" aria-label="Country colours">
@@ -41,6 +43,23 @@
   <p class="notice small">Not live yet: manoeuvre detection. It waits on a test of the open maneuver-detect method
     and on the terms for the orbital history it needs. Until then Orbit reports no manoeuvres and makes no
     warnings.</p>
+
+  <section class="card" id="map-card" aria-labelledby="map-h">
+    <div class="card-head">
+      <h2 id="map-h">Launch sites, pads and hazard areas</h2>
+      <p class="muted small">Launches of the last 7 days at their GCAT launch site, scheduled launches at their pad, and
+        the launch hazard and space-debris areas in navigational warnings now in force. Select a mark for its row;
+        every mark is also in the tables below. Ctrl and scroll (or two fingers) to zoom.</p>
+    </div>
+    <div class="map-stage"><div id="map" class="map"></div></div>
+    <p class="legend small muted" aria-label="Map key">
+      <span><span class="mk dot"></span>Launch, last 7 days (colour: launching country)</span>
+      <span><span class="mk ring"></span>Scheduled launch (colour: provider's country)</span>
+      <span><span class="mk area"></span>Rocket launching area</span>
+      <span><span class="mk area dash"></span>Space-debris area</span>
+    </p>
+    <p class="small" id="map-info" aria-live="polite"></p>
+  </section>
 
   <section class="card" id="launches" aria-labelledby="la-h">
     <div class="card-head">
@@ -60,6 +79,20 @@
         Library 2's when Orbit last read it.</p>
     </div>
     <div class="tbl-wrap" id="upcoming-table"></div>
+  </section>
+
+  <section class="card" id="hazards" aria-labelledby="hz-h">
+    <div class="card-head">
+      <h2 id="hz-h">Launch hazard and space-debris warnings in force</h2>
+      <p class="muted small">Navigational warnings that name rocket launching, space debris or reentry, from NGA's
+        daily in-force memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and XII) and the Japan Coast Guard's
+        NAVAREA XI, which covers the waters off China. Windows and areas are the issuer's; the same area broadcast by
+        more than one coordinator is one row. A scheduled launch is shown against a warning only when its NET falls
+        in a window of four hours or less, or up to an hour before one opens: a time coincidence, not an
+        attribution. Not for navigation:
+        mariners use the official broadcasts.</p>
+    </div>
+    <div class="tbl-wrap" id="hazard-table"></div>
   </section>
 
   <div class="two">
@@ -90,7 +123,12 @@
 <footer class="wrap foot small muted">
   <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
     <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
-    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>). Publicly available information only.</p>
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>). Navigational warnings from NGA Maritime Safety
+    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>) and from the Japan Coast Guard website
+    (出典：海上保安庁ホームページ, <a href="https://www1.kaiho.mlit.go.jp/TUHO/keiho/navarea11.html">NAVAREA XI</a>),
+    regrouped and reformatted by Orbit. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
+    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
 </footer>
 <script src="app.js"></script>
 </body>

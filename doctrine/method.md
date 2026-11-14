@@ -1,4 +1,4 @@
-# Orbit method (`orbit-2.1`, 13 Nov 2026)
+# Orbit method (`orbit-2.2`, 13 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
@@ -15,6 +15,7 @@ baseline of its own readings yet, so nothing is called an anomaly, and it makes 
 |---|---|---|
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
+| `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII); Japan Coast Guard, NAVAREA XI | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 
 GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
@@ -44,6 +45,33 @@ nothing (about 37 MB) unless one has changed.
    now list the launching country with the site and payload owners.
 8. **A scheduled launch is the provider's or press's schedule**, as Launch Library 2 lists it. It moves, and
    some military launches are listed late or not at all.
+
+## Launch hazard warnings (`orbit-2.2`)
+1. **Kept:** a warning whose text names rocket launching (including a suspension), space debris, a space vehicle
+   or spacecraft, or reentry. Missile firings and every other hazard are left out.
+2. **As written:** areas (lettered sub-areas kept apart), windows and cancel time are the issuer's. Windows are
+   expanded to UTC pairs: explicit `DDHHMMZ TO DDHHMMZ` lists, `ALTERNATE` lists (the first is the primary), and
+   `HHMMZ TO HHMMZ DAILY d THRU d` repeats (an end before the start runs past midnight). Areas that each carry
+   their own windows are joined: windows opening together are one, ending when the last area closes.
+3. **NAVAREA XI issue times are JST.** The Japan Coast Guard stamps each warning `発表日時` in Japan time; its own
+   in-force list (0499/26, stamped 21:00 on 7 Nov) says "IN FORCE 071200Z", which fixes the offset at nine hours.
+4. **One area, many broadcasts.** HYDROPAC rebroadcasts NAVAREA XI and XII warnings. Warnings with the same windows
+   and the same vertices (within 0.05 degrees; up to one in five may differ) are one row, NAVAREA XI listed first,
+   then NAVAREA IV/XII, then the HYDRO series. Vertices that differ between copies are counted and shown, not
+   corrected: on 13 Nov NAVAREA XI 0507/26 gives 19-21N 178-12E where NAVAREA XII 787/26 and HYDROPAC 3256/26 give
+   178-21E.
+5. **No attribution.** Orbit never says which launch a warning is for. The page shows, as a time coincidence only,
+   scheduled launches whose NET falls inside a window of four hours or less, or up to an hour before one opens;
+   longer windows (some debris areas stand for most of a day for two weeks) would match nearly everything. A
+   coincidence crosses oceans: it is time, not place.
+6. **Not for navigation.** The memoranda supplement, and do not replace, the IMO/SOLAS broadcasts; the page says so.
+7. **Sources fail apart.** One memo or one NAVAREA XI message that cannot be read is named and skipped; the lane
+   fails only when both sources fail, and then keeps its last good copy.
+8. **NGA's MSI API** (`msi.nga.mil/api/publications/broadcast-warn`) has answered 503 "under maintenance" since at
+   least 6 Nov 2026. The memoranda are served from its maintenance page (`apology_objects/`), so they may vanish
+   when the API returns; the lane then fails NGA and the API should be read instead.
+
+Not in the feed yet: warnings appear on the page and in `snapshot.json` only, so COP is unchanged.
 
 ## Not live: manoeuvres
 `orbit/maneuver.py` (from the 1 Nov seed build) is not run. It differences consecutive element sets with a
