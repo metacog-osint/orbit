@@ -152,6 +152,7 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
   node and e less the object's own median drift, turned into velocity terms; a change is marked at 8 robust
   deviations above the object's own median and at least 0.05 m/s, with 10 pairs minimum; marks under a day apart
   merge. Listed only at 0.25 m/s or more at GEO (Tom, 14 Nov 2026), 0.05 m/s elsewhere; smaller ones counted.
+  A change whose widest set pair spans 48 h or more carries `gap` and a page label (Tom, 14 Nov 2026).
   GEO objects also get longitude and drift.
 - **Real-data check, run 14 Nov 2026** (Tom's account, `.env` in place): `python tools/orbit.py maneuver-case`,
   Shijian-21 (49330) and BeiDou-2 G2 (34779), 1 Dec 2021 to 1 Mar 2022, 423 sets, stored in

@@ -607,6 +607,17 @@ class Maneuver(unittest.TestCase):
         d = self.detect(synth(9, burns=[(30.0, dn_for(0.15), 0.0)]))
         self.assertEqual((d["events"], d["below_report"]), ([], 1))
 
+    def test_change_across_a_tracking_gap_is_labelled(self):
+        recs = [r for r in synth(10, burns=[(30.0, dn_for(0.5), 0.0)])
+                if not "2026-11-01" <= r["EPOCH"][:10] <= "2026-11-05"]  # no sets for five days around the change
+        d = self.detect(recs)
+        self.assertEqual(len(d["events"]), 1, d["events"])
+        ev = d["events"][0]
+        self.assertGreaterEqual(ev["gap"]["hours"], 5 * 24)
+        self.assertLess(ev["gap"]["from"], "2026-11-01")
+        self.assertGreater(ev["gap"]["to"], "2026-11-05")
+        self.assertNotIn("gap", self.detect(synth(11, burns=[(30.0, dn_for(0.5), 0.0)]))["events"][0])
+
     def test_geo_plane_change_is_cross_track(self):
         d = self.detect(synth(3, i0=1.0, burns=[(25.0, 0.0, 0.01)]))  # 0.01 deg: about 0.54 m/s
         self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])

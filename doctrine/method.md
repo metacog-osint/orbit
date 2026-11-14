@@ -109,8 +109,10 @@ element sets are not republished. Not in the COP feed.
 4. **What a mark is:** the published orbit moved more than this object's sets usually move. Usually a manoeuvre;
    a re-fit after a tracking gap, a mislabelled set or storm-driven drag in low orbit can give the same. Orbit says
    which object, when and how much, never why; no warnings.
-5. **Silence is not quiet.** An object with no new set for 3 days is named as untracked, and the longest gap
-   between sets is kept.
+5. **Silence is not quiet.** An object with no new set for 3 days is counted as untracked, and the longest gap
+   between sets is kept. A change measured across a gap of 48 hours or more between consecutive sets is labelled
+   with that gap on the page (`gap`): it happened somewhere inside it, not at either end (Tom, 14 Nov 2026, after
+   the first live reading timed USA 270's change across three weeks).
 6. **The known case** (Shijian-21 towing BeiDou-2 G2, `tools/orbit.py maneuver-case`, run 14 Nov 2026 on 423
    Space-Track sets, 1 Dec 2021 to 1 Mar 2022): G2 raised 1,720 km and SJ-21 1,694 km from 21-25 Jan, SJ-21 back
    down 1,732 km on 26-27 Jan; J. McDowell gave the stack 290 x 3,100 km above GEO (about 1,695 km mean). At

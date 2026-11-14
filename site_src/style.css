@@ -170,6 +170,7 @@ tr.folded { display: none; }
 
 /* The anti-satellite card is a record, not news. */
 h2 .ref { color: var(--muted); font-weight: 400; }
+.gap-note { border-left: 2px solid var(--warn); padding-left: 6px; margin-top: 2px; }
 
 /* Phones: each table row becomes a short block, every value under its column's name (app.js sets data-label);
    a long card note shows three lines until selected. */
