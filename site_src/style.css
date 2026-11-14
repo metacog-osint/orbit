@@ -140,3 +140,5 @@ ul.lanes > li { margin-bottom: 8px; }
 button.linkish { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline;
   cursor: pointer; font: inherit; }
 .lane-head.sub, div.sub { margin-left: 14px; }
+.asat-note { margin-top: 10px; }
+.asat-note p { margin: 0 0 6px; }

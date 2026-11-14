@@ -258,6 +258,124 @@
       "Scheduled launches with NET in a window (time only)", ""], rows));
   }
 
+  /* Anti-satellite tests in space: Secure World Foundation's sheet as it stands (CC BY-NC 4.0). History, not new
+     events: every row is SWF's, shown as SWF gives it, newest first. */
+  function num(n) { return n == null ? "–" : n.toLocaleString(); }
+  // A calendar date with its year ("20 Oct 1968"): history needs the year that dayOnly leaves out.
+  function dayYear(isoDate) {
+    return T ? T.format(isoDate + "T12:00:00Z", { year: true, time: false }) : isoDate;
+  }
+  function counterspaceCard() {
+    var box = document.getElementById("asat-body");
+    var cs = (snap && snap.counterspace) || {};
+    var tests = cs.tests || [];
+    if (!cs.read_at) return empty(box, "Not read yet: the test history appears after Orbit's next collection.");
+    box.textContent = "";
+    if (tests.length) {
+      document.getElementById("asat-h").textContent = "Anti-satellite tests in space, " +
+        tests[tests.length - 1].date.slice(0, 4) + " to date";
+    }
+    // New since Orbit's last reading of the sheet.
+    var fresh = cs.new_since_last || [];
+    if (cs.first_reading) {
+      box.appendChild(el("p", "muted small", "First reading of the sheet: tests SWF adds are listed here from " +
+        "Orbit's next reading."));
+    } else if (fresh.length) {
+      box.appendChild(el("p", "small", fresh.length + (fresh.length === 1 ? " test" : " tests") +
+        " new in the sheet since Orbit's reading of " + fmt(cs.previous_read_at) + ":"));
+      var ul = el("ul", "plain small");
+      fresh.forEach(function (t) {
+        var li = el("li");
+        li.appendChild(mark(t.cc, null));
+        li.appendChild(document.createTextNode(dayYear(t.date) + ": " + (t.interceptor || "interceptor not given") +
+          (t.target ? ", target " + t.target : "")));
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    } else {
+      box.appendChild(el("p", "muted small", "No tests added to the sheet since Orbit's reading of " +
+        fmt(cs.previous_read_at) + "."));
+    }
+    // By country.
+    var bc = cs.by_country || {}, tot = { tests: 0, debris_created: 0, debris_on_orbit: 0 };
+    var srows = Object.keys(bc).map(function (k) {
+      var c = bc[k], tr = el("tr");
+      tot.tests += c.tests; tot.debris_created += c.debris_created; tot.debris_on_orbit += c.debris_on_orbit;
+      cell(tr, who([mark(c.cc, null)], k));
+      cell(tr, num(c.tests), "num");
+      cell(tr, num(c.debris_created), "num");
+      cell(tr, num(c.debris_on_orbit), "num");
+      return tr;
+    });
+    if (srows.length) {
+      var tt = el("tr");
+      cell(tt, "All in the table", "muted");
+      cell(tt, num(tot.tests), "num"); cell(tt, num(tot.debris_created), "num"); cell(tt, num(tot.debris_on_orbit), "num");
+      srows.push(tt);
+      box.appendChild(el("h3", "small", "By country"));
+      var sw = el("div", "tbl-wrap");
+      sw.appendChild(table(["Country", { label: "Tests", num: true }, { label: "Debris created", num: true },
+        { label: "Debris still on orbit", num: true }], srows));
+      box.appendChild(sw);
+    }
+    // Every test, newest first.
+    var rows = tests.map(function (t) {
+      var tr = el("tr");
+      cell(tr, dayYear(t.date));
+      cell(tr, mark(t.cc, null));
+      var what = el("div");
+      what.appendChild(el("div", "", t.interceptor || "Not given"));
+      what.appendChild(el("div", "pl", [t.interceptor_type, t.target ? "target: " + t.target : ""]
+        .filter(Boolean).join(" · ")));
+      cell(tr, what);
+      cell(tr, t.site || "–");
+      var hit = cell(tr, t.hit === true ? "Yes" : t.hit === false ? "No" : "–");
+      if (t.hit == null) hit.title = "The sheet gives a dash or nothing here";
+      cell(tr, num(t.debris_created), "num");
+      cell(tr, num(t.debris_reentered), "num");
+      cell(tr, num(t.debris_on_orbit), "num");
+      var fin = el("div");
+      fin.appendChild(el("div", "", t.final_reentry === "on orbit" ? "Still on orbit" :
+        t.final_reentry ? dayYear(t.final_reentry) : "–"));
+      if (t.lifespan_years != null) fin.appendChild(el("div", "pl", t.lifespan_years.toFixed(2) + " years"));
+      cell(tr, fin);
+      return tr;
+    });
+    box.appendChild(el("h3", "small", "Every test, newest first (" + rows.length + ")"));
+    var tw = el("div", "tbl-wrap");
+    tw.appendChild(table(["Date", "Country", "Interceptor, type and target", "Launch site", "Object hit",
+      { label: "Debris created", num: true }, { label: "Re-entered", num: true }, { label: "Still on orbit", num: true },
+      "Last piece re-entered (debris lifespan)"], rows));
+    box.appendChild(tw);
+    // Notes and credit.
+    var note = el("div", "muted small asat-note");
+    var bits = [];
+    if (cs.updated) bits.push("The sheet says it was last updated " + dayYear(cs.updated) + "; Orbit read it " +
+      fmt(cs.read_at) + ".");
+    bits.push("Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them.");
+    bits.push("SWF lists Soviet-era tests under Russia.");
+    var sk = cs.skipped || [];
+    if (sk.length) {
+      bits.push((sk.length === 1 ? "One row is" : sk.length + " rows are") + " dated as a span, not a day, so " +
+        (sk.length === 1 ? "it is" : "they are") + " in neither table: " + sk.map(function (s) {
+          return s.country + ", " + s.date_text + ", " + (s.interceptor || "interceptor not given") +
+            (s.target && s.target !== "None" ? ", target " + s.target : "") + " (" + num(s.debris_created) +
+            " debris created, " + num(s.debris_on_orbit) + " still on orbit)";
+        }).join("; ") + ".");
+    }
+    note.appendChild(el("p", "", bits.join(" ")));
+    var cr = el("p", "");
+    cr.appendChild(document.createTextNode("Secure World Foundation, Global Counterspace Capabilities (2026), " +
+      "CC BY-NC 4.0: "));
+    var a1 = el("a", "", "report"); a1.href = cs.report; a1.rel = "noopener"; cr.appendChild(a1);
+    cr.appendChild(document.createTextNode(", "));
+    var a2 = el("a", "", "sheet"); a2.href = cs.sheet; a2.rel = "noopener"; cr.appendChild(a2);
+    cr.appendChild(document.createTextNode("."));
+    note.appendChild(cr);
+    box.appendChild(note);
+  }
+
+
   /* The map loads after the tables, from map.js (an ES module with MapLibre); without WebGL it says so. */
   var mapApi = null, mapStarted = false;
   function groupOf(country, state) {
@@ -486,7 +604,7 @@
     var box = document.getElementById("lanes");
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
-      navwarn: "Navigational warnings" };
+      navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
     var ul = el("ul", "plain small lanes");
@@ -557,7 +675,8 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); reentryTable(); catalogBody(); lanes(); startMap();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); counterspaceCard(); reentryTable(); catalogBody(); lanes();
+    startMap();
     if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
   }
 

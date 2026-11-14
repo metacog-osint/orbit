@@ -9,13 +9,15 @@
 collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
 from_previous) or stays empty, and the snapshot's "lanes" block says which.
 
-Lanes (method orbit-2.2):
+Lanes (method orbit-2.3):
   catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
             day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
             if none has changed. About 37 MB when it does.
   upcoming  Launch Library 2: launches scheduled in the next 14 days. One request.
   navwarn   Launch hazard and space-debris navigational warnings in force: NGA's five daily memoranda and
             NAVAREA XI (Japan Coast Guard), a list and one request per launch-related warning.
+  counterspace  Secure World Foundation's "History of ASAT Testing in Space" sheet (CSV export, CC BY-NC 4.0):
+            every test with its debris counts, totals by country, and tests new since the last reading.
 The manoeuvre lane (orbit/maneuver.py) is not run: see doctrine/method.md.
 """
 from __future__ import annotations
@@ -31,21 +33,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import feed, fetch, gcat, launches, navwarn  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, navwarn  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
     "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes"],
     "upcoming": ["upcoming"],
     "navwarn": ["navwarn"],
+    "counterspace": ["counterspace"],
 }
 EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
-         "navwarn": {}}
+         "navwarn": {}, "counterspace": {}}
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"],
-               "navwarn": ["nga-msi"]}
+               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -173,7 +176,29 @@ def _lane_navwarn(raw_dir: Path, prev: dict, getter, **_):
     return {"navwarn": {"read_at": fetch.now_utc(), "sources": sources, "areas": areas}}, recs, None
 
 
-LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "navwarn": _lane_navwarn}
+def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
+    """Secure World Foundation's ASAT test history. A test is new when its (country, date, interceptor) was not in
+    the previous reading; with no previous reading the list is empty and first_reading says so."""
+    body, rec = fetch.fetch("swf-asat", counterspace.URL, raw_dir, "csv", getter=getter)
+    doc = counterspace.parse_asat(body)
+    prev_cs = prev.get("counterspace") or {}
+    previous = prev_cs.get("tests") if prev_cs.get("read_at") else None
+    return {"counterspace": {
+        "read_at": rec["fetched_at"],
+        "updated": doc["updated"],
+        "sheet": counterspace.SHEET,
+        "report": counterspace.REPORT,
+        "tests": doc["tests"],
+        "skipped": doc["skipped"],
+        "by_country": counterspace.by_country(doc["tests"]),
+        "first_reading": previous is None,
+        "previous_read_at": prev_cs.get("read_at"),
+        "new_since_last": counterspace.new_since(doc["tests"], previous),
+    }}, [rec], None
+
+
+LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "navwarn": _lane_navwarn,
+         "counterspace": _lane_counterspace}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
@@ -322,12 +347,14 @@ def main(argv=None) -> int:
         snap = collect(only=args.only, force=args.force)
         for lane, st in snap["lanes"].items():
             extra = f" ({st.get('error')})" if st.get("status") == "failed" else ""
-            print(f"  {lane:9s} {st.get('status')}{' [last good copy]' if st.get('from_previous') else ''}{extra}")
+            print(f"  {lane:12s} {st.get('status')}{' [last good copy]' if st.get('from_previous') else ''}{extra}")
         ch = snap.get("catalog_changes") or {}
         h = snap.get("hygiene") or {}
         print(f"Collected {len(snap['launches'])} launches (30 days), {len(snap['reentries'])} reentries (30 days), "
               f"{len(snap['upcoming'])} scheduled launches (14 days); "
               f"{len((snap.get('navwarn') or {}).get('areas') or [])} launch hazard areas in force; "
+              f"{len((snap.get('counterspace') or {}).get('tests') or [])} ASAT tests in SWF's sheet "
+              f"({len((snap.get('counterspace') or {}).get('new_since_last') or [])} new since the last reading); "
               f"{h.get('in_orbit', 0)} objects in orbit. "
               + (f"Catalog changes since {ch['previous_reading_at']}: {ch['added']} added, {ch['removed']} removed, "
                  f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))

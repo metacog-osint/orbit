@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "2.2",
+  "version": "2.3",
   "sources": [
     {
       "id": "gcat-mcdowell",
@@ -43,6 +43,17 @@
       "independence_group": "jcg",
       "commercial_ok": true,
       "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST. Not read since 14 Nov 2026: the site's robots.txt disallows /TUHO/ (where the list and messages sit) for every crawler but the National Diet Library's. Read 13-14 Nov 2026 before that was seen."
+    },
+    {
+      "id": "swf-counterspace",
+      "name": "Secure World Foundation, Global Counterspace Capabilities (2026): History of ASAT Testing in Space (Google Sheets CSV export)",
+      "url": "https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report",
+      "licence": "CC BY-NC 4.0 ('Global Counterspace Capabilities © 2026 by Secure World Foundation is licensed under Attribution-NonCommercial 4.0 International', read on the report page, which links this sheet, 13 Nov 2026); credit as 'Secure World Foundation, Global Counterspace Capabilities (2026), CC BY-NC 4.0'. Non-commercial use only.",
+      "use": "ingest",
+      "grade": "B2",
+      "independence_group": "swf",
+      "commercial_ok": false,
+      "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade is Orbit's call, to be confirmed by Tom."
     },
     {
       "id": "space-track",

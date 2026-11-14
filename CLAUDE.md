@@ -31,11 +31,11 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 29 offline tests, real fixtures from 13 Nov
+python -m unittest discover -s tests       # 36 offline tests, real fixtures from 13 Nov
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.2`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.3`; details in `doctrine/method.md`)
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
@@ -123,6 +123,21 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
   finish loading the style (seen in the browser pane); a visible tab draws it.
 - **Whether GitHub's runners can reach msi.nga.mil (Akamai) and www1.kaiho.mlit.go.jp is untested** until the first
   run after the push.
+
+## Anti-satellite test history (14 Nov 2026, `orbit-2.3`; Tom's "proceed with other options 1-3")
+- **Lane `counterspace`** (`orbit/counterspace.py`): Secure World Foundation's "History of ASAT Testing in Space"
+  Google Sheet, read as CSV with no key (`counterspace.URL`), from the 2026 Global Counterspace Capabilities report
+  (CC BY-NC 4.0: `commercial_ok` false; graded B2, Orbit's call for Tom to confirm). 14 Nov: 80 rows, 78 dated
+  tests (Russia 33, USA 32, China 11, India 2), 6,874 pieces of debris created, 2,757 still on orbit; two rows
+  dated as spans are listed apart and reconcile to SWF's totals (6,904 / 2,773). Sheet last updated 17 Feb 2026.
+- Side columns (totals, footnotes, "Last Updated") are cut before parsing; fewer than 50 tests or a moved header
+  fails the lane, which keeps its last good copy. Page card after the hazards card; nothing in the feed (no
+  coordinates, no counterspace requirement in `doctrine/requirements.json`).
+- **Not built:** SWF's RPO sheet (`1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4`; data tabs Commercial/Civil gid 0,
+  14 rows; Military/Intelligence gid 1789904048, 44 rows; Planned gid 1403218889; dates free text, needs span
+  parsing). ITU: Space Explorer needs a TIES login; the public BR IFIC zips (`itu.int/sns/ific10/ific3084.zip`,
+  11 MB, biweekly) are unopened, and ITU's copyright page reserves rights (ask jur@itu.int). CSIS: all rights
+  reserved, not used.
 
 ## Not live: manoeuvres (`orbit/maneuver.py`, not run)
 The seed engine differences consecutive element sets at a 0.35 m/s threshold that drag and fit noise exceed in

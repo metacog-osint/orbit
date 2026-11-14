@@ -1,4 +1,4 @@
-# Orbit method (`orbit-2.2`, 13 Nov 2026)
+# Orbit method (`orbit-2.3`, 14 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
@@ -16,6 +16,7 @@ baseline of its own readings yet, so nothing is called an anomaly, and it makes 
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
+| `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 
 GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
@@ -76,6 +77,18 @@ nothing (about 37 MB) unless one has changed.
    The page names the form read and why the API was passed over. Cordon reads NGA the same way.
 
 Not in the feed yet: warnings appear on the page and in `snapshot.json` only, so COP is unchanged.
+
+## Anti-satellite test history (`orbit-2.3`)
+1. **As SWF compiled it.** Country (SWF lists Soviet tests under Russia), date, target, interceptor and type,
+   launch site, whether the target was hit, and SWF's debris counts (U.S. military catalog, generally 10 cm and
+   larger). The sheet's own "Last Updated" date is shown; Orbit adds nothing and judges nothing.
+2. **Rows dated as a span** ("Aug - Dec 2019", "June-July 1965") are not placed on a day: they are listed apart
+   and named on the page, and the parsed tests plus those rows equal SWF's own totals (6,904 pieces created, 2,773
+   still on orbit, sheet of 17 Feb 2026).
+3. **New tests** are those whose country, date and interceptor were not in Orbit's previous reading. The first
+   reading lists none and says so. History, not events: nothing goes into the feed.
+4. **Licence:** CC BY-NC 4.0, credited with links to the report and the sheet. Orbit is non-commercial; this
+   source may not be reused commercially.
 
 ## Not live: manoeuvres
 `orbit/maneuver.py` (from the 1 Nov seed build) is not run. It differences consecutive element sets with a
