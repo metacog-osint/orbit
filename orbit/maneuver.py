@@ -45,6 +45,7 @@ MIN_RATE_DT = 0.1   # days: pairs closer than this do not set the steady-drift r
 WINDOW_DAYS = 30    # changes reported from the last 30 days
 KEEP_DAYS = 120     # sets older than this are dropped from the store
 STALE_DAYS = 3      # no new set for this long is named: an untracked object looks exactly like a quiet one
+GAP_LABEL_H = 48    # a change measured across a gap this long or longer is labelled: it happened somewhere inside it
 J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
 COMPONENTS = ("in-track", "cross-track", "eccentricity")
 
@@ -191,6 +192,10 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
               "dominant": max(dv, key=dv.get), "da_km": round(sum(p["da"] for p in g), 2),
               "di_deg": round(sum(p["di"] for p in g), 4), "z": round(max(max(p["z"].values()) for p in g), 1),
               "pairs": len(g)}
+        gap = max(g, key=lambda p: p["dt"])  # the widest pair: the change can sit anywhere inside it
+        ev["longest_gap_h"] = round(gap["dt"] * 24, 1)
+        if ev["longest_gap_h"] >= GAP_LABEL_H:
+            ev["gap"] = {"from": gap["from"], "to": gap["to"], "hours": ev["longest_gap_h"]}
         if reg == "GEO":
             b, a = geo_position(g[0]["p"]), geo_position(g[-1]["q"])
             ev["geo"] = {"lon_before": b["lon"], "lon_after": a["lon"], "drift_before": b["drift_deg_day"],

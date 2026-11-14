@@ -336,6 +336,12 @@
       cell(tr, who);
       var when = el("div", "", fmt(e.from));
       when.appendChild(el("div", "pl", "to " + fmt(e.to) + (e.pairs > 1 ? " (" + e.pairs + " set pairs)" : "")));
+      if (e.gap) {  // no element set between these two: the change happened somewhere inside the gap
+        var days = e.gap.hours / 24;
+        when.appendChild(el("div", "pl gap-note", "Measured across a " + (days >= 10 ? Math.round(days) : days.toFixed(1)) +
+          "-day gap between element sets (" + fmt(e.gap.from) + " to " + fmt(e.gap.to) + "): the change happened " +
+          "somewhere in that gap, not necessarily at either end."));
+      }
       cell(tr, when);
       var ch = el("div", "", "about " + (e.dv_ms >= 10 ? Math.round(e.dv_ms) : e.dv_ms.toFixed(2)) + " m/s, mostly " +
         (DOMINANT[e.dominant] || e.dominant));
