@@ -31,7 +31,7 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 26 offline tests, real fixtures from 13 Nov
+python -m unittest discover -s tests       # 29 offline tests, real fixtures from 13 Nov
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
@@ -89,7 +89,19 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
 - **Lane `navwarn`** (`orbit/navwarn.py`; rules in `doctrine/method.md`): warnings naming rocket launching, space
   debris or reentry, from NGA's daily memoranda and NAVAREA XI. NGA's MSI API is down (503 since at least 6 Nov);
   the memoranda come from its maintenance page (`msi.nga.mil/apology_objects/DailyMem*.txt`) and may vanish when
-  the API returns: then read `broadcast-warn` instead (untested here). NAVAREA XI: `warnings.cgi` (GET works,
+  the API returns. Since 13 Nov evening the lane reads `broadcast-warn` first (`navwarn.parse_api`; refused when
+  empty or its newest warning is over 7 days old) and falls back to the memoranda; `sources.nga.form` says which.
+  The API path is tested on the 13 Nov memoranda recast in the API's JSON form (Cordon's field names), not on a
+  live API response: none has been seen since it went down.
+- **NAVAREA XI is not read (since 14 Nov 2026, Tom's "stop the process, but then find another way").** The
+  Japan Coast Guard's robots.txt has `Disallow: /TUHO/` for every crawler but `ndl-japan`, and the list and the
+  messages both sit under it. Orbit read it from the 13 Nov deploy until the stop, without having checked robots.txt.
+  `navwarn.JCG_READ = False`; the parsers and fixtures stay. `jcg-navarea11` is `excluded` in the register.
+  Searched for another source, 14 Nov: China MSA (msa.gov.cn, no robots.txt) answers a script with 403 and its warning
+  list URL is unknown; NautoShark needs a login and bars AI crawlers; KHOA's robots.txt disallows everything; no
+  open archive found. HYDROPAC and NAVAREA XII rebroadcast some NAVAREA XI warnings (0504 = HYDROPAC 3257, 0507 =
+  3256 on 13 Nov), so those still show. Cordon's NAVAREA XI build is on hold for the same reason.
+  Old notes on the reader, kept for a source that permits reading. NAVAREA XI: `warnings.cgi` (GET works,
   `LANG=JP`; `E`/`EN` return nothing) for the list, `disp_warnings.cgi?TANA=` for each English text; titles
   filtered on ロケット/宇宙/再突入. Sources graded A2 each (Orbit's call; Tom may regrade).
 - **Grouping:** one row per area, with every broadcast (NAVAREA XI first). 13 Nov: NAVAREA XI 0504 = NAVAREA XII
@@ -118,6 +130,19 @@ low orbit, and its "calibrated confidence" is a formula. Before any manoeuvre la
 v0.3.0, needs PyTorch) locally on SJ-21 / BeiDou-2 G2 (Jan 2022) with Tom's Space-Track account; read
 Space-Track's terms (maneuver-detect's README says they bar redistributing data or derived analysis); keep the
 watch list in private config. Tom sets any credentials himself.
+
+**Terms research, 13 Nov 2026 evening (via a fetch tool's summaries, not checked against the raw pages):**
+- Space-Track's User Agreement bars passing on data, but it gives USSPACECOM's "blanket approval" to redistribute
+  basic SSA data "conditioned on appropriate citation". It adds that published analysis based on USSPACECOM data
+  "also require[s] appropriate citations". API limits: under 30 requests a minute and 300 an hour, and GP/TLE
+  queries once an hour, off the top and bottom of the hour.
+- maneuver-detect (github.com/astro-tools/maneuver-detect, MIT, dataset CC BY 4.0, v0.3.0) reads that the terms
+  bar redistributing analysis derived from Space-Track data. That conflicts with the clause above, so ask
+  Space-Track in writing before publishing. Its v0.3 labels are QZSS Δv files, GOES navigation summaries and
+  Galileo NAGUs; SJ-21 and BeiDou-2 G2 are not in its README.
+- Licence-clean route: operator-announced manoeuvres (QZSS CC BY 4.0, NOAA GOES public domain) as labels, and
+  CelesTrak GP snapshots that Orbit keeps itself, since CelesTrak serves no history. CelesTrak's usage policy
+  (updated 12 Nov 2026) states no redistribution terms either way.
 
 ## Deploy prep (13 Nov 2026, about 1:25 PM CST)
 - **`.github/workflows/update.yml`: Headwind's, first run on GitHub passed 13 Nov.** It is Headwind's working workflow with
