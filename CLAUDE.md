@@ -22,7 +22,7 @@ way: `GEMINI.md` and `data/`.
 **Planned scope** (`[local path]`, program row and roadmap step 14): catalog changes,
 launches, manoeuvres, counterspace events; maneuver-detect, Secure World Foundation counterspace sheets, ITU
 Space Explorer, optional 3D page. Built: launches, scheduled launches, reentries, catalog changes, owner-code
-counts. Not built: manoeuvres, counterspace events, ITU, 3D page. Describe Orbit publicly from what is live.
+counts, ASAT test history. Built but held (not published): manoeuvres (Space-Track). Not built: ITU, 3D page. Describe Orbit publicly from what is live.
 
 ## Commands
 ```bash
@@ -31,7 +31,7 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 36 offline tests, real fixtures from 13 Nov
+python -m unittest discover -s tests       # 53 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
@@ -139,12 +139,36 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
   11 MB, biweekly) are unopened, and ITU's copyright page reserves rights (ask jur@itu.int). CSIS: all rights
   reserved, not used.
 
-## Not live: manoeuvres (`orbit/maneuver.py`, not run)
-The seed engine differences consecutive element sets at a 0.35 m/s threshold that drag and fit noise exceed in
-low orbit, and its "calibrated confidence" is a formula. Before any manoeuvre lane: run maneuver-detect (MIT,
-v0.3.0, needs PyTorch) locally on SJ-21 / BeiDou-2 G2 (Jan 2022) with Tom's Space-Track account; read
-Space-Track's terms (maneuver-detect's README says they bar redistributing data or derived analysis); keep the
-watch list in private config. Tom sets any credentials himself.
+## Manoeuvre lane (orbit-2.4, built 14 Nov 2026, HELD: not on the page, not in the snapshot)
+Tom, 14 Nov 2026 (relayed by the parent session): "proceed with the space-track work, we will just have a
+disclaimer drafted as needed." No written question to Space-Track first. The draft is
+`doctrine/spacetrack-disclaimer.md`; Tom approves it before anything is published.
+- **Client** `orbit/spacetrack.py`: log in, GP for the watch list, GP_HISTORY (last 60 days) once only for objects
+  with no stored history, log out. At most 4 requests a run, 2.5 s apart; no request within an hour of the last GP
+  query; a run reaching Space-Track at :57-:03 or :27-:33 waits for a clear minute plus 0-60 s. The hub starts
+  Orbit at :55, so the lane usually waits a few minutes (workflow timeout raised to 22 minutes).
+- **Detector** `orbit/maneuver.py` (replaces the 1 Nov seed engine): per object, consecutive-set changes in a, i,
+  node and e less the object's own median drift, turned into velocity terms; a change is marked at 8 robust
+  deviations above the object's own median and at least 0.05 m/s, with 10 pairs minimum; marks under a day apart
+  merge. Listed only at 0.25 m/s or more at GEO (Tom, 14 Nov 2026), 0.05 m/s elsewhere; smaller ones counted.
+  GEO objects also get longitude and drift.
+- **Real-data check, run 14 Nov 2026** (Tom's account, `.env` in place): `python tools/orbit.py maneuver-case`,
+  Shijian-21 (49330) and BeiDou-2 G2 (34779), 1 Dec 2021 to 1 Mar 2022, 423 sets, stored in
+  `data/state/spacetrack/case_sj21_2022.json.gz` (never fetched again). G2 +1,720 km and SJ-21 +1,694 km from
+  21-25 Jan, SJ-21 -1,732 km on 26-27 Jan; McDowell's 290 x 3,100 km above GEO averages about 1,695 km. At the
+  old 0.05 m/s GEO floor the dead G2 drew four false marks (0.06-0.19 m/s), hence 0.25 m/s. Still open: the
+  one-day merge joins SJ-21's approach, docking and tow into one 17-25 Jan change; no LEO known case yet.
+- **Private:** credentials `SPACETRACK_IDENTITY`, `SPACETRACK_PASSWORD`; watch list `ORBIT_WATCH` (secrets, collect
+  step only) or locally `.env` and `private/watch.txt` (both git-ignored; starter list of 12 checked against GCAT).
+  Stored sets, the full report and the held lane record are in `data/state/spacetrack/` (private Actions cache).
+  The query URLs list the watch list, so the snapshot records them as "(watch list withheld)". Published output
+  names only objects with a marked change and counts the rest.
+- **To publish (after Tom approves the disclaimer):** `maneuver.PUBLISH = True`; `space-track` `use` to `ingest`
+  and `LANE_SOURCE["maneuver"] = ["space-track"]`; a page card with the disclaimer's wording; method version
+  orbit-2.4. Not built yet: the page card.
+- `python tools/orbit.py maneuver-report` prints the held report locally.
+
+Earlier notes (13 Nov 2026), kept for the record:
 
 **Terms research, 13 Nov 2026 evening (via a fetch tool's summaries, not checked against the raw pages):**
 - Space-Track's User Agreement bars passing on data, but it gives USSPACECOM's "blanket approval" to redistribute
@@ -191,7 +215,8 @@ watch list in private config. Tom sets any credentials himself.
    manoeuvres).
 
 ## Open for Tom
-Space-Track account and terms; the watch list; Launch Library 2 has no stated data licence (credited, images not
+Space-Track: an account, the three secrets (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD, ORBIT_WATCH) and `.env`
+locally, the `maneuver-case` result, and approval of `doctrine/spacetrack-disclaimer.md`; Launch Library 2 has no stated data licence (credited, images not
 used); the deploy steps above.
 
 ## Rules

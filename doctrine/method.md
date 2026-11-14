@@ -90,17 +90,34 @@ Not in the feed yet: warnings appear on the page and in `snapshot.json` only, so
 4. **Licence:** CC BY-NC 4.0, credited with links to the report and the sheet. Orbit is non-commercial; this
    source may not be reused commercially.
 
-## Not live: manoeuvres
-`orbit/maneuver.py` (from the 1 Nov seed build) is not run. It differences consecutive element sets with a
-0.35 m/s threshold, which drag and fit noise exceed in low orbit, and its confidence is a formula, not a
-calibration. Before any manoeuvre lane:
-1. Run maneuver-detect (MIT, astro-tools, v0.3.0 on PyPI; depends on PyTorch) on a known case: SJ-21 moving the
-   dead BeiDou-2 G2 to a graveyard orbit, January 2022. Local only.
-2. Settle the history source. Space-Track's terms are reported (maneuver-detect's README) to bar redistributing
-   data or derived analysis; not yet read by Orbit. The alternative is an archive Orbit builds itself, from a
-   source whose terms allow republishing derived results (CelesTrak: not yet checked).
-3. Keep the watch list in private config.
+## Orbit changes in watched objects (`orbit-2.4`, held: not published)
+Source: Space-Track.org (USSPACECOM) GP and GP_HISTORY element sets for a private watch list. Space-Track's
+documentation gives USSPACECOM's blanket approval to redistribute basic SSA data "conditioned on appropriate
+citation"; the wording Orbit will use is drafted in `spacetrack-disclaimer.md` and needs Tom's approval first.
+1. **Space-Track's limits kept:** at most four requests a run, 2.5 s apart; GP at most once an hour, never at
+   :57-:03 or :27-:33; each object's history (60 days) read once and stored, never asked for again.
+2. **One set per epoch**, the later-created where Space-Track re-issued one.
+3. **Change against the object's own noise.** For each pair of consecutive sets: the change in semi-major axis,
+   inclination, node and eccentricity, less the object's median drift over that interval (drag decay, nodal
+   precession), as along-track (v da / 2a), cross-track (v times the plane angle) and eccentricity (v de / 2)
+   velocities. A pair is marked when one term is at least 8 robust deviations (1.4826 x MAD) above the object's
+   own median and the total is at least 0.05 m/s; at least 10 pairs are needed first; marks under a day apart are
+   one change. A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s elsewhere); smaller ones
+   are counted, not listed. Geostationary objects also show longitude and drift before and after.
+4. **What a mark is:** the published orbit moved more than this object's sets usually move. Usually a manoeuvre;
+   a re-fit after a tracking gap, a mislabelled set or storm-driven drag in low orbit can give the same. Orbit says
+   which object, when and how much, never why; no warnings.
+5. **Silence is not quiet.** An object with no new set for 3 days is named as untracked, and the longest gap
+   between sets is kept.
+6. **The known case** (Shijian-21 towing BeiDou-2 G2, `tools/orbit.py maneuver-case`, run 14 Nov 2026 on 423
+   Space-Track sets, 1 Dec 2021 to 1 Mar 2022): G2 raised 1,720 km and SJ-21 1,694 km from 21-25 Jan, SJ-21 back
+   down 1,732 km on 26-27 Jan; J. McDowell gave the stack 290 x 3,100 km above GEO (about 1,695 km mean). At
+   0.05 m/s the dead G2 also drew four marks of 0.06-0.19 m/s, which cannot be manoeuvres; hence the 0.25 m/s
+   geostationary floor, which leaves G2 one change and SJ-21 six. Changes under a day apart are joined, so SJ-21's
+   approach, docking and tow show as one change (17-25 Jan). Velocities are differences between published orbits,
+   not burn records. Low, medium and high orbits are not yet checked against a known case.
 
 ## Not built
-Counterspace events (Secure World Foundation's counterspace reports), ITU Space Explorer filings, an optional 3D
+The manoeuvre lane's page card (held for the disclaimer), counterspace events (Secure World Foundation's
+counterspace reports), ITU Space Explorer filings, an optional 3D
 page (Cesium ion decision), a scheduled workflow, deploy, DNS, the hub and COP entries.

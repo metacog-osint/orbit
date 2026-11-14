@@ -5,11 +5,14 @@ swf_asat.csv is Secure World Foundation's whole "History of ASAT Testing in Spac
 from __future__ import annotations
 
 import json
+import math
+import os
+import random
 import shutil
 import sys
 import tempfile
 import unittest
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -17,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, navwarn  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -220,7 +223,8 @@ class EndToEnd(unittest.TestCase):
         self.header = lambda url: self.stamp
         self.patches = [mock.patch.object(gcat, "today_utc", return_value=TODAY),
                         mock.patch.object(launches, "now_utc", return_value=NOW),
-                        mock.patch.object(fetch, "now_utc", return_value="2026-11-13T18:00:00Z")]
+                        mock.patch.object(fetch, "now_utc", return_value="2026-11-13T18:00:00Z"),
+                        mock.patch.object(cli.spacetrack, "credentials", return_value=None)]
         for p in self.patches:
             p.start()
 
@@ -529,7 +533,8 @@ class Registers(unittest.TestCase):
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
         self.assertEqual(by_id["ll2-thespacedevs"]["credibility"], "Probably true")
-        self.assertEqual({lane for s in doc["sources"] for lane in s["lanes"]}, set(cli.LANE_FIELDS))
+        held = set() if maneuver.PUBLISH else {"maneuver"}  # held until Tom approves the Space-Track disclaimer
+        self.assertEqual({lane for s in doc["sources"] for lane in s["lanes"]}, set(cli.LANE_FIELDS) - held)
         self.assertTrue(all(s["grade"] for s in doc["sources"]))
 
     def test_feed_items_lint(self):
@@ -540,6 +545,269 @@ class Registers(unittest.TestCase):
         for f in doc["features"]:
             errs = [m for _, sev, m in contract.check(f, regs) if sev == "error"]
             self.assertEqual(errs, [], f["properties"]["id"])
+
+
+NOW_M = datetime(2026, 11, 14, 6, 0, tzinfo=timezone.utc)
+SIDEREAL = maneuver.SIDEREAL_REV_DAY
+
+
+def synth(norad, days=40, per_day=2, n0=1.0027379, e0=0.0002, i0=0.05, node0=80.0, n_rate=0.0, node_rate=0.0,
+          noise_n=2e-7, noise_i=2e-5, noise_node=0.0, burns=(), lon0=100.0, seed=1, end=NOW_M):
+    """SYNTHETIC element sets in Space-Track's GP form, for testing the detector's logic only: a steady orbit with
+    Gaussian set-to-set noise and step changes ("burns") at given days. Not real data."""
+    rng = random.Random(seed)
+    out, n, i, step, lon = [], n0, i0, 1.0 / per_day, lon0
+    t0 = end - timedelta(days=days)
+    for k in range(int(days * per_day)):
+        d = k * step
+        t = t0 + timedelta(days=d)
+        for bd, dn, di in burns:
+            if abs(d - bd) < step / 2:
+                n, i = n + dn, i + di
+        n_now = n + n_rate * d
+        node = node0 + node_rate * d + rng.gauss(0, noise_node)
+        argp = 10.0
+        lon = lon + (n_now - SIDEREAL) * 360.0 * step if k else lon0
+        ma = (lon + maneuver._gmst_deg(t) - node - argp) % 360.0
+        out.append({"NORAD_CAT_ID": str(norad), "OBJECT_NAME": f"TEST {norad}", "OBJECT_ID": "2000-001A",
+                    "COUNTRY_CODE": "TEST", "DECAY_DATE": None, "EPOCH": t.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+                    "MEAN_MOTION": f"{n_now + rng.gauss(0, noise_n):.8f}", "ECCENTRICITY": f"{e0:.7f}",
+                    "INCLINATION": f"{i + rng.gauss(0, noise_i):.6f}", "RA_OF_ASC_NODE": f"{node % 360:.6f}",
+                    "ARG_OF_PERICENTER": f"{argp:.4f}", "MEAN_ANOMALY": f"{ma:.4f}",
+                    "CREATION_DATE": (t + timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M:%S")})
+    return out
+
+
+def dn_for(dv_ms):  # mean-motion step for an along-track change of dv_ms at GEO (dv = v/3 * dn/n)
+    return 3 * dv_ms * SIDEREAL / 3074.7
+
+
+class Maneuver(unittest.TestCase):
+    """The detector on SYNTHETIC series (logic only; the real-data check is `orbit.py maneuver-case`)."""
+
+    def detect(self, recs, **kw):
+        store = maneuver.merge({}, recs, NOW_M)
+        return maneuver.detect(next(iter(store.values())), NOW_M, **kw)
+
+    def test_quiet_geo_has_no_change(self):
+        d = self.detect(synth(1))
+        self.assertEqual((d["regime"], d["events"], d["note"]), ("GEO", [], None))
+        self.assertAlmostEqual(d["geo"]["lon"], 100.0, delta=0.5)
+
+    def test_geo_in_track_burn_is_one_change(self):
+        d = self.detect(synth(2, burns=[(30.0, dn_for(0.5), 0.0)]))
+        self.assertEqual(len(d["events"]), 1, d["events"])
+        ev = d["events"][0]
+        self.assertEqual(ev["dominant"], "in-track")
+        self.assertAlmostEqual(ev["dv_ms"], 0.5, delta=0.05)
+        self.assertAlmostEqual(ev["da_km"], -13.7, delta=1.0)  # 2a*dv/v: faster mean motion, lower orbit
+        self.assertAlmostEqual(ev["geo"]["drift_after"] - ev["geo"]["drift_before"], dn_for(0.5) * 360, delta=0.01)
+
+    def test_geo_change_under_quarter_metre_a_second_is_counted_not_listed(self):
+        d = self.detect(synth(9, burns=[(30.0, dn_for(0.15), 0.0)]))
+        self.assertEqual((d["events"], d["below_report"]), ([], 1))
+
+    def test_geo_plane_change_is_cross_track(self):
+        d = self.detect(synth(3, i0=1.0, burns=[(25.0, 0.0, 0.01)]))  # 0.01 deg: about 0.54 m/s
+        self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])
+        self.assertAlmostEqual(d["events"][0]["dv_ms"], 0.54, delta=0.06)
+
+    def test_leo_drag_decay_and_precession_are_not_changes(self):
+        d = self.detect(synth(4, per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5,
+                              noise_i=1e-4, noise_node=1e-3))
+        self.assertEqual((d["regime"], d["events"]), ("LEO", []))
+
+    def test_short_baseline_marks_nothing(self):
+        d = self.detect(synth(5, days=5, burns=[(3.0, dn_for(2.0), 0.0)]))
+        self.assertEqual(d["events"], [])
+        self.assertIn("baseline too short", d["note"])
+
+    def test_old_changes_fall_outside_the_window(self):
+        self.assertEqual(self.detect(synth(6, days=60, burns=[(10.0, dn_for(0.5), 0.0)]))["events"], [])
+
+    def test_stale_object_is_named(self):
+        d = self.detect(synth(7, end=NOW_M - timedelta(days=5)))
+        self.assertTrue(d["note"].startswith("no new element set for 5."), d["note"])
+
+    def test_reissued_epoch_keeps_the_later_set(self):
+        a = synth(8, days=1)[0]
+        b = {**a, "MEAN_MOTION": "1.1", "CREATION_DATE": "2099-01-01T00:00:00"}
+        store = maneuver.merge({}, [b, a], NOW_M)
+        self.assertEqual(store["8"]["sets"][0][1], 1.1)
+        self.assertEqual(len(store["8"]["sets"]), 1)
+
+
+class SpaceTrack(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.env = mock.patch.dict(os.environ, {}, clear=False)
+        self.env.start()
+        for k in ("SPACETRACK_IDENTITY", "SPACETRACK_PASSWORD", "ORBIT_WATCH"):
+            os.environ.pop(k, None)
+
+    def tearDown(self):
+        self.env.stop()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_credentials_and_watch_list_from_private_files(self):
+        self.assertIsNone(spacetrack.credentials(self.tmp))
+        self.assertEqual(spacetrack.watch_list(self.tmp), [])
+        (self.tmp / ".env").write_text("﻿SPACETRACK_IDENTITY=me@example.test\n# local\nSPACETRACK_PASSWORD='x y'\n",
+                                       encoding="utf-8")  # with the byte-order mark Notepad can add
+        (self.tmp / "private").mkdir()
+        (self.tmp / "private" / "watch.txt").write_text("49330  # SJ-21, note 40258\n34779,49330\nfoo\n")
+        self.assertEqual(spacetrack.credentials(self.tmp), ("me@example.test", "x y"))
+        self.assertEqual(spacetrack.watch_list(self.tmp), [49330, 34779])
+        os.environ["ORBIT_WATCH"] = "41838"
+        self.assertEqual(spacetrack.watch_list(self.tmp), [41838])
+
+    def test_top_and_bottom_of_the_hour_are_waited_out(self):
+        def at(m, s=0):
+            return datetime(2026, 11, 14, 6, m, s, tzinfo=timezone.utc)
+        self.assertEqual(spacetrack.wait_for_clear_minute(at(58), lambda s: None, lambda: 0.0), 360)  # to 07:04
+        self.assertEqual(spacetrack.wait_for_clear_minute(at(30, 30), lambda s: None, lambda: 0.0), 210)  # to :34
+        self.assertEqual(spacetrack.wait_for_clear_minute(at(10), lambda s: None, lambda: 0.5), 30)
+        for m in range(60):
+            t = at(m) + timedelta(seconds=spacetrack.wait_for_clear_minute(at(m), lambda s: None, lambda: 0.0))
+            self.assertNotIn(t.minute, spacetrack.BLOCKED_MINUTES, m)
+
+    def test_requests_are_spaced(self):
+        waits = []
+
+        class Resp:
+            def __init__(self, b):
+                self.b = b
+
+            def read(self):
+                return self.b
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        class Opener:
+            def open(self, req, timeout=0):
+                return Resp(b"[]")
+
+        c = spacetrack.Client("u", "p", opener=Opener(), sleep=waits.append)
+        c.login()
+        c.query("gp", [2, 1])
+        c.logout()
+        self.assertEqual(c.requests, 3)
+        self.assertEqual(len(waits), 2)
+        self.assertTrue(all(2.0 < w <= spacetrack.GAP_S for w in waits))
+
+    def test_failed_login_is_refused(self):
+        class Opener:
+            def open(self, req, timeout=0):
+                class R:
+                    def read(self):
+                        return b'{"Login":"Failed"}'
+
+                    def __enter__(self):
+                        return self
+
+                    def __exit__(self, *a):
+                        return False
+                return R()
+        with self.assertRaises(PermissionError):
+            spacetrack.Client("u", "p", opener=Opener(), sleep=lambda s: None).login()
+
+
+class FakeClient:
+    """Stands in for Space-Track: answers GP (the newest set) and GP_HISTORY (the rest) from SYNTHETIC series."""
+    log: list = []
+    series: dict = {}
+
+    def __init__(self, ident, pw):
+        self.requests, self.last_body = 0, b""
+
+    def login(self):
+        self.requests += 1
+        FakeClient.log.append("login")
+
+    def logout(self):
+        self.requests += 1
+        FakeClient.log.append("logout")
+
+    def query(self, cls, ids, extra=""):
+        self.requests += 1
+        FakeClient.log.append((cls, tuple(ids), extra))
+        recs = [r for i in ids for r in (FakeClient.series[i][-1:] if cls == "gp" else FakeClient.series[i][:-1])]
+        self.last_body = json.dumps(recs).encode()
+        return recs
+
+
+def _offline(url, timeout=60):
+    raise OSError("offline")
+
+
+class ManeuverLane(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        shutil.copytree(ROOT / "doctrine", self.tmp / "doctrine")
+        FakeClient.log = []
+        FakeClient.series = {49330: synth(49330, burns=[(30.0, dn_for(0.5), 0.0)]), 34779: synth(34779)}
+        self.now = [NOW_M]
+        self.patches = [mock.patch.object(cli, "ST_CLIENT", FakeClient),
+                        mock.patch.object(cli, "ST_WAIT", lambda: 0.0),
+                        mock.patch.object(cli, "ST_NOW", lambda: self.now[0]),
+                        mock.patch.object(cli.spacetrack, "credentials", return_value=("u", "p")),
+                        mock.patch.dict(os.environ, {"ORBIT_WATCH": "49330,34779"})]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def run_lane(self):
+        return cli.collect(self.tmp, getter=_offline, header=lambda u: None, only=["maneuver"])
+
+    def held(self):
+        return json.loads((self.tmp / "data" / "state" / "spacetrack" / "held_lane.json").read_text(encoding="utf-8"))
+
+    def test_held_lane_stays_off_the_snapshot(self):
+        snap = self.run_lane()
+        self.assertNotIn("maneuver", snap["lanes"])
+        self.assertNotIn("maneuvers", snap)
+        self.assertNotIn("49330", (self.tmp / "data" / "snapshot.json").read_text(encoding="utf-8"))
+        held = self.held()
+        self.assertEqual(held["lane"]["status"], "ok")
+        self.assertEqual([e["norad"] for e in held["maneuvers"]["events"]], [49330])
+        self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""),
+                                          ("gp_history", (49330, 34779), "/EPOCH/>now-60"), "logout"])
+
+    def test_history_once_and_gp_once_an_hour(self):
+        self.run_lane()
+        FakeClient.log.clear()
+        self.now[0] = NOW_M + timedelta(minutes=30)
+        self.run_lane()
+        self.assertEqual(FakeClient.log, [])  # under an hour: no request at all
+        self.now[0] = NOW_M + timedelta(minutes=61)
+        self.run_lane()
+        self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""), "logout"])  # no history again
+
+    def test_off_without_credentials(self):
+        with mock.patch.object(cli.spacetrack, "credentials", return_value=None):
+            self.run_lane()
+        self.assertEqual(self.held()["lane"]["status"], "off")
+        self.assertEqual(FakeClient.log, [])
+
+    def test_published_snapshot_never_names_the_watch_list_in_urls(self):
+        with mock.patch.object(maneuver, "PUBLISH", True):
+            snap = self.run_lane()
+        lane = snap["lanes"]["maneuver"]
+        self.assertEqual(lane["status"], "ok")
+        self.assertTrue(all("withheld" in f["url"] and "49330" not in f["url"] for f in lane["fetches"]))
+        self.assertEqual(snap["maneuvers"]["watched"], 2)
+        self.assertIn("USSPACECOM", snap["maneuvers"]["attribution"])
+        self.assertEqual(len(snap["maneuvers"]["events"]), 1)
+        self.assertNotIn("objects", snap["maneuvers"])  # quiet watched objects are counted, not named
+
 
 
 if __name__ == "__main__":
