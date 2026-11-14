@@ -1,5 +1,7 @@
 """Offline tests for Orbit. Fixtures in tests/fixtures/ are real replies from 13 Nov 2026, cut down:
-GCAT tables (CC BY 4.0, J. McDowell, planet4589.org/space/gcat) and four Launch Library 2 records."""
+GCAT tables (CC BY 4.0, J. McDowell, planet4589.org/space/gcat) and four Launch Library 2 records.
+swf_asat.csv is Secure World Foundation's whole "History of ASAT Testing in Space" sheet as exported 13 Nov 2026
+(Global Counterspace Capabilities (2026), CC BY-NC 4.0), uncut."""
 from __future__ import annotations
 
 import json
@@ -15,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import feed, fetch, gcat, launches, navwarn  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, navwarn  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -189,6 +191,7 @@ class EndToEnd(unittest.TestCase):
         self.stamp = "Fri, 13 Nov 2026 00:23:02 GMT"
         self.fail = False
         self.api_doc = None
+        self.asat = body("swf_asat.csv")
         by_url = {u: FILES[name] for name, u in gcat.URLS.items()}
 
         def getter(url, timeout=60):
@@ -209,6 +212,8 @@ class EndToEnd(unittest.TestCase):
                 return body("navwarn/jcg_" + url.rsplit("TANA=", 1)[1].split("&")[0] + ".html")
             if "/warnings.cgi" in url:
                 return body("navwarn/jcg_list.xml")
+            if url == counterspace.URL:
+                return self.asat
             raise AssertionError(url)
 
         self.getter = getter
@@ -236,6 +241,13 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse([u for u in self.calls if "kaiho.mlit.go.jp" in u])
         self.assertTrue(snap["navwarn"]["areas"])
         self.assertEqual(snap["catalog_changes"], {})  # first reading only sets the baseline
+        cs = snap["counterspace"]
+        self.assertEqual(snap["lanes"]["counterspace"]["status"], "ok")
+        self.assertEqual(snap["lanes"]["counterspace"]["fetches"][0]["url"], counterspace.URL)
+        self.assertEqual((len(cs["tests"]), cs["updated"], cs["first_reading"]), (78, "2026-02-17", True))
+        self.assertEqual(cs["new_since_last"], [])  # first reading only sets the baseline
+        self.assertEqual(cs["by_country"]["China"], {"cc": "CN", "tests": 11, "debris_created": 3532,
+                                                     "debris_on_orbit": 2351})
         self.assertTrue((self.tmp / "data" / "state" / "catalog_index.json.gz").exists())
 
         # Same Last-Modified dates: GCAT is not downloaded again.
@@ -275,6 +287,29 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(snap["lanes"]["catalog"]["from_previous"])
         self.assertEqual(snap["launches"], good["launches"])
         self.assertEqual(snap["lanes"]["upcoming"]["status"], "failed")
+        self.assertEqual(snap["lanes"]["counterspace"]["status"], "failed")
+        self.assertEqual(snap["counterspace"], good["counterspace"])
+
+    def test_counterspace_new_tests_and_changed_layout(self):
+        self.run_collect()
+        rows = self.asat.decode("utf-8").split("\n")
+        # A test SWF adds: a new row in the China block, side columns empty.
+        i = next(k for k, r in enumerate(rows) if r.startswith("China,4/14/2023"))
+        rows.insert(i + 1, "China,9/1/2026,Unknown,DN-9,direct ascent,Korla,\u2013,0,0,0,\u2013,\u2013,,,,")
+        self.asat = "\n".join(rows).encode("utf-8")
+        cs = self.run_collect()["counterspace"]
+        self.assertFalse(cs["first_reading"])
+        self.assertEqual(cs["previous_read_at"], "2026-11-13T18:00:00Z")
+        self.assertEqual([(t["country"], t["date"], t["interceptor"]) for t in cs["new_since_last"]],
+                         [("China", "2026-09-01", "DN-9")])
+        self.assertEqual(cs["tests"][0]["date"], "2026-09-01")
+        self.assertEqual(self.run_collect()["counterspace"]["new_since_last"], [])  # new once only
+        # A sheet that no longer parses fails the lane and keeps the last good copy.
+        self.asat = b"<html>Sign in</html>"
+        snap = self.run_collect()
+        self.assertEqual(snap["lanes"]["counterspace"]["status"], "failed")
+        self.assertTrue(snap["lanes"]["counterspace"]["from_previous"])
+        self.assertEqual(len(snap["counterspace"]["tests"]), 79)
 
     def test_short_reading_is_refused(self):
         self.run_collect()
@@ -406,6 +441,80 @@ class NavWarnings(unittest.TestCase):
         self.assertIn("HYDROPAC 3251/26", left)
 
 
+class Counterspace(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.raw = body("swf_asat.csv")
+        cls.doc = counterspace.parse_asat(cls.raw)
+
+    def test_count_and_a_known_row(self):
+        tests = self.doc["tests"]
+        self.assertEqual(len(tests), 78)
+        self.assertEqual(tests[0]["date"], "2023-04-14")  # newest first
+        self.assertEqual(tests[-1]["date"], "1959-09-22")
+        row = next(t for t in tests if t["target"] == "Cosmos 248")
+        self.assertEqual(row, {
+            "country": "Russia", "cc": "RU", "date": "1968-10-20", "target": "Cosmos 248",
+            "interceptor": "Cosmos 249, Cosmos 252 (IS)", "interceptor_type": "co-orbital", "site": "Baikonur",
+            "hit": True, "debris_created": 252, "debris_reentered": 181, "debris_on_orbit": 71,
+            "final_reentry": "on orbit", "lifespan_years": 58.1})
+        solwind = next(t for t in tests if t["target"] == "Solwind")
+        self.assertEqual((solwind["final_reentry"], solwind["debris_on_orbit"]), ("2004-05-09", 0))
+        nudol = next(t for t in tests if t["date"] == "2014-08-12")
+        self.assertEqual((nudol["hit"], nudol["final_reentry"], nudol["lifespan_years"]), (None, None, None))
+        self.assertEqual(next(t for t in tests if t["site"] == "Abdul Kalam island" and t["hit"])["date"],
+                         "2019-03-27")
+        self.assertEqual(next(t for t in tests if t["interceptor"] == "Naryad-V")["date"], "1994-12-26")  # M/D/YY
+
+    def test_undated_rows_are_skipped_and_counted(self):
+        sk = self.doc["skipped"]
+        self.assertEqual([(s["country"], s["date_text"]) for s in sk],
+                         [("Russia", "Aug - Dec 2019"), ("USA", "June-July 1965")])
+        # Parsed tests plus skipped rows give the sheet's own totals: created 6904, still on orbit 2773.
+        tests = self.doc["tests"]
+        self.assertEqual(sum(t["debris_created"] or 0 for t in tests) + sum(s["debris_created"] for s in sk), 6904)
+        self.assertEqual(sum(t["debris_on_orbit"] or 0 for t in tests) + sum(s["debris_on_orbit"] for s in sk), 2773)
+        bc = counterspace.by_country(tests)
+        self.assertEqual(list(bc), ["Russia", "USA", "China", "India"])
+        self.assertEqual(bc["Russia"], {"cc": "RU", "tests": 33, "debris_created": 2734, "debris_on_orbit": 406})
+
+    def test_last_updated(self):
+        self.assertEqual(self.doc["updated"], "2026-02-17")
+        self.assertEqual(counterspace.parse_updated(["", "Last Updated 3-Sep-2027\n Updated By X"]), "2027-09-03")
+        self.assertIsNone(counterspace.parse_updated(["Total Debris Remaining", "2773"]))
+
+    def test_side_columns_are_ignored(self):
+        import csv
+        import io
+        rows = list(csv.reader(io.StringIO(self.raw.decode("utf-8"))))
+        self.assertTrue(any(len(r) > counterspace.DATA_COLS and any(c.strip() for c in r[counterspace.DATA_COLS:])
+                            for r in rows))  # the fixture does carry side-column text
+        out = io.StringIO()
+        csv.writer(out).writerows(r[:counterspace.DATA_COLS] for r in rows)
+        bare = counterspace.parse_asat(out.getvalue().encode("utf-8"))
+        self.assertEqual(bare["tests"], self.doc["tests"])
+        self.assertIsNone(bare["updated"])
+        side = {c.strip() for r in rows for c in r[counterspace.DATA_COLS:] if c.strip() and not c.strip().isdigit()}
+        for t in self.doc["tests"]:
+            self.assertFalse(side & {str(v) for v in t.values()}, t)
+
+    def test_new_since_last(self):
+        tests = self.doc["tests"]
+        self.assertEqual(counterspace.new_since(tests, None), [])
+        self.assertEqual(counterspace.new_since(tests, tests), [])
+        self.assertEqual(counterspace.new_since(tests, tests[1:]), [tests[0]])
+
+    def test_short_or_changed_sheet_raises(self):
+        lines = self.raw.decode("utf-8").split("\n")
+        cut = "\n".join(lines[:40])  # the Russian block only: under 50 tests
+        with self.assertRaises(ValueError):
+            counterspace.parse_asat(cut.encode("utf-8"))
+        with self.assertRaises(ValueError):
+            counterspace.parse_asat(b"<!DOCTYPE html><html>Sign in</html>")
+        with self.assertRaises(ValueError):
+            counterspace.parse_asat(self.raw.replace(b"Date of Test", b"When", 1))
+
+
 class Registers(unittest.TestCase):
     def test_doctrine_registers(self):
         self.assertEqual(registers.check(ROOT / "doctrine"), [])
@@ -414,7 +523,8 @@ class Registers(unittest.TestCase):
         doc = cli.sources_doc(ROOT)
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
-        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi"})
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi",
+                                      "swf-counterspace"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
