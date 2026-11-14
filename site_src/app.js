@@ -87,6 +87,7 @@
     var h = snap.hygiene || {};
     [["Orbital launches, 7 days", launches.length],
      ["Scheduled, next 14 days", (snap.upcoming || []).length],
+     ["Launch hazard areas in force", hazardAreas().length],
      ["Payload reentries, 7 days", reentries.length],
      ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–"]].forEach(function (t) {
       var d = el("div", "tile");
@@ -148,6 +149,7 @@
     var box = document.getElementById("upcoming-table");
     var rows = (snap.upcoming || []).map(function (x) {
       var tr = el("tr");
+      tr.id = "up-" + x.id;
       var when = el("div");
       when.appendChild(el("div", "", fmt(x.net)));
       var cd = el("div", "cd small");
@@ -166,6 +168,167 @@
     box.textContent = "";
     box.appendChild(table(["No earlier than (NET)", "Launch", "Provider", "Orbit", "Site", "Status"], rows));
     tick();
+  }
+
+  /* Navigational warnings: launch hazard and space-debris areas in force (NGA memoranda, NAVAREA XI). A scheduled
+     launch is shown against a warning only as a time coincidence: its NET inside a window of four hours or less, or
+     up to an hour before one opens. Longer windows (some debris areas stand for most of a day, two weeks running)
+     would match nearly everything. Orbit does not say which launch a warning is for. */
+  var HOUR = 3600000, MAX_WINDOW = 4 * HOUR;
+  function hazardAreas() { return ((snap && snap.navwarn) || {}).areas || []; }
+  function netInWindow(netIso, a) {
+    var t = Date.parse(netIso);
+    if (isNaN(t)) return false;
+    return (a.windows || []).some(function (w) {
+      var s = Date.parse(w.start), e = Date.parse(w.end);
+      return e - s <= MAX_WINDOW && t >= s - HOUR && t <= e;
+    });
+  }
+  function nextWindow(a, now) {
+    var ws = a.windows || [];
+    for (var i = 0; i < ws.length; i++) if (Date.parse(ws[i].end) > now) return { w: ws[i], left: ws.length - i - 1 };
+    return null;
+  }
+  var MODE = { alternates: "alternates", daily: "daily repeats", list: "more windows", single: "" };
+  function hazardTable() {
+    var box = document.getElementById("hazard-table");
+    var nw = (snap && snap.navwarn) || {};
+    var areas = hazardAreas();
+    if (!nw.read_at) return empty(box, "Not read yet: navigational warnings appear after Orbit's next collection.");
+    if (!areas.length) return empty(box, "No launch hazard or space-debris warnings in force in the sources read.");
+    var now = Date.now();
+    var rows = areas.map(function (a) {
+      var tr = el("tr");
+      tr.id = "nw-" + a.key;
+      var when = el("div");
+      var nx = nextWindow(a, now);
+      if (nx) {
+        var open = Date.parse(nx.w.start) <= now;
+        when.appendChild(el("div", "", fmt(nx.w.start) + " to " + fmt(nx.w.end, { date: false })));
+        when.appendChild(el("div", "pl", (open ? "Open now" : "") + (open && nx.left ? "; " : "") +
+          (nx.left ? "then " + nx.left + " " + (MODE[a.window_mode] || "more windows") : "")));
+      } else if (a.window_text) {
+        when.appendChild(el("div", "", a.window_text));
+      } else {
+        when.appendChild(el("div", "muted", "Notice, no window"));
+      }
+      cell(tr, when);
+      var what = el("div");
+      what.appendChild(el("div", "", a.hazard.charAt(0).toUpperCase() + a.hazard.slice(1)));
+      what.appendChild(el("div", "pl", (a.regions || []).join(", ").toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); })));
+      if (!(a.areas || []).length && a.cancels && a.cancels.length) {
+        what.appendChild(el("div", "pl", "Cancels " + a.cancels.join(", ")));
+      }
+      cell(tr, what);
+      var by = el("div");
+      a.broadcasts.forEach(function (b) {
+        var d = el("div");
+        var link = el("a", "", b.id); link.href = b.url; link.rel = "noopener";
+        d.appendChild(link);
+        d.appendChild(el("span", "muted", " issued " + fmt(b.issued, { date: true })));
+        by.appendChild(d);
+      });
+      if (a.vertex_differences) {
+        by.appendChild(el("div", "pl", "Copies differ at " + a.vertex_differences +
+          (a.vertex_differences === 1 ? " vertex" : " vertices") + "; the first is drawn"));
+      }
+      cell(tr, by);
+      var match = (snap.upcoming || []).filter(function (u) { return netInWindow(u.net, a); });
+      var mc = el("div");
+      if (match.length) {
+        match.forEach(function (u) {
+          var link = el("a", "", u.name); link.href = "#up-" + u.id;
+          var d = el("div"); d.appendChild(link); mc.appendChild(d);
+        });
+      } else mc.appendChild(el("span", "muted", "None listed"));
+      cell(tr, mc);
+      var act = el("div");
+      if ((a.areas || []).length) {
+        var btn = el("button", "linkish small", "Show on map");
+        btn.type = "button";
+        btn.addEventListener("click", function () { showOnMap(a.key); });
+        act.appendChild(btn);
+      }
+      if (a.expires) act.appendChild(el("div", "pl", "Cancelled " + fmt(a.expires)));
+      cell(tr, act);
+      return tr;
+    });
+    box.textContent = "";
+    box.appendChild(table(["Next window", "Hazard and area", "Broadcast as",
+      "Scheduled launches with NET in a window (time only)", ""], rows));
+  }
+
+  /* The map loads after the tables, from map.js (an ES module with MapLibre); without WebGL it says so. */
+  var mapApi = null, mapStarted = false;
+  function groupOf(country, state) {
+    if (state === "SU") return "ru";
+    return BIG[country] || "other";
+  }
+  function mapModel() {
+    var launchesFc = { type: "FeatureCollection", features: [] };
+    var since7 = daysAgo(7);
+    (snap.launches || []).filter(function (x) { return x.date >= since7 && x.site && x.site.lat != null; }).forEach(function (x) {
+      var l = (x.launchers || [])[0] || {};
+      launchesFc.features.push({ type: "Feature", geometry: { type: "Point", coordinates: [x.site.lon, x.site.lat] },
+        properties: { key: "launch-" + x.launch_tag.replace(/ /g, "-"), group: groupOf(l.country, l.state) } });
+    });
+    var pads = { type: "FeatureCollection", features: [] };
+    (snap.upcoming || []).filter(function (x) { return x.lat != null; }).forEach(function (x) {
+      pads.features.push({ type: "Feature", geometry: { type: "Point", coordinates: [x.lon, x.lat] },
+        properties: { key: "up-" + x.id, group: groupOf((x.provider_countries || [])[0], null) } });
+    });
+    var areas = { type: "FeatureCollection", features: [] };
+    hazardAreas().forEach(function (a) {
+      (a.areas || []).forEach(function (ar) {
+        if (ar.coords.length < 3) return;
+        var ring = ar.coords.slice();
+        var f0 = ring[0], fl = ring[ring.length - 1];
+        if (f0[0] !== fl[0] || f0[1] !== fl[1]) ring.push(f0);
+        areas.features.push({ type: "Feature", geometry: { type: "Polygon", coordinates: [ring] },
+          properties: { key: "nw-" + a.key, debris: a.hazard.indexOf("debris") >= 0 } });
+      });
+    });
+    return { launches: launchesFc, pads: pads, areas: areas };
+  }
+  function describe(key) {
+    var row = document.getElementById(key);
+    if (!row) return null;
+    var txt = function (c) { return c ? (c.innerText || c.textContent).replace(/\s+/g, " ").trim() : ""; };
+    var main = txt(row.cells[1]).slice(0, 160);
+    if (key.indexOf("nw-") === 0) {
+      var first = row.cells[2] && row.cells[2].querySelector("a");
+      return (first ? first.textContent + ": " : "") + main;
+    }
+    return main;
+  }
+  function onPick(key) {
+    var info = document.getElementById("map-info");
+    info.textContent = "";
+    var text = describe(key);
+    if (!text) return;
+    info.appendChild(document.createTextNode(text + " "));
+    var link = el("a", "", "Show in table"); link.href = "#" + key;
+    info.appendChild(link);
+    if (mapApi) mapApi.select(key.indexOf("nw-") === 0 ? key : "");
+  }
+  function showOnMap(key) {
+    var card = document.getElementById("map-card");
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (mapApi) { mapApi.select("nw-" + key); mapApi.flyTo("nw-" + key); onPick("nw-" + key); }
+  }
+  function startMap() {
+    if (mapStarted) return;
+    mapStarted = true;
+    var box = document.getElementById("map");
+    var test = document.createElement("canvas");
+    var gl = null;
+    try { gl = test.getContext("webgl2") || test.getContext("webgl"); } catch (e) { gl = null; }
+    if (!gl) { box.textContent = "This browser has no WebGL, so the map cannot be drawn; the tables list everything."; return; }
+    import("./map.js").then(function (m) {
+      return m.createMap(box, mapModel(), { onPick: onPick });
+    }).then(function (api) { mapApi = api; }).catch(function (e) {
+      box.textContent = "The map could not load (" + e + "); the tables list everything.";
+    });
   }
 
   /* Countdown to each NET, on the viewer's clock, refreshed each minute. It is never finer than the NET itself:
@@ -310,38 +473,72 @@
       "codes; SU is the Soviet Union, kept apart from the Russian Federation (RU)."));
   }
 
-  function sourceOf(lane) {
-    var list = (sources && sources.sources) || [];
-    for (var i = 0; i < list.length; i++) if ((list[i].lanes || []).indexOf(lane) >= 0) return list[i];
-    return null;
+  function sourcesOf(lane) {
+    return ((sources && sources.sources) || []).filter(function (s) { return (s.lanes || []).indexOf(lane) >= 0; });
+  }
+  function gradeBadge(src) {
+    var gb = el("span", "badge grade", "Grade " + src.grade);
+    gb.title = "Admiralty grade: source reliability " + src.grade.charAt(0) + " (" + src.reliability +
+      "), information credibility " + src.grade.slice(1) + " (" + src.credibility + ")";
+    return gb;
   }
   function lanes() {
     var box = document.getElementById("lanes");
     box.textContent = "";
-    var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)" };
+    var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
+      navwarn: "Navigational warnings" };
+    var srcNames = { "nga-msi": "NGA Maritime Safety Information, daily in-force memoranda",
+      "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
     var ul = el("ul", "plain small lanes");
     Object.keys(snap.lanes || {}).forEach(function (k) {
-      var s = snap.lanes[k], src = sourceOf(k);
+      var s = snap.lanes[k], srcs = sourcesOf(k);
       var li = el("li");
+      var multi = srcs.length > 1;
       var head = el("div", "lane-head");
-      if (src && src.url) {
-        var a = el("a", "", names[k] || k); a.href = src.url; a.rel = "noopener"; head.appendChild(a);
-      } else head.appendChild(el("span", "", names[k] || k));
-      if (src && src.grade) {
-        var gb = el("span", "badge grade", "Grade " + src.grade);
-        gb.title = "Admiralty grade: source reliability " + src.grade.charAt(0) + " (" + src.reliability +
-          "), information credibility " + src.grade.slice(1) + " (" + src.credibility + ")";
-        head.appendChild(gb);
-        head.appendChild(el("span", "muted", src.reliability.toLowerCase() + " source; information " +
-          src.credibility.toLowerCase()));
+      if (!multi && srcs[0] && srcs[0].url) {
+        var a = el("a", "", names[k] || k); a.href = srcs[0].url; a.rel = "noopener"; head.appendChild(a);
+      } else head.appendChild(el("strong", "", names[k] || k));
+      if (!multi && srcs[0] && srcs[0].grade) {
+        head.appendChild(gradeBadge(srcs[0]));
+        head.appendChild(el("span", "muted", srcs[0].reliability.toLowerCase() + " source; information " +
+          srcs[0].credibility.toLowerCase()));
       }
       li.appendChild(head);
+      if (multi) {
+        var nwSrc = ((snap.navwarn || {}).sources) || {};
+        srcs.forEach(function (src) {
+          var sh = el("div", "lane-head sub");
+          var a2 = el("a", "", srcNames[src.id] || src.name); a2.href = src.url; a2.rel = "noopener"; sh.appendChild(a2);
+          if (src.grade) {
+            sh.appendChild(gradeBadge(src));
+            sh.appendChild(el("span", "muted", src.reliability.toLowerCase() + " source; information " +
+              src.credibility.toLowerCase()));
+          }
+          li.appendChild(sh);
+          var st = nwSrc[src.id === "nga-msi" ? "nga" : "jcg"];
+          if (st) {
+            var parts = ["Status " + st.status];
+            if (st.memos) {
+              Object.keys(st.memos).forEach(function (m) {
+                var mm = st.memos[m];
+                parts.push(m + (mm.error ? " failed (" + mm.error + ")" : " as of " + fmt(mm.as_of) + ", " +
+                  mm.launch_related + " of " + mm.in_force + " launch-related"));
+              });
+            }
+            if (st.listed != null) parts.push(st.launch_titles + " of " + st.listed + " in-force warnings launch-related");
+            if (st.error) parts.push("Error: " + st.error);
+            (st.errors || []).forEach(function (e) { parts.push("Skipped " + e); });
+            li.appendChild(el("div", "sub", parts.join("; ")));
+          }
+          if (src.licence) li.appendChild(el("div", "muted sub", "Terms: " + src.licence));
+        });
+      }
       var when = s.fetched_at ? "read " + fmt(s.fetched_at) : "never read";
       var txt = "Status " + s.status + (s.from_previous ? " (showing the last good copy)" : "") +
         "; " + when + (s.checked_at ? ", checked " + fmt(s.checked_at) : "");
       if (s.status === "failed" && s.error) txt += ". Error: " + s.error;
       li.appendChild(el("div", "", txt));
-      if (src && src.licence) li.appendChild(el("div", "muted", "Terms: " + src.licence));
+      if (!multi && srcs[0] && srcs[0].licence) li.appendChild(el("div", "muted", "Terms: " + srcs[0].licence));
       ul.appendChild(li);
     });
     var g = snap.gcat_updated || {};
@@ -356,7 +553,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); reentryTable(); catalogBody(); lanes(); startMap();
     if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
   }
 

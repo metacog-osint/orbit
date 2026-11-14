@@ -31,15 +31,16 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 18 offline tests, real fixtures from 13 Nov
+python -m unittest discover -s tests       # 26 offline tests, real fixtures from 13 Nov
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.1`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.2`; details in `doctrine/method.md`)
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
 | `upcoming` | `launches.py` | Launch Library 2, detailed mode (about 450 KB; only it carries provider countries), one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
+| `navwarn` | `navwarn.py` | NGA daily in-force memoranda (5 text files, about 140 KB) and NAVAREA XI (Japan Coast Guard: list XML plus one page per launch-related warning) | 13 Nov, 5:57 PM CST: 25 launch-related warnings in force (NGA 23 of 321, NAVAREA XI 3), 20 areas after grouping |
 
 - **GCAT republishes once a day (about 00:20 UTC).** The lane asks Last-Modified first and downloads nothing if
   no file changed (status `unchanged`). Do not pass `--force` in a schedule: the files are on Jonathan
@@ -83,6 +84,33 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
   minute, never finer than Launch Library 2's NET precision: Second/Minute to the minute, Hour (and
   Morning/Afternoon) as "about", Day as "about N days", Week or coarser no countdown. A passed NET reads
   "NET passed ... ago, status as last read" (the status is from Orbit's last read, up to 6 h old).
+
+## Launch hazard warnings and the map (13 Nov 2026, `orbit-2.2`; Tom's "build the map, and yes to all")
+- **Lane `navwarn`** (`orbit/navwarn.py`; rules in `doctrine/method.md`): warnings naming rocket launching, space
+  debris or reentry, from NGA's daily memoranda and NAVAREA XI. NGA's MSI API is down (503 since at least 6 Nov);
+  the memoranda come from its maintenance page (`msi.nga.mil/apology_objects/DailyMem*.txt`) and may vanish when
+  the API returns: then read `broadcast-warn` instead (untested here). NAVAREA XI: `warnings.cgi` (GET works,
+  `LANG=JP`; `E`/`EN` return nothing) for the list, `disp_warnings.cgi?TANA=` for each English text; titles
+  filtered on ロケット/宇宙/再突入. Sources graded A2 each (Orbit's call; Tom may regrade).
+- **Grouping:** one row per area, with every broadcast (NAVAREA XI first). 13 Nov: NAVAREA XI 0504 = NAVAREA XII
+  788 = HYDROPAC 3257; NAVAREA XI 0507 = XII 787 = HYDROPAC 3256 with one vertex different (178-12E vs 178-21E).
+  NAVAREA XI 0511/26 (13 Nov): "ROCKET LAUNCHING SUSPENDED. CANCEL 0508/26" for the East China Sea, western North
+  Pacific and South Pacific (0508 itself was no longer listed).
+- **Time coincidence only**, in the warnings table: scheduled launches whose NET falls in a window of four hours or
+  less (or up to an hour before). It is time, not place: on 13 Nov it paired a Vostochny Soyuz with a North
+  Atlantic debris box. It was taken out of the scheduled-launch rows for that reason.
+- **Not in the feed** yet, so COP is unchanged. A feed item per area (polygon geometry) would need COP's Orbit
+  drawing entry to handle polygons.
+- **Map** (`site_src/map.js`, Blackout's pattern): MapLibre GL JS 6.14.0 in `site_src/vendor/maplibre-gl/`
+  (byte-identical to COP's integrity-checked copy; the build copies it unchanged), Natural Earth land
+  (`data/world.geojson`, built from the kit's `geo/countries.json`, about 970 KB) below zoom 3.5, OpenFreeMap
+  positron/dark above. Filled dots = launches of the last 7 days at the GCAT site (launching country's colour),
+  rings = scheduled launches at the pad (provider's country), outlines = hazard areas (dashed for debris), using
+  only the validated actor tokens plus ink. CSP now allows `tiles.openfreemap.org` (img, connect) and
+  `worker-src 'self' blob:`, as COP and Blackout do. In a hidden or background browser tab MapLibre does not
+  finish loading the style (seen in the browser pane); a visible tab draws it.
+- **Whether GitHub's runners can reach msi.nga.mil (Akamai) and www1.kaiho.mlit.go.jp is untested** until the first
+  run after the push.
 
 ## Not live: manoeuvres (`orbit/maneuver.py`, not run)
 The seed engine differences consecutive element sets at a 0.35 m/s threshold that drag and fit noise exceed in

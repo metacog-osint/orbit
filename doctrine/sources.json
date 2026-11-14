@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "2.0",
+  "version": "2.2",
   "sources": [
     {
       "id": "gcat-mcdowell",
@@ -21,6 +21,28 @@
       "grade": "B2",
       "independence_group": "thespacedevs",
       "commercial_ok": "unknown"
+    },
+    {
+      "id": "nga-msi",
+      "name": "NGA Maritime Safety Information: in-force daily memoranda for HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and NAVAREA XII (launch hazard and space-debris warnings)",
+      "url": "https://msi.nga.mil/NavWarnings",
+      "licence": "US Government work (17 U.S.C. 105). NGA's own terms page could not be read: the MSI portal and API answer 503 'under maintenance' (since at least 6 Nov 2026); the memoranda are served from that maintenance page. The memoranda say they supplement, and do not replace, IMO/SOLAS broadcasts (read 13 Nov 2026).",
+      "use": "ingest",
+      "grade": "A2",
+      "independence_group": "nga",
+      "commercial_ok": "unknown",
+      "note": "Official coordinator for NAVAREA IV and XII; HYDROPAC/HYDROLANT/HYDROARC rebroadcast other coordinators' warnings. Read the MSI API (broadcast-warn) when it returns."
+    },
+    {
+      "id": "jcg-navarea11",
+      "name": "Japan Coast Guard, Hydrographic and Oceanographic Department: NAVAREA XI navigational warnings (launch hazard and space-debris warnings)",
+      "url": "https://www1.kaiho.mlit.go.jp/TUHO/keiho/navarea11.html",
+      "licence": "Government of Japan Standard Terms of Use 2.0 (www1.kaiho.mlit.go.jp/copyright.html, read 13 Nov 2026): reuse, including commercial, with the source credited and edits marked; not to be presented as the government's own. Article 25 of the Hydrographic Services Act (publications similar to charts and nautical publications need permission) is not read as covering warnings; unverified.",
+      "use": "ingest",
+      "grade": "A2",
+      "independence_group": "jcg",
+      "commercial_ok": true,
+      "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST."
     },
     {
       "id": "space-track",

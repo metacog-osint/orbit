@@ -123,3 +123,20 @@ ul.plain { margin: 0; padding-left: 18px; }
 ul.lanes > li { margin-bottom: 8px; }
 .lane-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 .badge.grade { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Map: launch sites, pads and hazard areas (map.js). Colours of the marks come from the actor tokens above. */
+.map-stage { position: relative; }
+.map { height: 420px; border: 1px solid var(--border); border-radius: 4px; background: var(--badge); }
+@media (max-width: 520px) { .map { height: 320px; } }
+.map .maplibregl-ctrl-attrib { font-size: 0.7rem; }
+.fallback-note { position: absolute; left: 8px; bottom: 4px; margin: 0; background: var(--panel); padding: 2px 6px;
+  border-radius: 3px; }
+.mk { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; }
+.mk.dot { border-radius: 50%; background: var(--g-other); box-shadow: 0 0 0 1px var(--text); }
+.mk.ring { border-radius: 50%; border: 3px solid var(--g-other); background: var(--panel); }
+.mk.area { border: 1.5px solid var(--text); background: var(--warn-bg); opacity: 0.8; }
+.mk.area.dash { border-style: dashed; }
+#map-info { min-height: 1.4em; margin: 6px 0 0; }
+button.linkish { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline;
+  cursor: pointer; font: inherit; }
+.lane-head.sub, div.sub { margin-left: 14px; }

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import feed, fetch, gcat, launches  # noqa: E402
+from orbit import feed, fetch, gcat, launches, navwarn  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -179,6 +179,12 @@ class EndToEnd(unittest.TestCase):
                 return body(by_url[url])
             if url.startswith(launches.API):
                 return body("ll2_upcoming.json")
+            if url.startswith(navwarn.NGA_BASE):
+                return body("navwarn/" + url.rsplit("/", 1)[1])
+            if "disp_warnings.cgi" in url:
+                return body("navwarn/jcg_" + url.rsplit("TANA=", 1)[1].split("&")[0] + ".html")
+            if "/warnings.cgi" in url:
+                return body("navwarn/jcg_list.xml")
             raise AssertionError(url)
 
         self.getter = getter
@@ -201,6 +207,9 @@ class EndToEnd(unittest.TestCase):
         snap = self.run_collect()
         self.assertEqual(snap["lanes"]["catalog"]["status"], "ok")
         self.assertEqual(snap["lanes"]["upcoming"]["status"], "ok")
+        self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
+        self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "ok")
+        self.assertTrue(snap["navwarn"]["areas"])
         self.assertEqual(snap["catalog_changes"], {})  # first reading only sets the baseline
         self.assertTrue((self.tmp / "data" / "state" / "catalog_index.json.gz").exists())
 
@@ -260,6 +269,87 @@ class EndToEnd(unittest.TestCase):
             cli.build_site(self.tmp)
 
 
+NW = FIX / "navwarn"
+NOW_NW = datetime(2026, 11, 13, 23, 0, tzinfo=timezone.utc)
+
+
+class NavWarnings(unittest.TestCase):
+    """Real NGA memoranda and NAVAREA XI messages, 13 Nov 2026."""
+
+    def all_warnings(self):
+        out = []
+        for area, url in navwarn.NGA_MEMOS.items():
+            out += navwarn.parse_memo((NW / url.rsplit("/", 1)[1]).read_bytes(), area, NOW_NW)["warnings"]
+        for it in navwarn.jcg_wanted(navwarn.parse_jcg_list((NW / "jcg_list.xml").read_bytes())):
+            w = navwarn.parse_jcg_message((NW / f"jcg_{it['tana']}.html").read_bytes(), it)
+            if w:
+                out.append(w)
+        return out
+
+    def test_memo_header_and_launch_filter(self):
+        memo = navwarn.parse_memo((NW / "DailyMemPAC.txt").read_bytes(), "HYDROPAC", NOW_NW)
+        self.assertEqual(memo["as_of"], "2026-11-13T17:05:00Z")
+        ids = {w["id"] for w in memo["warnings"]}
+        self.assertIn("HYDROPAC 3315/26", ids)  # India, rocket launching
+        self.assertNotIn("HYDROPAC 3316/26", ids)  # the India hazardous-operations box with no launch words
+        for w in memo["warnings"]:
+            self.assertRegex(w["hazard"], "rocket|space|reentry")
+
+    def test_explicit_single_window_and_expiry(self):
+        w = next(x for x in self.all_warnings() if x["id"] == "HYDROPAC 3315/26")
+        self.assertEqual(w["windows"], [{"start": "2026-11-18T05:30:00Z", "end": "2026-11-18T07:00:00Z"}])
+        self.assertEqual(w["window_mode"], "single")
+        self.assertEqual(w["expires"], "2026-11-18T08:00:00Z")
+        self.assertEqual(w["regions"], ["EASTERN INDIAN OCEAN", "INDIA"])
+        self.assertEqual(len(w["areas"][0]["coords"]), 8)
+        self.assertAlmostEqual(w["areas"][0]["coords"][0][1], 8 + 31.98 / 60, places=3)
+
+    def test_daily_windows_cross_midnight(self):
+        w = next(x for x in self.all_warnings() if x["id"] == "HYDROPAC 3251/26")  # 2215Z TO 0700Z DAILY 13 THRU 26
+        self.assertEqual(w["window_mode"], "daily")
+        self.assertEqual(len(w["windows"]), 14)
+        self.assertEqual(w["windows"][0], {"start": "2026-11-13T22:15:00Z", "end": "2026-11-14T07:00:00Z"})
+
+    def test_alternates_and_lettered_areas(self):
+        w = next(x for x in self.all_warnings() if x["id"] == "NAVAREA IV 1078/26")
+        self.assertEqual(w["window_mode"], "alternates")
+        self.assertEqual(w["windows"][0]["start"], "2026-11-13T17:54:00Z")
+        self.assertEqual(len(w["windows"]), 7)
+        self.assertEqual([a["label"] for a in w["areas"]], ["A", "B", "C"])
+        x = next(x for x in self.all_warnings() if x["id"] == "NAVAREA XII 801/26")  # windows per area
+        self.assertEqual(len(x["windows"]), 7)  # areas opening together are one window
+        self.assertEqual(x["windows"][0], {"start": "2026-11-18T03:14:00Z", "end": "2026-11-18T07:57:00Z"})
+        self.assertEqual(x["cancels"], ["NAVAREA XII 785/26"])
+
+    def test_navarea_xi_message_jst_and_cancellation(self):
+        ws = {w["id"]: w for w in self.all_warnings()}
+        w = ws["NAVAREA XI 0504/26"]
+        self.assertEqual(w["issued"], "2026-11-09T12:00:00Z")  # 21:00 JST
+        self.assertEqual(w["windows"][0], {"start": "2026-11-14T01:30:00Z", "end": "2026-11-14T05:01:00Z"})
+        self.assertEqual(ws["NAVAREA XI 0511/26"]["hazard"], "rocket launching suspended")
+        self.assertEqual(ws["NAVAREA XI 0511/26"]["cancels"], ["NAVAREA XI 0508/26"])
+
+    def test_area_across_the_antimeridian_stays_one_shape(self):
+        w = next(x for x in self.all_warnings() if x["id"] == "NAVAREA XI 0504/26")
+        lons = [c[0] for c in w["areas"][0]["coords"]]
+        self.assertTrue(all(abs(a - b) < 180 for a, b in zip(lons, lons[1:])))
+        self.assertGreater(max(lons), 180)
+
+    def test_rebroadcasts_group_and_vertex_differences_are_counted(self):
+        groups = navwarn.group(navwarn.current(self.all_warnings(), NOW_NW))
+        ids = [[b["id"] for b in g["broadcasts"]] for g in groups]
+        self.assertIn(["NAVAREA XI 0504/26", "NAVAREA XII 788/26", "HYDROPAC 3257/26"], ids)
+        micronesia = next(g for g in groups if g["broadcasts"][0]["id"] == "NAVAREA XI 0507/26")
+        self.assertEqual(micronesia["vertex_differences"], 1)  # 178-12E in NAVAREA XI, 178-21E in NGA's copies
+        self.assertEqual(len(ids), len({i for g in ids for i in g}) - 5)  # 25 warnings, 20 areas
+
+    def test_current_drops_cancelled_warnings(self):
+        later = datetime(2026, 11, 25, 0, 0, tzinfo=timezone.utc)
+        left = {w["id"] for w in navwarn.current(self.all_warnings(), later)}
+        self.assertNotIn("HYDROPAC 3315/26", left)
+        self.assertIn("HYDROPAC 3251/26", left)
+
+
 class Registers(unittest.TestCase):
     def test_doctrine_registers(self):
         self.assertEqual(registers.check(ROOT / "doctrine"), [])
@@ -267,13 +357,14 @@ class Registers(unittest.TestCase):
     def test_page_sources_carry_grades_for_every_lane(self):
         doc = cli.sources_doc(ROOT)
         by_id = {s["id"]: s for s in doc["sources"]}
-        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs"})  # excluded sources stay off the page
+        # excluded sources (Space-Track, CelesTrak) stay off the page
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi", "jcg-navarea11"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
         self.assertEqual(by_id["ll2-thespacedevs"]["credibility"], "Probably true")
-        lanes = sorted(lane for s in doc["sources"] for lane in s["lanes"])
-        self.assertEqual(lanes, sorted(cli.LANE_FIELDS))
+        self.assertEqual({lane for s in doc["sources"] for lane in s["lanes"]}, set(cli.LANE_FIELDS))
+        self.assertTrue(all(s["grade"] for s in doc["sources"]))
 
     def test_feed_items_lint(self):
         snap = json.loads((FIX / "ll2_upcoming.json").read_text(encoding="utf-8"))
