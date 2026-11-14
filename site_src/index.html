@@ -24,6 +24,19 @@
   </div>
 </header>
 
+<nav class="secbar" aria-label="On this page">
+  <div class="wrap secbar-row">
+    <a href="#map-card">Map</a>
+    <a href="#launches">Launched <b data-n="launches"></b></a>
+    <a href="#upcoming">Scheduled <b data-n="upcoming"></b></a>
+    <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
+    <a href="#reentries">Reentries <b data-n="reentries"></b></a>
+    <a href="#catalog">Catalog</a>
+    <a href="#asat">ASAT history</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
 <main class="wrap">
   <section class="hero">
     <h1>What changed in Earth orbit.</h1>
@@ -40,9 +53,6 @@
     </p>
   </section>
 
-  <p class="notice small">Not live yet: manoeuvre detection. It waits on a test of the open maneuver-detect method
-    and on the terms for the orbital history it needs. Until then Orbit reports no manoeuvres and makes no
-    warnings.</p>
 
   <section class="card" id="map-card" aria-labelledby="map-h">
     <div class="card-head">
@@ -95,16 +105,6 @@
     <div class="tbl-wrap" id="hazard-table"></div>
   </section>
 
-  <section class="card" id="asat" aria-labelledby="asat-h">
-    <div class="card-head">
-      <h2 id="asat-h">Anti-satellite tests in space, 1959 to date</h2>
-      <p class="muted small">Every anti-satellite test in Secure World Foundation's history sheet, as SWF compiled it:
-        who tested, when, with which interceptor, against which target, and the cataloged debris created, since
-        re-entered and still on orbit. A record of past tests, not new events; tests SWF adds are listed at the top
-        after Orbit's next reading.</p>
-    </div>
-    <div id="asat-body"></div>
-  </section>
 
   <div class="two">
     <section class="card" id="reentries" aria-labelledby="re-h">
@@ -125,7 +125,22 @@
     </section>
   </div>
 
-  <section class="card" aria-labelledby="src-h">
+  <section class="card" id="asat" aria-labelledby="asat-h">
+    <div class="card-head">
+      <h2 id="asat-h"><span class="ref">Reference · </span>Anti-satellite tests in space, 1959 to date</h2>
+      <p class="muted small">Every anti-satellite test in Secure World Foundation's history sheet, as SWF compiled it:
+        who tested, when, with which interceptor, against which target, and the cataloged debris created, since
+        re-entered and still on orbit. A record of past tests, not new events; tests SWF adds are listed at the top
+        after Orbit's next reading.</p>
+    </div>
+    <div id="asat-body"></div>
+  </section>
+
+  <p class="notice small">Not live yet: manoeuvre detection. Orbit's method has been checked on a known case, and its
+    results wait on approval of the source credit and disclaimer. Until then Orbit reports no manoeuvres and makes no
+    warnings.</p>
+
+  <section class="card" id="sources" aria-labelledby="src-h">
     <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
     <div id="lanes"></div>
   </section>

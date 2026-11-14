@@ -28,7 +28,11 @@
     head.forEach(function (h) { var c = el("th", h.num ? "num" : "", h.label || h); tr.appendChild(c); });
     th.appendChild(tr); t.appendChild(th);
     var tb = el("tbody");
-    rows.forEach(function (r) { tb.appendChild(r); });
+    var names = head.map(function (h) { return h.label || h || ""; });
+    rows.forEach(function (r) {
+      [].forEach.call(r.cells, function (c, i) { if (names[i]) c.setAttribute("data-label", names[i]); });
+      tb.appendChild(r);
+    });
     t.appendChild(tb);
     return t;
   }
@@ -37,6 +41,34 @@
     if (content instanceof Node) td.appendChild(content); else td.textContent = content == null ? "" : content;
     tr.appendChild(td);
     return td;
+  }
+  var opened = {}; // folds the viewer has opened; kept when the page redraws (time settings)
+  function fold(box, rows, keep, noun, key) {
+    if (rows.length <= keep + 2) return;
+    var rest = rows.slice(keep);
+    var p = el("p", "more"), b = el("button");
+    b.type = "button";
+    function set(open) {
+      opened[key] = open;
+      rest.forEach(function (r) { r.classList.toggle("folded", !open); });
+      b.setAttribute("aria-expanded", String(open));
+      b.textContent = open ? "Show the first " + keep : "Show all " + rows.length + " " + noun;
+    }
+    b.addEventListener("click", function () { set(!opened[key]); });
+    b.foldOpen = function () { set(true); };
+    set(!!opened[key]);
+    p.appendChild(b);
+    box.appendChild(p);
+  }
+  // A link to a folded row (the map's "Show in table", a hazard's scheduled launch) opens its table first.
+  function reveal(id) {
+    var r = id && document.getElementById(id);
+    if (!r) return null;
+    if (r.classList.contains("folded")) {
+      var b = r.closest(".tbl-wrap").querySelector(".more button");
+      if (b && b.foldOpen) b.foldOpen();
+    }
+    return r;
   }
   function empty(box, text) { box.textContent = ""; box.appendChild(el("p", "muted small", text)); }
 
@@ -85,15 +117,18 @@
     var launches = (snap.launches || []).filter(function (x) { return x.date >= since7; });
     var reentries = (snap.reentries || []).filter(function (x) { return x.reentry_date >= since7 && x.type === "payload"; });
     var h = snap.hygiene || {};
-    [["Orbital launches, 7 days", launches.length],
-     ["Scheduled, next 14 days", (snap.upcoming || []).length],
-     ["Launch hazard areas in force", hazardAreas().length],
-     ["Payload reentries, 7 days", reentries.length],
-     ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–"]].forEach(function (t) {
-      var d = el("div", "tile");
+    [["Orbital launches, 7 days", launches.length, "launches"],
+     ["Scheduled, next 14 days", (snap.upcoming || []).length, "upcoming"],
+     ["Launch hazard areas in force", hazardAreas().length, "hazards"],
+     ["Payload reentries, 7 days", reentries.length, "reentries"],
+     ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–", "catalog"]].forEach(function (t) {
+      var d = el("a", "tile");
+      d.href = "#" + t[2];
       d.appendChild(el("span", "k", t[0]));
       d.appendChild(el("span", "v", String(t[1])));
       box.appendChild(d);
+      var n = document.querySelector('.secbar b[data-n="' + t[2] + '"]');
+      if (n) n.textContent = String(t[1]);
     });
     document.getElementById("asof").textContent = "Built " + fmt(snap.generated_at) + ".";
     document.getElementById("method").textContent = snap.method_version || "";
@@ -255,7 +290,8 @@
     });
     box.textContent = "";
     box.appendChild(table(["Next window", "Hazard and area", "Broadcast as",
-      "Scheduled launches with NET in a window (time only)", ""], rows));
+      "Scheduled launches with NET in a window (time only)", "Map and cancellation"], rows));
+    fold(box, rows, 8, "warnings", "hazards");
   }
 
   /* Anti-satellite tests in space: Secure World Foundation's sheet as it stands (CC BY-NC 4.0). History, not new
@@ -346,6 +382,7 @@
     tw.appendChild(table(["Date", "Country", "Interceptor, type and target", "Launch site", "Object hit",
       { label: "Debris created", num: true }, { label: "Re-entered", num: true }, { label: "Still on orbit", num: true },
       "Last piece re-entered (debris lifespan)"], rows));
+    fold(tw, rows, 10, "tests", "asat");
     box.appendChild(tw);
     // Notes and credit.
     var note = el("div", "muted small asat-note");
@@ -677,8 +714,59 @@
     if (!snap) return;
     tiles(); launchTable(); upcomingTable(); hazardTable(); counterspaceCard(); reentryTable(); catalogBody(); lanes();
     startMap();
-    if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    markSection();
   }
+
+  window.addEventListener("hashchange", function () {
+    var r = reveal(location.hash.slice(1));
+    if (r) r.scrollIntoView();
+    markSection();
+  });
+
+  // The section bar marks the section in view.
+  var barLinks = [].slice.call(document.querySelectorAll(".secbar a"));
+  function markSection() {
+    var cur = 0, curTop = -Infinity;
+    barLinks.forEach(function (link, i) {
+      var s = document.getElementById(link.getAttribute("href").slice(1));
+      var top = s ? s.getBoundingClientRect().top : Infinity;
+      // Side-by-side cards (reentries and catalog) share a top: the first one keeps the mark.
+      if (top <= 120 && top > curTop + 1) { cur = i; curTop = top; }
+    });
+    barLinks.forEach(function (link, i) {
+      if (i === cur) link.setAttribute("aria-current", "location"); else link.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", markSection, { passive: true });
+
+  // On a phone, a long card note shows three lines; selecting it shows the rest.
+  var notes = [].slice.call(document.querySelectorAll(".card-head p"));
+  function clampNotes() {
+    var phone = window.matchMedia("(max-width: 600px)").matches;
+    notes.forEach(function (p) {
+      var long = phone && !p.classList.contains("open") && p.scrollHeight > p.clientHeight + 2;
+      if (long || (phone && p.classList.contains("open"))) {
+        p.tabIndex = 0; p.setAttribute("role", "button");
+        p.setAttribute("aria-expanded", String(p.classList.contains("open")));
+      } else if (!phone) {
+        p.removeAttribute("tabindex"); p.removeAttribute("role"); p.removeAttribute("aria-expanded");
+      }
+    });
+  }
+  notes.forEach(function (p) {
+    function toggle() {
+      if (!p.hasAttribute("role")) return;
+      p.classList.toggle("open");
+      p.setAttribute("aria-expanded", String(p.classList.contains("open")));
+    }
+    p.addEventListener("click", toggle);
+    p.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+  });
+  clampNotes();
+  window.addEventListener("resize", clampNotes);
 
   if (T && T.mountSettings) T.mountSettings(document.getElementById("time-settings"));
   if (T && T.onChange) T.onChange(render);
