@@ -15,7 +15,7 @@ baseline of its own readings yet, so nothing is called an anomaly, and it makes 
 |---|---|---|
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
-| `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII); Japan Coast Guard, NAVAREA XI | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
+| `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 
 GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
@@ -53,7 +53,9 @@ nothing (about 37 MB) unless one has changed.
    expanded to UTC pairs: explicit `DDHHMMZ TO DDHHMMZ` lists, `ALTERNATE` lists (the first is the primary), and
    `HHMMZ TO HHMMZ DAILY d THRU d` repeats (an end before the start runs past midnight). Areas that each carry
    their own windows are joined: windows opening together are one, ending when the last area closes.
-3. **NAVAREA XI issue times are JST.** The Japan Coast Guard stamps each warning `発表日時` in Japan time; its own
+3. **NAVAREA XI is not read directly** (since 14 Nov 2026): the Japan Coast Guard's robots.txt disallows `/TUHO/`,
+   where its list and messages sit, for every crawler but the National Diet Library's. NAVAREA XI appears only where
+   NGA rebroadcasts it (HYDROPAC, NAVAREA XII). Kept for a source that permits reading: **issue times are JST.** The Japan Coast Guard stamps each warning `発表日時` in Japan time; its own
    in-force list (0499/26, stamped 21:00 on 7 Nov) says "IN FORCE 071200Z", which fixes the offset at nine hours.
 4. **One area, many broadcasts.** HYDROPAC rebroadcasts NAVAREA XI and XII warnings. Warnings with the same windows
    and the same vertices (within 0.05 degrees; up to one in five may differ) are one row, NAVAREA XI listed first,
@@ -68,8 +70,10 @@ nothing (about 37 MB) unless one has changed.
 7. **Sources fail apart.** One memo or one NAVAREA XI message that cannot be read is named and skipped; the lane
    fails only when both sources fail, and then keeps its last good copy.
 8. **NGA's MSI API** (`msi.nga.mil/api/publications/broadcast-warn`) has answered 503 "under maintenance" since at
-   least 6 Nov 2026. The memoranda are served from its maintenance page (`apology_objects/`), so they may vanish
-   when the API returns; the lane then fails NGA and the API should be read instead.
+   least 6 Nov 2026, and before that served a set frozen at May 2024. Orbit reads the API first and keeps it only
+   when its newest warning is under seven days old (NGA issues warnings daily, so an older list is a frozen copy,
+   never a quiet sea); otherwise it reads the memoranda, served from the maintenance page (`apology_objects/`).
+   The page names the form read and why the API was passed over. Cordon reads NGA the same way.
 
 Not in the feed yet: warnings appear on the page and in `snapshot.json` only, so COP is unchanged.
 

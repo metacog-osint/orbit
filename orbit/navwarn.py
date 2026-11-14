@@ -36,9 +36,23 @@ NGA_MEMOS = {
     "NAVAREA XII": NGA_BASE + "DailyMemXII.txt",
 }
 NGA_PAGE = "https://msi.nga.mil/NavWarnings"
+# NGA's MSI API, read first. It has answered 503 since at least 6 Nov 2026, and before that it served a set frozen at
+# May 2024 (Cordon's note), so a list whose newest warning is over STALE_DAYS old is passed over for the memoranda.
+NGA_API = "https://msi.nga.mil/api/publications/broadcast-warn?output=json&status=active"
+NGA_AREA_CODES = {"P": "HYDROPAC", "A": "HYDROLANT", "C": "HYDROARC", "4": "NAVAREA IV", "12": "NAVAREA XII"}
+STALE_DAYS = 7
 JCG_LIST = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi/warnings.cgi?YEAR={year}&TYPE=NAVAREA11&LANG=JP"
 JCG_MSG = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi/disp_warnings.cgi?TYPE=NAVAREA11&TANA={tana}&LANG=JP"
 JCG_PAGE = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/navarea11.html"
+# Not read since 14 Nov 2026: www1.kaiho.mlit.go.jp/robots.txt disallows /TUHO/ for every crawler but the National Diet
+# Library's, and the list and every message sit under it. The parsers stay for a source that permits reading.
+JCG_READ = False
+JCG_OFF = ("not read: the Japan Coast Guard's robots.txt disallows /TUHO/ for automated readers (seen 14 Nov 2026); "
+           "NAVAREA XI shows only where NGA rebroadcasts it")
+
+
+class SourceOff(Exception):
+    """A source Orbit has stopped reading on purpose."""
 # Japanese title words for a launch, space debris or reentry; the English text is checked again after.
 JCG_TITLE = re.compile("ロケット|宇宙|再突入")
 JST = timezone(timedelta(hours=9))
@@ -238,6 +252,39 @@ def parse_memo(body: bytes, area: str, now: datetime) -> dict:
         out.append({"id": wid, "issuer": "nga", "coordinator": im.group(1), "issued": _iso(issued),
                     "url": NGA_PAGE, "text": body_text[:2500], **parsed})
     return {"as_of": _iso(as_of), "in_force": len(starts), "warnings": out}
+
+
+API_DATE = re.compile(r"^(\d{2})(\d{2})(\d{2})Z\s+" + MON + r"\s+(\d{4})$")
+
+
+def parse_api(doc: dict, now: datetime) -> dict:
+    """NGA's broadcast-warn JSON -> {"newest", "memos": {area: {"in_force", "warnings"}}}, launch-related warnings
+    only, in the same form as parse_memo. Raises when nothing is listed or the newest warning is over STALE_DAYS old:
+    NGA issues warnings every day, so an old list is a frozen copy, never a quiet sea."""
+    memos = {a: {"in_force": 0, "warnings": []} for a in NGA_MEMOS}
+    newest = None
+    for w in doc.get("broadcast-warn", []) or []:
+        area = NGA_AREA_CODES.get(str(w.get("navArea") or "").strip().upper())
+        m = API_DATE.match(re.sub(r"\s+", " ", str(w.get("issueDate") or "")).strip().upper())
+        if not area or not m:
+            continue
+        dd, hh, nn, mon, yyyy = m.groups()
+        issued = datetime(int(yyyy), MONTHS.index(mon) + 1, int(dd), int(hh), int(nn), tzinfo=timezone.utc)
+        newest = issued if newest is None else max(newest, issued)
+        memos[area]["in_force"] += 1
+        text = str(w.get("text") or "").replace("\r", "").strip()
+        parsed = parse_body(text, issued)
+        if not parsed:
+            continue
+        wid = f"{area} {int(w.get('msgNumber'))}/{int(w.get('msgYear')) % 100:02d}"
+        parsed["cancels"] = [c if " " in c else f"{area} {c}" for c in parsed["cancels"]]
+        memos[area]["warnings"].append({"id": wid, "issuer": "nga", "coordinator": area, "issued": _iso(issued),
+                                        "url": NGA_PAGE, "text": text[:2500], **parsed})
+    if newest is None:
+        raise ValueError("no warnings in the API's list")
+    if newest < now - timedelta(days=STALE_DAYS):
+        raise ValueError(f"stale: newest warning issued {newest:%Y-%m-%d}")
+    return {"newest": _iso(newest), "memos": memos}
 
 
 # --- Japan Coast Guard, NAVAREA XI -------------------------------------------------------------------------------

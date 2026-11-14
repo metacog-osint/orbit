@@ -38,11 +38,11 @@
       "name": "Japan Coast Guard, Hydrographic and Oceanographic Department: NAVAREA XI navigational warnings (launch hazard and space-debris warnings)",
       "url": "https://www1.kaiho.mlit.go.jp/TUHO/keiho/navarea11.html",
       "licence": "Government of Japan Standard Terms of Use 2.0 (www1.kaiho.mlit.go.jp/copyright.html, read 13 Nov 2026): reuse, including commercial, with the source credited and edits marked; not to be presented as the government's own. Article 25 of the Hydrographic Services Act (publications similar to charts and nautical publications need permission) is not read as covering warnings; unverified.",
-      "use": "ingest",
+      "use": "excluded",
       "grade": "A2",
       "independence_group": "jcg",
       "commercial_ok": true,
-      "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST."
+      "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST. Not read since 14 Nov 2026: the site's robots.txt disallows /TUHO/ (where the list and messages sit) for every crawler but the National Diet Library's. Read 13-14 Nov 2026 before that was seen."
     },
     {
       "id": "space-track",

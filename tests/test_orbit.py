@@ -34,6 +34,25 @@ def body(name: str) -> bytes:
     return (FIX / name).read_bytes()
 
 
+def api_doc_from_memos() -> dict:
+    """The 13 Nov memoranda recast in the API's broadcast-warn form (navArea code, msgNumber, msgYear, issueDate
+    "DDHHMMZ MON YYYY", text), so the API path is tested on the same real warnings as the memo path."""
+    codes = {v: k for k, v in navwarn.NGA_AREA_CODES.items()}
+    out = []
+    for area, url in navwarn.NGA_MEMOS.items():
+        lines = (FIX / "navwarn" / url.rsplit("/", 1)[1]).read_bytes().decode("utf-8", "replace").replace(
+            "\r", "").split("\n")
+        starts = [i for i in range(len(lines) - 1)
+                  if navwarn.DTG.match(lines[i].strip()) and navwarn.MSG_ID.match(lines[i + 1].strip())]
+        for k, i in enumerate(starts):
+            dd, hh, nn, mon, yy = navwarn.DTG.match(lines[i].strip()).groups()
+            _, num, _yy = navwarn.MSG_ID.match(lines[i + 1].strip()).groups()
+            end = starts[k + 1] if k + 1 < len(starts) else len(lines)
+            out.append({"navArea": codes[area], "msgNumber": int(num), "msgYear": 2000 + int(yy),
+                        "issueDate": f"{dd}{hh}{nn}Z {mon} 20{yy}", "text": "\n".join(lines[i + 2:end]).strip()})
+    return {"broadcast-warn": out}
+
+
 def tables() -> dict:
     return {c: gcat.parse_tsv(body(FILES[c])) for c in gcat.CATALOGS}
 
@@ -169,6 +188,7 @@ class EndToEnd(unittest.TestCase):
         self.calls = []
         self.stamp = "Fri, 13 Nov 2026 00:23:02 GMT"
         self.fail = False
+        self.api_doc = None
         by_url = {u: FILES[name] for name, u in gcat.URLS.items()}
 
         def getter(url, timeout=60):
@@ -179,6 +199,10 @@ class EndToEnd(unittest.TestCase):
                 return body(by_url[url])
             if url.startswith(launches.API):
                 return body("ll2_upcoming.json")
+            if url == navwarn.NGA_API:
+                if self.api_doc is None:
+                    raise OSError("HTTP Error 503: Service Unavailable")
+                return json.dumps(self.api_doc).encode("utf-8")
             if url.startswith(navwarn.NGA_BASE):
                 return body("navwarn/" + url.rsplit("/", 1)[1])
             if "disp_warnings.cgi" in url:
@@ -208,7 +232,8 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["catalog"]["status"], "ok")
         self.assertEqual(snap["lanes"]["upcoming"]["status"], "ok")
         self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
-        self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "ok")
+        self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "off")  # robots.txt disallows /TUHO/
+        self.assertFalse([u for u in self.calls if "kaiho.mlit.go.jp" in u])
         self.assertTrue(snap["navwarn"]["areas"])
         self.assertEqual(snap["catalog_changes"], {})  # first reading only sets the baseline
         self.assertTrue((self.tmp / "data" / "state" / "catalog_index.json.gz").exists())
@@ -263,6 +288,19 @@ class EndToEnd(unittest.TestCase):
         snap = self.run_collect()
         self.assertEqual(snap["lanes"]["catalog"]["status"], "failed")
         self.assertIn("short reading", snap["lanes"]["catalog"]["error"])
+
+    def test_nga_api_first_then_memoranda(self):
+        snap = self.run_collect()  # API answers 503: the memoranda are read
+        nga = snap["navwarn"]["sources"]["nga"]
+        self.assertEqual((nga["form"], nga["status"]), ("memoranda", "ok"))
+        self.assertIn("503", nga["api_error"])
+        n_memo = len(snap["navwarn"]["areas"])
+        self.api_doc, self.calls[:] = api_doc_from_memos(), []
+        snap = self.run_collect()  # API back and fresh: it alone is read
+        nga = snap["navwarn"]["sources"]["nga"]
+        self.assertEqual((nga["form"], nga["status"]), ("api", "ok"))
+        self.assertFalse([u for u in self.calls if u.startswith(navwarn.NGA_BASE)])
+        self.assertEqual(len(snap["navwarn"]["areas"]), n_memo)
 
     def test_build_refuses_without_snapshot(self):
         with self.assertRaises(SystemExit):
@@ -343,6 +381,24 @@ class NavWarnings(unittest.TestCase):
         self.assertEqual(micronesia["vertex_differences"], 1)  # 178-12E in NAVAREA XI, 178-21E in NGA's copies
         self.assertEqual(len(ids), len({i for g in ids for i in g}) - 5)  # 25 warnings, 20 areas
 
+    def test_api_form_matches_memoranda(self):
+        api = navwarn.parse_api(api_doc_from_memos(), NOW_NW)
+        for area, url in navwarn.NGA_MEMOS.items():
+            memo = navwarn.parse_memo((NW / url.rsplit("/", 1)[1]).read_bytes(), area, NOW_NW)
+            got = api["memos"][area]
+            self.assertEqual(got["in_force"], memo["in_force"], area)
+            strip = lambda ws: [(w["id"], w["windows"], w["areas"], w["cancels"]) for w in ws]  # noqa: E731
+            self.assertEqual(strip(got["warnings"]), strip(memo["warnings"]), area)
+
+    def test_stale_or_empty_api_is_refused(self):
+        doc = api_doc_from_memos()
+        for w in doc["broadcast-warn"]:
+            w["issueDate"] = w["issueDate"][:-4] + "2024"  # the frozen May 2024 set NGA served before the outage
+        with self.assertRaisesRegex(ValueError, "stale"):
+            navwarn.parse_api(doc, NOW_NW)
+        with self.assertRaisesRegex(ValueError, "no warnings"):
+            navwarn.parse_api({"broadcast-warn": []}, NOW_NW)
+
     def test_current_drops_cancelled_warnings(self):
         later = datetime(2026, 11, 25, 0, 0, tzinfo=timezone.utc)
         left = {w["id"] for w in navwarn.current(self.all_warnings(), later)}
@@ -358,7 +414,7 @@ class Registers(unittest.TestCase):
         doc = cli.sources_doc(ROOT)
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
-        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi", "jcg-navarea11"})
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")

@@ -45,7 +45,7 @@ INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"],
-               "navwarn": ["nga-msi", "jcg-navarea11"]}
+               "navwarn": ["nga-msi"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -110,23 +110,35 @@ def _lane_navwarn(raw_dir: Path, prev: dict, getter, **_):
     now = launches.now_utc()
     warnings, recs, sources = [], [], {}
     nga = {"status": "ok", "memos": {}}
-    for area, url in navwarn.NGA_MEMOS.items():
-        slug = area.lower().replace(" ", "")
-        try:
-            body, rec = fetch.fetch(f"nga-{slug}", url, raw_dir, "txt", getter=getter)
-            recs.append(rec)
-            memo = navwarn.parse_memo(body, area, now)
+    try:  # NGA's API first; down (503) since at least 6 Nov 2026, frozen at May 2024 before that
+        body, rec = fetch.fetch("nga-api", navwarn.NGA_API, raw_dir, "json", getter=getter)
+        recs.append(rec)
+        api = navwarn.parse_api(json.loads(body), now)
+        nga.update({"form": "api", "newest": api["newest"]})
+        for area, memo in api["memos"].items():
             warnings += memo["warnings"]
-            nga["memos"][area] = {"as_of": memo["as_of"], "in_force": memo["in_force"],
-                                  "launch_related": len(memo["warnings"])}
-        except Exception as exc:  # one memo failing leaves the others
-            nga["memos"][area] = {"error": f"{type(exc).__name__}: {exc}"[:200]}
+            nga["memos"][area] = {"as_of": navwarn._iso(now), "in_force": memo["in_force"], "launch_related": len(memo["warnings"])}
+    except Exception as exc:  # then the daily in-force memoranda, each read on its own
+        nga.update({"form": "memoranda", "api_error": f"{type(exc).__name__}: {exc}"[:200]})
+        for area, url in navwarn.NGA_MEMOS.items():
+            slug = area.lower().replace(" ", "")
+            try:
+                body, rec = fetch.fetch(f"nga-{slug}", url, raw_dir, "txt", getter=getter)
+                recs.append(rec)
+                memo = navwarn.parse_memo(body, area, now)
+                warnings += memo["warnings"]
+                nga["memos"][area] = {"as_of": memo["as_of"], "in_force": memo["in_force"],
+                                      "launch_related": len(memo["warnings"])}
+            except Exception as exc2:  # one memo failing leaves the others
+                nga["memos"][area] = {"error": f"{type(exc2).__name__}: {exc2}"[:200]}
     bad = [a for a, m in nga["memos"].items() if "error" in m]
     if bad:
         nga["status"] = "failed" if len(bad) == len(navwarn.NGA_MEMOS) else "partial"
     sources["nga"] = nga
     jcg = {"status": "ok"}
     try:
+        if not navwarn.JCG_READ:
+            raise navwarn.SourceOff(navwarn.JCG_OFF)
         items = []
         for year in sorted({now.year, (now - timedelta(days=45)).year}):
             body, rec = fetch.fetch("jcg-navarea11-list", navwarn.JCG_LIST.format(year=year), raw_dir, "xml",
@@ -149,11 +161,14 @@ def _lane_navwarn(raw_dir: Path, prev: dict, getter, **_):
                 warnings.append(w)
         if bad:
             jcg.update({"status": "partial" if len(bad) < len(wanted) else "failed", "errors": bad})
+    except navwarn.SourceOff as exc:
+        jcg = {"status": "off", "reason": str(exc)}
     except Exception as exc:
         jcg = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"[:200]}
     sources["jcg"] = jcg
-    if nga["status"] == "failed" and jcg["status"] == "failed":
-        raise RuntimeError("both NGA and NAVAREA XI failed: " + (jcg.get("error") or "; ".join(jcg.get("errors", []))))
+    if nga["status"] == "failed" and jcg["status"] in ("failed", "off"):
+        raise RuntimeError("NGA failed and NAVAREA XI gave nothing: " + (jcg.get("error") or jcg.get("reason")
+                                                                         or "; ".join(jcg.get("errors", []))))
     areas = navwarn.group(navwarn.current(warnings, now))
     return {"navwarn": {"read_at": fetch.now_utc(), "sources": sources, "areas": areas}}, recs, None
 

@@ -487,13 +487,13 @@
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
       navwarn: "Navigational warnings" };
-    var srcNames = { "nga-msi": "NGA Maritime Safety Information, daily in-force memoranda",
+    var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
     var ul = el("ul", "plain small lanes");
     Object.keys(snap.lanes || {}).forEach(function (k) {
       var s = snap.lanes[k], srcs = sourcesOf(k);
       var li = el("li");
-      var multi = srcs.length > 1;
+      var multi = srcs.length > 1 || k === "navwarn";  // navwarn always shows NGA's per-memo status
       var head = el("div", "lane-head");
       if (!multi && srcs[0] && srcs[0].url) {
         var a = el("a", "", names[k] || k); a.href = srcs[0].url; a.rel = "noopener"; head.appendChild(a);
@@ -518,6 +518,9 @@
           var st = nwSrc[src.id === "nga-msi" ? "nga" : "jcg"];
           if (st) {
             var parts = ["Status " + st.status];
+            if (st.form === "api") parts.push("read from NGA's broadcast-warn API");
+            else if (st.form === "memoranda") parts.push("read from the daily in-force memoranda (API: " +
+              (st.api_error || "not used") + ")");
             if (st.memos) {
               Object.keys(st.memos).forEach(function (m) {
                 var mm = st.memos[m];
@@ -527,6 +530,7 @@
             }
             if (st.listed != null) parts.push(st.launch_titles + " of " + st.listed + " in-force warnings launch-related");
             if (st.error) parts.push("Error: " + st.error);
+            if (st.reason) parts.push(st.reason);
             (st.errors || []).forEach(function (e) { parts.push("Skipped " + e); });
             li.appendChild(el("div", "sub", parts.join("; ")));
           }
