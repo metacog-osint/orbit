@@ -1,151 +1,212 @@
-"""Maneuver Compare engine from the 1 Nov 2026 seed build. NOT RUN by tools/orbit.py (13 Nov 2026 review).
+"""Orbit changes in watched objects' element sets (orbit-2.4, 14 Nov 2026). Replaces the 1 Nov seed engine, which
+called any 0.35 m/s difference a manoeuvre (drag and fit noise exceed that in low orbit) and gave its confidence
+from a formula.
 
-Kept for reference only. Why it is not live:
-  - It differences two consecutive element sets and calls anything at or above 0.35 m/s a manoeuvre. In low
-    orbit, drag and ordinary element-set fit noise move mean motion by more than that between sets, so on live
-    data it would report false manoeuvres.
-  - "calibrated_confidence" is a fixed formula, not a calibration against known manoeuvres.
-  - Its inputs were made up. A real history needs Space-Track GP history (terms reported to bar publishing
-    derived analysis; not yet read) or an archive Orbit builds itself from a source it may republish.
-The plan's first step is to run maneuver-detect (MIT, astro-tools) on SJ-21 and BeiDou-2 G2 (January 2022)
-locally and judge whether it is believable. See doctrine/method.md.
+The method, for each watched object, over its stored Space-Track element sets (GP and GP_HISTORY):
+  1. One set per epoch: where Space-Track has re-issued an epoch, the later-created set is kept.
+  2. For each pair of consecutive sets, the changes in semi-major axis (from mean motion), inclination, right
+     ascension of the ascending node and eccentricity, less what the object's own steady drift would give over
+     that interval (the median rate across its pairs: drag decay, nodal precession).
+  3. Each change as a velocity: in-track from semi-major axis (v * da / 2a), cross-track from inclination and node
+     (v * angle), eccentricity (v * de / 2).
+  4. The object's own noise: for each of the three, the median and 1.4826 * median absolute deviation across all
+     its pairs. A pair is marked when one of them is at least Z (8) of those deviations above the median AND the
+     total is at least FLOOR_MS (0.05 m/s). At least MIN_PAIRS (10) pairs are needed before anything is marked.
+     A change is reported only when its total is at least REPORT_MS for its regime: 0.25 m/s at GEO (Tom, 14 Nov
+     2026, after the known case gave four 0.06-0.19 m/s marks on the dead BeiDou-2 G2), FLOOR_MS elsewhere.
+  5. Marked pairs less than a day apart are one change.
+
+What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
+marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
+drag can give the same. Orbit says which object, when and how much; never why, and never a warning. The
+thresholds are not yet calibrated against announced manoeuvres; `python tools/orbit.py maneuver-case` runs the
+known case (Shijian-21 towing BeiDou-2 G2 to a graveyard orbit, January 2022).
 """
 from __future__ import annotations
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from statistics import median
 
-MU_EARTH_KM3_S2 = 398600.4418
+PUBLISH = False  # held until Tom approves the Space-Track disclaimer (doctrine/spacetrack-disclaimer.md)
+ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSPACECOM), redistributed under USSPACECOM's "
+               "blanket approval for basic SSA data. Orbit-change analysis: The Intelligence Company, not reviewed or "
+               "endorsed by USSPACECOM. Not for operational use.")  # DRAFT wording, section 3 of the disclaimer
 
-MEANING_SENTENCES = {
-    "in-track": (
-        "Hypothesis: An in-track burn alters semi-major axis and orbital period, which usually indicates "
-        "along-track re-phasing, ground-track repeat timing adjustment, or closing/opening distance to a co-orbital object."
-    ),
-    "cross-track": (
-        "Hypothesis: A cross-track out-of-plane burn alters inclination or right ascension of the ascending node (RAAN), "
-        "which usually indicates orbital plane realignment, sun-synchronous local-time-of-ascending-node maintenance, or plane matching."
-    ),
-    "radial": (
-        "Hypothesis: A radial or eccentricity-shaping burn alters perigee/apogee geometry without a large period shift, "
-        "which usually indicates perigee height maintenance or close-proximity circumnavigation."
-    ),
-}
-
-
-def _semi_major_axis_km(mean_motion_rev_day: float) -> float:
-    n_rad_s = (mean_motion_rev_day * 2.0 * math.pi) / 86400.0
-    return (MU_EARTH_KM3_S2 / (n_rad_s ** 2)) ** (1.0 / 3.0)
-
-
-def _orbital_speed_ms(a_km: float) -> float:
-    return math.sqrt(MU_EARTH_KM3_S2 / a_km) * 1000.0
+MU = 398600.4418  # km^3/s^2
+RE = 6378.137     # km
+SIDEREAL_REV_DAY = 1.0027379093
+Z = 8.0
+FLOOR_MS = 0.05
+REPORT_MS = {"GEO": 0.25}  # smallest reported change by regime; FLOOR_MS where a regime is not listed
+MIN_PAIRS = 10
+MERGE_DAYS = 1.0
+MIN_RATE_DT = 0.1   # days: pairs closer than this do not set the steady-drift rate
+WINDOW_DAYS = 30    # changes reported from the last 30 days
+KEEP_DAYS = 120     # sets older than this are dropped from the store
+STALE_DAYS = 3      # no new set for this long is named: an untracked object looks exactly like a quiet one
+J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
+COMPONENTS = ("in-track", "cross-track", "eccentricity")
 
 
-def evaluate_tle_history(watched_histories: list[dict], siblings_map: dict[str, list[str]] | None = None) -> dict:
-    """Compare consecutive TLE epochs for each watched satellite to detect maneuvers and flag >=48h TLE gaps."""
-    siblings_map = siblings_map or {}
-    detections = []
-    source_health_flags = []
+def _dt(s: str) -> datetime:
+    s = s.strip().replace(" ", "T").rstrip("Z")
+    return datetime.fromisoformat(s).replace(tzinfo=timezone.utc)
 
-    for sat in watched_histories:
-        jcat = sat["jcat"]
-        norad = sat.get("norad") or "UNNUMBERED"
-        name = sat["name"]
-        owner = sat.get("owner_clean") or sat.get("owner") or "RU"
-        country = sat.get("country") or ("RU" if owner in ("RU", "SU") else owner)
-        orbit_class = sat.get("orbit_class") or "LEO"
-        launch_desig = sat.get("launch_designator") or ""
-        days_since_launch = int(sat.get("days_since_launch", 120))
-        is_sibling_dispersion = bool(launch_desig in siblings_map and days_since_launch <= 30)
-        epochs = sat.get("epochs") or []
 
-        max_gap_h = 0.0
-        for i in range(1, len(epochs)):
-            prev, curr = epochs[i - 1], epochs[i]
-            t0 = datetime.fromisoformat(prev["epoch"].replace("Z", "+00:00"))
-            t1 = datetime.fromisoformat(curr["epoch"].replace("Z", "+00:00"))
-            gap_h = round((t1 - t0).total_seconds() / 3600.0, 2)
-            if gap_h > max_gap_h:
-                max_gap_h = gap_h
+def _iso(d: datetime) -> str:
+    return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            a0 = _semi_major_axis_km(float(prev["mean_motion"]))
-            a1 = _semi_major_axis_km(float(curr["mean_motion"]))
-            v_ms = _orbital_speed_ms((a0 + a1) / 2.0)
 
-            da_km = a1 - a0
-            di_deg = float(curr["inclination_deg"]) - float(prev["inclination_deg"])
-            de = float(curr["eccentricity"]) - float(prev["eccentricity"])
+def norm(rec: dict) -> list:
+    """A Space-Track GP / GP_HISTORY record reduced to [epoch, mean motion, e, i, node, perigee arg, mean anomaly,
+    created]."""
+    return [_iso(_dt(rec["EPOCH"])), float(rec["MEAN_MOTION"]), float(rec["ECCENTRICITY"]), float(rec["INCLINATION"]),
+            float(rec["RA_OF_ASC_NODE"]), float(rec["ARG_OF_PERICENTER"]), float(rec["MEAN_ANOMALY"]),
+            str(rec.get("CREATION_DATE") or "")]
 
-            dv_intrack = abs(0.5 * v_ms * (da_km / a0))
-            dv_crosstrack = abs(2.0 * v_ms * math.sin(math.radians(abs(di_deg)) / 2.0))
-            dv_radial = abs(0.5 * v_ms * abs(de))
 
-            components = [
-                ("in-track", dv_intrack),
-                ("cross-track", dv_crosstrack),
-                ("radial", dv_radial),
-            ]
-            mtype, peak_dv = max(components, key=lambda x: x[1])
-            total_dv = round(math.sqrt(dv_intrack ** 2 + dv_crosstrack ** 2 + dv_radial ** 2), 2)
+def merge(store: dict, records: list[dict], now: datetime, keep_days: int = KEEP_DAYS) -> dict:
+    """Add Space-Track records to the store {norad: {name, object_id, country, decay, sets}}; one set per epoch
+    (the later-created one), sets older than keep_days dropped."""
+    cutoff = _iso(now - timedelta(days=keep_days))
+    for rec in records:
+        key = str(int(rec["NORAD_CAT_ID"]))
+        obj = store.setdefault(key, {"sets": []})
+        obj.update({"name": rec.get("OBJECT_NAME"), "object_id": rec.get("OBJECT_ID"),
+                    "country": rec.get("COUNTRY_CODE"), "decay": rec.get("DECAY_DATE")})
+        row = norm(rec)
+        by_epoch = {s[0]: s for s in obj["sets"]}
+        old = by_epoch.get(row[0])
+        if old is None or row[7] >= old[7]:
+            by_epoch[row[0]] = row
+        obj["sets"] = sorted((s for s in by_epoch.values() if s[0] >= cutoff), key=lambda s: s[0])
+    return store
 
-            if total_dv < 0.35:
-                continue
 
-            # Calibrated confidence (degraded if a >=48h TLE gap spans the detection window)
-            raw_conf = min(0.96, round(0.55 + min(0.40, total_dv / 8.0), 2))
-            if gap_h >= 48.0:
-                raw_conf = min(raw_conf, 0.45)
+def _a(n_rev_day: float) -> float:
+    n = n_rev_day * 2 * math.pi / 86400.0
+    return (MU / n ** 2) ** (1 / 3)
 
-            routine_sk = bool(sat.get("routine_station_keeping", False)) or (orbit_class == "GEO" and total_dv < 1.2) or is_sibling_dispersion
-            tier = "warning" if (total_dv >= 1.5 and raw_conf >= 0.75 and not routine_sk) else "routine"
 
-            detections.append({
-                "id": f"maneuver-{jcat.lower()}-{curr['epoch'][:13]}",
-                "jcat": jcat,
-                "norad": norad,
-                "name": name,
-                "owner": owner,
-                "country": country,
-                "orbit_class": orbit_class,
-                "epoch_before": prev["epoch"],
-                "epoch_after": curr["epoch"],
-                "tle_gap_hours": gap_h,
-                "maneuver_type": mtype,
-                "delta_v_ms": total_dv,
-                "delta_a_km": round(da_km, 3),
-                "delta_inc_deg": round(di_deg, 4),
-                "calibrated_confidence": raw_conf,
-                "routine_station_keeping": routine_sk,
-                "is_sibling_dispersion": is_sibling_dispersion,
-                "tier": tier,
-                "meaning_sentence": MEANING_SENTENCES[mtype],
-                "subpoint_lat": float(curr.get("subpoint_lat", sat.get("subpoint_lat", 0.0))),
-                "subpoint_lon": float(curr.get("subpoint_lon", sat.get("subpoint_lon", 0.0))),
-                "summary": (
-                    f"{name} (NORAD {norad}, {owner}, {orbit_class}): {mtype} maneuver of {total_dv} m/s "
-                    f"(Δa={round(da_km, 2)} km, Δi={round(di_deg, 4)}°) detected between {prev['epoch'][:16]}Z and "
-                    f"{curr['epoch'][:16]}Z (confidence {round(raw_conf * 100)}%). {MEANING_SENTENCES[mtype]}"
-                ),
-            })
+def _gmst_deg(t: datetime) -> float:
+    d = (t - J2000).total_seconds() / 86400.0
+    return (280.46061837 + 360.98564736629 * d) % 360.0
 
-        if max_gap_h >= 48.0:
-            source_health_flags.append({
-                "jcat": jcat,
-                "norad": norad,
-                "name": name,
-                "owner": owner,
-                "country": country,
-                "orbit_class": orbit_class,
-                "max_tle_gap_hours": max_gap_h,
-                "last_epoch": epochs[-1]["epoch"] if epochs else "unknown",
-                "subpoint_lat": float(sat.get("subpoint_lat", 0.0)),
-                "subpoint_lon": float(sat.get("subpoint_lon", 0.0)),
-                "summary": (
-                    f"Source health flag: {name} (NORAD {norad}, {owner}) had a {max_gap_h} h TLE tracking gap "
-                    f"(>=48 h threshold); an untracked window looks identical to zero maneuvers."
-                ),
-            })
 
-    detections.sort(key=lambda d: (d["tier"] != "warning", -d["delta_v_ms"], d["jcat"]))
-    return {"detections": detections, "source_health_flags": source_health_flags}
+def _wrap180(x: float) -> float:
+    return (x + 180.0) % 360.0 - 180.0
+
+
+def regime(n: float, e: float) -> str:
+    a = _a(n)
+    if e > 0.25:
+        return "HEO"
+    if a * (1 + e) - RE < 2000:
+        return "LEO"
+    if 0.9 < n < 1.1 and e < 0.05:
+        return "GEO"
+    return "MEO"
+
+
+def geo_position(s: list) -> dict:
+    """Sub-satellite longitude (east +) at the set's epoch and drift in degrees a day (east +), near-circular
+    geosynchronous orbits only."""
+    t = _dt(s[0])
+    lon = _wrap180(s[4] + s[5] + s[6] - _gmst_deg(t))
+    return {"lon": round(lon, 2), "drift_deg_day": round((s[1] - SIDEREAL_REV_DAY) * 360.0, 3)}
+
+
+def _pairs(sets: list) -> list[dict]:
+    out = []
+    for p, q in zip(sets, sets[1:]):
+        dt = (_dt(q[0]) - _dt(p[0])).total_seconds() / 86400.0
+        if dt <= 0:
+            continue
+        a0, a1 = _a(p[1]), _a(q[1])
+        out.append({"from": p[0], "to": q[0], "dt": dt, "a": (a0 + a1) / 2, "i": (p[3] + q[3]) / 2,
+                    "da": a1 - a0, "di": q[3] - p[3], "dnode": _wrap180(q[4] - p[4]), "de": q[2] - p[2],
+                    "p": p, "q": q})
+    return out
+
+
+def _robust(xs: list[float]) -> tuple[float, float]:
+    m = median(xs)
+    return m, 1.4826 * median(abs(x - m) for x in xs)
+
+
+def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
+    sets = obj.get("sets") or []
+    out = {"sets": len(sets), "events": [], "regime": None, "last_epoch": sets[-1][0] if sets else None,
+           "max_gap_h": None, "note": None}
+    if not sets:
+        out["note"] = "no element sets"
+        return out
+    last = sets[-1]
+    out["regime"] = reg = regime(last[1], last[2])
+    if reg == "GEO":
+        out["geo"] = geo_position(last)
+    age = (now - _dt(last[0])).total_seconds() / 86400.0
+    if age > STALE_DAYS:
+        out["note"] = f"no new element set for {age:.1f} days"
+    pairs = _pairs(sets)
+    if pairs:
+        out["max_gap_h"] = round(max(p["dt"] for p in pairs) * 24, 1)
+    if len(pairs) < MIN_PAIRS:
+        out["note"] = out["note"] or f"baseline too short ({len(pairs)} pairs of {MIN_PAIRS})"
+        return out
+    rated = [p for p in pairs if p["dt"] >= MIN_RATE_DT] or pairs
+    rate = {k: median(p[k] / p["dt"] for p in rated) for k in ("da", "di", "dnode", "de")}
+    for p in pairs:
+        v = math.sqrt(MU / p["a"]) * 1000.0  # m/s
+        ja = p["da"] - rate["da"] * p["dt"]
+        ji = math.radians(p["di"] - rate["di"] * p["dt"])
+        jn = math.radians(p["dnode"] - rate["dnode"] * p["dt"]) * math.sin(math.radians(p["i"]))
+        je = p["de"] - rate["de"] * p["dt"]
+        p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
+                   "eccentricity": abs(v * je / 2)}
+        p["total"] = math.sqrt(sum(x * x for x in p["dv"].values()))
+    base = {c: _robust([p["dv"][c] for p in pairs]) for c in COMPONENTS}
+    out["noise_ms"] = {c: round(base[c][1], 4) for c in COMPONENTS}
+    cutoff = _iso(now - timedelta(days=window_days))
+    marked = []
+    for p in pairs:
+        z = {c: (p["dv"][c] - base[c][0]) / max(base[c][1], 1e-6) for c in COMPONENTS}
+        p["z"] = z
+        if max(z.values()) >= Z and p["total"] >= FLOOR_MS and p["to"] >= cutoff:
+            marked.append(p)
+    groups: list[list[dict]] = []
+    for p in marked:
+        if groups and (_dt(p["from"]) - _dt(groups[-1][-1]["to"])).total_seconds() / 86400.0 < MERGE_DAYS:
+            groups[-1].append(p)
+        else:
+            groups.append([p])
+    out["below_report"] = 0
+    for g in groups:
+        if sum(p["total"] for p in g) < REPORT_MS.get(reg, FLOOR_MS):
+            out["below_report"] += 1  # counted, not listed
+            continue
+        dv = {c: sum(p["dv"][c] for p in g) for c in COMPONENTS}
+        ev = {"from": g[0]["from"], "to": g[-1]["to"], "dv_ms": round(sum(p["total"] for p in g), 3),
+              "dominant": max(dv, key=dv.get), "da_km": round(sum(p["da"] for p in g), 2),
+              "di_deg": round(sum(p["di"] for p in g), 4), "z": round(max(max(p["z"].values()) for p in g), 1),
+              "pairs": len(g)}
+        if reg == "GEO":
+            b, a = geo_position(g[0]["p"]), geo_position(g[-1]["q"])
+            ev["geo"] = {"lon_before": b["lon"], "lon_after": a["lon"], "drift_before": b["drift_deg_day"],
+                         "drift_after": a["drift_deg_day"]}
+        out["events"].append(ev)
+    return out
+
+
+def report(store: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
+    objs = []
+    for key, obj in sorted(store.items(), key=lambda kv: int(kv[0])):
+        d = detect(obj, now, window_days)
+        objs.append({"norad": int(key), "name": obj.get("name"), "object_id": obj.get("object_id"),
+                     "country": obj.get("country"), "decay": obj.get("decay"), **d})
+    events = sorted(({"norad": o["norad"], "name": o["name"], "object_id": o["object_id"], "country": o["country"],
+                      "regime": o["regime"], **e} for o in objs for e in o["events"]),
+                    key=lambda e: e["to"], reverse=True)
+    return {"objects": objs, "events": events, "window_days": window_days,
+            "thresholds": {"z": Z, "floor_ms": FLOOR_MS, "report_ms": REPORT_MS, "min_pairs": MIN_PAIRS, "merge_days": MERGE_DAYS}}

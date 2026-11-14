@@ -18,22 +18,28 @@ Lanes (method orbit-2.3):
             NAVAREA XI (Japan Coast Guard), a list and one request per launch-related warning.
   counterspace  Secure World Foundation's "History of ASAT Testing in Space" sheet (CSV export, CC BY-NC 4.0):
             every test with its debris counts, totals by country, and tests new since the last reading.
-The manoeuvre lane (orbit/maneuver.py) is not run: see doctrine/method.md.
+  maneuver  Space-Track.org (USSPACECOM) element sets for a private watch list: GP once an hour at most, each
+            object's history (GP_HISTORY) once only, stored in data/state/spacetrack/. Orbit changes larger than
+            each object's own element-set noise (orbit/maneuver.py). Held off the page and out of the snapshot
+            until Tom approves the disclaimer (maneuver.PUBLISH); off without credentials.
+    python tools/orbit.py maneuver-case      # the January 2022 Shijian-21 / BeiDou-2 G2 case, local only
+    python tools/orbit.py maneuver-report    # the held report, printed locally
 """
 from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 import sys
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, navwarn  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -41,9 +47,14 @@ LANE_FIELDS = {
     "upcoming": ["upcoming"],
     "navwarn": ["navwarn"],
     "counterspace": ["counterspace"],
+    "maneuver": ["maneuvers"],
 }
 EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
-         "navwarn": {}, "counterspace": {}}
+         "navwarn": {}, "counterspace": {}, "maneuvers": {}}
+ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
+ST_CLIENT = spacetrack.Client            # replaceable in tests
+ST_WAIT = spacetrack.wait_for_clear_minute
+ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
@@ -197,8 +208,87 @@ def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
     }}, [rec], None
 
 
+def _st_read(data_dir: Path, name: str, default):
+    p = data_dir / ST_DIR / name
+    if not p.exists():
+        return default
+    raw = p.read_bytes()
+    return json.loads(gzip.decompress(raw) if name.endswith(".gz") else raw)
+
+
+def _st_write(data_dir: Path, name: str, doc) -> None:
+    p = data_dir / ST_DIR / name
+    p.parent.mkdir(parents=True, exist_ok=True)
+    raw = json.dumps(doc, separators=(",", ":") if name.endswith(".gz") else None, indent=None if name.endswith(
+        ".gz") else 1, ensure_ascii=False).encode("utf-8")
+    p.write_bytes(gzip.compress(raw, 6) if name.endswith(".gz") else raw)
+
+
+def _st_raw(raw_dir: Path, source_id: str, cls: str, body: bytes) -> dict:
+    """Hash and keep Space-Track's bytes before anything is derived (git-ignored data/raw). The record names the
+    class only: the URL lists the watch list, so it never reaches the snapshot."""
+    sha = hashlib.sha256(body).hexdigest()
+    dest = raw_dir / source_id
+    dest.mkdir(parents=True, exist_ok=True)
+    f = dest / f"{sha[:12]}.json.gz"
+    if not f.exists():
+        f.write_bytes(gzip.compress(body, 6))
+    return {"source_id": source_id, "url": spacetrack.REDACTED.format(cls=cls), "sha256": sha, "bytes": len(body),
+            "fetched_at": fetch.now_utc()}
+
+
+def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
+    """Orbit changes in watched objects (Space-Track GP and GP_HISTORY). Off without credentials or a watch list;
+    unchanged (no request) within an hour of the last GP query."""
+    data_dir = raw_dir.parent
+    root = data_dir.parent
+    cred = spacetrack.credentials(root)
+    if not cred:
+        raise spacetrack.NotReady("no Space-Track credentials (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD)")
+    ids = spacetrack.watch_list(root)
+    if not ids:
+        raise spacetrack.NotReady("no watch list (ORBIT_WATCH or private/watch.txt)")
+    meta = _st_read(data_dir, "meta.json", {})
+    store = _st_read(data_dir, "sets.json.gz", {})
+    now = ST_NOW()
+    if meta.get("last_gp_at"):
+        since = (now - datetime.fromisoformat(meta["last_gp_at"].replace("Z", "+00:00"))).total_seconds()
+        if since < spacetrack.MIN_GP_GAP_S:
+            return None, [], None  # GP once an hour: keep the last reading
+    ST_WAIT()
+    client = ST_CLIENT(*cred)
+    recs = []
+    try:
+        client.login()
+        gp = client.query("gp", ids)
+        recs.append(_st_raw(raw_dir, "spacetrack-gp", "gp", client.last_body))
+        fresh = [i for i in ids if not (store.get(str(i)) or {}).get("history_at")]
+        hist = []
+        if fresh:  # each object's history once only: Space-Track asks that it be stored, never fetched again
+            hist = client.query("gp_history", fresh, spacetrack.history_extra())
+            recs.append(_st_raw(raw_dir, "spacetrack-gp-history", "gp_history", client.last_body))
+    finally:
+        client.logout()
+    read_at = maneuver._iso(ST_NOW())
+    meta.update({"last_gp_at": read_at, "requests_last_run": client.requests})
+    maneuver.merge(store, hist + gp, now)
+    for i in fresh:
+        store.setdefault(str(i), {"sets": []})["history_at"] = read_at
+    _st_write(data_dir, "sets.json.gz", store)
+    _st_write(data_dir, "meta.json", meta)
+    watched = {str(i): store[str(i)] for i in ids if str(i) in store}
+    rep = maneuver.report(watched, now)
+    rep.update({"read_at": read_at, "watched": len(ids), "missing": [i for i in ids if str(i) not in store]})
+    _st_write(data_dir, "report.json", rep)  # the full report, private
+    out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
+           "thresholds": rep["thresholds"], "events": rep["events"],
+           "quiet_or_untracked": sum(1 for o in rep["objects"] if not o["events"]),
+           "stale": sum(1 for o in rep["objects"] if (o.get("note") or "").startswith("no new"))}
+    return {"maneuvers": out}, recs, None
+
+
 LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "navwarn": _lane_navwarn,
-         "counterspace": _lane_counterspace}
+         "counterspace": _lane_counterspace, "maneuver": _lane_maneuver}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
@@ -232,6 +322,10 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
                                    "fetches": [{k: r[k] for k in ("url", "sha256", "bytes")} for r in recs]}
             if stamps:
                 snap["lanes"][lane]["last_modified"] = stamps
+        except spacetrack.NotReady as exc:
+            for k in fields:
+                snap[k] = EMPTY[k]
+            snap["lanes"][lane] = {"status": "off", "reason": str(exc), "checked_at": now}
         except Exception as exc:
             had = bool(prev_lane.get("fetched_at"))
             for k in fields:
@@ -239,6 +333,11 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             snap["lanes"][lane] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"[:300],
                                    "failed_at": now, "from_previous": had, "fetched_at": prev_lane.get("fetched_at"),
                                    "last_modified": prev_lane.get("last_modified")}
+    if not maneuver.PUBLISH:  # held: the lane's record and output stay in the private state, off the snapshot
+        held = {"lane": snap["lanes"].pop("maneuver", None), "maneuvers": snap.pop("maneuvers", None)}
+        if prev.get("maneuvers") or (prev.get("lanes") or {}).get("maneuver"):
+            held["note"] = "dropped from a snapshot written while PUBLISH was on"
+        _st_write(data_dir, "held_lane.json", held)
     data_dir.mkdir(parents=True, exist_ok=True)
     snap_path.write_text(json.dumps(snap, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     return snap
@@ -333,6 +432,49 @@ def check_all(root: Path = ROOT) -> list[str]:
     return errs
 
 
+CASE = {"ids": [49330, 34779], "from": "2021-12-01", "to": "2022-03-01", "file": "case_sj21_2022.json.gz",
+        "now": "2022-03-01T00:00:00Z", "window_days": 90}
+
+
+def print_report(rep: dict) -> None:
+    for o in rep["objects"]:
+        g = o.get("geo") or {}
+        print(f"{o['norad']:>6} {str(o.get('name'))[:24]:24s} {str(o.get('regime')):4s} sets {o['sets']:4d}  "
+              f"last {o.get('last_epoch')}  gap max {o.get('max_gap_h')} h  noise {o.get('noise_ms')}"
+              + (f"  lon {g['lon']} drift {g['drift_deg_day']}/day" if g else "") + (f"  [{o['note']}]" if o.get("note") else ""))
+        for e in o["events"]:
+            gg = e.get("geo") or {}
+            print(f"         {e['from']} -> {e['to']}  {e['dv_ms']:8.3f} m/s {e['dominant']:12s} da {e['da_km']} km "
+                  f"di {e['di_deg']} deg z {e['z']} ({e['pairs']} pairs)"
+                  + (f"  lon {gg['lon_before']} -> {gg['lon_after']}, drift {gg['drift_before']} -> {gg['drift_after']}"
+                     if gg else ""))
+
+
+def maneuver_case(root: Path = ROOT) -> int:
+    """Shijian-21 (49330) and BeiDou-2 G2 (34779), 1 Dec 2021 to 1 Mar 2022: one GP_HISTORY request the first
+    time, stored in data/state/spacetrack/ and never asked for again."""
+    data_dir = root / "data"
+    records = _st_read(data_dir, CASE["file"], None)
+    if records is None:
+        cred = spacetrack.credentials(root)
+        if not cred:
+            print("No Space-Track credentials: set SPACETRACK_IDENTITY and SPACETRACK_PASSWORD in .env first.")
+            return 1
+        ST_WAIT()
+        client = ST_CLIENT(*cred)
+        try:
+            client.login()
+            records = client.query("gp_history", CASE["ids"], f"/EPOCH/{CASE['from']}--{CASE['to']}")
+        finally:
+            client.logout()
+        _st_write(data_dir, CASE["file"], records)
+    store = maneuver.merge({}, records, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")), keep_days=400)
+    rep = maneuver.report(store, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")), CASE["window_days"])
+    print(f"{len(records)} element sets, Space-Track (USSPACECOM). Thresholds {rep['thresholds']}.")
+    print_report(rep)
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -341,6 +483,8 @@ def main(argv=None) -> int:
     c.add_argument("--force", action="store_true", help="read GCAT even if its files have not changed")
     sub.add_parser("build")
     sub.add_parser("check")
+    sub.add_parser("maneuver-case", help="the Jan 2022 Shijian-21 / BeiDou-2 G2 case from Space-Track, local only")
+    sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
     args = ap.parse_args(argv)
 
     if args.cmd == "collect":
@@ -359,6 +503,15 @@ def main(argv=None) -> int:
               + (f"Catalog changes since {ch['previous_reading_at']}: {ch['added']} added, {ch['removed']} removed, "
                  f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))
         return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
+    if args.cmd == "maneuver-case":
+        return maneuver_case(ROOT)
+    if args.cmd == "maneuver-report":
+        rep = _st_read(ROOT / "data", "report.json", None)
+        if not rep:
+            print("No report yet: run collect with Space-Track credentials and a watch list.")
+            return 1
+        print_report(rep)
+        return 0
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")
