@@ -22,7 +22,8 @@ way: `GEMINI.md` and `data/`.
 **Planned scope** (`D:\Projects\_ideas\new-programs.md`, program row and roadmap step 14): catalog changes,
 launches, manoeuvres, counterspace events; maneuver-detect, Secure World Foundation counterspace sheets, ITU
 Space Explorer, optional 3D page. Built: launches, scheduled launches, reentries, catalog changes, owner-code
-counts, ASAT test history. Built but held (not published): manoeuvres (Space-Track). Not built: ITU, 3D page. Describe Orbit publicly from what is live.
+counts, ASAT test history, orbit changes in watched satellites (Space-Track, 14 Nov 2026). Not built: ITU, 3D
+page. Describe Orbit publicly from what is live.
 
 ## Commands
 ```bash
@@ -139,7 +140,7 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
   11 MB, biweekly) are unopened, and ITU's copyright page reserves rights (ask jur@itu.int). CSIS: all rights
   reserved, not used.
 
-## Manoeuvre lane (orbit-2.4, built 14 Nov 2026, HELD: not on the page, not in the snapshot)
+## Manoeuvre lane (orbit-2.4, published 14 Nov 2026 after Tom approved the disclaimer, naming the 18th SDS)
 Tom, 14 Nov 2026 (relayed by the parent session): "proceed with the space-track work, we will just have a
 disclaimer drafted as needed." No written question to Space-Track first. The draft is
 `doctrine/spacetrack-disclaimer.md`; Tom approves it before anything is published.
@@ -163,9 +164,12 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
   Stored sets, the full report and the held lane record are in `data/state/spacetrack/` (private Actions cache).
   The query URLs list the watch list, so the snapshot records them as "(watch list withheld)". Published output
   names only objects with a marked change and counts the rest.
-- **To publish (after Tom approves the disclaimer):** `maneuver.PUBLISH = True`; `space-track` `use` to `ingest`
-  and `LANE_SOURCE["maneuver"] = ["space-track"]`; a page card with the disclaimer's wording; method version
-  orbit-2.4. Not built yet: the page card.
+- **Published:** `maneuver.PUBLISH = True` (False holds it again), `space-track` `use` is `ingest`,
+  `LANE_SOURCE["maneuver"] = ["space-track"]`, method orbit-2.4. The card `#maneuvers` carries the approved
+  disclaimer at its head, the short credit on every row, and the footer credit; events show GCAT's name and owner
+  beside Space-Track's. Change the wording only with Tom's yes. Not in the COP feed. GitHub secrets
+  SPACETRACK_IDENTITY, SPACETRACK_PASSWORD and ORBIT_WATCH set by Tom 14 Nov 2026; the first run with them reads
+  each watched object's 60-day history once.
 - `python tools/orbit.py maneuver-report` prints the held report locally.
 
 Earlier notes (13 Nov 2026), kept for the record:

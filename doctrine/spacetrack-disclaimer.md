@@ -1,8 +1,8 @@
-# Space-Track disclaimer (DRAFT, 14 Nov 2026, for Tom's approval)
+# Space-Track disclaimer (approved by Tom, 14 Nov 2026)
 
-Nothing from Space-Track is published until Tom approves this text. Approval is one change: `PUBLISH = True` in
-`orbit/maneuver.py`, the `space-track` source's `use` set to `ingest` in `doctrine/sources.json`, and the page
-card built with the wording below.
+Tom approved the draft on 14 Nov 2026 and chose to name the 18th Space Defense Squadron. Published from orbit-2.4:
+`PUBLISH = True` in `orbit/maneuver.py`, the `space-track` source's `use` is `ingest`, and the page card carries
+the wording below. Change the wording only with Tom's yes.
 
 ## What Space-Track's terms say (read 14 Nov 2026)
 - User Agreement (space-track.org/auth/createAccount): the user agrees "not to transfer any data or technical
@@ -16,7 +16,7 @@ card built with the wording below.
   of the pages, not yet checked word for word in a browser.
 
 ## 1. On the page, at the top of the manoeuvre card (every time the card shows)
-> **Source: Space-Track.org, United States Space Command (USSPACECOM).** Element sets are USSPACECOM's,
+> **Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron.** Element sets are USSPACECOM's,
 > redistributed under its blanket approval for basic space situational awareness data, which requires this
 > citation. The orbit changes listed here are The Intelligence Company's own analysis of those element sets. They
 > are not USSPACECOM's, and USSPACECOM and Space-Track have not reviewed, endorsed or checked them.
@@ -30,17 +30,16 @@ card built with the wording below.
 > Space-Track.org (USSPACECOM) element sets; Intelligence Company analysis.
 
 ## 3. In `snapshot.json` (`maneuvers.attribution`) and any COP feed item
-> Element sets: Space-Track.org, United States Space Command (USSPACECOM), redistributed under USSPACECOM's blanket
-> approval for basic SSA data. Orbit-change analysis: The Intelligence Company, not reviewed or endorsed by
+> Element sets: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron,
+> redistributed under USSPACECOM's blanket approval for basic SSA data. Orbit-change analysis: The Intelligence Company, not reviewed or endorsed by
 > USSPACECOM. Not for operational use.
 
 ## 4. Footer credit and README
-> Satellite element sets from Space-Track.org, United States Space Command (USSPACECOM); orbit-change analysis is
-> Orbit's own.
+> Satellite element sets from Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
+> Squadron; orbit-change analysis is Orbit's own.
 
-## Open points for Tom
-- Should the page name the 18th and 19th Space Defense Squadrons? Orbit's register used to. Space-Track's
-  sign-up page refers operators to the 18th; the 19th has not been checked.
+## Settled
+- The 18th Space Defense Squadron is named (Tom, 14 Nov 2026); the 19th is not.
 - Space-Track's terms apply to the account holder. The account is Tom's, so this text is published under Tom's
   account terms.
 - Raw element sets are not republished: the page shows changes and positions derived from them, and the stored

@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "2.3",
+  "version": "2.4",
   "sources": [
     {
       "id": "gcat-mcdowell",
@@ -57,11 +57,11 @@
     },
     {
       "id": "space-track",
-      "name": "Space-Track.org (United States Space Command, USSPACECOM): GP and GP_HISTORY element sets",
+      "name": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron): GP and GP_HISTORY element sets",
       "url": "https://www.space-track.org/",
-      "licence": "Account required. User Agreement (read 14 Nov 2026): no transfer of data 'including the analysis of data' 'without prior express approval'. Space-Track's documentation (read 14 Nov 2026): 'USSPACECOM has provided express blanket approval for transfer/redistribution of basic SSA data and services ... conditioned on appropriate citation', and 'Publications of analysis based on USSPACECOM data also require appropriate citations.' Credit wording: doctrine/spacetrack-disclaimer.md (draft, for Tom).",
-      "use": "excluded",
-      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. Held: nothing derived is published until Tom approves the disclaimer (maneuver.PUBLISH), then use becomes 'ingest'. Grade is Orbit's call, to be confirmed by Tom.",
+      "licence": "Account required. User Agreement (read 14 Nov 2026): no transfer of data 'including the analysis of data' 'without prior express approval'. Space-Track's documentation (read 14 Nov 2026): 'USSPACECOM has provided express blanket approval for transfer/redistribution of basic SSA data and services ... conditioned on appropriate citation', and 'Publications of analysis based on USSPACECOM data also require appropriate citations.' Credit wording: doctrine/spacetrack-disclaimer.md, approved by Tom 14 Nov 2026.",
+      "use": "ingest",
+      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. Raw element sets are not republished: the page shows changes and positions derived from them, credited as the disclaimer gives. Grade is Orbit's call, to be confirmed by Tom.",
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": false

@@ -9,7 +9,7 @@
 collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
 from_previous) or stays empty, and the snapshot's "lanes" block says which.
 
-Lanes (method orbit-2.3):
+Lanes (method orbit-2.4):
   catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
             day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
             if none has changed. About 37 MB when it does.
@@ -20,8 +20,8 @@ Lanes (method orbit-2.3):
             every test with its debris counts, totals by country, and tests new since the last reading.
   maneuver  Space-Track.org (USSPACECOM) element sets for a private watch list: GP once an hour at most, each
             object's history (GP_HISTORY) once only, stored in data/state/spacetrack/. Orbit changes larger than
-            each object's own element-set noise (orbit/maneuver.py). Held off the page and out of the snapshot
-            until Tom approves the disclaimer (maneuver.PUBLISH); off without credentials.
+            each object's own element-set noise (orbit/maneuver.py). Published since Tom approved the disclaimer
+            (14 Nov 2026); maneuver.PUBLISH = False holds it off the page again. Off without credentials.
     python tools/orbit.py maneuver-case      # the January 2022 Shijian-21 / BeiDou-2 G2 case, local only
     python tools/orbit.py maneuver-report    # the held report, printed locally
 """
@@ -59,7 +59,7 @@ INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"],
-               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"]}
+               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "maneuver": ["space-track"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -278,6 +278,11 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
     _st_write(data_dir, "meta.json", meta)
     watched = {str(i): store[str(i)] for i in ids if str(i) in store}
     rep = maneuver.report(watched, now)
+    objs = (_read_index(data_dir) or {}).get("objects") or {}
+    for ev in rep["events"]:  # GCAT's name and owner beside Space-Track's, as the rest of the page uses
+        g = objs.get(f"S{ev['norad']:05d}")
+        if g:
+            ev.update({"gcat_name": g[4], "state": g[10], "cc": gcat.iso_country(g[10])})
     rep.update({"read_at": read_at, "watched": len(ids), "missing": [i for i in ids if str(i) not in store]})
     _st_write(data_dir, "report.json", rep)  # the full report, private
     out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
