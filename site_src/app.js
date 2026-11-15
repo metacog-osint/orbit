@@ -495,6 +495,95 @@
   }
 
 
+  // SWF's rendezvous and proximity operations: SWF's text, Orbit's reading of its dates, GCAT matches.
+  function rpoPart(s) {  // "2014-10" or "2014-10-03" or "2014", as precise as SWF gave it
+    if (!s) return "";
+    if (s.length === 10) return dayYear(s);
+    if (s.length === 7) return MONTH_NAMES[parseInt(s.slice(5), 10) - 1] + " " + s.slice(0, 4);
+    return s;
+  }
+  var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function rpoWhen(r) {
+    var w = r.when;
+    if (!w) return r.date_text || "Not given";
+    if (w.ongoing) return "Since " + rpoPart(w.start) + ", ongoing";
+    if (w.end === w.start) return rpoPart(w.start);
+    return rpoPart(w.start) + " to " + rpoPart(w.end);
+  }
+  function rpoSats(cellText, links) {
+    var d = el("div");
+    d.appendChild(el("div", "", cellText || "Not given"));
+    (links || []).forEach(function (g) {
+      d.appendChild(el("div", "pl", "GCAT: " + g.gcat_name + (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")")));
+    });
+    return d;
+  }
+  function rpoCard() {
+    var box = document.getElementById("rpo-body");
+    var rp = (snap && snap.rpo) || {};
+    if (!rp.read_at) return empty(box, "Not read yet: the history appears after Orbit's next collection.");
+    box.textContent = "";
+    var rows = rp.rows || [], tabs = rp.tabs || {}, roles = rp.roles || {};
+    var key = function (r) { return (r.when && r.when.start) || ""; };
+    ["military", "commercial", "planned"].forEach(function (tab) {
+      var mine = rows.filter(function (r) { return r.tab === tab; })
+        .sort(function (a, b) { return key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0; });
+      if (!mine.length) return;
+      var ro = roles[tab] || ["Target", "Chaser"], planned = tab === "planned";
+      var trs = mine.map(function (r) {
+        var tr = el("tr");
+        var when = el("div");
+        when.appendChild(el("div", "", rpoWhen(r)));
+        if (r.when && r.date_text) when.appendChild(el("div", "pl", "SWF: " + r.date_text));
+        cell(tr, when);
+        cell(tr, who([mark(r.cc, null)], r.country));
+        cell(tr, rpoSats(r.chaser, (r.gcat || {}).chaser));
+        cell(tr, rpoSats(r.target, (r.gcat || {}).target));
+        cell(tr, r.mission_type || "–");
+        if (planned) {
+          cell(tr, r.org || "–");
+          cell(tr, r.notes || "–", "small");
+        } else {
+          cell(tr, r.orbit || "–");
+          cell(tr, r.site || "–");
+          cell(tr, r.debris_released || "–");
+        }
+        return tr;
+      });
+      box.appendChild(el("h3", "small", (tabs[tab] || tab) + " (" + trs.length + ")"));
+      var head = ["When (SWF's text below)", "Country", ro[1], ro[0], "Mission type"]
+        .concat(planned ? ["Organisation", "SWF's notes"] : ["Orbit", "Launch site", "Debris released"]);
+      var tw = el("div", "tbl-wrap");
+      tw.appendChild(table(head, trs));
+      fold(tw, trs, 10, "operations", "rpo-" + tab);
+      box.appendChild(tw);
+    });
+    var note = el("div", "muted small asat-note");
+    var bits = [];
+    if (rp.updated) bits.push("The sheet says it was last updated " + dayYear(rp.updated) + "; Orbit read it " +
+      fmt(rp.read_at) + ".");
+    var un = rp.unread_dates || [];
+    if (un.length) {
+      bits.push("Orbit could not read " + (un.length === 1 ? "one row's date" : un.length + " rows' dates") +
+        " into a span, so " + (un.length === 1 ? "it shows" : "they show") + " SWF's text as given and " +
+        (un.length === 1 ? "sorts" : "sort") + " last: " + un.map(function (u) {
+          return u.country + ", " + u.date_text + ", " + (u.chaser || "not given");
+        }).join("; ") + ".");
+    }
+    bits.push("Categories, purposes and spans are SWF's; a GCAT match is Orbit's, by name and launch date.");
+    note.appendChild(el("p", "", bits.join(" ")));
+    var cr = el("p", "");
+    cr.appendChild(document.createTextNode("Secure World Foundation, Global Counterspace Capabilities (2026), " +
+      "CC BY-NC 4.0: "));
+    var a1 = el("a", "", "report"); a1.href = rp.report; a1.rel = "noopener"; cr.appendChild(a1);
+    cr.appendChild(document.createTextNode(", "));
+    var a2 = el("a", "", "sheet"); a2.href = rp.sheet; a2.rel = "noopener"; cr.appendChild(a2);
+    cr.appendChild(document.createTextNode("."));
+    note.appendChild(cr);
+    box.appendChild(note);
+  }
+
+
   /* The map loads after the tables, from map.js (an ES module with MapLibre); without WebGL it says so. */
   var mapApi = null, mapStarted = false;
   function groupOf(country, state) {
@@ -725,6 +814,7 @@
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
       news: "Spaceflight News API (headlines, links only)",
       navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history",
+      rpo: "Secure World Foundation, RPO history",
       maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
@@ -797,7 +887,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); counterspaceCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
     startMap();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();

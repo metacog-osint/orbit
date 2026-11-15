@@ -1,0 +1,48 @@
+Country,Date of Activity,Client Satellite,Servicer Satellite,Mission Type,Orbit,Launch Site,Debris Released,"Total Pieces of Cataloged 
+Debris* Created","Total Pieces Cataloged 
+Debris Re-entered","Amount of Debris 
+Still on Orbit","Date of Final 
+Piece Re-entry","Lifespan of Debris 
+(years on orbit or to date)",Notes,Sources,,,
+USA,"Apr 14, 2005",MUBLCOM,DART,Servicing,,Vandenberg AFB,–,0,0,0,–,–,NASA DART bumped into military satellite but did not cause damage or release tracked debris,"https://swfound.org/counterspace/ 
+ http://www.nasa.gov/pdf/148072main_DART_mishap_overview.pdf.",,,"* Debris cataloged by the U.S. military, generally pieces 
+10 cm in size and larger. Breakups from after 2003 are 
+likely to have higher number of pieces detected and 
+tracked by the SSN due to the full-power status of Cobra 
+Dane radar.
+
+Note also that these numbers are based on the last updated 
+time as debris may have fragmented again or deborbited"
+USA,Jan 2016,BEVO-2,AggieSat4,Servicing,LEO,Cape Canaveral,–,0,0,0,–,–,"Lonestar mission testing in space navigation capabilitites, Bevo-2 deployed from AggieSat4; Pair of satellites deployed from ISS to practice communication and data exchange as well as 
+stationkeeping and navigation","https://spaceflight101.com/iss-expedition-46/pair-of-satellites-ejected-from-iss-for-in-space-nav
+igation-exercise/
+https://spaceflightnow.com/2015/11/30/atlas-5cygnus-oa-4-launch-timeline/ ",,,
+USA,"Jan 25, 2020",Intelsat 901,MEV-1,Servicing,GEO,Baikonur ,–,0,0,0,–,–,MEV-1 successfully docked to provide mission extension services for Intelsat 901,"https://news.northropgrumman.com/news/releases/northrop-grumman-successfully-completes
+-historic-first-docking-of-mission-extension-vehicle-with-intelsat-901-satellite
+https://www.space.com/mev-1-satellite-servicing-spacecraft-launch-success.html ",,,
+USA,Jun 15-29 2020,Aerocube 10-B,Aerocube 10-A,Servicing,LEO,Wallops,-,0,0,0,-,-,"AC-10B entered a proximity orbit around AC-10A with a radius of 30 x 60 meters and used its on-board camera to take resolved images of AC-10A while orbiting from maximum to minimum range. During another close approach, AC-10B was able to take photos from a mere 22 meters away. ",https://aerospace.org/article/cubesats-get-close-proximity-operation-interesting-implications,,,
+USA,"Apr 12, 2021",Intelsat 10-02,MEV-2,Servicing,GEO,Guiana Space Center,-,0,0,0,-,-,"Launched on August 15, 2020; On April 12, 2021, MEV-2 docked succesfully and is conducting close proximity operations on Intelsat's 10-02 spacecraft for servicing. The service will provide another 5 years of life for the 18-year old satellite.","https://spacenews.com/mev-2-servicer-closing-in-on-intelsat-10-02-docking-attempt/
+https://www.intelsat.com/newsroom/intelsat-announces-successful-launch-of-galaxy-30-satellite-and-northrop-grummans-second-mission-extension-vehicle/",,,
+USA,April 2023,LINUSS1,LINUSS2,Servicing,GEO,Kennedy Space Center,-,0,0,0,-,-,"Cubesats launched on November 1st 2022 by Lockheed Martin as part of the Linuss experiement. They were deployed in the GEO. In April 2023, one cubesat performed the role of a servicing vehicle to the other. The mission was used to test various algorithms, SSA cameras and the new ASPIN. ",https://spacenews.com/lockheed-martin-declares-success-demonstrating-tech-for-in-orbit-satellite-servicing/ ; https://aerospace.org/article/ussf-44-space-force-successfully-completes-first-mission-falcon-heavy-rocket ; https://breakingdefense.com/2023/04/lockheed-martin-demos-on-orbit-maneuvering-for-afrl-with-sat-servicing-in-mind/ ,,,
+,,,,,,,,,,,,,,,,,
+Sweden,Aug 2010 - July 2011,PRISMA Target,PRISMA Main,Servicing,LEO,Dombarovskiy Air Base,–,0,0,0,–,–,Two launched as a pair and separated; Autonomous guidance and navigation experiements; GPS navigation testing for future formation flying ,"https://spaceflightnow.com/news/n1010/25prisma 
+Distributed Space Missions for Earth System Monitoring (Page 615) 
+https://space.skyrocket.de/doc_sdat/prisma.htm ",,,
+,,,,,,,,,,,,,,,,,
+Japan,Nov 1997,ORIHIME,HIKOBOSHI,Servicing,LEO,Baikonur Cosmodrome,–,0,0,0,–,–,Demonstrated autonmous docking and satellite servicing with onboard mounted robot system,"https://nexis.gsfc.nasa.gov/workshop_2012/Oda_final_presentation_2012_workshop.pdf
+https://global.jaxa.jp/projects/sat/ets7/index.html ",,,
+Japan,March 2021 - May 2022,ELSA-D Client,ELSA-D Servicer,Servicing,LEO,Baikonur Cosmodrome,"--
+",0,0,0,--,--,"The ELSA-d servicer is designed specifically for debris removal capabilities by Astroscale.; Launched on March 22, 2021, ELSA-d magentically docks with client satellite and demonstrates debris removal capabilities with multiple RPO.; On August 26, 2021, ELSA-d successfully conducted a capture test of a client's spacecraft using the server's magentic capture system.","https://astroscale.com/astroscales-elsa-d-mission-successfully-completes-complex-rendezvous-operation/
+",,,
+Japan,Feb - Nov 2024,H-2A rocket upper stage,ADRAS-J,Servicing,LEO,Rocket Lab Launch Complex,–,0,0,0,–,–,"Astroscale's commercial debris inspection satellite (ADRAS-J) successfully approached a rocket upper stage in LEO within 15 meters, which is the closest approach of space debris by a commercial space company to date. ADRAS-J reached a 15 meter distance on November 30, 2024.","https://astroscale.com/astroscales-adras-j-achieves-historic-15-meter-approach-to-space-debris/
+https://www.space.com/astroscale-space-junk-probe-photo ",,,
+,,,,,,,,,,,,,,,,,
+Italy,Sept 3-Oct 28 2020,Multiple,D-Orbit ION,Servicing,LEO,Guiana Space Center,-,0,0,0,-,-,"Similar to rideshare where ION will rendevous with a satellite and 
+bring it to it's designated orbit faster than normal drifting","https://spacenews.com/d-orbit-demonstrates-ion/
+https://spacenews.com/d-orbit-preps-for-in-orbit-transportation-business-with-upcoming-arianespace-and-spacex-launches/",,,
+,,,,,,,,,,,,,,,,,
+China,"April 27, 2021 (launch)",subsatellite,NEO-1,Servicing,LEO,Taiyuan Satellite Launch Center,-,0,0,0,,,"NEO-1 will release a small, square, spiral-patterned target and subsequently attempt capture using a net system. The spacecraft will then lower its orbit using onboard electric propulsion. There is no known evidence of whether or not it completed this mission",https://spacenews.com/china-launches-space-mining-test-spacecraft-on-commercial-rideshare-mission/ https://spectrum.ieee.org/tech-talk/aerospace/satellites/china-to-launch-space-mining-bot,,,
+China,Dec 2021 - Jan 2022,Beidou-2 G2,ShiJian-21 (SJ-21),Servicing,GEO,Xichang Satellite Launch Center,–,0,0,0,–,–,"Launched on October 24, 2021, classified as a space debris mitigation satellite by Chinese government; On January 27, 2022, it docked with the defunct Chinese satellite Beidou-2 G2 navigation satellite, towed it above the crowded GEO belt, and undocked the satellite in disposal orbit. These capabilities previously have only been demonstrated by the U.S.","https://spacenews.com/chinas-shijian-21-spacecraft-docked-with-and-towed-a-dead-satellite/ 
+https://www.airuniversity.af.edu/Portals/10/CASI/documents/Research/Space/2021-12-09%20SJ-21%20and%20China%27s%20OSAM%20Capabilities.pdf",,,
+,,,,,,,,,,,,,,,,,
+India,January 2025,SDX02 ,SDX01 ,Servicing,,Satish Dhawan Space Centre,–,0,0,0,–,–,"In January 2025, India successfully conducted space docking by joining together SDX01 and SDX02 for the first time, demonstrating RPO and robotic arm operations to support future servicing capabilities.",https://www.ioag.org/SitePages/India-successfully-conducts-historic-space-docking-test.aspx,,,

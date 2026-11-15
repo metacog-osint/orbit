@@ -67,6 +67,17 @@
       "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade B2 confirmed by Tom, 15 Nov 2026 (the RPO sheet, if built, is graded on its own)."
     },
     {
+      "id": "swf-rpo",
+      "name": "Secure World Foundation, Global Counterspace Capabilities (2026): History of Robotic Rendezvous and Proximity Operations in Space (Google Sheets CSV export)",
+      "url": "https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report",
+      "licence": "CC BY-NC 4.0 ('is licensed under Attribution-NonCommercial 4.0 International', on the report page, which links this sheet under Additional Information; read 15 Nov 2026); credit as 'Secure World Foundation, Global Counterspace Capabilities (2026), CC BY-NC 4.0'. Non-commercial use only.",
+      "use": "ingest",
+      "grade": "B3",
+      "independence_group": "swf",
+      "commercial_ok": false,
+      "note": "Sheet: docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4, tabs Commercial/Civil (gid 0), Military/Intelligence (gid 1789904048), Planned (gid 1403218889) and About (gid 1782604784, 'Last Updated 17 February 2026'), read as CSV with no key. Grade B3 is Orbit's call, graded apart from the ASAT sheet (Tom, 15 Nov 2026): the same reliable compiler, but many rows are SWF's reading of public tracking (an activity's purpose, its 'Intelligence' category, a span of months), not an operator's statement. Not in the feed."
+    },
+    {
       "id": "space-track",
       "name": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron): GP and GP_HISTORY element sets",
       "url": "https://www.space-track.org/",
