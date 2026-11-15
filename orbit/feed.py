@@ -1,13 +1,14 @@
 """Build Orbit's contract-v2 feed (tic-feed/2, GeoJSON) from the snapshot.
 
 Every item is an observation (measured or reported, no judgment) at tier "routine": Orbit has no baseline
-of its own readings yet, so nothing is called an anomaly, and the manoeuvre lane is not live (see
-doctrine/method.md). Items:
+of its own readings yet, so nothing is called an anomaly (see doctrine/method.md). Items:
   - orbital launches GCAT dates in the last 7 days (one item each, at the launch site);
   - launches scheduled in the next 14 days (Launch Library 2, one item each, at the pad);
   - reentries GCAT dates in the last 7 days (one summary item, off-map);
   - catalog changes since Orbit's previous reading: new objects from launches more than 30 days old (one item
-    per launch), and owner or state changes (one item).
+    per launch), and owner or state changes (one item);
+  - orbit changes in watched objects listed on the page (Space-Track element sets, last 30 days; one item each,
+    off-map), kind "maneuver" (Tom, 14 Nov 2026). COP's gate holds this kind as military context.
 """
 from __future__ import annotations
 
@@ -45,6 +46,17 @@ SRC_LL2 = {
     "grade": "B2",
     "independence_group": "thespacedevs",
     "source_type": "aggregator",
+}
+
+
+SRC_ST = {
+    "id": "space-track",
+    "publisher": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron)",
+    "title": "GP and GP_HISTORY element sets for a watch list",
+    "url": "https://www.space-track.org/",
+    "grade": "A2",
+    "independence_group": "usspacecom",
+    "source_type": "registry",
 }
 
 
@@ -229,6 +241,49 @@ def _owner_item(changes: list[dict], generated: str, accessed: str, prev_at: str
     return {"type": "Feature", "geometry": None, "properties": props}
 
 
+def _lon(x: float) -> str:
+    x = ((x + 180) % 360) - 180
+    return f"{abs(x):.2f} {'E' if x >= 0 else 'W'}"
+
+
+def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> dict:
+    """Off the map (geometry null): where to draw a satellite on COP's map is Tom's open decision (ground tracks)."""
+    name = e.get("gcat_name") or e["name"]
+    owner = e.get("state") or e.get("country") or "unknown owner"
+    t = lambda s: s[:16].replace("T", " ")
+    gap = e.get("gap")
+    if gap:
+        when = f"somewhere inside a {gap['hours']:g}-hour gap between element sets ({t(gap['from'])} to {t(gap['to'])} UTC)"
+        if (gap["from"], gap["to"]) != (e["from"], e["to"]):
+            when += f"; the change as measured spans {t(e['from'])} to {t(e['to'])} UTC"
+    else:
+        when = f"between {t(e['from'])} and {t(e['to'])} UTC"
+    g = e.get("geo")
+    geo_text = (f" Geostationary longitude {_lon(g['lon_before'])} before and {_lon(g['lon_after'])} after, drift "
+                f"{g['drift_before']:+.3f} to {g['drift_after']:+.3f} deg/day." if g else "")
+    props = {
+        **_base(generated),
+        "id": f"orbit:maneuver:{e['norad']}:{e['from'][:10]}",
+        "title": f"Orbit change: {name} ({e['regime'] or 'orbit unknown'}, {owner}), {e['dv_ms']:g} m/s {e['dominant']}",
+        "summary": (f"{name} (catalog {e['norad']}, {e['object_id']}, owner {owner}): its published orbit changed by "
+                    f"about {e['dv_ms']:g} m/s, mostly {e['dominant']}, semi-major axis {e['da_km']:+g} km, "
+                    f"inclination {e['di_deg']:+g} deg, {when}.{geo_text} A listed change means the object's "
+                    "published orbit moved more than its element sets usually move; it is not a confirmed manoeuvre, "
+                    "a statement of intent or a warning. Velocities are differences between published orbits, not "
+                    "burn records. " + attribution),
+        "data_as_of": e["to"],
+        "countries": _countries(e.get("cc")),
+        "requirement_ids": ["OR-PIR-1", "OR-EEI-1"] + (["OR-EEI-2"] if gap else []),
+        "coverage_fraction": 1.0,
+        "precision_class": "none",
+        "measures": {"dv_ms": e["dv_ms"], "da_km": e["da_km"], "di_deg": e["di_deg"],
+                     **({"gap_hours": gap["hours"]} if gap else {})},
+        "visual": {"type": "table", "url": f"{SITE}/#maneuvers"},
+        "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],
+    }
+    return {"type": "Feature", "geometry": None, "properties": props}
+
+
 def build_feed(snap: dict) -> dict:
     generated = snap["generated_at"]
     now = _dt(generated)
@@ -261,6 +316,12 @@ def build_feed(snap: dict) -> dict:
         if changes.get("owner_changes"):
             features.append(_owner_item(changes["owner_changes"], generated, cat_at, changes["previous_reading_at"]))
 
+    man = snap.get("maneuvers") or {}
+    for e in man.get("events") or []:  # the card's own list: 30 days, above the reporting floor
+        features.append(_maneuver_item(e, generated, man.get("read_at") or generated, man["attribution"]))
+    credit = (". Satellite element sets from Space-Track.org, United States Space Command (USSPACECOM), 18th Space "
+              "Defense Squadron; orbit-change analysis is Orbit's own" if man.get("events") else "")  # disclaimer section 4
+
     return {
         "type": "FeatureCollection",
         "contract": CONTRACT,
@@ -268,9 +329,11 @@ def build_feed(snap: dict) -> dict:
         "generated_at": generated,
         "method_version": METHOD,
         "licence": "GCAT data CC BY 4.0 (J. McDowell, planet4589.org/space/gcat); Launch Library 2 data from "
-                   "The Space Devs (free access, no licence stated)",
+                   "The Space Devs (free access, no licence stated)" + (
+                       "; Space-Track element sets redistributed under USSPACECOM's blanket approval for basic SSA "
+                       "data, with citation" if man.get("events") else ""),
         "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat) "
-                       "and Launch Library 2 (The Space Devs)",
+                       "and Launch Library 2 (The Space Devs)" + credit,
         "language_key": LANGUAGE_KEY,
         "features": features,
     }

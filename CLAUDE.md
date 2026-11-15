@@ -6,7 +6,8 @@ scheduled launches, reentries and satellite catalog changes. Observations only: 
 **State, 14 Nov 2026, about 4:40 PM CST: `main` at `465fb5d`, method `orbit-2.4`, live at
 https://orbit.theintelligence.company.** Five lanes: `catalog` (GCAT), `upcoming` (Launch Library 2), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `maneuver` (Space-Track, published with Tom's approved
-disclaimer). Orbit's feed carries GCAT and Launch Library 2 items only. COP shows NGA's launch, debris and reentry
+disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
+the listed orbit changes (kind `maneuver`, off the map), which COP's gate holds from joins as military context. COP shows NGA's launch, debris and reentry
 warnings under "Spectrum and space" from Cordon's copies, not Orbit's (COP `1a6c577`, live 14 Nov). The hub's
 `tic-dispatch` starts Orbit at :55 past 00/06/12/18 UTC (workflow_dispatch runs at 06:55, 12:55 and 18:55 UTC on
 14 Nov), so the token's repository access is in place; Orbit's own cron (:41 every 6 h) still runs too.
@@ -40,7 +41,7 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 54 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
+python -m unittest discover -s tests       # 55 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
@@ -177,7 +178,11 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
 - **Published:** `maneuver.PUBLISH = True` (False holds it again), `space-track` `use` is `ingest`,
   `LANE_SOURCE["maneuver"] = ["space-track"]`, method orbit-2.4. The card `#maneuvers` carries the approved
   disclaimer at its head, the short credit on every row, and the footer credit; events show GCAT's name and owner
-  beside Space-Track's. Change the wording only with Tom's yes. Not in the COP feed. GitHub secrets
+  beside Space-Track's. Change the wording only with Tom's yes. **In the feed from 15 Nov 2026** (Tom's "Yes, add
+  them"): one item per listed change, id `orbit:maneuver:<norad>:<from date>`, `geometry` null (where to draw a
+  satellite is the open ground-track decision), section 3's citation as the source licence and at the end of the
+  summary, section 4's credit in the feed's attribution; requirements OR-PIR-1, OR-EEI-1 and OR-EEI-2 (gap). COP's
+  `tools/gate.py` lists `orbit:maneuver` as military context and names Orbit's other kinds as open. GitHub secrets
   SPACETRACK_IDENTITY, SPACETRACK_PASSWORD and ORBIT_WATCH set by Tom 14 Nov 2026; the first run with them reads
   each watched object's 60-day history once.
 - `python tools/orbit.py maneuver-report` prints the held report locally.
@@ -229,15 +234,15 @@ Earlier notes (13 Nov 2026), kept for the record:
    manoeuvres).
 
 ## Open for Tom (14 Nov 2026; Space-Track account, secrets, case run and disclaimer are done)
-1. Manoeuvres in COP's feed (COP's gate holds military context).
-2. SWF's B2 grade (Orbit's call).
-3. Launch Library 2 has no stated data licence (credited, images not used).
-4. A 3D page: Cesium ion, or tiles without ion.
-5. ITU: a TIES login for Space Explorer, or the BR IFIC zips after asking jur@itu.int.
-6. A Spaceflight News lane (terms not read).
-7. Ground tracks as Orbit's COP mark.
-8. A baseline of Orbit's own readings, so it can flag anomalies.
-9. NAVAREA XI: no permitted source found.
+Decided 15 Nov 2026: manoeuvres go into COP's feed, held from joins by COP's gate (Tom's "Yes, add them").
+1. SWF's B2 grade (Orbit's call).
+2. Launch Library 2 has no stated data licence (credited, images not used).
+3. A 3D page: Cesium ion, or tiles without ion.
+4. ITU: a TIES login for Space Explorer, or the BR IFIC zips after asking jur@itu.int.
+5. A Spaceflight News lane (terms not read).
+6. Ground tracks as Orbit's COP mark.
+7. A baseline of Orbit's own readings, so it can flag anomalies.
+8. NAVAREA XI: no permitted source found.
 Proposed, not built: a fix for the one-day merge (SJ-21's 17-25 Jan change), a LEO known case from
 operator-announced manoeuvres, and the SWF RPO sheet lane.
 

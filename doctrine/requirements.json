@@ -12,12 +12,13 @@
       "id": "OR-PIR-1",
       "type": "pir",
       "parent": "OR-REQ-1",
-      "question": "Which watched payloads have executed an in-track, cross-track, or radial maneuver exceeding station-keeping thresholds (delta_v >= 1.5 m/s or calibrated confidence >= 0.75) in the past 30 days?",
+      "question": "Which watched objects' published orbits changed by more than their own element sets usually move (at least 0.25 m/s in geostationary orbit, 0.05 m/s elsewhere) in the past 30 days?",
       "series": [
-        "celestrak_gp_history",
+        "spacetrack_gp",
+        "spacetrack_gp_history",
         "gcat_satcat"
       ],
-      "note": "Not live (13 Nov 2026): the manoeuvre lane waits on the maneuver-detect test and Space-Track's terms. See method.md."
+      "note": "Live from orbit-2.4 (14 Nov 2026): Space-Track element sets for a private watch list; in the feed as kind maneuver. See method.md."
     },
     {
       "id": "OR-PIR-2",
@@ -33,12 +34,13 @@
       "id": "OR-EEI-1",
       "type": "eei",
       "parent": "OR-PIR-1",
-      "question": "What is the maneuver type (in-track, cross-track, radial), estimated delta-v (m/s), and sibling-launch context for the maneuvering object?",
+      "question": "What is the change's dominant term (in-track, cross-track, eccentricity), size in m/s, change in semi-major axis and inclination, and, in geostationary orbit, longitude and drift before and after?",
       "series": [
-        "celestrak_gp_history",
+        "spacetrack_gp",
+        "spacetrack_gp_history",
         "gcat_satcat"
       ],
-      "note": "Not live: part of the manoeuvre lane."
+      "note": "Live from orbit-2.4."
     },
     {
       "id": "OR-EEI-2",
@@ -46,9 +48,10 @@
       "parent": "OR-PIR-1",
       "question": "Does the watched satellite have a TLE tracking gap >=48 hours that degrades maneuver detection confidence?",
       "series": [
-        "celestrak_gp_history"
+        "spacetrack_gp",
+        "spacetrack_gp_history"
       ],
-      "note": "Not live: part of the manoeuvre lane."
+      "note": "Live from orbit-2.4: a change measured across a gap of 48 hours or more is labelled with the gap."
     },
     {
       "id": "OR-PIR-3",
