@@ -148,8 +148,8 @@ button.linkish { background: none; border: 0; padding: 0; color: var(--link); te
 
 /* Section bar (14 Nov 2026): Orbit's sections with their counts, at the top while the page scrolls; the section in
    view is marked (app.js sets aria-current). Links land below it. */
-html { scroll-padding-top: 52px; }
-.secbar { position: sticky; top: 0; z-index: 20; background: var(--panel); border-bottom: 1px solid var(--border); }
+html { scroll-padding-top: calc(var(--tic-house-h, 0px) + 52px); }
+.secbar { position: sticky; top: var(--tic-house-h, 0px); z-index: 20; background: var(--panel); border-bottom: 1px solid var(--border); }
 .secbar-row { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
 .secbar-row::-webkit-scrollbar { display: none; }
 .secbar a { flex: none; padding: 10px 10px 8px; color: var(--muted); text-decoration: none; font-size: 0.86rem;
