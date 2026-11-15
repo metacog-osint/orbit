@@ -3,8 +3,16 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 13 Nov 2026: first live slice and deploy workflow merged into `main` and pushed (`84190bb`, a
-fast-forward, on Tom's "merge and push", 3:25 PM CST).** First GitHub run (43510613951) passed: tests, both lanes
+**State, 14 Nov 2026, about 4:40 PM CST: `main` at `465fb5d`, method `orbit-2.4`, live at
+https://orbit.theintelligence.company.** Five lanes: `catalog` (GCAT), `upcoming` (Launch Library 2), `navwarn`
+(NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `maneuver` (Space-Track, published with Tom's approved
+disclaimer). Orbit's feed carries GCAT and Launch Library 2 items only. COP shows NGA's launch, debris and reentry
+warnings under "Spectrum and space" from Cordon's copies, not Orbit's (COP `1a6c577`, live 14 Nov). The hub's
+`tic-dispatch` starts Orbit at :55 past 00/06/12/18 UTC (workflow_dispatch runs at 06:55, 12:55 and 18:55 UTC on
+14 Nov), so the token's repository access is in place; Orbit's own cron (:41 every 6 h) still runs too.
+
+Go-live record, 13 Nov 2026: first live slice and deploy workflow merged into `main` and pushed (`84190bb`, a
+fast-forward, on Tom's "merge and push", 3:25 PM CST). First GitHub run (43510613951) passed: tests, both lanes
 ok on GitHub's runners, check PASS, state saved to the Actions cache (1.34 MiB), deploy skipped because the
 Cloudflare secrets were not yet set.
 **Deployed 13 Nov:** Pages project `orbit` at **https://orbit-q2t.pages.dev** (created by Tom; his first manual
@@ -15,9 +23,9 @@ orbit-q2t.pages.dev` (4 hrs, after Tom's Google re-verification), about 3:55 PM 
 **active with HTTPS and HSTS since 3:57 PM CST** (https://orbit.theintelligence.company checked: 200, Orbit's page). **Listed across the suite 13 Nov** (Tom's "approve, push and deploy"): house bar `tic-nav.js` v1.9 (`Space ·
 orbital activity`, beta; Orbit's copy `aa932dc`), hub listing and `tic-dispatch` start at :55 past 00/06/12/18 UTC
 (hub `c70271c`, `5cfa03a`), registry kit 0.4.8 (tic-doctrine `895fcf1`), COP layer (`a7c80ec`, open list
-`3788906`; COP shows Orbit fresh, 21 items, 20 on the map). Tom still has to add `orbit` to the `tic-dispatch`
-token's repository access; until then the dispatcher's start 404s and Orbit runs on its own cron. Untracked and to stay that
-way: `GEMINI.md` and `data/`.
+`3788906`; COP shows Orbit fresh, 21 items, 20 on the map). The `tic-dispatch` token's access to `orbit` was
+added by 14 Nov (dispatched runs since 06:55 UTC). Untracked and to stay that way: `GEMINI.md` and `data/`; `site/`
+changes stay unstaged (other sessions build there).
 
 **Planned scope** (`[local path]`, program row and roadmap step 14): catalog changes,
 launches, manoeuvres, counterspace events; maneuver-detect, Secure World Foundation counterspace sheets, ITU
@@ -32,11 +40,12 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 53 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
+python -m unittest discover -s tests       # 54 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.3`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.4`; details in `doctrine/method.md`)
+`counterspace` and `maneuver` are described in their own sections below.
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
@@ -112,8 +121,8 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
 - **Time coincidence only**, in the warnings table: scheduled launches whose NET falls in a window of four hours or
   less (or up to an hour before). It is time, not place: on 13 Nov it paired a Vostochny Soyuz with a North
   Atlantic debris box. It was taken out of the scheduled-launch rows for that reason.
-- **Not in the feed** yet, so COP is unchanged. A feed item per area (polygon geometry) would need COP's Orbit
-  drawing entry to handle polygons.
+- **Not in Orbit's feed.** COP shows the same NGA launch, debris and reentry warnings under "Spectrum and space"
+  from Cordon's copies (COP `1a6c577`, live 14 Nov 2026), so an Orbit feed item per area would duplicate them.
 - **Map** (`site_src/map.js`, Blackout's pattern): MapLibre GL JS 6.14.0 in `site_src/vendor/maplibre-gl/`
   (byte-identical to COP's integrity-checked copy; the build copies it unchanged), Natural Earth land
   (`data/world.geojson`, built from the kit's `geo/countries.json`, about 970 KB) below zoom 3.5, OpenFreeMap
@@ -122,8 +131,8 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
   only the validated actor tokens plus ink. CSP now allows `tiles.openfreemap.org` (img, connect) and
   `worker-src 'self' blob:`, as COP and Blackout do. In a hidden or background browser tab MapLibre does not
   finish loading the style (seen in the browser pane); a visible tab draws it.
-- **Whether GitHub's runners can reach msi.nga.mil (Akamai) and www1.kaiho.mlit.go.jp is untested** until the first
-  run after the push.
+- **GitHub's runners reach msi.nga.mil** (lane `ok` on every run since 13 Nov; the API still answers 503, so the
+  memoranda are read). The Japan Coast Guard site is no longer read.
 
 ## Anti-satellite test history (14 Nov 2026, `orbit-2.3`; Tom's "proceed with other options 1-3")
 - **Lane `counterspace`** (`orbit/counterspace.py`): Secure World Foundation's "History of ASAT Testing in Space"
@@ -219,10 +228,18 @@ Earlier notes (13 Nov 2026), kept for the record:
    and feed list. Describe Orbit there from what is live (launches, schedule, reentries, catalog changes; no
    manoeuvres).
 
-## Open for Tom
-Space-Track: an account, the three secrets (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD, ORBIT_WATCH) and `.env`
-locally, the `maneuver-case` result, and approval of `doctrine/spacetrack-disclaimer.md`; Launch Library 2 has no stated data licence (credited, images not
-used); the deploy steps above.
+## Open for Tom (14 Nov 2026; Space-Track account, secrets, case run and disclaimer are done)
+1. Manoeuvres in COP's feed (COP's gate holds military context).
+2. SWF's B2 grade (Orbit's call).
+3. Launch Library 2 has no stated data licence (credited, images not used).
+4. A 3D page: Cesium ion, or tiles without ion.
+5. ITU: a TIES login for Space Explorer, or the BR IFIC zips after asking jur@itu.int.
+6. A Spaceflight News lane (terms not read).
+7. Ground tracks as Orbit's COP mark.
+8. A baseline of Orbit's own readings, so it can flag anomalies.
+9. NAVAREA XI: no permitted source found.
+Proposed, not built: a fix for the one-day merge (SJ-21's 17-25 Jan change), a LEO known case from
+operator-announced manoeuvres, and the SWF RPO sheet lane.
 
 ## Rules
 - Standard library only for the live lanes. Tests stay offline.

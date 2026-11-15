@@ -3,8 +3,8 @@
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
 and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
-live slice: launches, scheduled launches, reentries and catalog changes. Manoeuvres and counterspace events are
-not built.
+live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
+test history (`orbit-2.3`) and orbit changes in watched objects (`orbit-2.4`) followed.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. Orbit has no
 baseline of its own readings yet, so nothing is called an anomaly, and it makes no warnings.
@@ -76,7 +76,8 @@ nothing (about 37 MB) unless one has changed.
    never a quiet sea); otherwise it reads the memoranda, served from the maintenance page (`apology_objects/`).
    The page names the form read and why the API was passed over. Cordon reads NGA the same way.
 
-Not in the feed yet: warnings appear on the page and in `snapshot.json` only, so COP is unchanged.
+Not in Orbit's feed: warnings appear on the page and in `snapshot.json` only. COP shows NGA's launch, debris and
+reentry warnings from Cordon's copies (14 Nov 2026).
 
 ## Anti-satellite test history (`orbit-2.3`)
 1. **As SWF compiled it.** Country (SWF lists Soviet tests under Russia), date, target, interceptor and type,
@@ -122,6 +123,5 @@ element sets are not republished. Not in the COP feed.
    not burn records. Low, medium and high orbits are not yet checked against a known case.
 
 ## Not built
-Manoeuvre items in the COP feed, counterspace events (Secure World Foundation's counterspace reports), ITU
-Space Explorer filings, an optional 3D
-page (Cesium ion decision), a scheduled workflow, deploy, DNS, the hub and COP entries.
+Manoeuvre items in the COP feed, SWF's rendezvous and proximity operations sheet, ITU Space Explorer filings,
+an optional 3D page (Cesium ion decision).
