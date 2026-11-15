@@ -1,11 +1,11 @@
-# Orbit method (`orbit-2.5`, 15 Nov 2026)
+# Orbit method (`orbit-2.6`, 15 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
 and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
 live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
 test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
-launches (`orbit-2.5`) followed.
+launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. Orbit has no
 baseline of its own readings yet, so nothing is called an anomaly, and it makes no warnings.
@@ -118,7 +118,8 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    precession), as along-track (v da / 2a), cross-track (v times the plane angle) and eccentricity (v de / 2)
    velocities. A pair is marked when one term is at least 8 robust deviations (1.4826 x MAD) above the object's
    own median and the total is at least 0.05 m/s; at least 10 pairs are needed first; marks under a day apart are
-   one change. A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s elsewhere); smaller ones
+   one change only when they agree, with the same dominant term and the same sign of semi-major-axis change
+   (`orbit-2.6`, Tom, 15 Nov 2026). A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s elsewhere); smaller ones
    are counted, not listed. Geostationary objects also show longitude and drift before and after.
 4. **What a mark is:** the published orbit moved more than this object's sets usually move. Usually a manoeuvre;
    a re-fit after a tracking gap, a mislabelled set or storm-driven drag in low orbit can give the same. Orbit says
@@ -131,8 +132,11 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    Space-Track sets, 1 Dec 2021 to 1 Mar 2022): G2 raised 1,720 km and SJ-21 1,694 km from 21-25 Jan, SJ-21 back
    down 1,732 km on 26-27 Jan; J. McDowell gave the stack 290 x 3,100 km above GEO (about 1,695 km mean). At
    0.05 m/s the dead G2 also drew four marks of 0.06-0.19 m/s, which cannot be manoeuvres; hence the 0.25 m/s
-   geostationary floor, which leaves G2 one change and SJ-21 six. Changes under a day apart are joined, so SJ-21's
-   approach, docking and tow show as one change (17-25 Jan). Velocities are differences between published orbits,
+   geostationary floor, which left G2 one change and SJ-21 six. Joining every change under a day apart made
+   SJ-21's approach, docking and tow one change (17-25 Jan); from `orbit-2.6`, joining only changes that agree
+   gives SJ-21 fifteen: 17-19 Jan 5.7 m/s lowering, 20-21 Jan 4.3 m/s raising, 21-25 Jan 69.6 m/s (the tow, G2
+   69.4 m/s), 26 Jan 70.7 m/s back down. It also splits small corrections, e.g. two 0.4 m/s cross-track marks on
+   27 Dec with opposite tiny semi-major-axis changes. Velocities are differences between published orbits,
    not burn records. Low, medium and high orbits are not yet checked against a known case.
 
 ## Not built

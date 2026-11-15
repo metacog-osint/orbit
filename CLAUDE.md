@@ -4,7 +4,7 @@ The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, p
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
 **State, 14 Nov 2026, about 4:40 PM CST: `main` at `465fb5d`, method `orbit-2.4`, live at
-https://orbit.theintelligence.company.** Six lanes (method `orbit-2.5` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+https://orbit.theintelligence.company.** Six lanes (method `orbit-2.6` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
 (Spaceflight News API headlines, links only), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
@@ -46,7 +46,7 @@ python -m unittest discover -s tests       # 59 offline tests, real fixtures fro
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.5`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.6`; details in `doctrine/method.md`)
 `counterspace` and `maneuver` are described in their own sections below.
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
@@ -254,11 +254,22 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
    (`orbit/news.py`), source `snapi-thespacedevs` (B3, Orbit's call), one request a run filtered to the scheduled
    launches' LL2 ids; three newest headlines under each scheduled launch, headline, outlet, date and link only.
    No terms stated; question 4 added to the Space Devs email. Not in the feed.
-7. Ground tracks as Orbit's COP mark.
-8. A baseline of Orbit's own readings, so it can flag anomalies.
-9. NAVAREA XI: no permitted source found.
-Proposed, not built: a fix for the one-day merge (SJ-21's 17-25 Jan change), a LEO known case from
-operator-announced manoeuvres, and the SWF RPO sheet lane.
+7. ~~Ground tracks as Orbit's COP mark~~ Decided 15 Nov 2026 (Tom's "Pads on COP, tracks in 3D"): COP keeps launch
+   pads as Orbit's mark (they join Launch's closure areas); ground tracks go only on the 3D page. A LEO track crosses
+   most countries in a day and would make false joins on COP. Manoeuvres, reentries and catalog changes stay off the map.
+8. ~~A baseline~~ Decided 15 Nov 2026 (Tom's "GCAT history now, rest later"): baseline launch cadence per country and
+   per operator, catalog additions and reentries from GCAT's full history at once (e.g. a country's last 30 days
+   against its prior 2 years); start a daily archive of Orbit's own counts (listed orbit changes per object, warnings
+   per area) and add those baselines after 90 days. Not built.
+9. ~~NAVAREA XI~~ Decided 15 Nov 2026 (Tom's "Ask JCG, rely on rebroadcasts"): Tom asks the Japan Coast Guard for
+   permission to read the English list by script, at most hourly (draft in `private/email-jcg-navarea11.md`, to
+   tuho@jodc.go.jp, an address from coordinator lists of uncertain date). Until they answer, HYDROPAC and NAVAREA XII
+   rebroadcasts only, and the page says XI is not read.
+Approved 15 Nov 2026 (Tom's "Yes, build it" to each): (a) built 15 Nov, `orbit-2.6`, the merge fix, joining marks under a day
+apart only when the dominant term and the sign of the semi-major-axis change agree (SJ-21's 17-25 Jan change);
+(b) a LEO known case, the ISS over a 90-day window with at least 3 NASA-announced reboosts plus a window with the
+10-11 May 2024 storm, one stored GP_HISTORY read (about 3 requests); (c) the SWF RPO sheet lane, after confirming the
+2026 report links the sheet under CC BY-NC 4.0.
 
 ## Rules
 - Standard library only for the live lanes. Tests stay offline.

@@ -14,7 +14,9 @@ The method, for each watched object, over its stored Space-Track element sets (G
      total is at least FLOOR_MS (0.05 m/s). At least MIN_PAIRS (10) pairs are needed before anything is marked.
      A change is reported only when its total is at least REPORT_MS for its regime: 0.25 m/s at GEO (Tom, 14 Nov
      2026, after the known case gave four 0.06-0.19 m/s marks on the dead BeiDou-2 G2), FLOOR_MS elsewhere.
-  5. Marked pairs less than a day apart are one change.
+  5. Marked pairs less than a day apart are one change, but only when they agree: the same dominant term
+     (in-track, cross-track or eccentricity) and the same sign of semi-major-axis change as the change so far
+     (orbit-2.6, Tom, 15 Nov 2026; before, SJ-21's lowering, raising, tow and return of 17-26 Jan 2022 read as one).
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
 marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
@@ -136,6 +138,18 @@ def _robust(xs: list[float]) -> tuple[float, float]:
     return m, 1.4826 * median(abs(x - m) for x in xs)
 
 
+def _dominant(g: list[dict]) -> str:
+    dv = {c: sum(p["dv"][c] for p in g) for c in COMPONENTS}
+    return max(dv, key=dv.get)
+
+
+def _agrees(g: list[dict], p: dict) -> bool:
+    """A marked pair joins the change before it only with the same dominant term and the same sign of
+    semi-major-axis change (a zero change agrees with either sign)."""
+    da_g, da_p = sum(q["da"] for q in g), p["da"]
+    return _dominant(g) == _dominant([p]) and da_g * da_p >= 0
+
+
 def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     sets = obj.get("sets") or []
     out = {"sets": len(sets), "events": [], "regime": None, "last_epoch": sets[-1][0] if sets else None,
@@ -178,7 +192,7 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
             marked.append(p)
     groups: list[list[dict]] = []
     for p in marked:
-        if groups and (_dt(p["from"]) - _dt(groups[-1][-1]["to"])).total_seconds() / 86400.0 < MERGE_DAYS:
+        if groups and (_dt(p["from"]) - _dt(groups[-1][-1]["to"])).total_seconds() / 86400.0 < MERGE_DAYS                 and _agrees(groups[-1], p):
             groups[-1].append(p)
         else:
             groups.append([p])
