@@ -6,14 +6,17 @@ the wording below. Change the wording only with Tom's yes.
 
 ## What Space-Track's terms say (read 14 Nov 2026)
 - User Agreement (space-track.org/auth/createAccount): the user agrees "not to transfer any data or technical
-  information received from this website, including the analysis of data, to any other entity without prior
-  express approval."
+  information received from this website, or other U.S. Government source, including the analysis of data, to any
+  other entity without prior express approval." It cites 10 USC 2274(c)(2).
 - Documentation, "Redistribution of Basic SSA Information" (space-track.org/documentation): "USSPACECOM has provided
   express blanket approval for transfer/redistribution of basic SSA data and services" accessed via Space-Track,
   "conditioned on appropriate citation." And: "Publications of analysis based on USSPACECOM data also require
   appropriate citations."
-- Space-Track gives no citation wording. The text below is Orbit's. Both quotes come from a fetch tool's reading
-  of the pages, not yet checked word for word in a browser.
+- Space-Track gives no citation wording. The text below is Orbit's. **Both quotes checked word for word against
+  the raw pages, 14 Nov 2026, 22:30 UTC:** the documentation quote matches; the User Agreement quote had dropped
+  "or other U.S. Government source" (restored above). The blanket approval names basic SSA data only (TLEs, OMMs,
+  SATCAT, decay and reentry data); for analysis it asks only for citation. maneuver-detect's README reads the terms
+  as barring redistribution of derived analysis, which is the User Agreement clause read without the approval.
 
 ## 1. On the page, at the top of the manoeuvre card (every time the card shows)
 > **Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron.** Element sets are USSPACECOM's,
