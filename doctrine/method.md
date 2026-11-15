@@ -137,7 +137,19 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    gives SJ-21 fifteen: 17-19 Jan 5.7 m/s lowering, 20-21 Jan 4.3 m/s raising, 21-25 Jan 69.6 m/s (the tow, G2
    69.4 m/s), 26 Jan 70.7 m/s back down. It also splits small corrections, e.g. two 0.4 m/s cross-track marks on
    27 Dec with opposite tiny semi-major-axis changes. Velocities are differences between published orbits,
-   not burn records. Low, medium and high orbits are not yet checked against a known case.
+   not burn records.
+7. **The low-orbit known case** (the ISS, `tools/orbit.py maneuver-case iss`, run 15 Nov 2026 on 965 Space-Track
+   sets, 15 Jan to 1 Jun 2024, one GP_HISTORY read): scored against the five reboosts NASA's ISS Daily Summary
+   Reports announced (27 Jan, 23 Feb, 14 Mar, 25-26 Apr, 24 May; US public domain), a change counting as a hit
+   when it comes within 12 hours of NASA's stated time or span. **All five hit**, each as an in-track change
+   raising the orbit 1.0-3.1 km. The semi-major-axis change alone gives 1.76 m/s on 23 Feb (NASA 1.725), 1.68 on
+   14 Mar (NASA 1.59) and 2.56 for 24 May's two burns (NASA 2.26); the listed totals run higher (2.23-2.25 m/s)
+   because they add the noisy cross-track term. **Nine marks are not in NASA's list**, all cross-track or
+   eccentricity at 0.28-0.84 m/s with semi-major-axis changes under 0.2 km, near the threshold (z 8-15); in low
+   orbit the cross-track noise is 0.32 m/s against 0.006 m/s in-track. Reboosts also drew cross-track marks beside
+   them (fit settling after the burn). **The G5 storm of 10-12 May 2024** drew no in-track (drag) mark and one
+   0.32 m/s cross-track mark. NASA's reports found may not list every manoeuvre, so an extra mark is "not in this
+   list", not proven false. Medium and high orbits are not yet checked against a known case.
 
 ## Not built
 SWF's rendezvous and proximity operations sheet, ITU Space Explorer filings,
