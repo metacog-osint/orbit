@@ -1,11 +1,12 @@
-# Orbit method (`orbit-2.6`, 15 Nov 2026)
+# Orbit method (`orbit-2.7`, 15 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
 and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
 live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
 test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
-launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree.
+launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree, and `orbit-2.7` adds SWF's
+rendezvous and proximity operations history.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. Orbit has no
 baseline of its own readings yet, so nothing is called an anomaly, and it makes no warnings.
@@ -18,6 +19,7 @@ baseline of its own readings yet, so nothing is called an anomaly, and it makes 
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
+| `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
 
 GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
@@ -92,6 +94,24 @@ reentry warnings from Cordon's copies (14 Nov 2026).
 4. **Licence:** CC BY-NC 4.0, credited with links to the report and the sheet. Orbit is non-commercial; this
    source may not be reused commercially.
 
+## Rendezvous and proximity operations (`orbit-2.7`)
+Source: SWF's RPO sheet, linked from the 2026 report's page under "Additional Information"; the report is CC BY-NC
+4.0 (checked 15 Nov 2026). Graded B3 on its own (Orbit's call; the ASAT sheet is B2): the same reliable compiler,
+but many rows are SWF's reading of public tracking (a purpose, an "Intelligence" category, a span of months).
+1. **SWF's text kept.** Every field as SWF wrote it, its spellings included ("Comos 2521"); the three tabs are
+   shown apart, with SWF's column names (client and servicer, target and chaser).
+2. **Dates read, not guessed.** SWF's free-text date becomes a start, an end, a precision (day, month or year)
+   and whether it is ongoing ("Oct 2014 - Present"). Forms read: "Apr 14, 2005", "Jan 2016", "2026", "Jun 15-29
+   2020", "Sept 3-Oct 28 2020", "Mar - Apr 2017", "Aug 2010 - July 2011", "1990-1998", "Oct 2014 - Present",
+   "Dec 23, 2008 & Jan 1, 2009" (first to last); a bracketed note such as "(launch)" stays in SWF's text. Any other
+   form is listed apart with SWF's text (15 Nov 2026: "Mar - Apr, Sep, Dec 2024" and "Fall 2025").
+3. **GCAT matches by name and date only.** A satellite name links to a GCAT payload only when exactly one payload
+   of that name (spaces and punctuation ignored; Cosmos read as Kosmos, Shi Jian as SJ, Shiyan as SY, Tongxin Jishu
+   Shiyan as TJS) was launched by the operation's last year and had not reentered before its first. Several or
+   none: no link. 15 Nov 2026: 78 of 143 names linked; "Luch (Olymp)" is not, since GCAT has more than one Luch.
+4. **History, not events.** Nothing goes into the feed or onto the map. A changed layout, or a tab with fewer rows
+   than a good reading has, fails the lane, which keeps its last good copy.
+
 ## Headlines for scheduled launches (`orbit-2.5`)
 Source: the Spaceflight News API (Spaceflight News API and The Space Devs), which ties articles to Launch Library 2
 launches. No licence or terms stated (read 15 Nov 2026); asked of The Space Devs in writing.
@@ -152,5 +172,5 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    list", not proven false. Medium and high orbits are not yet checked against a known case.
 
 ## Not built
-SWF's rendezvous and proximity operations sheet, ITU Space Explorer filings,
+ITU filings (BR IFIC, after ITU's legal office answers),
 an optional 3D page (Cesium ion decision).

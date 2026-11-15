@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -219,6 +219,10 @@ class EndToEnd(unittest.TestCase):
                 return body("navwarn/jcg_list.xml")
             if url == counterspace.URL:
                 return self.asat
+            if url.startswith(rpo.SHEET):
+                gid = url.rsplit("gid=", 1)[1]
+                tab = {s["gid"]: t for t, s in rpo.TABS.items()}.get(gid, "about")
+                return body(f"swf_rpo_{tab}.csv")
             raise AssertionError(url)
 
         self.getter = getter
@@ -243,6 +247,8 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["catalog"]["status"], "ok")
         self.assertEqual(snap["lanes"]["upcoming"]["status"], "ok")
         self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
+        self.assertEqual(snap["lanes"]["rpo"]["status"], "ok")
+        self.assertEqual(snap["rpo"]["counts"], {"commercial": 14, "military": 44, "planned": 4})
         self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "off")  # robots.txt disallows /TUHO/
         self.assertFalse([u for u in self.calls if "kaiho.mlit.go.jp" in u])
         self.assertTrue(snap["navwarn"]["areas"])
@@ -521,6 +527,64 @@ class Counterspace(unittest.TestCase):
             counterspace.parse_asat(self.raw.replace(b"Date of Test", b"When", 1))
 
 
+class RPO(unittest.TestCase):
+    """SWF's RPO sheet as read 15 Nov 2026 (tests/fixtures/swf_rpo_*.csv, CC BY-NC 4.0, Secure World Foundation)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bodies = {t: (FIX / f"swf_rpo_{t}.csv").read_bytes() for t in list(rpo.TABS) + ["about"]}
+        cls.doc = rpo.read(cls.bodies, None)
+
+    def test_counts_and_date(self):
+        self.assertEqual(self.doc["counts"], {"commercial": 14, "military": 44, "planned": 4})
+        self.assertEqual(self.doc["updated"], "2026-02-17")
+
+    def test_dates_read_or_listed_apart(self):
+        W = rpo.parse_when
+        self.assertEqual(W("Apr 14, 2005"), {"start": "2005-04-14", "end": "2005-04-14", "precision": "day", "ongoing": False})
+        self.assertEqual((W("Aug - Oct. 2017")["start"], W("Aug - Oct. 2017")["end"]), ("2017-08", "2017-10"))
+        self.assertEqual((W("Aug 2010 - July 2011")["start"], W("Aug 2010 - July 2011")["end"]), ("2010-08", "2011-07"))
+        self.assertEqual((W("Sept 3-Oct 28 2020")["start"], W("Sept 3-Oct 28 2020")["end"]), ("2020-09-03", "2020-10-28"))
+        self.assertEqual((W("Jun 15-29 2020")["start"], W("Jun 15-29 2020")["end"]), ("2020-06-15", "2020-06-29"))
+        self.assertEqual(W("Oct 2014 - Present"), {"start": "2014-10", "end": None, "precision": "month", "ongoing": True})
+        self.assertEqual(W("2014 - Present")["precision"], "year")
+        self.assertEqual((W("1990-1998")["start"], W("1990-1998")["end"]), ("1990", "1998"))
+        self.assertEqual((W("Dec 23, 2008 & Jan 1, 2009")["start"], W("Dec 23, 2008 & Jan 1, 2009")["end"]),
+                         ("2008-12-23", "2009-01-01"))
+        self.assertEqual(W("April 27, 2021 (launch)")["start"], "2021-04-27")
+        for t in ("Mar - Apr, Sep, Dec 2024", "Fall 2025", "", "Feb 30, 2020"):
+            self.assertIsNone(W(t), t)
+        self.assertEqual([u["date_text"] for u in self.doc["unread_dates"]], ["Mar - Apr, Sep, Dec 2024", "Fall 2025"])
+
+    def test_swf_text_kept(self):
+        row = next(r for r in self.doc["rows"] if r["chaser"] == "Comos 2521")  # SWF's spelling, kept
+        self.assertEqual((row["tab"], row["target"], row["mission_type"]), ("military", "Cosmos 2519", "Intelligence"))
+        planned = [r for r in self.doc["rows"] if r["tab"] == "planned"]
+        self.assertTrue(all("notes" in r and "orbit" not in r for r in planned))
+
+    def test_names_link_to_gcat_only_when_one_fits(self):
+        objs = {"S49330": ["satcat", "49330", "2021-063", "P", "Shi Jian 21", "2021 Oct 24", "-", "-", "O", "", "CN", ""],
+                "S23426": ["satcat", "23426", "1994-082", "P", "Luch", "1994 Dec 16", "-", "-", "O", "", "RU", ""],
+                "S40258": ["satcat", "40258", "2014-058", "P", "Luch", "2014 Sep 27", "-", "-", "O", "", "RU", ""],
+                "S99999": ["satcat", "99999", "2030-001", "P", "SJ-99", "2030 Jan  1", "-", "-", "O", "", "CN", ""],
+                "S11111": ["satcat", "11111", "2001-001", "P", "Old 1", "2001 Jan  1", "-", "2005 Jan  1", "R", "", "US", ""]}
+        ix = rpo.gcat_names(objs)
+        when = rpo.parse_when("Dec 2021 - Jan 2022")
+        self.assertEqual([o["norad"] for o in rpo.link("ShiJian-21 (SJ-21)", when, ix)], ["49330"])  # once
+        self.assertEqual(rpo.link("Luch (Olymp)", when, ix), [])  # two GCAT payloads named Luch: no guess
+        self.assertEqual(rpo.link("SJ-99", when, ix), [])  # launched after the activity
+        self.assertEqual(rpo.link("Old 1", rpo.parse_when("2010"), ix), [])  # reentered before it
+        self.assertEqual(rpo.link("Multiple", when, ix), [])
+
+    def test_changed_layout_fails(self):
+        with self.assertRaises(ValueError):
+            rpo.parse_tab(self.bodies["military"].replace(b"Chaser", b"Other", 1), "military")
+        with self.assertRaises(ValueError):
+            rpo.parse_tab(b"<!DOCTYPE html><html>Sign in</html>", "commercial")
+        with self.assertRaises(ValueError):
+            rpo.parse_tab(self.bodies["military"].split(b"\n", 5)[0] + b"\n", "military")  # header only
+
+
 class Registers(unittest.TestCase):
     def test_doctrine_registers(self):
         self.assertEqual(registers.check(ROOT / "doctrine"), [])
@@ -530,7 +594,7 @@ class Registers(unittest.TestCase):
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
-                                      "swf-counterspace", "space-track"})
+                                      "swf-counterspace", "swf-rpo", "space-track"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")

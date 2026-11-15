@@ -1,0 +1,112 @@
+Country,Date of Test,Target Satellite,Chaser Satellite,Mission Type,Orbit,Launch Site,Debris Released,"Total Pieces of Cataloged 
+Debris* Created","Total Pieces Cataloged 
+Debris Re-entered","Amount of Debris 
+Still on Orbit","Date of Final 
+Piece Re-entry","Lifespan of Debris 
+(years on orbit or to date)",Notes,Sources,,"Total Debris 
+Remaining",,"Average Lifespan 
+of Debris"
+Russia,Jun 2014 - Mar 2016,Briz-KM R/B,Cosmos 2499,Intelligence,LEO,Plesetsk,"Yes, likely due to pressurized tank explosion",74,3,71,Still On Orbit,1.75,"Cosmos 2499 did series of maneuvers to bring it close to, and then away from the Briz-KM upper stage; Cosmos 2499 possibly part of Nivelir program used for intelligence & space situational awareness","https://swfound.org/counterspace/  
+ http://www.astronautix.com/r/rokot.html
+https://www.thespacereview.com/article/3931/1 ",,147,,3.90
+Russia,Oct 2014 - Present,Multiple,Luch (Olymp),Intelligence,GEO,Baikonur,–,0,0,0,–,–,"Luch parked near several satellites over nearly five years including the Russian Express AM-6, American Intelsat 7, Intelsat 401, 
+Intelsat 17, Intelsat 20, and Intelsat 36, and French-Italian Athena-Fidus satellites","Secure World Foundation Global Counterspace Capabilities Report 2020 
+ https://space.skyrocket.de/doc_sdat/olimp-k.htm",,"* Debris cataloged by the U.S. military, generally pieces 10 cm in size and larger. 
+Breakups from after 2003 are likely to have higher number of pieces detected 
+and tracked by the SSN due to the full-power status of Cobra Dane radar.
+
+Note also that these numbers are based on the last updated time as debris may
+have fragmented again or deborbited",,
+Russia,Apr 2015 - Apr 2017,Briz-KM R/B,Cosmos 2504,Intelligence,LEO,Plesetsk,"Yes, source unknown",8,0,8,Still On Orbit,6.00,Cosmos 2504 maneuvers to approach the Briz-KM upper stage and may have had a slight impact before separating again; Possibly part of Nivelir program used for intelligence & space situational awareness,"https://swfound.org/counterspace/ 
+ http://www.astronautix.com/r/rokot.html",,,,
+Russia,Mar - Apr 2017,FY-1C Debris,Cosmos 2504,Intelligence,LEO,Plesetsk,–,0,0,0,–,–,"After a year of dormancy, Cosmos 2504 did a close approach with a piece of Chinese space debris from the 2007 ASAT test; Possibly part of Nivelir program used for intelligence & space situational awareness","https://swfound.org/counterspace/ 
+ http://www.astronautix.com/r/rokot.html",,,,
+Russia,Aug - Oct. 2017,Multiple,Cosmos 2521,Intelligence,LEO,Plesetsk,--,0,0,0,_,--,"Cosmos 2521 separated from Cosmos 2519 and performed a series of small maneuvers to do inspections before 
+redocking with Cosmos 2519. Cosmos 2523 separated from Cosmos 2521 but did not maneuver on its own.  ",http://www.interfax.ru/russia/576068,,,,
+Russia,Mar - Apr 2018,Cosmos 2519,Comos 2521,Intelligence,LEO,Plesetsk,--,0,0,0,--,--,Cosmos 2521 conducted close approaches of Cosmos 2519. ,https://planet4589.org/space/jsr/back/news.752.txt.,,,,
+Russia,February 2019,TJS-3,Luch (Olymp),Intelligence,GEO,Baikonur,–,0,0,0,–,–,"In September 2019, Russia's Luch (OLYMP) satellite approached China's TJS-3 satellite within 30 kilometers. This approach took place several weeks after the launch of TJS-3. This event was reported to be the first instance of an event between a manueverable Russian satellite and a maneuverable Chinese satellite. ",https://www.defenseone.com/threats/2024/05/fast-movers-meet-chinese-satellites-zoom-around-inspectionsor-interference/396714/,,,,
+Russia,Aug - Dec 2019,Cosmos 2535,Cosmos 2536,Intelligence,LEO,Plesetsk,Yes,30,14,16,Still On Orbit,0.93,Cosmos 2535 and Cosmos 2536 conducted at least 25 individual RPO operations to within 2 km and as far apart as 380 km. Debris created,https://planet4589.org/space/papers/space19.pdf,,,,
+Russia,"Dec 23, 2019",Unknown,Cosmos 2491,Intelligence,LEO,Plesetsk,"Yes, likely due to pressurized tank explosion",52,0,52,Still On Orbit,6.90,Orbital change and fragmentation event was caused by the explosive release of the residual fuel,"https://www.thespacereview.com/article/2839/1
+https://twitter.com/planet4589/status/1216265783644389376?s=20 ",,,,
+Russia,Dec 2019 - Mar 2020,USA 245,Cosmos 2543,Intelligence,LEO,Plesetsk,–,0,0,0,–,–,"Cosmos 2542 deployed an inspector subsatellite; Cosmos 2543 raised its orbit to come within 30 km of USA 245 (NRO KH-11 satellite) and established repeated close approaches within 150 km, likely for the purpose of surveillance; Cosmos 2542 also made close approaches to USD 245; Possibly part of Nivelir program used for intelligence & space situational awareness","https://swfound.org/counterspace/ 
+http://www.russianspaceweb.com/cosmos-2542.html 
+https://www.space.com/russian-spacecraft-stalking-us-spy-satellite-space-force.html ",,,,
+Russia,Jun - Oct 2020,Cosmos 2535,"Cosmos 2543, Cosmos 2536",Intelligence,LEO,Plesetsk,--,0,0,0,--,--,"Cosmos 2543 rendezvoused with Cosmos 2535 and released a small object at high relative velocity; In Sept, Cosmos 2536 joined in the RPO with the other two and may have docked with Cosmos 2535. ",https://forum.nasaspaceflight.com/index.php?topic=49501.msg2096595#msg2096595,,,,
+Russia,Feb 2022 - May 2024,USA 326,Cosmos 2558,Intelligence,LEO,Plesetsk,--,0,0,0,--,--,"Cosmos 2558 has matched the orbital plane of USA 326 and conducted repeat close approaches, getting within 50 km of USA 326 once a week","http://sattrackcam.blogspot.com/2022/08/kosmos-2558-russian-inspector-satellite.html 
+https://sattrackcam.blogspot.com/2022/09/kosmos-2558-keeping-its-orbit-close-to.html 
+https://x.com/coastal8049/status/1645197516395397120?s=20 ",,,,
+Russia,"November 22, 2022",Resurs-P3,Cosmos 2562,Intelligence,LEO,Plesetsk,--,0,0,0,--,--,"Resurs-P3 was presumed inactive after failed solar panel deployment, but maneuevered to raise its orbit and was then approached by Cosmos 2562 for an RPO.",https://spacenews.com/leolabs-data-shows-on-orbit-maneuvers-by-russian-satellites/,,,,
+Russia,November 2023,Cosmos 2571,Object D,Intelligence,LEO,Plesetsk,--,0,0,0,--,--,"Cosmos 2570 released another satellite, Cosmos 2571. After circularizing, Cosmos 2571 once again released a third satellite, catalogued as Object D in late November. Commercial satellite tracking firm LeoLabs reported that Object D had maneuvered and performed at least one close pass of Cosmos 2571, potentially as part of an imaging attempt. ",https://breakingdefense.com/2023/12/leolabs-russia-china-time-suspicious-space-activity-for-some-us-holidays/,,,,
+Russia,Mar 2023 - Present,Multiple,Luch (Olymp) 2,Intelligence,LEO,Baikonur,--,0,0,0,--,--,Luch 2 parked near several satellites including American WGS F2 and multiple European commercial communications satellites.,"https://www.kratosdefense.com/constellations/articles/espionage-in-orbit-satellite-or-spy
+https://www.thespacereview.com/article/4696/1 ",,,,
+,,,,,,,,,,,,,,,,,,
+USA,1990-1998,"Unknown Russian 
+communications satellites",Prowler,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"Secretly launched from a Space Shuttle mission in 1990; Maneuvered close to multiple Russian geosynchronous orbit satellites to collect intelligence but utilized stealth technologies 
+to remain undetected","http://www.nbcnews.com/id/6687654/ns/us_news-security/t/what-americas-top-secret-spy-program/#.XvUXRvJMHOQ
+satobs.org/seesat_ref/STS_38/Unknown_GEO_Object_2000-653A_-_90007_Identified_as_Prowler.pdf ",,,,
+USA,"Jan 29, 2003",Delta Upperstage,XSS-10,Intelligence,LEO,Cape Canaveral,–,0,0,0,–,–,"Series of RPO maneuvers near the Delta upper stage,","https://swfound.org/counterspace/ 
+ www.kirtland.af.mil/Portals/52/documents/AFD-111103-035.pdf?ver=2016-06-28-110256-797
+ http://www.astronautix.com/x/xss.html",,,,
+USA,Apr 2005 - Oct 2006,Minotaur Upperstage,XSS-11,Intelligence,LEO,Vandenberg AFB,–,0,0,0,–,–,"Close apporach manuevers and inspection of other satellites; Sponsored by USAF, possible co-orbital ASAT test/investigation","https://swfound.org/counterspace/ 
+ http://www.designation-systems.net/dusrm/app3/xss-11.html",,,,
+USA,Apr 2005,MUBLCOM,DART,Intelligence,LEO,Vandenberg AFB,-,0,0,0,-,-,DART did a series of autonomous maneuvers to bring it close to the MUBLCOM satellite and ended up bumping into it.,https://www.nasa.gov/pdf/148072main_DART_mishap_overview.pdf,,,,
+USA,Mar - Jul 2007,NEXTSat,ASTRO,Servicing,LEO,Cape Canaveral,–,0,0,0,–,–,"DARPA demonstration of autonomous on-orbit techniques with two satellites including refueling; Servicing mission; yet, run by the Defense Advanced Research Projects Agency – possible military precussor/application","https://swfound.org/counterspace/ 
+ https://space.skyrocket.de/doc_sdat/nextsat.htm
+http://www.spaceref.com/news/viewsr.html?pid=23763 
+http://www.spaceref.com/news/viewpr.html?pid=22409 ",,,,
+USA,"Dec 23, 2008 &
+Jan 1, 2009",DSP-23,"MiTEx (USA 187, USA 188)",Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,Inspection and close rendevous with a failed US satellite; Possibly other demonstrations and tests in geosynchronous orbit ,"https://spaceflightnow.com/news/n0901/14dsp23/ 
+https://www.thespacereview.com/article/670/1 ",,,,
+USA,May 2009,Thuraya 2,Mentor 4 (USA 202),Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"USA 202 drifted westward around 0.8 degrees per day for several weeks, and eventually stabilized in a geosynchronous orbit at 44 degrees east longitude in May 2009. That placement put it right next to commercial satellite Thuraya 2, where it appeared to match up with the latter’s orbital inclination.",https://www.thespacereview.com/article/3095/1,,,,
+USA,2009 - 2016,"Yahsat 1B, others unknown",PAN (USA-207),Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,Part of NROs Nemesis satellites (geostationary COMINT); Presuumed to have completed SIGNIT (signals intelligence) with other satellites; Unique for roaming various times to different orbits and satellites,https://www.thespacereview.com/article/3095/1,,,,
+USA,2014 - Present,Unknown,CLIO (USA 257),Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"Part of NROs Nemesis satellites (geostationary COMINT); Similar to PAN with classified communications surveillance and rotating between different orbits; Worked on ""targeting commercial satellite uplinks"" of foreign satellites ","https://space.skyrocket.de/doc_sdat/nemesis-1.htm
+https://spaceflight101.com/spacecraft/clio/ ",,,,
+USA,Jul 2014 - Present,Various Objects,GSSAP,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"RPO demonstrations, using electro-optical sensors to gain intelligence on other satellites; Expected 6 satellites in total as part of the Hornet series by 2020","https://swfound.org/counterspace/ 
+ http://www.astronautix.com/g/gssap.html
+ https://space.skyrocket.de/doc_sdat/gssap-1.htm",,,,
+USA,Jul 2014 - Nov 2017,Delta Upperstage,ANGELS (USA 255),Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"RPO demonstrations in GSO disposal region, satellite inspection",https://swfound.org/counterspace/ ,,,,
+USA,May 2018,EAGLE (USA 284),MYCROFT,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"Mycroft payload deployed from Eagle Satellite, Mycroft RPO of Eagle in GEO region, satellite inspection","https://swfound.org/counterspace/ 
+ https://space.skyrocket.de/doc_sdat/mycroft.htm
+ https://in-the-sky.org/spacecraft.php?id=43340",,,,
+USA,Oct 2019,S5,MYCROFT,Intelligence,GEO,—,–,0,0,0,–,–,Mycroft manuevered to rendevous with S5 after S5 ceased communications,"https://swfound.org/counterspace/ 
+ https://space.skyrocket.de/doc_sdat/mycroft.htm",,,,
+USA,August 2020,SJ-20,USA 271,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"On August 2020, USA 271 approached the PRC's SJ-20, shadowing the spacecraft. The Chinese spacecraft detected the U.S. satellite and rapidly moved away. ",https://breakingdefense.com/2021/10/us-china-russia-test-new-space-war-tactics-sats-buzzing-spoofing-spying/,,,,
+USA,January 2022,SY-12(01) and SY-12(02),USA 270,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"In January 2022, USA 270 drifted near China's Shiyan-12(01) and (02) satellites just below the GEO belt. The USA 270 got close, pulled a maneuver and within 2 days, the Shiyan-12 satellites had left the vicinity. The closest approach was around 73 kilometers.",https://space4peace.org/chinas-shijian-21-towed-dead-satellite-to-a-high-graveyard-orbit/,,,,
+USA,October 2024,SJ-23,LDPE 3A,Intelligence,GEO,Cape Canaveral,–,0,0,0,–,–,"In October 2024, LDPE 3A maneuvered to approach SJ-23, possibly to 30 km by Nov. 4 or Nov. 5, after which it maneuvered to synchronize itself with SJ-23.",https://space.skyrocket.de/doc_sdat/ldpe-1.htm,,,,
+,,,,,,,,,,,,,,,,,,
+China,Sept 2008,SZ-7,BX-1,Intelligence,LEO,Jiuquan Satellite Launch Center,–,0,0,0,–,–,"BX-1 was deployed from SZ-7 and proceeded to orbit around the spacecraft; “BX-1 may have been designed to test in-orbit ejection of “companion” satellites, dual-use on-orbit inspection capabilities, 
+and use of attitude control and propulsion systems for formation flying""","https://www.uscc.gov/annual-report/2019-annual-report 
+ http://www.astronautix.com/s/shenzhou7.html 
+https://www.thespacereview.com/article/1235/1 ",,,,
+China,Jun - Aug 2010,SJ-O6F,SJ-12,Intelligence,LEO,Jiuquan Satellite Launch Center,–,0,0,0,–,–,SJ-12 moved to rendevous with SJ-O6F and may have bumped it,"https://swfound.org/counterspace/ 
+https://www.uscc.gov/annual-report/2019-annual-report 
+https://www.space.com/9062-chinese-satellites-bump-secret-maneuvers.html ",,,,
+China,Jul 2013 - May 2016,"SY-7, CX-3",SJ-15,Intelligence,LEO,"Taiyuan Satellite 
+Launch Center",–,0,0,0,–,–,"SY-7 released an additional object that it performed maneuvers with and may have had a telerobotic arm. CX-3 performed optical surveillance of other in-space objects. SJ-15 Demonstrated altitude and inclination changes to approach other satellites.; Some space debris observations; In Dec 2015, SJ-15 raised orbit to CX-3 demonstrating multi-orbit inspection ","https://swfound.org/counterspace/ 
+https://www.uscc.gov/annual-report/2019-annual-report 
+https://space.skyrocket.de/doc_sdat/sj-15.html 
+https://spaceflight101.com/long-march-7-maiden-launch/aolong-1-asat-concerns/ ",,,,
+China,Nov 2016 - Mar 2018,"Chinasat 5A, Chinasat-20",SJ-17,Intelligence,GEO,"Wenchang Satellite 
+Launch Center",–,0,0,0,–,–,"YZ-2 upper stage failed to burn to the graveyard orbit and stayed near GEO. SJ-17 demonstrated maneuverability around 
+the GEO belt and circumnavigated Chinasat 5A.","https://swfound.org/counterspace/ 
+https://www.uscc.gov/annual-report/2019-annual-report 
+https://space.skyrocket.de/doc_sdat/sj-17.html 
+https://breakingdefense.com/2018/04/china-satellite-sj-17-friendly-wanderer/ ",,,,
+China,Jan - Apr 2019,TJS-3,TJS-3 AKM,Intelligence,GEO,Xichang Satellite Launch Center,–,0,0,0,–,–,TJS-3 AGM separated from TJS-3 in GEO and both manuevered slightly to stay within close orbits,"https://www.uscc.gov/annual-report/2019-annual-report 
+https://space.skyrocket.de/doc_sdat/tjs-3.html",,,,
+China,May 2019 - Present,Multiple,TJS-3  ,Intelligence,GEO,Xichang Satellite Launch Center,–,0,0,0,–,–,"TJS-3 is drifting around the GEO belt, periodically stopping to approach Russian and US satellites; from Nov. 2023- Nov. 2024, it conducted RPOs with TJS-10; it then started moving again","https://www.space.com/chinese-spacecraft-tjs-3-inspecting-us-satellites
+https://isruniversity.com/wp-content/uploads/2024/12/110-24-Nov-2024-Integrity-Flash.pdf 
+",,,,
+China,Jan-August 2020,"Chinasat 6B, SJ-20",SJ-17,Intelligence,GEO,"Wenchang Satellite 
+Launch Center",–,0,0,0,–,–,"SJ-17 made smaller changes to RPO with Chinasat 6B in January 2020 and, SJ-20, a new Chinese high bandwidth 
+communications satellite launched in December 2019, in October 2020",2021 Counterspace Report (SWF),,,,
+China,Dec 2021 - Jan 2022,Compass G2,SJ-21,Intelligence,GEO,Xichang Satellite Launch Center,–,0,0,0,–,–,SJ-21 maneuvered to dock with Compass G2 and pull it into a much higher orbit.,https://breakingdefense.com/2022/01/chinas-sj-21-tugs-dead-satellite-out-of-geo-belt-trackers/,,,,
+China,January 2022,USA 270,"SY-12 01, SY-12 02",Intelligence,GEO,"Wenchang Satellite 
+Launch Center",–,0,0,0,–,–,"USA 270 maneuvered to approach SY-12 01 and SY-12 02. The two Chinese satellites made significant maneuvers to split up and begin rotating around the GEO belt in opposite directions, with SY-12 02 apparently also getting an imaging opportunity on USA 270.",https://spacenews.com/an-in-orbit-game-of-cat-and-mouse-close-approaches-prompt-calls-for-communications-and-norms/,,,,
+China,Nov 2022 - Feb 2023,Object J,PRC Test Spacecraft 2,Unknown,LEO,Jiuquan Satellite Launch Center,--,0,0,0,--,--,"PRC Test Spacecraft 2 (Shenlong spaceplane) released Object J and made multiple RPOs, including repeated docking, deployment, and formation flying.",https://spacenews.com/chinas-spaceplane-conducted-proximity-and-capture-maneuvers-with-subsatellite-data-suggests/,,,,
+China,Nov 2023,VENESAT-1,SJ-17,Intelligence,GEO,"Wenchang Satellite 
+Launch Center",–,0,0,0,–,–,"SJ-17 made a brief RPO with VENESAT-1, a Venezuelan communications satellite built and launched by China in 2008",https://isruniversity.com/wp-content/uploads/2024/12/110-24-Nov-2024-Integrity-Flash.pdf,,,,
+China,June 2024,Object G,PRC Test Spacecraft 3,Unknown,LEO,Jiuquan Satellite Launch Center,–,0,0,0,–,–,"In June 2024, China's experimental spaceplane (PRC Test Spacecraft 3) conducted an RPO with another Chinese spacecraft ""Object G."" Object G was released into orbit by the spaceplane on May 14, 2024, and between June 5 - 8, PRC Test Spacecraft 3 carried out a series of avoidance maneuvers and approaches with the object. ",https://spacenews.com/chinas-secretive-spaceplane-conducts-proximity-operations-with-small-spacecraft/,,,,
+China,"Mar - Apr, Sep, Dec 2024","SY-24C 01, SY-24C 02, SY-24C 03, SJ-6 05A, SJ-6 05B","SY-24C 01, SY-24C 02, SY-24C 03, SJ-6 05A, SJ-6 05B",Intelligence,LEO,"Yangjiang Sea-based Launch Center
+
+Jiuquan Satellite Launch Center",–,0,0,0,–,–,The five satellites conducted RPOs that at times brought them to distances of less than 1 km from each other.,https://nssaspace.org/wp-content/uploads/2025/02/20250221-S2-Space-Threat-Fact-Sheet-Annex-v1-RELEASE.pdf,,,,

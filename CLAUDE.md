@@ -3,10 +3,10 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 14 Nov 2026, about 4:40 PM CST: `main` at `465fb5d`, method `orbit-2.4`, live at
-https://orbit.theintelligence.company.** Six lanes (method `orbit-2.6` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+**State, 15 Nov 2026, about 2:30 PM CST: live at https://orbit.theintelligence.company with `fab47f4`, method
+`orbit-2.6`. The RPO lane (`orbit-2.7`) is committed locally on top and not pushed until Tom says yes.** Seven lanes (method `orbit-2.7` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
 (Spaceflight News API headlines, links only), `navwarn`
-(NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `maneuver` (Space-Track, published with Tom's approved
+(NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `rpo` (SWF RPO sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
 the listed orbit changes (kind `maneuver`, off the map), which COP's gate holds from joins as military context. COP shows NGA's launch, debris and reentry
 warnings under "Spectrum and space" from Cordon's copies, not Orbit's (COP `1a6c577`, live 14 Nov). The hub's
@@ -46,7 +46,7 @@ python -m unittest discover -s tests       # 59 offline tests, real fixtures fro
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.6`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.7`; details in `doctrine/method.md`)
 `counterspace` and `maneuver` are described in their own sections below.
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
@@ -145,9 +145,11 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
 - Side columns (totals, footnotes, "Last Updated") are cut before parsing; fewer than 50 tests or a moved header
   fails the lane, which keeps its last good copy. Page card after the hazards card; nothing in the feed (no
   coordinates, no counterspace requirement in `doctrine/requirements.json`).
-- **Not built:** SWF's RPO sheet (`1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4`; data tabs Commercial/Civil gid 0,
-  14 rows; Military/Intelligence gid 1789904048, 44 rows; Planned gid 1403218889; dates free text, needs span
-  parsing). ITU: Space Explorer needs a TIES login; the public BR IFIC zips (`itu.int/sns/ific10/ific3084.zip`,
+- **RPO sheet built 15 Nov 2026 (`orbit-2.7`, lane `rpo`, `orbit/rpo.py`):** SWF's
+  `1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4`, tabs Commercial/Civil gid 0 (14 rows), Military/Intelligence gid
+  1789904048 (44), Planned gid 1403218889 (4), About gid 1782604784 ("Last Updated 17 February 2026"); five requests
+  a run. 60 of 62 dates read; 78 of 143 names matched to GCAT. Source `swf-rpo` B3 (Orbit's call, for Tom to
+  confirm). Card `#rpo` after the ASAT card; not in the feed. Fixtures `tests/fixtures/swf_rpo_*.csv`. ITU: Space Explorer needs a TIES login; the public BR IFIC zips (`itu.int/sns/ific10/ific3084.zip`,
   11 MB, biweekly) are unopened, and ITU's copyright page reserves rights (ask jur@itu.int). CSIS: all rights
   reserved, not used.
 
@@ -269,7 +271,7 @@ Approved 15 Nov 2026 (Tom's "Yes, build it" to each): (a) built 15 Nov, `orbit-2
 apart only when the dominant term and the sign of the semi-major-axis change agree (SJ-21's 17-25 Jan change);
 (b) built 15 Nov (`maneuver-case iss`, stored read of 965 sets; 5 of 5 NASA reboosts hit, 9 cross-track or
 eccentricity marks not in NASA's list, storm drew no drag mark; method.md orbit changes item 7), a LEO known case, the ISS over a 90-day window with at least 3 NASA-announced reboosts plus a window with the
-10-11 May 2024 storm, one stored GP_HISTORY read (about 3 requests); (c) the SWF RPO sheet lane, after confirming the
+10-11 May 2024 storm, one stored GP_HISTORY read (about 3 requests); (c) built 15 Nov (`orbit-2.7`, see the ASAT section), the SWF RPO sheet lane, after confirming the
 2026 report links the sheet under CC BY-NC 4.0.
 
 ## Rules

@@ -9,7 +9,7 @@
 collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
 from_previous) or stays empty, and the snapshot's "lanes" block says which.
 
-Lanes (method orbit-2.4):
+Lanes (method orbit-2.7):
   catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
             day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
             if none has changed. About 37 MB when it does.
@@ -18,6 +18,9 @@ Lanes (method orbit-2.4):
             NAVAREA XI (Japan Coast Guard), a list and one request per launch-related warning.
   counterspace  Secure World Foundation's "History of ASAT Testing in Space" sheet (CSV export, CC BY-NC 4.0):
             every test with its debris counts, totals by country, and tests new since the last reading.
+  rpo       Secure World Foundation's "History of Robotic Rendezvous and Proximity Operations in Space" sheet
+            (CSV export of three data tabs and the About tab, CC BY-NC 4.0): SWF's rows with dates read into
+            start, end, precision and ongoing, rows whose dates do not read listed apart, names matched to GCAT.
   maneuver  Space-Track.org (USSPACECOM) element sets for a private watch list: GP once an hour at most, each
             object's history (GP_HISTORY) once only, stored in data/state/spacetrack/. Orbit changes larger than
             each object's own element-set noise (orbit/maneuver.py). Published since Tom approved the disclaimer
@@ -39,7 +42,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -48,10 +51,11 @@ LANE_FIELDS = {
     "news": ["news"],
     "navwarn": ["navwarn"],
     "counterspace": ["counterspace"],
+    "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
 }
 EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
-         "news": {}, "navwarn": {}, "counterspace": {}, "maneuvers": {}}
+         "news": {}, "navwarn": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -60,7 +64,8 @@ INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "news": ["snapi-thespacedevs"],
-               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "maneuver": ["space-track"]}
+               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
+               "maneuver": ["space-track"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -220,6 +225,26 @@ def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
     }}, [rec], None
 
 
+def _lane_rpo(raw_dir: Path, prev: dict, getter, **_):
+    """Secure World Foundation's RPO history: one request per data tab, and one for the About tab's date (that
+    one may fail alone). Names are matched to the GCAT index Orbit keeps (data/state), if there is one."""
+    bodies, recs = {}, []
+    for tab, spec in rpo.TABS.items():
+        bodies[tab], rec = fetch.fetch(f"swf-rpo-{tab}", rpo.EXPORT.format(gid=spec["gid"]), raw_dir, "csv",
+                                       getter=getter)
+        recs.append(rec)
+    try:
+        bodies["about"], rec = fetch.fetch("swf-rpo-about", rpo.EXPORT.format(gid=rpo.ABOUT_GID), raw_dir, "csv",
+                                           getter=getter)
+        recs.append(rec)
+    except Exception:  # noqa: BLE001 - the date is shown as unknown
+        bodies["about"] = b""
+    doc = rpo.read(bodies, (_read_index(Path(raw_dir).parent) or {}).get("objects"))
+    return {"rpo": {"read_at": recs[0]["fetched_at"], "sheet": rpo.SHEET, "report": rpo.REPORT,
+                    "tabs": {t: s["name"] for t, s in rpo.TABS.items()},
+                    "roles": {t: list(s["roles"]) for t, s in rpo.TABS.items()}, **doc}}, recs, None
+
+
 def _st_read(data_dir: Path, name: str, default):
     p = data_dir / ST_DIR / name
     if not p.exists():
@@ -305,7 +330,7 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
 
 
 LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "news": _lane_news, "navwarn": _lane_navwarn,
-         "counterspace": _lane_counterspace, "maneuver": _lane_maneuver}
+         "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
