@@ -3,8 +3,12 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 15 Nov 2026, about 2:30 PM CST: live at https://orbit.theintelligence.company with `fab47f4`, method
-`orbit-2.6`. The RPO lane (`orbit-2.7`) is committed locally on top and not pushed until Tom says yes.** Seven lanes (method `orbit-2.7` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+**State, 15 Nov 2026, about 2:30 PM CST: live at https://orbit.theintelligence.company with `c9f3b9c`, method
+`orbit-2.7`** (RPO lane pushed on Tom's "Yes, push it"; run 43757609794 passed and deployed; checked live: rpo lane
+ok, card `#rpo` after `#asat`, swf-rpo B3 under Sources). Open for Tom: the swf-rpo grade, whether the Space Devs,
+ITU and JCG emails went out, the low-orbit cross-track filter, the GCAT-history baseline, the other session's notes
+edit to `doctrine/spacetrack-disclaimer.md` (unstaged), whether Noisefloor and Orbit share one Space-Track login
+(Noisefloor's GEO pull at 05:40 and 12:40 UTC), and moving Noisefloor's GEO belt into Orbit. Seven lanes (method `orbit-2.7` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
 (Spaceflight News API headlines, links only), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `rpo` (SWF RPO sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
