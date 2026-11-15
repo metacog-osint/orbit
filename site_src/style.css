@@ -82,6 +82,9 @@ tr:target { background: var(--warn-bg); }
 .small { font-size: 0.84rem; }
 .pl { color: var(--muted); font-size: 0.8rem; }
 ul.plain { margin: 0; padding-left: 18px; }
+ul.news { margin: 4px 0 0; padding-left: 16px; }
+ul.news li { margin: 2px 0; }
+ul.news a { overflow-wrap: anywhere; }
 .foot { padding: 24px 0; border-top: 1px solid var(--border); margin-top: 24px; }
 @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .hero h1 { font-size: 1.3rem; } }
 

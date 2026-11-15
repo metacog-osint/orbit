@@ -23,6 +23,17 @@
       "commercial_ok": "unknown"
     },
     {
+      "id": "snapi-thespacedevs",
+      "name": "Spaceflight News API (Spaceflight News API and The Space Devs): headlines tied to Launch Library 2 launches",
+      "url": "https://www.spaceflightnewsapi.net/",
+      "licence": "No licence, terms of use or rate limit stated (site read 15 Nov 2026; footer 'Copyright © 2026 Spaceflight News API & The Space Devs'). Orbit keeps links only: headline, outlet, time and the link to the outlet's page; no summaries, no images. Asked in Tom's email to The Space Devs (15 Nov 2026).",
+      "use": "ingest",
+      "grade": "B3",
+      "independence_group": "thespacedevs",
+      "commercial_ok": "unknown",
+      "note": "orbit-2.5 (Tom's 'Yes, links only', 15 Nov 2026): one request a run, filtered to the scheduled launches' Launch Library 2 ids. Grade is Orbit's call: the API usually links the right launch (B); the headlines are the outlets' own reporting, not checked (3)."
+    },
+    {
       "id": "nga-msi",
       "name": "NGA Maritime Safety Information: in-force daily memoranda for HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and NAVAREA XII (launch hazard and space-debris warnings)",
       "url": "https://msi.nga.mil/NavWarnings",
@@ -53,7 +64,7 @@
       "grade": "B2",
       "independence_group": "swf",
       "commercial_ok": false,
-      "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade is Orbit's call, to be confirmed by Tom."
+      "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade B2 confirmed by Tom, 15 Nov 2026 (the RPO sheet, if built, is graded on its own)."
     },
     {
       "id": "space-track",

@@ -39,18 +39,19 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
     "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes"],
     "upcoming": ["upcoming"],
+    "news": ["news"],
     "navwarn": ["navwarn"],
     "counterspace": ["counterspace"],
     "maneuver": ["maneuvers"],
 }
 EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
-         "navwarn": {}, "counterspace": {}, "maneuvers": {}}
+         "news": {}, "navwarn": {}, "counterspace": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -58,7 +59,7 @@ ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
-LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"],
+LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "news": ["snapi-thespacedevs"],
                "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "maneuver": ["space-track"]}
 
 
@@ -116,6 +117,17 @@ def _lane_upcoming(raw_dir: Path, prev: dict, getter, **_):
     now = launches.now_utc()
     body, rec = fetch.fetch("ll2-upcoming", launches.url(now), raw_dir, "json", getter=getter)
     return {"upcoming": launches.within(launches.parse(body), now)}, [rec], None
+
+
+def _lane_news(raw_dir: Path, prev: dict, getter, upcoming=None, **_):
+    """Spaceflight News API headlines for this run's scheduled launches (links only): one request, none when
+    nothing is scheduled."""
+    ids = [u["id"] for u in upcoming or [] if u.get("id")]
+    if not ids:
+        return {"news": {"read_at": fetch.now_utc(), "articles": [], "by_launch": {}, "note": "no scheduled launches"}}, [], None
+    body, rec = fetch.fetch("snapi-articles", news.url(ids), raw_dir, "json", getter=getter)
+    doc = news.parse(body, ids)
+    return {"news": {"read_at": rec["fetched_at"], "source": news.SITE, **doc}}, [rec], None
 
 
 def _lane_navwarn(raw_dir: Path, prev: dict, getter, **_):
@@ -292,7 +304,7 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
     return {"maneuvers": out}, recs, None
 
 
-LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "navwarn": _lane_navwarn,
+LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "news": _lane_news, "navwarn": _lane_navwarn,
          "counterspace": _lane_counterspace, "maneuver": _lane_maneuver}
 
 
@@ -317,6 +329,8 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             continue
         try:
             kwargs = {"force": force, "header": header} if lane == "catalog" else {}
+            if lane == "news":  # reads this run's scheduled launches (upcoming runs first)
+                kwargs = {"upcoming": snap.get("upcoming")}
             result, recs, stamps = fn(raw_dir, prev, getter, **kwargs)
             if result is None:
                 keep_previous()

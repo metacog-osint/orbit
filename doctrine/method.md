@@ -1,10 +1,11 @@
-# Orbit method (`orbit-2.4`, 14 Nov 2026)
+# Orbit method (`orbit-2.5`, 15 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
 and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
 live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
-test history (`orbit-2.3`) and orbit changes in watched objects (`orbit-2.4`) followed.
+test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
+launches (`orbit-2.5`) followed.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. Orbit has no
 baseline of its own readings yet, so nothing is called an anomaly, and it makes no warnings.
@@ -90,6 +91,17 @@ reentry warnings from Cordon's copies (14 Nov 2026).
    reading lists none and says so. History, not events: nothing goes into the feed.
 4. **Licence:** CC BY-NC 4.0, credited with links to the report and the sheet. Orbit is non-commercial; this
    source may not be reused commercially.
+
+## Headlines for scheduled launches (`orbit-2.5`)
+Source: the Spaceflight News API (Spaceflight News API and The Space Devs), which ties articles to Launch Library 2
+launches. No licence or terms stated (read 15 Nov 2026); asked of The Space Devs in writing.
+1. **Links only** (Tom, 15 Nov 2026): headline, outlet, publication time and the link to the outlet's own page.
+   Summaries are the publishers' text and images are theirs; neither is kept.
+2. **One request a run**, filtered to the Launch Library 2 ids of the launches scheduled in the next 14 days; no
+   request when none are. Each launch shows its three newest headlines; a link listed twice is kept once; links
+   other than http(s) are dropped.
+3. **Not checked.** A headline is the outlet's reporting, shown beside the launch the API ties it to; Orbit does
+   not judge it. Graded B3 (Orbit's call). Not in the feed.
 
 ## Orbit changes in watched objects (`orbit-2.4`)
 Source: Space-Track.org (USSPACECOM, 18th Space Defense Squadron) GP and GP_HISTORY element sets for a private
