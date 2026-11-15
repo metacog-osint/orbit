@@ -694,6 +694,17 @@ class Maneuver(unittest.TestCase):
         self.assertGreater(ev["gap"]["to"], "2026-11-05")
         self.assertNotIn("gap", self.detect(synth(11, burns=[(30.0, dn_for(0.5), 0.0)]))["events"][0])
 
+    def test_marks_under_a_day_apart_join_only_when_they_agree(self):
+        # orbit-2.6: a lowering then a raising half a day later are two changes; two raisings are one
+        d = self.detect(synth(12, burns=[(30.0, dn_for(0.5), 0.0), (30.5, -dn_for(0.5), 0.0)]))
+        self.assertEqual([e["da_km"] < 0 for e in d["events"]], [True, False], d["events"])
+        d = self.detect(synth(13, burns=[(30.0, dn_for(0.5), 0.0), (30.5, dn_for(0.5), 0.0)]))
+        self.assertEqual(len(d["events"]), 1, d["events"])
+        self.assertAlmostEqual(d["events"][0]["dv_ms"], 1.0, delta=0.1)
+        # an in-track change then a plane change half a day later are two changes
+        d = self.detect(synth(14, i0=1.0, burns=[(30.0, dn_for(0.5), 0.0), (30.5, 0.0, 0.01)]))
+        self.assertEqual([e["dominant"] for e in d["events"]], ["in-track", "cross-track"], d["events"])
+
     def test_geo_plane_change_is_cross_track(self):
         d = self.detect(synth(3, i0=1.0, burns=[(25.0, 0.0, 0.01)]))  # 0.01 deg: about 0.54 m/s
         self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])
