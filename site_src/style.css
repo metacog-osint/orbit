@@ -191,3 +191,9 @@ h2 .ref { color: var(--muted); font-weight: 400; }
   .card-head p:not(.open) { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .card-head p[role="button"] { cursor: pointer; }
 }
+
+/* Baseline card (orbit-2.8): 24 windows then the last 30 days as small bars; the table carries the numbers. */
+.spark { display: inline-flex; align-items: flex-end; gap: 1px; height: 16px; }
+.spark i { display: block; width: 3px; background: var(--g-other); }
+.spark i.now { background: var(--accent); }
+.pos-above, .pos-below { font-weight: 600; }

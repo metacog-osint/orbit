@@ -17,6 +17,13 @@ The method, for each watched object, over its stored Space-Track element sets (G
   5. Marked pairs less than a day apart are one change, but only when they agree: the same dominant term
      (in-track, cross-track or eccentricity) and the same sign of semi-major-axis change as the change so far
      (orbit-2.6, Tom, 15 Nov 2026; before, SJ-21's lowering, raising, tow and return of 17-26 Jan 2022 read as one).
+  6. In low orbit a change is listed only when it is mainly in-track, or when its cross-track or eccentricity
+     total is LEO_OFF_TRACK_MS (1 m/s) or more; the rest are counted, not listed (orbit-2.8, Tom, 15 Nov 2026). On
+     the ISS known case low-orbit cross-track noise is 0.32 m/s against 0.006 m/s in-track, and all nine marks
+     NASA did not list were cross-track or eccentricity at 0.28-0.84 m/s.
+  7. Each listed change also carries dv_sma_ms, the velocity the net semi-major-axis change alone gives
+     (v * |da| / 2a, steady drift removed), beside the total, which adds the noisier cross-track and eccentricity
+     terms.
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
 marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
@@ -41,6 +48,7 @@ SIDEREAL_REV_DAY = 1.0027379093
 Z = 8.0
 FLOOR_MS = 0.05
 REPORT_MS = {"GEO": 0.25}  # smallest reported change by regime; FLOOR_MS where a regime is not listed
+LEO_OFF_TRACK_MS = {"cross-track": 1.0, "eccentricity": 1.0}  # LEO: smallest listed change by dominant term (orbit-2.8)
 MIN_PAIRS = 10
 MERGE_DAYS = 1.0
 MIN_RATE_DT = 0.1   # days: pairs closer than this do not set the steady-drift rate
@@ -178,6 +186,7 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         ji = math.radians(p["di"] - rate["di"] * p["dt"])
         jn = math.radians(p["dnode"] - rate["dnode"] * p["dt"]) * math.sin(math.radians(p["i"]))
         je = p["de"] - rate["de"] * p["dt"]
+        p["ja"], p["v"] = ja, v
         p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
                    "eccentricity": abs(v * je / 2)}
         p["total"] = math.sqrt(sum(x * x for x in p["dv"].values()))
@@ -197,13 +206,21 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         else:
             groups.append([p])
     out["below_report"] = 0
+    out["leo_off_track"] = 0
     for g in groups:
-        if sum(p["total"] for p in g) < REPORT_MS.get(reg, FLOOR_MS):
+        total = sum(p["total"] for p in g)
+        if total < REPORT_MS.get(reg, FLOOR_MS):
             out["below_report"] += 1  # counted, not listed
             continue
         dv = {c: sum(p["dv"][c] for p in g) for c in COMPONENTS}
-        ev = {"from": g[0]["from"], "to": g[-1]["to"], "dv_ms": round(sum(p["total"] for p in g), 3),
-              "dominant": max(dv, key=dv.get), "da_km": round(sum(p["da"] for p in g), 2),
+        dominant = max(dv, key=dv.get)
+        if reg == "LEO" and total < LEO_OFF_TRACK_MS.get(dominant, 0.0):
+            out["leo_off_track"] += 1  # counted, not listed: low-orbit cross-track and eccentricity noise
+            continue
+        a = sum(p["a"] for p in g) / len(g)
+        ev = {"from": g[0]["from"], "to": g[-1]["to"], "dv_ms": round(total, 3),
+              "dv_sma_ms": round(g[0]["v"] * abs(sum(p["ja"] for p in g)) / (2 * a), 3),
+              "dominant": dominant, "da_km": round(sum(p["da"] for p in g), 2),
               "di_deg": round(sum(p["di"] for p in g), 4), "z": round(max(max(p["z"].values()) for p in g), 1),
               "pairs": len(g)}
         gap = max(g, key=lambda p: p["dt"])  # the widest pair: the change can sit anywhere inside it
@@ -245,4 +262,5 @@ def report(store: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
                       "regime": o["regime"], **e} for o in objs for e in o["events"]),
                     key=lambda e: e["to"], reverse=True)
     return {"objects": objs, "events": events, "window_days": window_days,
-            "thresholds": {"z": Z, "floor_ms": FLOOR_MS, "report_ms": REPORT_MS, "min_pairs": MIN_PAIRS, "merge_days": MERGE_DAYS}}
+            "thresholds": {"z": Z, "floor_ms": FLOOR_MS, "report_ms": REPORT_MS, "leo_off_track_ms": LEO_OFF_TRACK_MS,
+                           "min_pairs": MIN_PAIRS, "merge_days": MERGE_DAYS}}

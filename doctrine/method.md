@@ -1,4 +1,4 @@
-# Orbit method (`orbit-2.7`, 15 Nov 2026)
+# Orbit method (`orbit-2.8`, 15 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
@@ -6,10 +6,12 @@ and roadmap step 14): catalog changes, launches, manoeuvres and counterspace eve
 live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
 test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
 launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree, and `orbit-2.7` adds SWF's
-rendezvous and proximity operations history.
+rendezvous and proximity operations history. `orbit-2.8` lists low-orbit plane and shape changes only from 1 m/s,
+waits for Noisefloor's share of the Space-Track account, and adds baselines from GCAT's history.
 
-Every item is an **observation** (measured or reported, no judgment) at tier **routine**. Orbit has no
-baseline of its own readings yet, so nothing is called an anomaly, and it makes no warnings.
+Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
+shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
+makes no warnings.
 
 ## Lanes
 
@@ -96,8 +98,9 @@ reentry warnings from Cordon's copies (14 Nov 2026).
 
 ## Rendezvous and proximity operations (`orbit-2.7`)
 Source: SWF's RPO sheet, linked from the 2026 report's page under "Additional Information"; the report is CC BY-NC
-4.0 (checked 15 Nov 2026). Graded B3 on its own (Orbit's call; the ASAT sheet is B2): the same reliable compiler,
-but many rows are SWF's reading of public tracking (a purpose, an "Intelligence" category, a span of months).
+4.0 (checked 15 Nov 2026). Graded B2, as the ASAT sheet (Tom, 15 Nov 2026: "I trust SWF"; Orbit had proposed
+B3). Many rows are SWF's reading of public tracking (a purpose, an "Intelligence" category, a span of months), and
+the card says so.
 1. **SWF's text kept.** Every field as SWF wrote it, its spellings included ("Comos 2521"); the three tabs are
    shown apart, with SWF's column names (client and servicer, target and chaser).
 2. **Dates read, not guessed.** SWF's free-text date becomes a start, an end, a precision (day, month or year)
@@ -131,7 +134,12 @@ Tom on 14 Nov 2026, and appear on the card, in `snapshot.json` (`maneuvers.attri
 element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one item per listed change (kind
 `maneuver`, off the map), carrying the citation; COP's gate holds the kind from joins as military context.
 1. **Space-Track's limits kept:** at most four requests a run, 2.5 s apart; GP at most once an hour, never at
-   :57-:03 or :27-:33; each object's history (60 days) read once and stored, never asked for again.
+   :57-:03 or :27-:33; each object's history (60 days) read once and stored, never asked for again. **The account
+   is shared** with Noisefloor, whose daily workflow makes one GP query in its step "GEO region (Space-Track)"
+   (Tom, 15 Nov 2026). The hourly limit is the account's, so from `orbit-2.8` Orbit reads that workflow's recent
+   runs from GitHub's API just before asking: while a run is going, or within an hour of that step, it keeps its
+   last reading and says why on the lane; if GitHub cannot be read it waits too. Noisefloor does not yet check
+   Orbit's query (see `geo-move-plan.md`).
 2. **One set per epoch**, the later-created where Space-Track re-issued one.
 3. **Change against the object's own noise.** For each pair of consecutive sets: the change in semi-major axis,
    inclination, node and eccentricity, less the object's median drift over that interval (drag decay, nodal
@@ -139,8 +147,12 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    velocities. A pair is marked when one term is at least 8 robust deviations (1.4826 x MAD) above the object's
    own median and the total is at least 0.05 m/s; at least 10 pairs are needed first; marks under a day apart are
    one change only when they agree, with the same dominant term and the same sign of semi-major-axis change
-   (`orbit-2.6`, Tom, 15 Nov 2026). A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s elsewhere); smaller ones
-   are counted, not listed. Geostationary objects also show longitude and drift before and after.
+   (`orbit-2.6`, Tom, 15 Nov 2026). A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s
+   elsewhere); smaller ones are counted, not listed. **In low orbit** a change whose largest term is cross-track or
+   eccentricity is listed only at 1 m/s or more (`orbit-2.8`, Tom, 15 Nov 2026, from the ISS case below); the rest
+   are counted, not listed. Every listed change also gives the velocity its net semi-major-axis change alone
+   implies (v |da| / 2a, steady drift removed) beside the total, which adds the noisier terms. Geostationary
+   objects also show longitude and drift before and after.
 4. **What a mark is:** the published orbit moved more than this object's sets usually move. Usually a manoeuvre;
    a re-fit after a tracking gap, a mislabelled set or storm-driven drag in low orbit can give the same. Orbit says
    which object, when and how much, never why; no warnings.
@@ -170,6 +182,31 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    them (fit settling after the burn). **The G5 storm of 10-12 May 2024** drew no in-track (drag) mark and one
    0.32 m/s cross-track mark. NASA's reports found may not list every manoeuvre, so an extra mark is "not in this
    list", not proven false. Medium and high orbits are not yet checked against a known case.
+   **With the low-orbit rule (`orbit-2.8`)**: still 5 of 5 hits, 0 marks not in NASA's list; 11 cross-track or
+   eccentricity marks counted, not listed, over the whole span (the 9 extras plus 2 beside reboosts). The
+   semi-major-axis velocity alone: 1.79 m/s on 23 Feb (NASA 1.725), 1.71 on 14 Mar (NASA 1.59). The rule as first
+   worded to Tom ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
+   0.53 m/s eccentricity mark of 28 Apr 2024; the 1 m/s floor applies to eccentricity too, which is what gave the
+   "drops all 9" result Tom approved.
+
+## Baselines from GCAT's history (`orbit-2.8`)
+Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
+(`gcat.baseline`), shown in the card `#baseline`; not in the feed.
+1. **Windows:** the last 30 days (UTC dates, today included) against each of the 24 windows of 30 days before
+   them (about two years). For each row: the recent count, the prior windows' median, lowest and highest, how many
+   prior windows were as high or higher, and all 25 counts. "Above" or "below" means outside every prior window,
+   not a threshold of Orbit's choosing. A count, never a warning.
+2. **Series:** orbital, deep-space and near-orbital launch attempts (GCAT LaunchCode O, D or N, failures included)
+   in total, by launching country (each country among the launch's GCAT agencies, once) and by GCAT agency (the 25
+   busiest over the span plus any active in the last 30 days); payloads by launch date and owner state (top 30);
+   reentries by GCAT decay date and owner state, in total and by owner (top 20).
+3. **The newest window fills in late** for payloads and reentries: GCAT adds payloads and dates reentries as it
+   learns of them, so a "below" there can be lag. Launches are dated promptly. First measured on the 13 Nov GCAT
+   copy: 21 launches in the last 30 days against a prior median of 26 (20 to 41); 83 reentries against 143 (114 to
+   274), below every prior window, which is likely lag.
+4. **Not from GCAT:** catalog additions by date of cataloging (GCAT keeps no such date) and Orbit's own counts
+   (listed orbit changes per object, warnings per area). Those need Orbit's own daily archive, with baselines after
+   90 days (decision 8, not built).
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers),

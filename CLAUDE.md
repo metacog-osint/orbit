@@ -3,12 +3,13 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 15 Nov 2026, about 2:30 PM CST: live at https://orbit.theintelligence.company with `c9f3b9c`, method
-`orbit-2.7`** (RPO lane pushed on Tom's "Yes, push it"; run 43757609794 passed and deployed; checked live: rpo lane
-ok, card `#rpo` after `#asat`, swf-rpo B3 under Sources). Open for Tom: the swf-rpo grade, whether the Space Devs,
-ITU and JCG emails went out, the low-orbit cross-track filter, the GCAT-history baseline, the other session's notes
-edit to `doctrine/spacetrack-disclaimer.md` (unstaged), whether Noisefloor and Orbit share one Space-Track login
-(Noisefloor's GEO pull at 05:40 and 12:40 UTC), and moving Noisefloor's GEO belt into Orbit. Seven lanes (method `orbit-2.7` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+**State, 15 Nov 2026, about 4 PM CST: live at https://orbit.theintelligence.company with `f9e81d7` (method
+`orbit-2.7`, RPO lane checked live). Local, not pushed: `32bbf31` (Space-Track terms notes, committed on Tom's
+yes) and uncommitted `orbit-2.8`, all approved by Tom 15 Nov:** swf-rpo regraded B2 ("I trust SWF"); low-orbit
+plane and shape changes listed only from 1 m/s, with the semi-major-axis velocity beside each total; a wait for
+Noisefloor's GP query on the shared Space-Track account (Tom: "they use the same account"); baselines from GCAT's
+history (card `#baseline`); and `doctrine/geo-move-plan.md` for moving Noisefloor's GEO belt into Orbit, sun
+outages staying in Noisefloor. Emails to The Space Devs, ITU and the Japan Coast Guard: not sent yet (Tom, 15 Nov). Seven lanes (method `orbit-2.8` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
 (Spaceflight News API headlines, links only), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `rpo` (SWF RPO sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
@@ -46,7 +47,7 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 59 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
+python -m unittest discover -s tests       # offline tests (76 on 15 Nov), real fixtures from 13 Nov (manoeuvre tests synthetic)
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
@@ -152,8 +153,8 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
 - **RPO sheet built 15 Nov 2026 (`orbit-2.7`, lane `rpo`, `orbit/rpo.py`):** SWF's
   `1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4`, tabs Commercial/Civil gid 0 (14 rows), Military/Intelligence gid
   1789904048 (44), Planned gid 1403218889 (4), About gid 1782604784 ("Last Updated 17 February 2026"); five requests
-  a run. 60 of 62 dates read; 78 of 143 names matched to GCAT. Source `swf-rpo` B3 (Orbit's call, for Tom to
-  confirm). Card `#rpo` after the ASAT card; not in the feed. Fixtures `tests/fixtures/swf_rpo_*.csv`. ITU: Space Explorer needs a TIES login; the public BR IFIC zips (`itu.int/sns/ific10/ific3084.zip`,
+  a run. 60 of 62 dates read; 78 of 143 names matched to GCAT. Source `swf-rpo` B2 (Tom, 15 Nov 2026:
+  "I trust SWF"; Orbit had proposed B3). Card `#rpo` after the ASAT card; not in the feed. Fixtures `tests/fixtures/swf_rpo_*.csv`. ITU: Space Explorer needs a TIES login; the public BR IFIC zips (`itu.int/sns/ific10/ific3084.zip`,
   11 MB, biweekly) are unopened, and ITU's copyright page reserves rights (ask jur@itu.int). CSIS: all rights
   reserved, not used.
 
@@ -169,6 +170,10 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
   node and e less the object's own median drift, turned into velocity terms; a change is marked at 8 robust
   deviations above the object's own median and at least 0.05 m/s, with 10 pairs minimum; marks under a day apart
   merge. Listed only at 0.25 m/s or more at GEO (Tom, 14 Nov 2026), 0.05 m/s elsewhere; smaller ones counted.
+  In LEO a change mainly cross-track or eccentricity is listed only from 1 m/s (`LEO_OFF_TRACK_MS`, orbit-2.8);
+  each listed change carries `dv_sma_ms`. The account is shared with Noisefloor: `spacetrack.shared_gp_busy`
+  reads Noisefloor's `daily.yml` runs (GH_TOKEN in the collect step) and the lane waits, with a note, while its
+  step "GEO region (Space-Track)" is under an hour old or a run is going, or when GitHub cannot be read.
   A change whose widest set pair spans 48 h or more carries `gap` and a page label (Tom, 14 Nov 2026).
   GEO objects also get longitude and drift.
 - **Real-data check, run 14 Nov 2026** (Tom's account, `.env` in place): `python tools/orbit.py maneuver-case`,
@@ -266,7 +271,8 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
 8. ~~A baseline~~ Decided 15 Nov 2026 (Tom's "GCAT history now, rest later"): baseline launch cadence per country and
    per operator, catalog additions and reentries from GCAT's full history at once (e.g. a country's last 30 days
    against its prior 2 years); start a daily archive of Orbit's own counts (listed orbit changes per object, warnings
-   per area) and add those baselines after 90 days. Not built.
+   per area) and add those baselines after 90 days. GCAT part built 15 Nov 2026 (`orbit-2.8`, `gcat.baseline`, card
+   `#baseline`, page only; method.md "Baselines"); Orbit's own daily archive not built.
 9. ~~NAVAREA XI~~ Decided 15 Nov 2026 (Tom's "Ask JCG, rely on rebroadcasts"): Tom asks the Japan Coast Guard for
    permission to read the English list by script, at most hourly (draft in `private/email-jcg-navarea11.md`, to
    tuho@jodc.go.jp, an address from coordinator lists of uncertain date). Until they answer, HYDROPAC and NAVAREA XII

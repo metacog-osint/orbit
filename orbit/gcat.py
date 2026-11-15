@@ -369,5 +369,100 @@ def hygiene(objs: list[dict]) -> dict:
     }
 
 
+# --- baselines from GCAT's own history (orbit-2.8; Tom, 15 Nov 2026, decision 8) ----------------------------
+
+BASE_WINDOW_DAYS = 30   # the recent window
+BASE_PRIOR_WINDOWS = 24  # the 24 windows of 30 days before it: about two years
+BASE_TOP_OPERATORS = 25
+
+
+def _windows(today: date, window: int = BASE_WINDOW_DAYS, prior: int = BASE_PRIOR_WINDOWS) -> list[tuple[date, date]]:
+    """[(start, end)], both ends included: index 0 is the recent window ending today, 1..prior the ones before."""
+    return [(today - timedelta(days=window * (k + 1) - 1), today - timedelta(days=window * k)) for k in range(prior + 1)]
+
+
+def _series(dated: list[tuple[str, str]], wins: list[tuple[date, date]]) -> dict[str, list[int]]:
+    """Counts per key and window from (key, ISO date) pairs."""
+    first, last = wins[-1][0], wins[0][1]
+    out: dict[str, list[int]] = defaultdict(lambda: [0] * len(wins))
+    span = BASE_WINDOW_DAYS
+    for key, d in dated:
+        day = date.fromisoformat(d)
+        if not (first <= day <= last):
+            continue
+        out[key][(last - day).days // span] += 1
+    return out
+
+
+def _position(recent: int, prior: list[int]) -> dict:
+    """The recent window against the prior windows: their median and range, and where the recent count sits.
+    'above' and 'below' mean outside every prior window, not a threshold of Orbit's choosing."""
+    srt = sorted(prior)
+    mid = len(srt) // 2
+    med = srt[mid] if len(srt) % 2 else (srt[mid - 1] + srt[mid]) / 2
+    pos = "above" if recent > srt[-1] else "below" if recent < srt[0] else "within"
+    return {"recent": recent, "prior_median": med, "prior_min": srt[0], "prior_max": srt[-1],
+            "prior_windows": len(prior), "windows_at_or_above": sum(1 for x in prior if x >= recent), "position": pos}
+
+
+def _rows(series: dict[str, list[int]], label) -> list[dict]:
+    rows = []
+    for key, counts in series.items():
+        rows.append({**label(key), **_position(counts[0], counts[1:]), "series": counts[::-1]})  # oldest first
+    rows.sort(key=lambda r: (-(r["recent"] + sum(r["series"][:-1]) / max(len(r["series"]) - 1, 1)), str(r.get("key"))))
+    return rows
+
+
+def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date) -> dict:
+    """Launch cadence per launching country and per launch agency, payloads launched per owner and reentries per
+    owner: the last 30 days against each of the 24 windows of 30 days before them, from GCAT's own history.
+    GCAT dates the last few days as it learns of them, so the newest window can grow after a reading."""
+    wins = _windows(today)
+    by_country, by_agency, all_launches = [], [], []
+    for r in launch_rows:
+        code = r.get("LaunchCode", "")
+        if not code or code[0] not in ORBITAL_CODES:
+            continue
+        d = vague_date(r.get("Launch_Date", ""))["date"]
+        if not d:
+            continue
+        all_launches.append(("all", d))
+        ls = launchers(r.get("Agency", ""), orgs)
+        for c in sorted({l["country"] or l["state"] or "?" for l in ls} or {"?"}):
+            by_country.append((c, d))
+        for l in ls:
+            by_agency.append((l["code"], d))
+    names = {l: (orgs.get(l) or {}) for l, _ in by_agency}
+    payloads, reentries = [], []
+    for o in objs:
+        st = o["state"] or "?"
+        if o["type"] == "P":
+            d = vague_date(o["ldate"])["date"]
+            if d:
+                payloads.append((st, d))
+        if o["status"] in GONE:
+            d = vague_date(o["ddate"])["date"]
+            if d:
+                reentries.append((st, d))
+    country = lambda c: {"key": c, "country": c if len(c) == 2 and c.isalpha() and c.isupper() else None}
+    owner = lambda st: {"key": st, "state": st, "country": iso_country(st)}
+    agency = lambda a: {"key": a, "agency": a, "name": names.get(a, {}).get("name", a),
+                        "state": names.get(a, {}).get("state", ""), "country": iso_country(names.get(a, {}).get("state", ""))}
+    ag = _rows(_series(by_agency, wins), agency)
+    ag = [r for i, r in enumerate(ag) if i < BASE_TOP_OPERATORS or r["recent"]]
+    total = lambda pairs: _rows(_series([("all", d) for _, d in pairs], wins), lambda k: {"key": k})
+    return {
+        "window_days": BASE_WINDOW_DAYS, "prior_windows": BASE_PRIOR_WINDOWS,
+        "recent": [wins[0][0].isoformat(), wins[0][1].isoformat()],
+        "prior": [wins[-1][0].isoformat(), wins[1][1].isoformat()],
+        "launches_all": total(all_launches),
+        "launches_by_country": _rows(_series(by_country, wins), country),
+        "launches_by_agency": ag,
+        "payloads_by_owner": _rows(_series(payloads, wins), owner)[:30],
+        "reentries_all": total(reentries),
+        "reentries_by_owner": _rows(_series(reentries, wins), owner)[:20],
+    }
+
+
 def today_utc() -> date:
     return datetime.now(timezone.utc).date()
