@@ -4,7 +4,8 @@ The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, p
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
 **State, 14 Nov 2026, about 4:40 PM CST: `main` at `465fb5d`, method `orbit-2.4`, live at
-https://orbit.theintelligence.company.** Five lanes: `catalog` (GCAT), `upcoming` (Launch Library 2), `navwarn`
+https://orbit.theintelligence.company.** Six lanes (method `orbit-2.5` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+(Spaceflight News API headlines, links only), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
 the listed orbit changes (kind `maneuver`, off the map), which COP's gate holds from joins as military context. COP shows NGA's launch, debris and reentry
@@ -41,11 +42,11 @@ python tools/orbit.py collect --only upcoming
 python tools/orbit.py collect --force      # read GCAT even if unchanged
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # 55 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
+python -m unittest discover -s tests       # 59 offline tests, real fixtures from 13 Nov (manoeuvre tests synthetic)
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
 ```
 
-## Lanes (method `orbit-2.4`; details in `doctrine/method.md`)
+## Lanes (method `orbit-2.5`; details in `doctrine/method.md`)
 `counterspace` and `maneuver` are described in their own sections below.
 | Lane | Module | Source | Measured 13 Nov 2026, about 12:40 PM CST |
 |---|---|---|---|
@@ -138,7 +139,7 @@ orbit.theintelligence.company (grades A2/B2, 14 countdowns, no console errors).
 ## Anti-satellite test history (14 Nov 2026, `orbit-2.3`; Tom's "proceed with other options 1-3")
 - **Lane `counterspace`** (`orbit/counterspace.py`): Secure World Foundation's "History of ASAT Testing in Space"
   Google Sheet, read as CSV with no key (`counterspace.URL`), from the 2026 Global Counterspace Capabilities report
-  (CC BY-NC 4.0: `commercial_ok` false; graded B2, Orbit's call for Tom to confirm). 14 Nov: 80 rows, 78 dated
+  (CC BY-NC 4.0: `commercial_ok` false; graded B2, confirmed by Tom 15 Nov 2026). 14 Nov: 80 rows, 78 dated
   tests (Russia 33, USA 32, China 11, India 2), 6,874 pieces of debris created, 2,757 still on orbit; two rows
   dated as spans are listed apart and reconcile to SWF's totals (6,904 / 2,773). Sheet last updated 17 Feb 2026.
 - Side columns (totals, footnotes, "Last Updated") are cut before parsing; fewer than 50 tests or a moved header
@@ -234,15 +235,28 @@ Earlier notes (13 Nov 2026), kept for the record:
    manoeuvres).
 
 ## Open for Tom (14 Nov 2026; Space-Track account, secrets, case run and disclaimer are done)
-Decided 15 Nov 2026: manoeuvres go into COP's feed, held from joins by COP's gate (Tom's "Yes, add them").
-1. SWF's B2 grade (Orbit's call).
-2. Launch Library 2 has no stated data licence (credited, images not used).
-3. A 3D page: Cesium ion, or tiles without ion.
-4. ITU: a TIES login for Space Explorer, or the BR IFIC zips after asking jur@itu.int.
-5. A Spaceflight News lane (terms not read).
-6. Ground tracks as Orbit's COP mark.
-7. A baseline of Orbit's own readings, so it can flag anomalies.
-8. NAVAREA XI: no permitted source found.
+Decided 15 Nov 2026: manoeuvres go into COP's feed, held from joins by COP's gate (Tom's "Yes, add them"); SWF's
+ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
+3. ~~Launch Library 2 has no stated data licence~~ Decided 15 Nov 2026 (Tom's "Keep, and ask them"): keep it
+   (credited, images not used) and ask The Space Devs (support@thespacedevs.com, from their site) for a licence
+   statement. Text drafted for Tom to send from his own account; not sent by Claude. Site still states none (15 Nov).
+4. ~~A 3D page: Cesium ion, or tiles without ion.~~ Decided 15 Nov 2026: **Cesium ion** (Tom: "not a commercial
+   venture. If the day comes that we start generating revenue, then we'll change our status with cesium"). Not
+   built. When it is: Tom creates the ion account and token (restrict the token to orbit.theintelligence.company);
+   CesiumJS self-hosted like MapLibre; token set by Tom 15 Nov 2026 as repo variable `CESIUM_ION_TOKEN` (public scope
+   assets:read only, allowed URLs orbit.theintelligence.company, orbit-q2t.pages.dev, 127.0.0.1:8761); CSP opened for ion's hosts; revisit the ion plan before any revenue. Settle
+   ground tracks (item 7) first, since both draw satellites.
+5. ~~ITU route~~ Decided 15 Nov 2026: BR IFIC zips, after written permission from ITU's legal office (jur@itu.int;
+   email drafted for Tom to send, not sent by Claude). TIES is closed to TIC: ITU's TIES page gives access only to
+   staff of ITU Members (Member States, Sector Members, Associates, Academia, UN system) through the member's TIES
+   Focal Point; an ITU User account alone does not qualify. Do not use a government-affiliated TIES account for TIC.
+6. ~~A Spaceflight News lane~~ Built 15 Nov 2026, `orbit-2.5` (Tom's "Yes, links only"): lane `news`
+   (`orbit/news.py`), source `snapi-thespacedevs` (B3, Orbit's call), one request a run filtered to the scheduled
+   launches' LL2 ids; three newest headlines under each scheduled launch, headline, outlet, date and link only.
+   No terms stated; question 4 added to the Space Devs email. Not in the feed.
+7. Ground tracks as Orbit's COP mark.
+8. A baseline of Orbit's own readings, so it can flag anomalies.
+9. NAVAREA XI: no permitted source found.
 Proposed, not built: a fix for the one-day merge (SJ-21's 17-25 Jan change), a LEO known case from
 operator-announced manoeuvres, and the SWF RPO sheet lane.
 

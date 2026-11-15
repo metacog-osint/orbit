@@ -182,6 +182,24 @@
     box.appendChild(table(["When", "Flight and payloads (by owner)", "Vehicle and launcher", "Site", "Outcome", "GCAT"], rows));
   }
 
+  /* Spaceflight News API headlines for a scheduled launch: links only (headline, outlet, date), newest first. */
+  function headlines(id) {
+    var nw = (snap && snap.news) || {}, idx = (nw.by_launch || {})[id] || [];
+    var arts = idx.map(function (n) { return (nw.articles || [])[n]; }).filter(function (a) {
+      return a && /^https?:\/\//.test(a.url || "");
+    });
+    if (!arts.length) return null;
+    var ul = el("ul", "plain small news");
+    arts.forEach(function (a) {
+      var li = el("li"), link = el("a", "", a.title);
+      link.href = a.url; link.rel = "noopener noreferrer"; link.target = "_blank";
+      li.appendChild(link);
+      li.appendChild(el("span", "muted", " " + (a.site || "") +
+        (a.published_at ? ", " + fmt(a.published_at, { time: false, zoneName: false }) : "")));
+      ul.appendChild(li);
+    });
+    return ul;
+  }
   function upcomingTable() {
     var box = document.getElementById("upcoming-table");
     var rows = (snap.upcoming || []).map(function (x) {
@@ -194,7 +212,11 @@
       cd.setAttribute("data-prec", x.net_precision || "");
       when.appendChild(cd);
       cell(tr, when);
-      cell(tr, x.name);
+      var nm = el("div");
+      nm.appendChild(el("div", "", x.name));
+      var hl = headlines(x.id);
+      if (hl) nm.appendChild(hl);
+      cell(tr, nm);
       cell(tr, who((x.provider_countries || []).map(function (c) { return mark(c, null); }), x.provider || ""));
       cell(tr, x.orbit || "");
       cell(tr, who(x.pad_country ? [mark(x.pad_country, null)] : [], x.location || x.pad));
@@ -701,6 +723,7 @@
     var box = document.getElementById("lanes");
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
+      news: "Spaceflight News API (headlines, links only)",
       navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history",
       maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",

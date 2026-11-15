@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -205,6 +205,8 @@ class EndToEnd(unittest.TestCase):
                 return body(by_url[url])
             if url.startswith(launches.API):
                 return body("ll2_upcoming.json")
+            if url.startswith(news.API):
+                return body("snapi_articles.json")
             if url == navwarn.NGA_API:
                 if self.api_doc is None:
                     raise OSError("HTTP Error 503: Service Unavailable")
@@ -527,7 +529,7 @@ class Registers(unittest.TestCase):
         doc = cli.sources_doc(ROOT)
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
-        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "nga-msi",
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
                                       "swf-counterspace", "space-track"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
@@ -570,6 +572,55 @@ class Registers(unittest.TestCase):
         regs = registers.ids(ROOT / "doctrine")
         self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
         self.assertNotIn("Space-Track", feed.build_feed({**snap, "maneuvers": {}})["attribution"])
+
+
+class News(unittest.TestCase):
+    """Spaceflight News API headlines (orbit-2.5): links only, filtered to the scheduled launches."""
+    IDS = [r["id"] for r in json.loads(body("ll2_upcoming.json"))["results"]]
+
+    def test_fixture_keeps_headline_outlet_time_and_link_only(self):
+        doc = news.parse(body("snapi_articles.json"), self.IDS)
+        self.assertEqual(len(doc["articles"]), 4)  # 6 results; one link listed twice is kept once; 3 newest a launch
+        for a in doc["articles"]:
+            self.assertEqual(set(a), {"title", "site", "url", "published_at", "launches"})
+            self.assertTrue(a["url"].startswith("https://"))
+            self.assertTrue(set(a["launches"]) <= set(self.IDS))
+        self.assertEqual(sorted(i[:8] for i in doc["by_launch"]), ["0f867f0c", "7bdc412b", "db3500ac"])
+        dates = [a["published_at"] for a in doc["articles"]]
+        self.assertEqual(dates, sorted(dates, reverse=True))
+
+    def test_bad_links_duplicates_and_other_launches_are_dropped_and_each_launch_keeps_three(self):
+        mine, other = "0f867f0c-0000-0000-0000-000000000000", "ffffffff-0000-0000-0000-000000000000"
+        rows = [{"title": f"Story {n}", "url": f"https://example.org/{n}", "news_site": "Outlet",
+                 "published_at": f"2026-11-{10 + n:02d}T12:00:00Z", "launches": [{"launch_id": mine}]} for n in range(7)]
+        rows += [{"title": "Dup", "url": "https://example.org/3", "news_site": "X", "published_at": "2026-11-20T00:00:00Z",
+                  "launches": [{"launch_id": mine}]},
+                 {"title": "Script", "url": "javascript:alert(1)", "news_site": "X", "published_at": "2026-11-20T00:00:00Z",
+                  "launches": [{"launch_id": mine}]},
+                 {"title": "Not ours", "url": "https://example.org/x", "news_site": "X",
+                  "published_at": "2026-11-20T00:00:00Z", "launches": [{"launch_id": other}]}]
+        doc = news.parse(json.dumps({"count": len(rows), "results": rows}).encode(), [mine])
+        titles = [a["title"] for a in doc["articles"]]
+        self.assertEqual(titles, ["Story 6", "Story 5", "Story 4"])  # newest three; Dup lost to Story 3, Script dropped
+        self.assertEqual(doc["by_launch"][mine], [0, 1, 2])
+
+    def test_one_request_for_all_scheduled_launches_and_none_when_nothing_is_scheduled(self):
+        calls = []
+
+        def getter(url, timeout=60):
+            calls.append(url)
+            return body("snapi_articles.json")
+        out, recs, _ = cli._lane_news(None, {}, getter, upcoming=[{"id": i} for i in self.IDS])
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(all(i in calls[0] for i in self.IDS))
+        self.assertEqual(len(out["news"]["articles"]), 4)
+        calls.clear()
+        out, recs, _ = cli._lane_news(None, {}, getter, upcoming=[])
+        self.assertEqual((calls, recs, out["news"]["articles"]), ([], [], []))
+
+    def test_a_response_without_results_fails_the_lane(self):
+        with self.assertRaises(ValueError):
+            news.parse(b'{"detail": "throttled"}', self.IDS)
 
 
 NOW_M = datetime(2026, 11, 14, 6, 0, tzinfo=timezone.utc)

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Orbit · The Intelligence Company</title>
-<meta name="description" content="Orbital launches, scheduled launches, launch hazard warnings, reentries, satellite catalog changes and the history of anti-satellite tests, from GCAT, Launch Library 2, NGA, the Japan Coast Guard and Secure World Foundation.">
+<meta name="description" content="Orbital launches, scheduled launches with news headlines, launch hazard warnings, reentries, satellite catalog changes, orbit changes in watched satellites and the history of anti-satellite tests, from GCAT, Launch Library 2, the Spaceflight News API, NGA, Secure World Foundation and Space-Track.org.">
 <link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tic-time.css">
@@ -87,7 +87,8 @@
       <p class="muted small">From Launch Library 2. Scheduled times are the provider's or the press's and often
         move; some military launches are listed late or not at all. Countdowns run on your device's clock to the
         listed NET, refresh each minute, and are never finer than the NET's own precision; the status is Launch
-        Library 2's when Orbit last read it.</p>
+        Library 2's when Orbit last read it. Headlines under a launch come from the Spaceflight News API and link to
+        each outlet's own page; Orbit shows the headline only and has not checked the reporting.</p>
     </div>
     <div class="tbl-wrap" id="upcoming-table"></div>
   </section>
@@ -172,7 +173,8 @@
 <footer class="wrap foot small muted">
   <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
     <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
-    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>). Navigational warnings from NGA Maritime Safety
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
+    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
     Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
     regrouped and reformatted by Orbit. Anti-satellite test history from Secure World Foundation, Global
     Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
