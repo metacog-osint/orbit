@@ -218,6 +218,23 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     return out
 
 
+def score(events: list[dict], announced: list[dict], tolerance_h: float = 12.0, storm: dict | None = None) -> dict:
+    """Listed changes against announced manoeuvres. A change (somewhere between its first and last element set)
+    hits an announced one when the two spans come within tolerance_h hours. Changes that hit nothing are extra;
+    those inside the storm span are named apart (drag, not a manoeuvre)."""
+    tol = timedelta(hours=tolerance_h)
+
+    def near(e, a):
+        return _dt(e["from"]) - tol <= _dt(a["to"]) and _dt(e["to"]) + tol >= _dt(a["from"])
+
+    out = [{**a, "events": [e for e in events if near(e, a)]} for a in announced]
+    used = {id(e) for h in out for e in h["events"]}
+    extra = sorted((e for e in events if id(e) not in used), key=lambda e: e["from"])
+    in_storm = [e for e in extra if storm and _dt(e["from"]) <= _dt(storm["to"]) and _dt(e["to"]) >= _dt(storm["from"])]
+    hits = sum(1 for h in out if h["events"])
+    return {"announced": out, "hits": hits, "misses": len(out) - hits, "extra": extra, "in_storm": in_storm}
+
+
 def report(store: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     objs = []
     for key, obj in sorted(store.items(), key=lambda kv: int(kv[0])):

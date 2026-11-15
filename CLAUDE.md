@@ -267,7 +267,8 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
    rebroadcasts only, and the page says XI is not read.
 Approved 15 Nov 2026 (Tom's "Yes, build it" to each): (a) built 15 Nov, `orbit-2.6`, the merge fix, joining marks under a day
 apart only when the dominant term and the sign of the semi-major-axis change agree (SJ-21's 17-25 Jan change);
-(b) a LEO known case, the ISS over a 90-day window with at least 3 NASA-announced reboosts plus a window with the
+(b) built 15 Nov (`maneuver-case iss`, stored read of 965 sets; 5 of 5 NASA reboosts hit, 9 cross-track or
+eccentricity marks not in NASA's list, storm drew no drag mark; method.md orbit changes item 7), a LEO known case, the ISS over a 90-day window with at least 3 NASA-announced reboosts plus a window with the
 10-11 May 2024 storm, one stored GP_HISTORY read (about 3 requests); (c) the SWF RPO sheet lane, after confirming the
 2026 report links the sheet under CC BY-NC 4.0.
 

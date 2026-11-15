@@ -705,6 +705,22 @@ class Maneuver(unittest.TestCase):
         d = self.detect(synth(14, i0=1.0, burns=[(30.0, dn_for(0.5), 0.0), (30.5, 0.0, 0.01)]))
         self.assertEqual([e["dominant"] for e in d["events"]], ["in-track", "cross-track"], d["events"])
 
+    def test_score_counts_hits_misses_and_storm_marks(self):
+        ev = lambda f, t: {"from": f, "to": t, "dv_ms": 1.0, "dominant": "in-track", "da_km": 1.0}
+        hit, late, storm, other = (ev("2024-01-27T05:00:00Z", "2024-01-27T17:00:00Z"),
+                                   ev("2024-03-15T02:00:00Z", "2024-03-15T03:00:00Z"),
+                                   ev("2024-05-11T08:00:00Z", "2024-05-11T11:00:00Z"),
+                                   ev("2024-04-15T12:00:00Z", "2024-04-15T13:00:00Z"))
+        ann = [{"label": "a", "from": "2024-01-27T11:39:00Z", "to": "2024-01-27T11:39:00Z"},
+               {"label": "b", "from": "2024-03-14T13:11:00Z", "to": "2024-03-14T13:11:00Z"},  # 12 h 49 m before "late": outside 12 h
+               {"label": "c", "from": "2024-02-23T06:00:00Z", "to": "2024-02-24T06:00:00Z"}]
+        sc = maneuver.score([hit, late, storm, other], ann, 12,
+                            {"from": "2024-05-10T12:00:00Z", "to": "2024-05-13T00:00:00Z"})
+        self.assertEqual((sc["hits"], sc["misses"]), (1, 2))
+        self.assertEqual(sc["extra"], [late, other, storm])
+        self.assertEqual(sc["in_storm"], [storm])
+        self.assertEqual(maneuver.score([late], ann[1:2], 14)["hits"], 1)  # 12 h 49 m apart: inside 14 h
+
     def test_geo_plane_change_is_cross_track(self):
         d = self.detect(synth(3, i0=1.0, burns=[(25.0, 0.0, 0.01)]))  # 0.01 deg: about 0.54 m/s
         self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])

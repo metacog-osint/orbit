@@ -453,6 +453,29 @@ def check_all(root: Path = ROOT) -> list[str]:
 
 CASE = {"ids": [49330, 34779], "from": "2021-12-01", "to": "2022-03-01", "file": "case_sj21_2022.json.gz",
         "now": "2022-03-01T00:00:00Z", "window_days": 90}
+_NASA = "https://www.nasa.gov/blogs/stationreport/2024/"
+# The ISS (25544), 15 Jan to 1 Jun 2024: the reboosts NASA's ISS Daily Summary Reports announced (US public domain),
+# each as the span NASA's words allow, in UTC (the reports keep US Central time). Read 15 Nov 2026; the reports
+# found may not list every manoeuvre, so an extra mark is "not in this list", not a false mark.
+CASE_ISS = {"ids": [25544], "from": "2024-01-15", "to": "2024-06-01", "file": "case_iss_2024.json.gz",
+            "now": "2024-06-01T00:00:00Z", "window_days": 138, "tolerance_h": 12,
+            "announced": [
+                {"label": "27 Jan, Progress 85P", "from": "2024-01-27T11:39:00Z", "to": "2024-01-27T11:39:00Z",
+                 "dv_ms": None, "said": "27 Jan, 5:39 AM CST", "url": _NASA + "01/29/"},
+                {"label": "23 Feb, Progress 87P", "from": "2024-02-23T06:00:00Z", "to": "2024-02-24T06:00:00Z",
+                 "dv_ms": 1.725, "said": "Friday 23 Feb, no time",
+                 "url": _NASA + "02/26/iss-daily-summary-report-2-26-2024/"},
+                {"label": "14 Mar, Progress 87P", "from": "2024-03-14T13:11:00Z", "to": "2024-03-14T13:11:00Z",
+                 "dv_ms": 1.59, "said": "8:11 AM CDT", "url": _NASA + "03/14/iss-daily-summary-report-3-14-2024/"},
+                {"label": "25-26 Apr, Progress 87P", "from": "2024-04-25T23:00:00Z", "to": "2024-04-26T13:00:00Z",
+                 "dv_ms": None, "said": "overnight, report of 26 Apr",
+                 "url": _NASA + "04/26/iss-daily-summary-report-4-26-2024/"},
+                {"label": "24 May, Cygnus NG-20 (two burns)", "from": "2024-05-24T05:00:00Z",
+                 "to": "2024-05-25T05:00:00Z", "dv_ms": 2.26, "said": "today, report of 24 May",
+                 "url": _NASA + "05/24/iss-daily-summary-report-5-24-2024/"}],
+            # the G5 geomagnetic storm (NOAA SWPC): from about 17 UTC on 10 May; drag, not a manoeuvre
+            "storm": {"label": "G5 storm, 10-12 May 2024", "from": "2024-05-10T12:00:00Z", "to": "2024-05-13T00:00:00Z"}}
+CASES = {"sj21": CASE, "iss": CASE_ISS}
 
 
 def print_report(rep: dict) -> None:
@@ -469,9 +492,25 @@ def print_report(rep: dict) -> None:
                      if gg else ""))
 
 
-def maneuver_case(root: Path = ROOT) -> int:
-    """Shijian-21 (49330) and BeiDou-2 G2 (34779), 1 Dec 2021 to 1 Mar 2022: one GP_HISTORY request the first
-    time, stored in data/state/spacetrack/ and never asked for again."""
+def print_score(sc: dict, case: dict) -> None:
+    print(f"Scored against {len(case['announced'])} announced reboosts, within {case['tolerance_h']} h:")
+    for h in sc["announced"]:
+        got = "; ".join(f"{e['from']} -> {e['to']} {e['dv_ms']} m/s {e['dominant']} da {e['da_km']} km"
+                        for e in h["events"]) or "MISSED"
+        print(f"  {h['label']:34s} NASA {h['dv_ms'] if h['dv_ms'] is not None else 'n/a':>5} m/s  {got}")
+    st = case.get("storm")
+    print(f"  hits {sc['hits']} of {len(sc['announced'])}, misses {sc['misses']}, marks not in the list "
+          f"{len(sc['extra'])}" + (f" ({len(sc['in_storm'])} inside the {st['label']})" if st else ""))
+    for e in sc["extra"]:
+        tag = "  [storm]" if e in sc["in_storm"] else ""
+        print(f"    extra {e['from']} -> {e['to']} {e['dv_ms']} m/s {e['dominant']} da {e['da_km']} km{tag}")
+
+
+def maneuver_case(root: Path = ROOT, name: str = "sj21") -> int:
+    """A known case from Space-Track GP_HISTORY: one request the first time, stored in data/state/spacetrack/ and
+    never asked for again. sj21: Shijian-21 (49330) and BeiDou-2 G2 (34779), 1 Dec 2021 to 1 Mar 2022. iss: the ISS
+    (25544), 15 Jan to 1 Jun 2024, scored against NASA's announced reboosts and the 10-12 May 2024 storm."""
+    CASE = CASES[name]
     data_dir = root / "data"
     records = _st_read(data_dir, CASE["file"], None)
     if records is None:
@@ -491,6 +530,8 @@ def maneuver_case(root: Path = ROOT) -> int:
     rep = maneuver.report(store, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")), CASE["window_days"])
     print(f"{len(records)} element sets, Space-Track (USSPACECOM). Thresholds {rep['thresholds']}.")
     print_report(rep)
+    if CASE.get("announced"):
+        print_score(maneuver.score(rep["events"], CASE["announced"], CASE["tolerance_h"], CASE.get("storm")), CASE)
     return 0
 
 
@@ -502,7 +543,9 @@ def main(argv=None) -> int:
     c.add_argument("--force", action="store_true", help="read GCAT even if its files have not changed")
     sub.add_parser("build")
     sub.add_parser("check")
-    sub.add_parser("maneuver-case", help="the Jan 2022 Shijian-21 / BeiDou-2 G2 case from Space-Track, local only")
+    mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
+                                              "BeiDou-2 G2) or iss (2024 reboosts and the May storm)")
+    mc.add_argument("case", nargs="?", default="sj21", choices=sorted(CASES))
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
     args = ap.parse_args(argv)
 
@@ -523,7 +566,7 @@ def main(argv=None) -> int:
                  f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))
         return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
     if args.cmd == "maneuver-case":
-        return maneuver_case(ROOT)
+        return maneuver_case(ROOT, args.case)
     if args.cmd == "maneuver-report":
         rep = _st_read(ROOT / "data", "report.json", None)
         if not rep:
