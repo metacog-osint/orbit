@@ -46,7 +46,7 @@ from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, 
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
-    "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes"],
+    "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes", "baseline"],
     "upcoming": ["upcoming"],
     "news": ["news"],
     "navwarn": ["navwarn"],
@@ -54,11 +54,12 @@ LANE_FIELDS = {
     "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
 }
-EMPTY = {"gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
+EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "news": {}, "navwarn": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
+ST_SHARED = spacetrack.shared_gp_busy       # Noisefloor's GP query on the same account (replaceable in tests)
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
@@ -103,9 +104,11 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
     today = gcat.today_utc()
     sites = gcat.sites_table(gcat.parse_tsv(bodies["sites"]))
     orgs = gcat.orgs_table(gcat.parse_tsv(bodies["orgs"]))
+    launch_rows = gcat.parse_tsv(bodies["launch"])
     result = {
         "gcat_updated": {name: gcat.updated_stamp(bodies[name]) for name in gcat.URLS},
-        "launches": gcat.recent_launches(gcat.parse_tsv(bodies["launch"]), objs, sites, today, orgs=orgs),
+        "launches": gcat.recent_launches(launch_rows, objs, sites, today, orgs=orgs),
+        "baseline": gcat.baseline(launch_rows, objs, orgs, today),
         "reentries": gcat.recent_reentries(objs, today),
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
@@ -293,6 +296,9 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
         if since < spacetrack.MIN_GP_GAP_S:
             return None, [], None  # GP once an hour: keep the last reading
     ST_WAIT()
+    busy = ST_SHARED(ST_NOW())  # checked after the wait, just before the query
+    if busy:
+        return None, [], busy  # the account's hourly GP limit: keep the last reading, say why
     client = ST_CLIENT(*cred)
     recs = []
     try:
@@ -324,6 +330,8 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
     _st_write(data_dir, "report.json", rep)  # the full report, private
     out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
            "thresholds": rep["thresholds"], "events": rep["events"],
+           "counted_not_listed": {"below_floor": sum(o.get("below_report") or 0 for o in rep["objects"]),
+                                  "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"])},
            "quiet_or_untracked": sum(1 for o in rep["objects"] if not o["events"]),
            "stale": sum(1 for o in rep["objects"] if (o.get("note") or "").startswith("no new"))}
     return {"maneuvers": out}, recs, None
@@ -360,6 +368,9 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             if result is None:
                 keep_previous()
                 snap["lanes"][lane] = {**prev_lane, "status": "unchanged", "checked_at": now, "from_previous": False}
+                snap["lanes"][lane].pop("note", None)
+                if isinstance(stamps, str):
+                    snap["lanes"][lane]["note"] = stamps
                 continue
             snap.update(result)
             snap["lanes"][lane] = {"status": "ok", "fetched_at": now, "from_previous": False,
@@ -511,7 +522,7 @@ def print_report(rep: dict) -> None:
               + (f"  lon {g['lon']} drift {g['drift_deg_day']}/day" if g else "") + (f"  [{o['note']}]" if o.get("note") else ""))
         for e in o["events"]:
             gg = e.get("geo") or {}
-            print(f"         {e['from']} -> {e['to']}  {e['dv_ms']:8.3f} m/s {e['dominant']:12s} da {e['da_km']} km "
+            print(f"         {e['from']} -> {e['to']}  {e['dv_ms']:8.3f} m/s (sma {e.get('dv_sma_ms')}) {e['dominant']:12s} da {e['da_km']} km "
                   f"di {e['di_deg']} deg z {e['z']} ({e['pairs']} pairs)"
                   + (f"  lon {gg['lon_before']} -> {gg['lon_after']}, drift {gg['drift_before']} -> {gg['drift_after']}"
                      if gg else ""))
@@ -520,7 +531,7 @@ def print_report(rep: dict) -> None:
 def print_score(sc: dict, case: dict) -> None:
     print(f"Scored against {len(case['announced'])} announced reboosts, within {case['tolerance_h']} h:")
     for h in sc["announced"]:
-        got = "; ".join(f"{e['from']} -> {e['to']} {e['dv_ms']} m/s {e['dominant']} da {e['da_km']} km"
+        got = "; ".join(f"{e['from']} -> {e['to']} {e['dv_ms']} m/s (sma {e.get('dv_sma_ms')}) {e['dominant']} da {e['da_km']} km"
                         for e in h["events"]) or "MISSED"
         print(f"  {h['label']:34s} NASA {h['dv_ms'] if h['dv_ms'] is not None else 'n/a':>5} m/s  {got}")
     st = case.get("storm")

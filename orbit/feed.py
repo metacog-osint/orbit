@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.7"
+METHOD = "orbit-2.8"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -266,7 +266,9 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "id": f"orbit:maneuver:{e['norad']}:{e['from'][:10]}",
         "title": f"Orbit change: {name} ({e['regime'] or 'orbit unknown'}, {owner}), {e['dv_ms']:g} m/s {e['dominant']}",
         "summary": (f"{name} (catalog {e['norad']}, {e['object_id']}, owner {owner}): its published orbit changed by "
-                    f"about {e['dv_ms']:g} m/s, mostly {e['dominant']}, semi-major axis {e['da_km']:+g} km, "
+                    f"about {e['dv_ms']:g} m/s, mostly {e['dominant']}, semi-major axis {e['da_km']:+g} km"
+                    + (f" (about {e['dv_sma_ms']:g} m/s from that change alone)" if e.get("dv_sma_ms") is not None else "")
+                    + ", "
                     f"inclination {e['di_deg']:+g} deg, {when}.{geo_text} A listed change means the object's "
                     "published orbit moved more than its element sets usually move; it is not a confirmed manoeuvre, "
                     "a statement of intent or a warning. Velocities are differences between published orbits, not "
@@ -277,6 +279,7 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "coverage_fraction": 1.0,
         "precision_class": "none",
         "measures": {"dv_ms": e["dv_ms"], "da_km": e["da_km"], "di_deg": e["di_deg"],
+                     **({"dv_sma_ms": e["dv_sma_ms"]} if e.get("dv_sma_ms") is not None else {}),
                      **({"gap_hours": gap["hours"]} if gap else {})},
         "visual": {"type": "table", "url": f"{SITE}/#maneuvers"},
         "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],

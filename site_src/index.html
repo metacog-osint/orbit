@@ -32,6 +32,7 @@
     <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
     <a href="#reentries">Reentries <b data-n="reentries"></b></a>
     <a href="#catalog">Catalog</a>
+    <a href="#baseline">Two-year baseline</a>
     <a href="#maneuvers">Orbit changes <b data-n="maneuvers"></b></a>
     <a href="#asat">ASAT history</a>
     <a href="#rpo">RPO history</a>
@@ -128,6 +129,17 @@
     </section>
   </div>
 
+  <section class="card" id="baseline" aria-labelledby="base-h">
+    <div class="card-head">
+      <h2 id="base-h">The last 30 days against the two years before</h2>
+      <p class="muted small">Counts from GCAT's own history: orbital launches by launching country and agency, payloads
+        launched by owner, and reentries by owner, in the last 30 days and in each of the 24 windows of 30 days before
+        them. "Above" or "below" means outside every one of those 24 windows. A count, not a warning. GCAT adds
+        payloads and dates reentries as it learns of them, so the newest window for those two can still grow.</p>
+    </div>
+    <div id="baseline-body"></div>
+  </section>
+
   <section class="card" id="maneuvers" aria-labelledby="mn-h">
     <div class="card-head">
       <h2 id="mn-h">Orbit changes in watched satellites, last 30 days</h2>
@@ -146,8 +158,10 @@
       <p class="muted small">How Orbit marks a change: each pair of consecutive element sets is measured against
         that object's own usual set-to-set movement, after its steady drift is taken out. The change is given as the
         velocity it implies (along track, plane change, or orbit shape), which is a rough size, not a burn record.
-        In geostationary orbit only changes of 0.25 m/s or more are listed. Changes less than a day apart are shown
-        as one. A change measured across two days or more without an element set is labelled with that gap: it
+        In geostationary orbit only changes of 0.25 m/s or more are listed. In low orbit, where plane and shape
+        readings are noisiest, a change that is mainly a plane change or orbit shape is listed only at 1 m/s or more;
+        each change also shows the velocity its semi-major-axis change alone implies. Changes less than a day apart
+        are shown as one when they point the same way. A change measured across two days or more without an element set is labelled with that gap: it
         happened somewhere inside it. Quiet watched objects are counted, not named.</p>
     </div>
     <div class="tbl-wrap" id="maneuver-body"></div>

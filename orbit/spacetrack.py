@@ -9,6 +9,12 @@ Space-Track's own rules (space-track.org/documentation, read 14 Nov 2026):
     services ... conditioned on appropriate citation." "Publications of analysis based on USSPACECOM data also
     require appropriate citations."
 
+Noisefloor (github.com/metacog-osint/noise-floor, public) logs in with the same Space-Track account (Tom, 15 Nov
+2026) and makes one GP query in its daily workflow's step "GEO region (Space-Track)". GP once an hour is the
+account's limit, not Orbit's, so before asking, `shared_gp_busy` reads that workflow's recent runs from GitHub's
+API: a run still going, or that step finished within the hour, and Orbit waits for its next run. If GitHub cannot
+be read, Orbit waits too: the limit is kept even when it cannot be checked.
+
 So a run makes at most four requests (log in, GP for the watch list, GP_HISTORY once for objects that have no
 stored history yet, log out), at least 2.5 s apart; never within an hour of the last GP query; and never at
 :57-:03 or :27-:33 (it waits for a clear minute instead, plus a random 0-60 s).
@@ -40,6 +46,10 @@ GAP_S = 2.5          # seconds between requests: 24 a minute at most, under the 
 MIN_GP_GAP_S = 3600  # GP once an hour
 HISTORY_DAYS = 60    # first reading of an object: its last 60 days, stored and never asked for again
 BLOCKED_MINUTES = set(range(57, 60)) | set(range(0, 4)) | set(range(27, 34))
+SHARED_RUNS = ("https://api.github.com/repos/metacog-osint/noise-floor/actions/workflows/daily.yml/runs"
+               "?per_page=5&exclude_pull_requests=true")
+SHARED_STEP = "GEO region (Space-Track)"  # Noisefloor's one GP query on the same account
+SHARED_LOOKBACK_S = 3 * 3600              # runs older than this cannot hold a GP query inside the hour
 
 
 class NotReady(Exception):
@@ -130,6 +140,43 @@ class Client:
         if isinstance(doc, dict):  # an error object, e.g. {"error": "..."}
             raise RuntimeError(f"Space-Track {cls}: {str(doc)[:160]}")
         return doc
+
+
+def _gh_json(url: str, opener=None, timeout: int = 30):
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "research-collector/1.0",
+               "X-GitHub-Api-Version": "2022-11-28"}
+    tok = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if tok:
+        headers["Authorization"] = "Bearer " + tok
+    with (opener or urllib.request.urlopen)(urllib.request.Request(url, headers=headers), timeout=timeout) as resp:
+        return json.loads(resp.read())
+
+
+def _when(s: str | None) -> datetime | None:
+    return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
+
+
+def shared_gp_busy(now: datetime, get=_gh_json) -> str | None:
+    """Why Orbit must not make a GP query now because of Noisefloor's (None when clear). Any error reading GitHub
+    counts as busy."""
+    try:
+        runs = get(SHARED_RUNS).get("workflow_runs") or []
+        for run in runs:
+            started = _when(run.get("run_started_at") or run.get("created_at"))
+            if run.get("status") != "completed":
+                return f"Noisefloor's daily run {run.get('id')} is {run.get('status')}; its GP query may fall within the hour"
+            if started and (now - started).total_seconds() > SHARED_LOOKBACK_S:
+                continue
+            for job in get(run["jobs_url"]).get("jobs") or []:
+                for step in job.get("steps") or []:
+                    if step.get("name") != SHARED_STEP or step.get("conclusion") == "skipped":
+                        continue
+                    done = _when(step.get("completed_at"))
+                    if done is None or (now - done).total_seconds() < MIN_GP_GAP_S:
+                        return f"Noisefloor's GP query (run {run.get('id')}) was under an hour ago on the shared account"
+    except Exception as exc:
+        return f"could not read Noisefloor's runs from GitHub ({type(exc).__name__}); waiting keeps the hourly limit"
+    return None
 
 
 def history_extra(days: int = HISTORY_DAYS) -> str:

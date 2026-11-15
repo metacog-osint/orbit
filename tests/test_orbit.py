@@ -795,6 +795,25 @@ class Maneuver(unittest.TestCase):
                               noise_i=1e-4, noise_node=1e-3))
         self.assertEqual((d["regime"], d["events"]), ("LEO", []))
 
+    def test_leo_small_cross_track_change_is_counted_not_listed(self):
+        # orbit-2.8: in low orbit a change mainly cross-track or eccentricity is listed only at 1 m/s or more
+        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-4)
+        d = self.detect(synth(15, burns=[(30.0, 0.0, 0.0037)], **leo))  # about 0.5 m/s plane change
+        self.assertEqual((d["regime"], d["events"], d["leo_off_track"]), ("LEO", [], 1))
+        d = self.detect(synth(16, burns=[(30.0, 0.0, 0.0112)], **leo))  # about 1.5 m/s: listed
+        self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])
+        self.assertEqual(d["leo_off_track"], 0)
+
+    def test_leo_in_track_change_is_listed_with_its_semi_major_axis_velocity(self):
+        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        dn = 3 * 0.3 * 15.2 / 7680.0  # about 0.3 m/s along-track at 400 km
+        d = self.detect(synth(17, burns=[(30.0, -dn, 0.0)], **leo))
+        self.assertEqual([e["dominant"] for e in d["events"]], ["in-track"], d["events"])
+        ev = d["events"][0]
+        self.assertAlmostEqual(ev["dv_sma_ms"], 0.3, delta=0.05)
+        self.assertLessEqual(ev["dv_sma_ms"], ev["dv_ms"] + 1e-9)
+        self.assertGreater(ev["da_km"], 0)  # slower mean motion: higher orbit
+
     def test_short_baseline_marks_nothing(self):
         d = self.detect(synth(5, days=5, burns=[(3.0, dn_for(2.0), 0.0)]))
         self.assertEqual(d["events"], [])
@@ -932,6 +951,7 @@ class ManeuverLane(unittest.TestCase):
         self.patches = [mock.patch.object(cli, "ST_CLIENT", FakeClient),
                         mock.patch.object(cli, "ST_WAIT", lambda: 0.0),
                         mock.patch.object(cli, "ST_NOW", lambda: self.now[0]),
+                        mock.patch.object(cli, "ST_SHARED", lambda now: None),
                         mock.patch.object(cli.spacetrack, "credentials", return_value=("u", "p")),
                         mock.patch.dict(os.environ, {"ORBIT_WATCH": "49330,34779"})]
         for p in self.patches:
@@ -970,6 +990,21 @@ class ManeuverLane(unittest.TestCase):
         self.run_lane()
         self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""), "logout"])  # no history again
 
+    def test_waits_while_noisefloor_holds_the_shared_gp_hour(self):
+        self.run_lane()
+        FakeClient.log.clear()
+        self.now[0] = NOW_M + timedelta(minutes=90)
+        with mock.patch.object(cli, "ST_SHARED", lambda now: "Noisefloor's GP query was under an hour ago"):
+            snap = self.run_lane()
+        self.assertEqual(FakeClient.log, [])  # no request at all
+        lane = snap["lanes"]["maneuver"]
+        self.assertEqual(lane["status"], "unchanged")
+        self.assertIn("Noisefloor", lane["note"])
+        self.assertEqual(len(snap["maneuvers"]["events"]), 1)  # the last reading is kept
+        snap = self.run_lane()  # clear again: asks, and the note goes
+        self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""), "logout"])
+        self.assertNotIn("note", snap["lanes"]["maneuver"])
+
     def test_off_without_credentials(self):
         with mock.patch.object(cli.spacetrack, "credentials", return_value=None):
             snap = self.run_lane()
@@ -989,6 +1024,82 @@ class ManeuverLane(unittest.TestCase):
         self.assertEqual(len(snap["maneuvers"]["events"]), 1)
         self.assertNotIn("objects", snap["maneuvers"])  # quiet watched objects are counted, not named
 
+
+class Baseline(unittest.TestCase):
+    """gcat.baseline on small synthetic rows: windows, counts and positions."""
+    TODAY = date(2026, 11, 15)
+
+    def test_windows_counts_and_position(self):
+        orgs = {"SPX": {"name": "SpaceX", "state": "US"}, "CALT": {"name": "CALT", "state": "CN"}}
+        prior = [(self.TODAY - timedelta(days=30 * k + 3)).isoformat() for k in range(1, 25)]  # one a window
+        rows = [{"Launch_Tag": d, "Launch_Date": gcat_date(d), "Agency": "SPX", "LaunchCode": "OS"} for d in prior]
+        recent = [(self.TODAY - timedelta(days=k)).isoformat() for k in (1, 2, 3)]
+        rows += [{"Launch_Tag": d, "Launch_Date": gcat_date(d), "Agency": "SPX", "LaunchCode": "OS"} for d in recent]
+        rows.append({"Launch_Tag": "x", "Launch_Date": gcat_date(recent[0]), "Agency": "CALT", "LaunchCode": "OF"})
+        rows.append({"Launch_Tag": "y", "Launch_Date": gcat_date(recent[0]), "Agency": "SPX", "LaunchCode": "SS"})  # suborbital
+        b = gcat.baseline(rows, [], orgs, self.TODAY)
+        self.assertEqual(b["recent"], ["2026-10-17", "2026-11-15"])
+        us = next(r for r in b["launches_by_country"] if r["key"] == "US")
+        self.assertEqual((us["recent"], us["prior_median"], us["prior_min"], us["prior_max"], us["position"]),
+                         (3, 1, 1, 1, "above"))
+        self.assertEqual(len(us["series"]), 25)
+        cn = next(r for r in b["launches_by_country"] if r["key"] == "CN")  # a failed orbital attempt still counts
+        self.assertEqual((cn["recent"], cn["position"], cn["windows_at_or_above"]), (1, "above", 0))
+        self.assertEqual(b["launches_all"][0]["recent"], 4)
+        self.assertEqual(next(r for r in b["launches_by_agency"] if r["key"] == "SPX")["name"], "SpaceX")
+
+    def test_reentries_and_payloads_by_owner(self):
+        d = (self.TODAY - timedelta(days=40)).isoformat()
+        objs = [{"type": "P", "state": "CN", "ldate": gcat_date(d), "status": "O", "ddate": ""},
+                {"type": "R", "state": "US", "ldate": "2020 Jan  1", "status": "R", "ddate": gcat_date(d)}]
+        b = gcat.baseline([], objs, {}, self.TODAY)
+        self.assertEqual(b["payloads_by_owner"][0]["key"], "CN")
+        self.assertEqual(b["payloads_by_owner"][0]["series"][-2:], [1, 0])
+        self.assertEqual((b["reentries_by_owner"][0]["key"], b["reentries_by_owner"][0]["position"]), ("US", "within"))
+
+
+def gcat_date(iso):  # GCAT's own form: "2026 Nov 12"
+    y, m, d = iso.split("-")
+    return f"{y} {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][int(m) - 1]} {int(d):2d}"
+
+
+class SharedAccount(unittest.TestCase):
+    """spacetrack.shared_gp_busy against canned GitHub API answers (offline)."""
+    NOW = datetime(2026, 11, 15, 13, 5, tzinfo=timezone.utc)
+
+    def get(self, runs, steps):
+        def _get(url):
+            if url == spacetrack.SHARED_RUNS:
+                return {"workflow_runs": runs}
+            return {"jobs": [{"steps": steps}]}
+        return _get
+
+    def run_(self, status="completed", started="2026-11-15T12:40:00Z"):
+        return {"id": 1, "status": status, "run_started_at": started, "jobs_url": "jobs"}
+
+    def step(self, done, conclusion="success"):
+        return {"name": spacetrack.SHARED_STEP, "conclusion": conclusion, "completed_at": done}
+
+    def test_recent_noisefloor_gp_query_is_busy(self):
+        busy = spacetrack.shared_gp_busy(self.NOW, self.get([self.run_()], [self.step("2026-11-15T12:52:00Z")]))
+        self.assertIn("under an hour", busy)
+
+    def test_an_hour_after_it_is_clear(self):
+        self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get([self.run_(started="2026-11-15T11:30:00Z")],
+                                                                     [self.step("2026-11-15T12:00:00Z")])))
+
+    def test_skipped_step_and_old_runs_are_clear(self):
+        self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get([self.run_()], [self.step(None, "skipped")])))
+        self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get([self.run_(started="2026-11-15T05:40:00Z")],
+                                                                     [self.step("2026-11-15T12:59:00Z")])))
+
+    def test_running_noisefloor_job_is_busy(self):
+        self.assertIn("in_progress", spacetrack.shared_gp_busy(self.NOW, self.get([self.run_("in_progress")], [])))
+
+    def test_github_unreadable_is_busy(self):
+        def fail(url):
+            raise OSError("offline")
+        self.assertIn("could not read", spacetrack.shared_gp_busy(self.NOW, fail))
 
 
 if __name__ == "__main__":

@@ -346,7 +346,8 @@
     box.appendChild(el("p", "small", mv.watched + " watched " + (mv.watched === 1 ? "object" : "objects") + "; " +
       ev.length + (ev.length === 1 ? " change" : " changes") + " listed in the last " + mv.window_days + " days; " +
       (mv.stale ? mv.stale + " without a new element set for 3 days or more (an untracked object looks the same " +
-        "as a quiet one). " : "all with a recent element set. ") + "Read " + fmt(mv.read_at) + "."));
+        "as a quiet one). " : "all with a recent element set. ") + countedText(mv.counted_not_listed) +
+      "Read " + fmt(mv.read_at) + "."));
     if (!ev.length) return;
     var rows = ev.map(function (e) {
       var tr = el("tr");
@@ -368,7 +369,8 @@
       var ch = el("div", "", "about " + (e.dv_ms >= 10 ? Math.round(e.dv_ms) : e.dv_ms.toFixed(2)) + " m/s, mostly " +
         (DOMINANT[e.dominant] || e.dominant));
       ch.appendChild(el("div", "pl", "semi-major axis " + (e.da_km > 0 ? "+" : "") + (Math.abs(e.da_km) >= 100 ? Math.round(e.da_km).toLocaleString() : e.da_km.toFixed(1)) +
-        " km, inclination " + (e.di_deg > 0 ? "+" : "") + e.di_deg + "\u00b0"));
+        " km" + (e.dv_sma_ms != null ? " (" + (e.dv_sma_ms >= 10 ? Math.round(e.dv_sma_ms) : e.dv_sma_ms.toFixed(2)) +
+        " m/s from that change alone)" : "") + ", inclination " + (e.di_deg > 0 ? "+" : "") + e.di_deg + "\u00b0"));
       cell(tr, ch);
       var pos = el("div");
       if (e.geo) {
@@ -381,6 +383,76 @@
     });
     box.appendChild(table(["Object", "When", "Change", "Longitude (geostationary)", "Source"], rows));
     fold(box, rows, 10, "changes", "maneuvers");
+  }
+
+  function countedText(c) {  // marks counted, not listed (orbit-2.8)
+    if (!c) return "";
+    var parts = [];
+    if (c.below_floor) parts.push(c.below_floor + " under the listing floor");
+    if (c.low_orbit_off_track) parts.push(c.low_orbit_off_track + " in low orbit, mainly plane change or orbit shape " +
+      "and under 1 m/s, where element-set noise is largest");
+    return parts.length ? "Counted, not listed: " + parts.join("; ") + ". " : "";
+  }
+
+  function baselineCard() {
+    var box = document.getElementById("baseline-body");
+    var b = (snap && snap.baseline) || {};
+    if (!b.recent) return empty(box, "Not read yet: the baseline appears after Orbit's next reading of GCAT.");
+    box.textContent = "";
+    function ymd(d) {  // a plain date with its year: the windows span two years
+      try { return new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }); }
+      catch (e) { return d; }
+    }
+    box.appendChild(el("p", "small", "Last 30 days: " + ymd(b.recent[0]) + " to " + ymd(b.recent[1]) + " (UTC dates). Before: " +
+      b.prior_windows + " windows of " + b.window_days + " days, " + ymd(b.prior[0]) + " to " + ymd(b.prior[1]) + "."));
+    function where(r) {
+      if (r.position === "above") return "above all " + r.prior_windows;
+      if (r.position === "below") return "below all " + r.prior_windows;
+      return r.windows_at_or_above + " of " + r.prior_windows + " as high or higher";
+    }
+    function spark(series) {  // the 24 windows then the last 30 days, as small bars; the text carries the numbers
+      var max = Math.max.apply(null, series.concat([1]));
+      var s = el("span", "spark");
+      s.setAttribute("aria-hidden", "true");
+      series.forEach(function (v, i) {
+        var bar = el("i", i === series.length - 1 ? "now" : "");
+        bar.style.height = Math.max(1, Math.round(16 * v / max)) + "px";
+        s.appendChild(bar);
+      });
+      return s;
+    }
+    function block(title, rows, keep, key, who) {
+      if (!rows || !rows.length) return;
+      box.appendChild(el("h3", "small", title));
+      var trs = rows.map(function (r) {
+        var tr = el("tr");
+        cell(tr, who(r));
+        cell(tr, String(r.recent), "num");
+        cell(tr, r.prior_median + " (" + r.prior_min + " to " + r.prior_max + ")", "num");
+        var w = el("div", r.position === "within" ? "" : "pos-" + r.position, where(r));
+        cell(tr, w);
+        cell(tr, spark(r.series));
+        return tr;
+      });
+      var wrap = el("div", "tbl-wrap");
+      wrap.appendChild(table(["", { label: "Last 30 days", num: true }, { label: "Before: median (range)", num: true },
+        "Where it sits", "24 windows, then the last 30 days"], trs));
+      box.appendChild(wrap);
+      fold(wrap, trs, keep, "rows", key);
+    }
+    var all = function (label) { return function () { return document.createTextNode(label); }; };
+    var cc = function (r) { var d = el("div"); d.appendChild(mark(r.country, r.state || r.key)); return d; };
+    var ag = function (r) {
+      var d = el("div"); d.appendChild(mark(r.country, r.state));
+      d.appendChild(document.createTextNode(r.name || r.agency));
+      d.appendChild(el("div", "pl", "GCAT agency " + r.agency)); return d;
+    };
+    block("Orbital launches", (b.launches_all || []).map(function (r) { return Object.assign({}, r, { all: true }); })
+      .concat(b.launches_by_country || []), 8, "base-lc", function (r) { return r.all ? all("All launches")() : cc(r); });
+    block("Orbital launches by launch agency", b.launches_by_agency, 8, "base-la", ag);
+    block("Payloads launched, by owner", b.payloads_by_owner, 8, "base-po", cc);
+    block("Reentries, by owner", (b.reentries_all || []).map(function (r) { return Object.assign({}, r, { all: true }); })
+      .concat(b.reentries_by_owner || []), 8, "base-ro", function (r) { return r.all ? all("All reentries")() : cc(r); });
   }
 
   function counterspaceCard() {
@@ -887,7 +959,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); baselineCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
     startMap();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();
