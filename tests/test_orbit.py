@@ -546,6 +546,31 @@ class Registers(unittest.TestCase):
             errs = [m for _, sev, m in contract.check(f, regs) if sev == "error"]
             self.assertEqual(errs, [], f["properties"]["id"])
 
+    def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
+        ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
+              "from": "2026-10-12T18:06:12Z", "to": "2026-11-02T06:44:40Z", "dv_ms": 0.887, "dominant": "in-track",
+              "da_km": -14.63, "di_deg": 0.053, "z": 2916.6, "pairs": 2, "longest_gap_h": 408.8,
+              "gap": {"from": "2026-10-12T18:06:12Z", "to": "2026-10-29T18:55:44Z", "hours": 408.8},
+              "geo": {"lon_before": 125.47, "lon_after": -72.13, "drift_before": -0.065, "drift_after": 0.123},
+              "gcat_name": "USA 270", "state": "US", "cc": "US"}
+        snap = {"generated_at": "2026-11-15T00:56:02Z", "lanes": {},
+                "maneuvers": {"attribution": maneuver.ATTRIBUTION, "read_at": "2026-11-15T00:56:26Z", "events": [ev]}}
+        doc = feed.build_feed(snap)
+        (f,) = doc["features"]
+        p = f["properties"]
+        self.assertEqual(p["id"], "orbit:maneuver:41744:2026-10-12")  # kind "maneuver": COP's gate holds it
+        self.assertIsNone(f["geometry"])
+        self.assertEqual(p["sources"][0]["licence"], maneuver.ATTRIBUTION)
+        self.assertTrue(p["summary"].endswith(maneuver.ATTRIBUTION))
+        self.assertIn("not a confirmed manoeuvre", p["summary"])
+        self.assertIn("408.8-hour gap", p["summary"])
+        self.assertIn("72.13 W", p["summary"])
+        self.assertIn("OR-EEI-2", p["requirement_ids"])
+        self.assertIn("18th Space Defense Squadron; orbit-change analysis is Orbit's own", doc["attribution"])
+        regs = registers.ids(ROOT / "doctrine")
+        self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
+        self.assertNotIn("Space-Track", feed.build_feed({**snap, "maneuvers": {}})["attribution"])
+
 
 NOW_M = datetime(2026, 11, 14, 6, 0, tzinfo=timezone.utc)
 SIDEREAL = maneuver.SIDEREAL_REV_DAY

@@ -96,7 +96,8 @@ Source: Space-Track.org (USSPACECOM, 18th Space Defense Squadron) GP and GP_HIST
 watch list. Space-Track's documentation gives USSPACECOM's blanket approval to redistribute basic SSA data
 "conditioned on appropriate citation". The citation and disclaimer are in `spacetrack-disclaimer.md`, approved by
 Tom on 14 Nov 2026, and appear on the card, in `snapshot.json` (`maneuvers.attribution`) and in the footer. Raw
-element sets are not republished. Not in the COP feed.
+element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one item per listed change (kind
+`maneuver`, off the map), carrying the citation; COP's gate holds the kind from joins as military context.
 1. **Space-Track's limits kept:** at most four requests a run, 2.5 s apart; GP at most once an hour, never at
    :57-:03 or :27-:33; each object's history (60 days) read once and stored, never asked for again.
 2. **One set per epoch**, the later-created where Space-Track re-issued one.
@@ -123,5 +124,5 @@ element sets are not republished. Not in the COP feed.
    not burn records. Low, medium and high orbits are not yet checked against a known case.
 
 ## Not built
-Manoeuvre items in the COP feed, SWF's rendezvous and proximity operations sheet, ITU Space Explorer filings,
+SWF's rendezvous and proximity operations sheet, ITU Space Explorer filings,
 an optional 3D page (Cesium ion decision).
