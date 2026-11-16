@@ -1,4 +1,4 @@
-# Orbit method (`orbit-2.10`, 16 Nov 2026)
+# Orbit method (`orbit-2.11`, 16 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
@@ -9,7 +9,7 @@ launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree,
 rendezvous and proximity operations history. `orbit-2.8` lists low-orbit plane and shape changes only from 1 m/s,
 waits for Noisefloor's share of the Space-Track account, and adds baselines from GCAT's history. `orbit-2.9` adds
 the launch ledger; `orbit-2.10` adds each payload's orbit from GCAT, Launch's place check on Orbit's hazard areas,
-and the ledger's history and GCAT gap on the page.
+and the ledger's history and GCAT gap on the page; `orbit-2.11` starts Orbit's own daily archive.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
 shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
@@ -213,8 +213,27 @@ Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the c
    at 2-3 a day across the window rather than thinning toward today; and the four windows before it (139, 123, 119,
    137) are not low. A lag of weeks or more is not ruled out.
 4. **Not from GCAT:** catalog additions by date of cataloging (GCAT keeps no such date) and Orbit's own counts
-   (listed orbit changes per object, warnings per area). Those need Orbit's own daily archive, with baselines after
-   90 days (decision 8, not built).
+   (listed orbit changes per object, warnings per area). Those come from Orbit's own daily archive (below, from
+   `orbit-2.11`), with baselines after 90 days of it.
+
+## Orbit's own daily archive (`orbit-2.11`, 16 Nov 2026)
+Decision 8's second half (Tom, 15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,
+schema `orbit-archive/1`), the newest 800 days kept:
+1. **Listed orbit changes**, each keyed by NORAD number and start date, with name, regime, size and dominant term,
+   on days the lane read Space-Track itself (`ok`, or `unchanged` while it waits out the hour). Only what the page
+   lists goes in, with the watched count it already shows; the private watch list does not.
+2. **Warning areas in force**, by Orbit's area key, with hazard, regions and every broadcast seen that day, and the
+   newest NGA memorandum date and form, so a day read from stale memoranda (the API has answered 503 since at least
+   6 Nov) is marked as such rather than read as a quiet day.
+3. **Catalog changes by GCAT reading**, keyed by GCAT's own satcat stamp so two runs on one copy count once: added
+   (fresh and late), removed, temporary entries closed, changed, owner changes, newly numbered, late launches. GCAT
+   keeps no date of cataloging, so a reading's changes are dated by the day Orbit read them.
+4. **Coverage:** runs that day and each lane's statuses. A day with no run, or with a lane that failed or was off,
+   has no count for that series, never a zero. Baselines start 90 days after the first day and will skip those days.
+5. **Where it lives:** `data/state/daily_archive.json` in the Actions cache, published at `/data/archive.json` with
+   the site. A run with no local copy reads the published one back (one request to Orbit's own site) and merges it
+   day by day, so a lost cache entry does not start the archive over. The page notes the archive under the GCAT
+   baselines (days kept, days with no run, the date baselines start).
 
 ## Launch ledger (`orbit-2.9`, 16 Nov 2026)
 Hourly, one Launch Library 2 request takes the 14 launches from the newest saved launch's NET on, in NET order. The

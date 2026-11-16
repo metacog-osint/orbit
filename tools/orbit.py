@@ -46,7 +46,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
+from orbit import (archive, counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
                    spacetrack)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -70,6 +70,7 @@ ST_WAIT = spacetrack.wait_for_clear_minute
 ST_SHARED = spacetrack.shared_gp_busy       # Noisefloor's GP query on the same account (replaceable in tests)
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
+ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
@@ -427,8 +428,33 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             held["note"] = "dropped from a snapshot written while PUBLISH was on"
         _st_write(data_dir, "held_lane.json", held)
     data_dir.mkdir(parents=True, exist_ok=True)
+    snap["archive"] = _archive_run(data_dir, snap, getter)
     snap_path.write_text(json.dumps(snap, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     return snap
+
+
+def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
+    """Add this run to Orbit's daily archive (orbit/archive.py) and return its summary for the page.
+
+    The archive lives in data/state/ (the Actions cache). When that copy is missing, the published copy is read
+    back from Orbit's own site (one request) and merged, so a lost cache entry does not start the archive over.
+    A failed read of the published copy starts from what is local and says so."""
+    path = data_dir / ARCHIVE
+    local = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    note = None
+    if local is None:
+        try:
+            local = archive.merge(None, json.loads((getter or fetch.get)(archive.PUBLIC_URL, 30).decode("utf-8")))
+            note = "restored from the published copy"
+        except Exception as exc:  # noqa: BLE001 - a first run, or the site unreachable: start locally
+            note = f"no local or published copy read ({type(exc).__name__}); started here"
+    doc = archive.record(local, snap)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
+    out = archive.summary(doc, datetime.fromisoformat(snap["generated_at"].replace("Z", "+00:00")).date())
+    if note:
+        out["note"] = note
+    return out
 
 
 def world_shapes(countries: dict, step: float = 0.1) -> dict:
@@ -490,6 +516,8 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     countries = json.loads((root / "doctrine" / "kit" / "geo" / "countries.json").read_text(encoding="utf-8"))
     files = {"data/snapshot.json": dump(snapshot), "data/feed.geojson": dump(feed_doc),
              "data/sources.json": dump(sources_doc(root)),
+             "data/archive.json": (root / "data" / ARCHIVE).read_text(encoding="utf-8")
+             if (root / "data" / ARCHIVE).exists() else dump(archive.empty()),
              "data/world.geojson": json.dumps(world_shapes(countries), separators=(",", ":")) + "\n"}
     src_dir = root / "site_src"
     if src_dir.exists():
