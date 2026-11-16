@@ -69,6 +69,8 @@ releases. Questions 3 and 4 stay open. **Settled the same evening:** `metacog-os
 3. **Dependencies:** `geo_callouts.py` uses numpy and sgp4, and the monthly element files are parquet (pyarrow).
    Orbit's live lanes are standard library only. Options: callouts run at build time with those packages pinned,
    or rewritten to the standard library (SGP4 in pure Python is slower but small at GEO's few thousand objects).
+   **Decided 16 Nov 2026 (Tom):** pinned at build time, for the callouts only; the collector and the live lanes
+   stay standard library.
 4. **Which rule wins for GEO orbit changes:** Orbit's (8 robust deviations of the object's own noise, 0.25 m/s
    floor) or Noisefloor's C5 (drift 0.02 deg/day, inclination 0.02 deg, or 0.15 deg longitude off prediction).
    Decided after step 3's comparison.
