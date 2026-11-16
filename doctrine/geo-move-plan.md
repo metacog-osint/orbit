@@ -45,6 +45,13 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
    queries spaced inside the run, never two runs inside the hour. The history Noisefloor already holds is read
    once from its public releases (no new Space-Track requests). Then Noisefloor's step "GEO region (Space-Track)"
    is switched off in the same change window, so only one repo queries.
+   **Built 16 Nov 2026 (Tom's "Start step 2"); Orbit's side pushed to main on Tom's "Ship Orbit's side"**: branch `feat/geo-lane`, `orbit/geo_region.py`,
+   `python tools/orbit.py geo`, workflows `geo.yml` (twice a day) and `geo-import.yml` (once, by hand), method.md
+   "The GEO region". Parity with Noisefloor checked on its 15 and 16 Nov 2026 day files (same objects, regions,
+   counts and events). Elements are monthly JSON (gzipped, standard library) on the public releases `geo-YYYY`. Not one
+   gp query for both region and watch list: Space-Track's REST predicates are ANDed, so the GEO region runs in its own
+   workflow and the two check each other's runs. Noisefloor's side: branch `geo/from-orbit` (its step reads Orbit's
+   day file instead of Space-Track), merged only after Orbit's first two geo runs are checked.
 3. **Callouts in Orbit:** C1-C8 ported with their pre-registered rules and scoring unchanged, and rerun on the
    same cases to show the same results before anything is published. Orbit's C5 and its own orbit-change lane are
    then compared object by object on the GEO watch list; where they disagree, Tom picks one rule.

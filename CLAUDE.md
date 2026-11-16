@@ -184,6 +184,24 @@ Shipped 16 Nov 2026 as `1d6e6ce`. Rules in `doctrine/method.md`
 - Checked 16 Nov 2026 on a local build (live snapshot plus that day's CelesTrak reply; headless Edge, Natural Earth
   II): Soyuz Rideshare 17 (2026-257) drew 13 paths, QPS-SAR-19 (2026-258) 1 with its label; 122 tests pass.
 
+## The GEO region (16 Nov 2026; step 2 of `doctrine/geo-move-plan.md`, Tom's "Start step 2")
+Built on branch `feat/geo-lane` (worktree `_worktrees\orbit-geo-lane`); **pushed to `main` on Tom's "Ship Orbit's
+side", 16 Nov 2026** (Noisefloor's `geo/from-orbit` not merged). Tom accepted the program boundaries on 16 Nov 2026 (`_ideas/space-programs-reorg-2026-11-16.md`): the GEO
+belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules in `doctrine/method.md` ("The GEO region").
+- `orbit/geo_region.py` (standard library port of Noisefloor's `tools/geo_region.py`, rules unchanged), `python
+  tools/orbit.py geo [--day] [--out data/geo] [--upload]`, workflow `geo.yml` at 03:17 and 15:17 UTC (no tic-dispatch
+  slot yet: a hub change). One gp query for every object near GEO and one CelesTrak GEO-group request a run; files on
+  public releases `geo-YYYY`: `<day>.geo-region.json` and `geo-elements-YYYY-MM.json.gz`.
+- Shared account: `spacetrack.shared_gp_busy(now, get, shared)`; the update run checks Noisefloor and `geo.yml`
+  (`FOR_MANEUVER`), `geo.yml` checks Noisefloor and the update run (`FOR_GEO`). The step names in both workflows are
+  what the checks look for (a test holds them).
+- History: `tools/geo_import.py` (pyarrow, run once by `geo-import.yml`) copies Noisefloor's July-November 2026
+  history from its public releases: 508,742 element sets and 111 day files, 31 MB, measured locally 16 Nov 2026.
+- Parity: on Noisefloor's 15 and 16 Nov 2026 day files, the same 1,836 objects, regions, counts and events.
+- Order to go live, each on Tom's yes: commit and push; run `geo-import.yml` once; run `geo.yml` by hand and compare
+  its day file with Noisefloor's for two days; then merge Noisefloor's `geo/from-orbit` (its daily step reads Orbit's
+  day file and stops querying Space-Track); then step 3 (callouts).
+
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days

@@ -46,8 +46,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
-                   spacetrack)
+from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
+                   news, rpo, spacetrack)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -701,6 +701,60 @@ def ledger_pull(path: Path, getter=None, raw_dir: Path | None = ROOT / "data" / 
     return 0
 
 
+def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
+    """The GEO region (orbit/geo_region.py; workflow geo.yml): one Space-Track gp query for every object near GEO,
+    one CelesTrak request for its active GEO list, today's region file and the monthly element files, uploaded to
+    the public release geo-YYYY. Skips, with a note and exit 0, when the shared account's hourly gp limit could be
+    broken (Noisefloor's daily run, Orbit's update run) or today's file was pulled under an hour ago."""
+    out.mkdir(parents=True, exist_ok=True)
+    gh_out = os.environ.get("GITHUB_OUTPUT")
+    if upload:
+        geo_region.release_get([f"{day}.geo-region.json", f"{geo_region.yesterday(day)}.geo-region.json"], str(out))
+    held = geo_region.load_region(str(out), day)
+    if held and held.get("fetched_utc"):
+        since = ST_NOW() - datetime.strptime(held["fetched_utc"], "%Y-%m-%dT%H:%MZ").replace(tzinfo=timezone.utc)
+        if since.total_seconds() < spacetrack.MIN_GP_GAP_S:
+            print(f"{day}: pulled {int(since.total_seconds() // 60)} minutes ago; gp once an hour: skipped")
+            return 0
+    cred = spacetrack.credentials(ROOT)
+    if not cred:
+        print("::warning::GEO region: no Space-Track credentials (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD); skipped")
+        return 0
+    ST_WAIT()
+    busy = ST_SHARED(ST_NOW(), shared=spacetrack.FOR_GEO)  # after the wait, just before the query
+    if busy:
+        print(f"::notice::GEO region skipped: {busy}")
+        return 0
+    client = ST_CLIENT(*cred)
+    try:
+        client.login()
+        records = client.query_path(geo_region.GP_URL)
+    finally:
+        client.logout()
+    fetched = ST_NOW().strftime("%Y-%m-%dT%H:%MZ")
+    _st_raw(ROOT / "data" / "raw", "spacetrack-gp-geo", "gp", client.last_body)
+    try:
+        active = geo_region.active_ids((getter or fetch.get)(geo_region.ACTIVE_URL, 60))
+    except Exception as exc:  # yesterday's list is used instead (geo_region.pull)
+        print(f"::warning::CelesTrak's GEO group not read ({type(exc).__name__}); yesterday's active list is used")
+        active = None
+    months = sorted({r["EPOCH"][:7] for r in records if (r.get("EPOCH") or "") >= geo_region.HISTORY_START})
+    if upload:
+        geo_region.release_get([geo_region.elements_name(m) for m in months], str(out))
+    summary, paths = geo_region.pull(day, str(out), records, active, fetched)
+    print(f"{day}: {summary['objects']} objects near GEO; zone {summary['zone']}, graveyard {summary['graveyard']}; "
+          f"{summary['events']} events{' (first day: none)' if summary['first_day'] else ''}; "
+          f"active list {summary['active_listed']}; element sets by month {summary['element_months']}; "
+          f"{client.requests} Space-Track request(s)")
+    if upload:
+        geo_region.release_put(paths)
+        print(f"uploaded {len(paths)} file(s)")
+    if gh_out:
+        with open(gh_out, "a", encoding="utf-8") as fh:
+            fh.write("changed=true\n")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -715,7 +769,13 @@ def main(argv=None) -> int:
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
     lg = sub.add_parser("ledger", help="one Launch Library 2 pull into data/state/launch-ledger.json (hourly)")
     lg.add_argument("--file", default=str(ROOT / "data" / "state" / ledger.ASSET))
+    gp = sub.add_parser("geo", help="the GEO region: one Space-Track gp query, day file and element files (geo.yml)")
+    gp.add_argument("--day", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    gp.add_argument("--out", default=str(ROOT / "data" / "geo"))
+    gp.add_argument("--upload", action="store_true", help="read and write the public release geo-YYYY (GitHub only)")
     args = ap.parse_args(argv)
+    if args.cmd == "geo":
+        return geo_pull(args.day, Path(args.out), args.upload)
 
     if args.cmd == "collect":
         snap = collect(only=args.only, force=args.force)
