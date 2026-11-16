@@ -3,6 +3,17 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
+**State, 16 Nov 2026, about 10 AM CST: live with `1d6e6ce` (method `orbit-2.11`), pushed on Tom's "Push both"
+about 9:21 AM CST; update run 43895370439 passed.** Another session's `3100c21` (warning times) followed it.
+Checked live 15:21-15:45 UTC 16 Nov: `#globe` loads Cesium ion (Bing) tiles in headless Edge and draws paths for
+the 2 listed orbit changes from real Space-Track sets; `/data/archive.json` holds its first day; lane `pairs` ok
+(11 time rows, none time-and-place yet). The hub's `tic-dispatch` (`ac2ac70`, deployed by run 43895428381) started
+`ledger.yml` at 15:45 UTC (run 43899801160: 1 request, 13 added, 40 launches to 29 Feb 2024). Not seen yet:
+payload `inc` and the launch card with orbits. The catalog lane carries the 15 Nov GCAT reading, built before
+orbit-2.10, so they appear on the first run after GCAT republishes (satcat still 15 Nov 10:19 GMT at 15:57 UTC
+16 Nov). Once `inc` is live, tell session "Launch mapper features 5-7". Emails to The Space Devs, ITU and the
+Japan Coast Guard: still not sent (Tom, 16 Nov).
+
 **State, 15 Nov 2026, about 7 PM CST: live at https://orbit.theintelligence.company with `8740711` (method
 `orbit-2.8`), deployed by the new repo's first run 43768395830 (workflow_dispatch, passed 22:17 UTC 15 Nov, every
 lane ok).** `orbit-2.8`, approved by Tom 15 Nov: swf-rpo regraded B2 ("I trust SWF"); low-orbit plane and shape
@@ -47,7 +58,7 @@ changes stay unstaged (other sessions build there).
 **Planned scope** (`D:\Projects\_ideas\new-programs.md`, program row and roadmap step 14): catalog changes,
 launches, manoeuvres, counterspace events; maneuver-detect, Secure World Foundation counterspace sheets, ITU
 Space Explorer, optional 3D page. Built: launches, scheduled launches, reentries, catalog changes, owner-code
-counts, ASAT test history, orbit changes in watched satellites (Space-Track, 14 Nov 2026). Not built: ITU. 3D globe built on a branch 16 Nov 2026 (`orbit-2.11`). Describe Orbit publicly from what is live.
+counts, ASAT test history, orbit changes in watched satellites (Space-Track, 14 Nov 2026). Not built: ITU. 3D globe live 16 Nov 2026 (`orbit-2.11`). Describe Orbit publicly from what is live.
 
 ## Commands
 ```bash
@@ -102,8 +113,7 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
   :45 there); its own cron (`45 * * * *`) is the fallback. Hub change: the hub's `dispatch/dispatch.js`.
 
 ## Map, ledger and payload orbits (16 Nov 2026, `orbit-2.10`; Tom's "do all four")
-Built on branch `feat/map-four` (worktree `D:\Projects\_worktrees\orbit-map-four`); not committed or pushed until
-Tom's yes. Details in `doctrine/method.md` ("Payload orbits", "Launch's place check").
+Shipped 16 Nov 2026 as `3e5629f` (live with `1d6e6ce`). Details in `doctrine/method.md` ("Payload orbits", "Launch's place check").
 1. **Payload orbits** (`gcat.orbit_of`): `inc`, `perigee`, `apogee`, `orbit_date` on every payload in `launches`
    and on every object record. Launch's notes asked for `inc`; it reads Orbit's snapshot. GCAT's `Inf` apogee
    (escape trajectories) is read as None: a plain float() round() crashed on the 13 Nov copy.
@@ -121,8 +131,7 @@ launch cards for Tanluzhe (2026-254) and USSF-627 (2026-255). Not seen yet: a ti
 time rows on 16 Nov) and a card with orbits on screen (checked in Node; the browser pane was hidden).
 
 ## Orbit's own daily archive (16 Nov 2026, `orbit-2.11`; decision 8's second half, Tom's "archive first")
-Built on branch `feat/orbit-next` (worktree `D:\Projects\_worktrees\orbit-next`, on 9a23d7c plus orbit-2.10 as
-3e5629f); not committed or pushed until Tom's yes. Rules in `doctrine/method.md` ("Orbit's own daily archive").
+Shipped 16 Nov 2026 as `ef9c5a6` (live with `1d6e6ce`). Rules in `doctrine/method.md` ("Orbit's own daily archive").
 - `orbit/archive.py`: one entry per UTC day (schema `orbit-archive/1`, 800 days kept): listed orbit changes by
   NORAD:start date, warning areas in force by area key (with the newest memorandum date, so stale-memoranda days
   show), each GCAT reading's catalog changes by satcat stamp, and each lane's statuses (`carried` for a kept
@@ -136,7 +145,7 @@ Built on branch `feat/orbit-next` (worktree `D:\Projects\_worktrees\orbit-next`,
   changes, the day marked as read from stale memoranda (13 Nov), note drawn, no console errors; 104 tests pass.
 
 ## The globe (16 Nov 2026, `orbit-2.11`; decisions 4 and 7, Tom's "then work the 3d page in cesium")
-Same branch and worktree as the archive; not committed or pushed until Tom's yes. Rules in `doctrine/method.md`
+Shipped 16 Nov 2026 as `1d6e6ce`. Rules in `doctrine/method.md`
 ("The globe").
 - A "Flat map | Globe (3D)" switch on the map card (`#globe` in the address opens it). `site_src/globe.js` has the
   same interface as `map.js` (`resize`, `setHistory`, `select`, `flyTo`), so the cards and filters work with either.
@@ -157,8 +166,8 @@ Same branch and worktree as the archive; not committed or pushed until Tom's yes
   `'wasm-unsafe-eval'` in script-src; two sha256 hashes for Cesium's credit `<style>` blocks.
 - Checked 16 Nov 2026 on a local build (Natural Earth II, made-up element sets in the local snapshot only, the browser
   pane hidden so animation frames were stood in by a timer): globe, pads, history, areas, both test paths and the
-  click card drawn; flat map unchanged; 110 tests pass. Not seen: ion imagery, a real element set's path (the live
-  lane fills them).
+  click card drawn; flat map unchanged; 110 tests pass. Seen live 16 Nov 2026 (headless Edge, 15:2x
+  UTC): ion tiles (18, all 200) and paths for the 2 listed changes from real element sets.
 - The ion token's allowed URLs (orbit.theintelligence.company, orbit-q2t.pages.dev, 127.0.0.1:8761) don't include
   the local preview ports, so local checks show Natural Earth II; ion imagery can only be seen live.
 
@@ -373,6 +382,10 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
    permission to read the English list by script, at most hourly (draft in `private/email-jcg-navarea11.md`, to
    tuho@jodc.go.jp, an address from coordinator lists of uncertain date). Until they answer, HYDROPAC and NAVAREA XII
    rebroadcasts only, and the page says XI is not read.
+10. **Decided 16 Nov 2026 (Tom):** CelesTrak's last-30-days group as a second element-set source, for paths of new
+    launches' payloads only (Space-Track stays primary; one request a run; CelesTrak's terms checked before
+    building). GEO move question 3: numpy, sgp4 and pyarrow pinned at build time for the callouts only; live
+    lanes stay standard library (`doctrine/geo-move-plan.md`).
 Approved 15 Nov 2026 (Tom's "Yes, build it" to each): (a) built 15 Nov, `orbit-2.6`, the merge fix, joining marks under a day
 apart only when the dominant term and the sign of the semi-major-axis change agree (SJ-21's 17-25 Jan change);
 (b) built 15 Nov (`maneuver-case iss`, stored read of 965 sets; 5 of 5 NASA reboosts hit, 9 cross-track or
