@@ -2,6 +2,7 @@
 built here in LL2's detailed shape, cut to the fields Orbit reads."""
 from __future__ import annotations
 
+import contextlib
 import io
 import json
 import sys
@@ -146,6 +147,10 @@ class LedgerCommandTest(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.path = self.tmp / "state" / ledger.ASSET
+        # the command's own lines (a ::warning:: among them) would read as real annotations in the workflow log
+        out = contextlib.redirect_stdout(io.StringIO())
+        out.__enter__()
+        self.addCleanup(out.__exit__, None, None, None)
 
     def test_pull_writes_and_repeats(self):
         urls = []
