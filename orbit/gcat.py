@@ -46,6 +46,10 @@ NO_COUNTRY = {"X", "-", ""}
 TYPE_NAMES = {"P": "payload", "R": "rocket stage", "C": "component", "D": "debris", "Z": "other"}
 # GCAT Status codes for an object no longer in orbit around Earth (GCAT object catalog column notes).
 GONE = {"R", "D", "L", "AR", "E", "R?", "L?"}
+# GCAT phases.html: E "Exploded ... free in orbit until breakup", C "Collided". Gone from the catalog as one object,
+# but not reentered: a breakup or collision is listed apart, never counted as a reentry (15 Nov 2026 suite review).
+BROKEN_UP = {"E", "C"}
+REENTERED = GONE - BROKEN_UP
 ORBITAL_CODES = ("O", "D", "N")  # LaunchCode first letter: orbital, deep space, near-orbital
 MONTHS = {m: i for i, m in enumerate(
     ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], start=1)}
@@ -351,17 +355,26 @@ def recent_launches(launch_rows: list[dict], objs: list[dict], sites: dict, toda
 
 
 def recent_reentries(objs: list[dict], today: date, days: int = 30) -> list[dict]:
-    """Objects whose GCAT decay date (DDate) falls within the last `days` days and that are no longer in orbit."""
+    """Objects whose GCAT decay date (DDate) falls within the last `days` days and that reentered (not a breakup)."""
+    return _ended(objs, today, days, REENTERED, "reentry")
+
+
+def recent_breakups(objs: list[dict], today: date, days: int = 30) -> list[dict]:
+    """Objects GCAT marks exploded (E) or collided (C) with a DDate in the last `days` days; `status` says which."""
+    return _ended(objs, today, days, BROKEN_UP, "breakup")
+
+
+def _ended(objs: list[dict], today: date, days: int, statuses: set, key: str) -> list[dict]:
     since = today - timedelta(days=days)
     out = []
     for o in objs:
-        if o["status"] not in GONE:
+        if o["status"] not in statuses:
             continue
         d = vague_date(o["ddate"])
         if d["date"] and since <= date.fromisoformat(d["date"]) <= today:
-            out.append({**_brief(o), "reentry_date": d["date"], "reentry_time": d["time"],
-                        "reentry_uncertain": d["uncertain"]})
-    out.sort(key=lambda x: (x["reentry_date"], x["jcat"]), reverse=True)
+            out.append({**_brief(o), f"{key}_date": d["date"], f"{key}_time": d["time"],
+                        f"{key}_uncertain": d["uncertain"]})
+    out.sort(key=lambda x: (x[f"{key}_date"], x["jcat"]), reverse=True)
     return out
 
 
@@ -465,7 +478,7 @@ def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date)
             d = vague_date(o["ldate"])["date"]
             if d:
                 payloads.append((st, d))
-        if o["status"] in GONE:
+        if o["status"] in REENTERED:
             d = vague_date(o["ddate"])["date"]
             if d:
                 reentries.append((st, d))

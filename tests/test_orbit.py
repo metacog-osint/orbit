@@ -173,6 +173,16 @@ class Catalog(unittest.TestCase):
         self.assertTrue(all(r["reentry_date"] >= "2026-11-06" for r in rows))
         self.assertTrue(all(r["status"] in gcat.GONE for r in rows))
 
+    def test_breakup_and_collision_are_not_reentries(self):
+        def obj(jcat, status):
+            return {"jcat": jcat, "norad": 99000 + int(jcat[1:]), "name": f"TEST {jcat}", "type": "R",
+                    "launch_tag": "2020-001", "ldate": "2020 Jan  1", "parent": "", "state": "CN", "owner": "",
+                    "status": status, "op_orbit": "LEO/I", "ddate": "2026 Nov 10"}
+        objs = [obj("S1", "R"), obj("S2", "E"), obj("S3", "C")]
+        self.assertEqual([r["jcat"] for r in gcat.recent_reentries(objs, TODAY)], ["S1"])
+        self.assertEqual({(r["jcat"], r["status"], r["breakup_date"]) for r in gcat.recent_breakups(objs, TODAY)},
+                         {("S2", "E", "2026-11-10"), ("S3", "C", "2026-11-10")})
+
     def test_not_a_gcat_table(self):
         with self.assertRaises(ValueError):
             gcat.parse_tsv(b"<html>maintenance</html>")
@@ -886,6 +896,19 @@ class Maneuver(unittest.TestCase):
         d = self.detect(synth(4, per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5,
                               noise_i=1e-4, noise_node=1e-3))
         self.assertEqual((d["regime"], d["events"]), ("LEO", []))
+
+    def test_precession_across_a_long_gap_is_not_a_change(self):
+        # 15 Nov review: 28.5 deg, 30-day gap, no burn listed 22,902 m/s cross-track (node residual off by 360 deg)
+        leo = dict(days=70, per_day=4, n0=15.2, i0=28.5, node_rate=-7.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        recs = [r for r in synth(18, **leo) if not "2026-09-25" <= r["EPOCH"][:10] <= "2026-10-24"]
+        d = self.detect(recs)
+        self.assertGreaterEqual(d["max_gap_h"], 30 * 24)
+        self.assertEqual((d["events"], d["implausible"]), ([], 0))
+
+    def test_a_change_beyond_orbital_speed_is_counted_never_listed(self):
+        leo = dict(per_day=4, n0=15.2, i0=51.6, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        d = self.detect(synth(19, burns=[(30.0, 0.0, 70.0)], **leo))  # a 70 deg plane jump: a bad set, not a burn
+        self.assertEqual((d["events"], d["implausible"]), ([], 1))
 
     def test_leo_small_cross_track_change_is_counted_not_listed(self):
         # orbit-2.8: in low orbit a change mainly cross-track or eccentricity is listed only at 1 m/s or more

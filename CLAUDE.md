@@ -330,6 +330,11 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
   SPACETRACK_IDENTITY, SPACETRACK_PASSWORD and ORBIT_WATCH set by Tom 14 Nov 2026; the first run with them reads
   each watched object's 60-day history once.
 - `python tools/orbit.py maneuver-report` prints the held report locally.
+- **Review fixes, 16 Nov 2026 (branch `fix/node-wrap-and-breakups`, pushed to `main` on Tom's "Yes, ship both"):** the node residual is wrapped
+  after the expected precession is taken off (a 30-day gap at 28.5 deg had listed 22,902 m/s); a pair needing more
+  than the orbital speed is counted in `implausible`, never listed. GCAT statuses E (exploded) and C (collided)
+  are no longer reentries: `gcat.recent_breakups` puts them in the snapshot's `breakups`; no card or feed item yet
+  (which requirement id it serves is Tom's call).
 
 Earlier notes (13 Nov 2026), kept for the record:
 
