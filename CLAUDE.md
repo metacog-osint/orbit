@@ -67,6 +67,7 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
 | `upcoming` | `launches.py` | Launch Library 2, detailed mode (about 450 KB; only it carries provider countries), one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
+| `pairs` | `launchpairs.py` | Launch's published snapshot (the suite's own program), one request: its place check on Orbit's areas | 16 Nov 2026: 14 rows, 11 launch-area pairs, all time only |
 | `ledger` | `ledger.py` | Orbit's own launch ledger, read back from its public release (one GitHub request, no LL2 request); written hourly by `ledger.yml` | Not run yet (built 16 Nov 2026) |
 | `navwarn` | `navwarn.py` | NGA daily in-force memoranda (5 text files, about 140 KB) and NAVAREA XI (Japan Coast Guard: list XML plus one page per launch-related warning) | 13 Nov, 5:57 PM CST: 25 launch-related warnings in force (NGA 23 of 321, NAVAREA XI 3), 20 areas after grouping |
 
@@ -96,10 +97,29 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
   The job creates the release on its first run; a release that holds a ledger it cannot download stops the job,
   so a bad read never starts the ledger over.
 - Orbit's update run reads it back as lane `ledger`: snapshot block `ledger` (counts, last check, and `since_gcat`,
-  the launches after GCAT's newest launch date, the 1-3 day gap the 15 Nov suite review found). Page display: not
-  built yet.
+  the launches after GCAT's newest launch date, the 1-3 day gap the 15 Nov suite review found). Page display:
+  card `#ledger` and the map's history layer (orbit-2.10, below).
 - tic-dispatch starts `ledger.yml` at :45 past every UTC hour, :55 at 01, 05, 09, 13, 17 and 21 UTC (Blackout has
   :45 there); its own cron (`45 * * * *`) is the fallback. Hub change: the hub's `dispatch/dispatch.js`.
+
+## Map, ledger and payload orbits (16 Nov 2026, `orbit-2.10`; Tom's "do all four")
+Built on branch `feat/map-four` (worktree `D:\Projects\_worktrees\orbit-map-four`); not committed or pushed until
+Tom's yes. Details in `doctrine/method.md` ("Payload orbits", "Launch's place check").
+1. **Payload orbits** (`gcat.orbit_of`): `inc`, `perigee`, `apogee`, `orbit_date` on every payload in `launches`
+   and on every object record. Launch's notes asked for `inc`; it reads Orbit's snapshot. GCAT's `Inf` apogee
+   (escape trajectories) is read as None: a plain float() round() crashed on the 13 Nov copy.
+2. **Lane `pairs`** (`orbit/launchpairs.py`): Launch's published snapshot, its match rows on Orbit's areas
+   (`area_source` `orbit-navwarn`), best row per launch and area. Source `tic-launch` (B2). The warnings table
+   shows Launch's level under each time coincidence; the map draws a dotted great circle for time and place.
+3. **Ledger on the page:** `ledger.history` (pads once, one short row per launch) in the snapshot's `ledger`
+   block; pale dots at each pad sized by count with year and provider filters; card `#ledger` with the state
+   and `since_gcat` (shown once the ledger has caught up past GCAT's newest launch date).
+4. **Launch dot card:** selecting a launch of the last 7 days shows its payloads grouped by orbit, with a link to
+   the same launch in Launch's history (`#history?st=launched&q=<GCAT tag>&sel=gcat:<GCAT tag>`; Launch's record id is `gcat:<tag>`).
+Checked 16 Nov 2026 on a local build (live snapshot, launches re-derived from the 13 Nov GCAT copies on disk, lanes
+`pairs` and `ledger` read live): 92 tests pass, no console errors, map draws with the history layer and filters,
+launch cards for Tanluzhe (2026-254) and USSF-627 (2026-255). Not seen yet: a time-and-place line (Launch had only
+time rows on 16 Nov) and a card with orbits on screen (checked in Node; the browser pane was hidden).
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

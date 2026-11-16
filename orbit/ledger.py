@@ -177,13 +177,34 @@ def after(ledger: dict, since_date: str) -> list[dict]:
                   key=_key, reverse=True)
 
 
+def history(ledger: dict) -> dict:
+    """The ledger compacted for Orbit's map (orbit-2.10): each pad once, then one short row per launch,
+    [net, pad index, status, provider country, name], oldest first. Pads without coordinates are left out and
+    counted. About 160 bytes a launch (measured on the first 14), so about 140 KB once the ledger has caught up."""
+    pads, index, rows, no_place = [], {}, [], 0
+    for r in sorted(ledger.get("launches") or [], key=_key):
+        if r.get("lat") is None or r.get("lon") is None:
+            no_place += 1
+            continue
+        key = (r.get("pad") or "", r.get("location") or "", round(r["lat"], 3), round(r["lon"], 3))
+        if key not in index:
+            index[key] = len(pads)
+            pads.append([key[0], key[1], key[2], key[3], r.get("pad_country")])
+        pc = r.get("provider_countries") or []
+        rows.append([r.get("net"), index[key], r.get("status") or "", pc[0] if pc else None, r.get("name") or ""])
+    return {"fields": {"pads": ["pad", "location", "lat", "lon", "country"],
+                       "launches": ["net", "pad", "status", "provider_country", "name"]},
+            "pads": pads, "launches": rows, "no_place": no_place}
+
+
 def summary(ledger: dict, gcat_last_date: str | None = None) -> dict:
     """The snapshot's `ledger` block: counts, the last check, and the launches GCAT hasn't listed yet."""
     rows = ledger.get("launches") or []
     out = {"attribution": ATTRIBUTION, "url": PUBLIC_URL, "start": ledger.get("start"), "held": len(rows),
            "first_net": rows[0]["net"] if rows else None, "last_net": rows[-1]["net"] if rows else None,
            "caught_up": ledger.get("caught_up"), "updated_at": ledger.get("updated_at"),
-           "last_check": ledger.get("last_check"), "changes_logged": len(ledger.get("changes") or [])}
+           "last_check": ledger.get("last_check"), "changes_logged": len(ledger.get("changes") or []),
+           "history": history(ledger)}
     if gcat_last_date:
         out["gcat_last_date"] = gcat_last_date
         out["since_gcat"] = [{k: r.get(k) for k in ("id", "name", "net", "status", "status_name", "provider",
