@@ -121,6 +121,21 @@ Checked 16 Nov 2026 on a local build (live snapshot, launches re-derived from th
 launch cards for Tanluzhe (2026-254) and USSF-627 (2026-255). Not seen yet: a time-and-place line (Launch had only
 time rows on 16 Nov) and a card with orbits on screen (checked in Node; the browser pane was hidden).
 
+## Orbit's own daily archive (16 Nov 2026, `orbit-2.11`; decision 8's second half, Tom's "archive first")
+Built on branch `feat/orbit-next` (worktree `[local path]`, on 9a23d7c plus orbit-2.10 as
+3e5629f); not committed or pushed until Tom's yes. Rules in `doctrine/method.md` ("Orbit's own daily archive").
+- `orbit/archive.py`: one entry per UTC day (schema `orbit-archive/1`, 800 days kept): listed orbit changes by
+  NORAD:start date, warning areas in force by area key (with the newest memorandum date, so stale-memoranda days
+  show), each GCAT reading's catalog changes by satcat stamp, and each lane's statuses (`carried` for a kept
+  copy). A failed, off or carried lane leaves no count that day, never a zero. Nothing from the private watch list.
+- `collect` adds each run (`_archive_run`) and puts the summary in the snapshot as `archive`; `build` publishes
+  `data/state/daily_archive.json` as `/data/archive.json`. With no local copy, a run reads the published one back
+  (one request to Orbit's own site) and merges it day by day. No workflow change: data/state is already cached.
+- Page: a note under the GCAT baselines (`#archive-body`): days kept, days with no run, baselines from day 90
+  (14 Feb 2027 if the first day is 16 Nov 2026). The 90-day baselines themselves are not built.
+- Checked 16 Nov 2026 on a local build (local snapshot, lanes marked fresh for the check): 19 areas, 2 listed
+  changes, the day marked as read from stale memoranda (13 Nov), note drawn, no console errors; 104 tests pass.
+
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days
@@ -327,7 +342,7 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
    per operator, catalog additions and reentries from GCAT's full history at once (e.g. a country's last 30 days
    against its prior 2 years); start a daily archive of Orbit's own counts (listed orbit changes per object, warnings
    per area) and add those baselines after 90 days. GCAT part built 15 Nov 2026 (`orbit-2.8`, `gcat.baseline`, card
-   `#baseline`, page only; method.md "Baselines"); Orbit's own daily archive not built.
+   `#baseline`, page only; method.md "Baselines"); Orbit's own daily archive built 16 Nov 2026 (`orbit-2.11`, above), its baselines after 90 days.
 9. ~~NAVAREA XI~~ Decided 15 Nov 2026 (Tom's "Ask JCG, rely on rebroadcasts"): Tom asks the Japan Coast Guard for
    permission to read the English list by script, at most hourly (draft in `private/email-jcg-navarea11.md`, to
    tuho@jodc.go.jp, an address from coordinator lists of uncertain date). Until they answer, HYDROPAC and NAVAREA XII

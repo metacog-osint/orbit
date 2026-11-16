@@ -480,6 +480,29 @@
       .concat(b.reentries_by_owner || []), 8, "base-ro", function (r) { return r.all ? all("All reentries")() : cc(r); });
   }
 
+  function archiveNote() {  // Orbit's own daily archive (orbit/archive.py): what it keeps and when its baselines start
+    var box = document.getElementById("archive-body");
+    if (!box) return;
+    var a = (snap && snap.archive) || {};
+    box.textContent = "";
+    var ymd = function (d) {
+      try { return new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }); }
+      catch (e) { return d; }
+    };
+    var p = el("p", "small");
+    p.appendChild(document.createTextNode(!a.days ? "Orbit's own daily archive has no days yet. " :
+      "Orbit's own daily archive: " + a.days + (a.days === 1 ? " day" : " days") + " since " + ymd(a.first_day) +
+      (a.missed_days ? " (" + a.missed_days + " with no run)" : "") + ". "));
+    p.appendChild(document.createTextNode("It keeps what no outside source dates for Orbit: the orbit changes listed each day, " +
+      "the launch and debris warning areas in force each day, and each GCAT reading's catalog changes, dated by the day " +
+      "Orbit read them. " + (a.days ? "Baselines for those from " + ymd(a.baseline_from) + ", after 90 days. " : "")));
+    var link = el("a", "", "The archive (JSON)");
+    link.href = "data/archive.json";
+    p.appendChild(link);
+    p.appendChild(document.createTextNode("."));
+    box.appendChild(p);
+  }
+
   function counterspaceCard() {
     var box = document.getElementById("asat-body");
     var cs = (snap && snap.counterspace) || {};
@@ -1201,7 +1224,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
     startMap();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();
