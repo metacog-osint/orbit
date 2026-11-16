@@ -1,0 +1,40 @@
+name: geo
+# The GEO region (orbit/geo_region.py; step 2 of doctrine/geo-move-plan.md, 16 Nov 2026): one Space-Track gp query
+# for every object near the geostationary region, one CelesTrak request for its active GEO list, today's
+# <day>.geo-region.json and the monthly element files, on this repository's public releases geo-YYYY.
+#
+# Space-Track's gp class is read at most once an hour on the account Orbit shares with Noisefloor. Before its query
+# this job reads GitHub's record of Noisefloor's daily runs and Orbit's update runs and skips (exit 0, a notice)
+# while either made, or may be making, a gp query within the hour; Orbit's update run checks this workflow the same
+# way. Step name "GEO region (Space-Track)" is what the others look for: keep it.
+#
+# Twice a day, as Noisefloor's pull ran (its 05:40 and 12:40 UTC runs), at times clear of Orbit's update runs (:41
+# and :55 past 00, 06, 12, 18 UTC). GitHub fires this account's schedules hours late, so a tic-dispatch slot is the
+# lasting fix (hub change, not made here); a late start is still safe, because of the checks above.
+on:
+  schedule:
+    - cron: "17 3,15 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: geo
+  cancel-in-progress: false
+jobs:
+  geo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: GEO tests
+        run: python -m unittest tests.test_geo_region
+      - name: GEO region (Space-Track)
+        id: geo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
+          SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
+        run: python tools/orbit.py geo --upload

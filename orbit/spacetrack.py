@@ -13,7 +13,9 @@ Noisefloor (github.com/metacog-osint/noise-floor, public) logs in with the same 
 2026) and makes one GP query in its daily workflow's step "GEO region (Space-Track)". GP once an hour is the
 account's limit, not Orbit's, so before asking, `shared_gp_busy` reads that workflow's recent runs from GitHub's
 API: a run still going, or that step finished within the hour, and Orbit waits for its next run. If GitHub cannot
-be read, Orbit waits too: the limit is kept even when it cannot be checked.
+be read, Orbit waits too: the limit is kept even when it cannot be checked. From 16 Nov 2026 Orbit makes the GEO
+region's gp query itself (`geo_region.py`, workflow geo.yml): the update run checks Noisefloor's and geo.yml's runs
+(FOR_MANEUVER), and geo.yml checks Noisefloor's and the update run's (FOR_GEO).
 
 So a run makes at most four requests (log in, GP for the watch list, GP_HISTORY once for objects that have no
 stored history yet, log out), at least 2.5 s apart; never within an hour of the last GP query; and never at
@@ -50,6 +52,19 @@ SHARED_RUNS = ("https://api.github.com/repos/metacog-osint/noise-floor/actions/w
                "?per_page=5&exclude_pull_requests=true")
 SHARED_STEP = "GEO region (Space-Track)"  # Noisefloor's one GP query on the same account
 SHARED_LOOKBACK_S = 3 * 3600              # runs older than this cannot hold a GP query inside the hour
+# Orbit's own GEO region query (orbit/geo_region.py, workflow geo.yml, from 16 Nov 2026) and its update run's
+# watch-list query (the collect step of update.yml). Each workflow checks the others, never itself.
+GEO_RUNS = ("https://api.github.com/repos/metacog-osint/orbit/actions/workflows/geo.yml/runs"
+            "?per_page=5&exclude_pull_requests=true")
+GEO_STEP = "GEO region (Space-Track)"
+UPDATE_RUNS = ("https://api.github.com/repos/metacog-osint/orbit/actions/workflows/update.yml/runs"
+               "?per_page=5&exclude_pull_requests=true")
+UPDATE_STEP = "Live collection (a failed lane keeps its last good copy and says so on the page)"
+NOISEFLOOR = (SHARED_RUNS, SHARED_STEP, "Noisefloor's daily run")
+GEO = (GEO_RUNS, GEO_STEP, "Orbit's GEO region run")
+UPDATE = (UPDATE_RUNS, UPDATE_STEP, "Orbit's update run")
+FOR_MANEUVER = (NOISEFLOOR, GEO)   # what the update run's watch-list query waits for
+FOR_GEO = (NOISEFLOOR, UPDATE)     # what the GEO region query waits for
 
 
 class NotReady(Exception):
@@ -134,7 +149,10 @@ class Client:
             pass
 
     def query(self, cls: str, ids: list[int], extra: str = "") -> list[dict]:
-        url = QUERY.format(cls=cls, ids=",".join(str(i) for i in sorted(ids)), extra=extra)
+        return self.query_path(QUERY.format(cls=cls, ids=",".join(str(i) for i in sorted(ids)), extra=extra), cls)
+
+    def query_path(self, url: str, cls: str = "gp") -> list[dict]:
+        """GET a full query URL (the GEO region's gp query selects by mean motion, not by catalog number)."""
         body = self.last_body = self._open(url)
         doc = json.loads(body or b"[]")
         if isinstance(doc, dict):  # an error object, e.g. {"error": "..."}
@@ -156,26 +174,28 @@ def _when(s: str | None) -> datetime | None:
     return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
 
 
-def shared_gp_busy(now: datetime, get=_gh_json) -> str | None:
-    """Why Orbit must not make a GP query now because of Noisefloor's (None when clear). Any error reading GitHub
-    counts as busy."""
-    try:
-        runs = get(SHARED_RUNS).get("workflow_runs") or []
-        for run in runs:
-            started = _when(run.get("run_started_at") or run.get("created_at"))
-            if run.get("status") != "completed":
-                return f"Noisefloor's daily run {run.get('id')} is {run.get('status')}; its GP query may fall within the hour"
-            if started and (now - started).total_seconds() > SHARED_LOOKBACK_S:
-                continue
-            for job in get(run["jobs_url"]).get("jobs") or []:
-                for step in job.get("steps") or []:
-                    if step.get("name") != SHARED_STEP or step.get("conclusion") == "skipped":
-                        continue
-                    done = _when(step.get("completed_at"))
-                    if done is None or (now - done).total_seconds() < MIN_GP_GAP_S:
-                        return f"Noisefloor's GP query (run {run.get('id')}) was under an hour ago on the shared account"
-    except Exception as exc:
-        return f"could not read Noisefloor's runs from GitHub ({type(exc).__name__}); waiting keeps the hourly limit"
+def shared_gp_busy(now: datetime, get=_gh_json, shared=FOR_MANEUVER) -> str | None:
+    """Why Orbit must not make a GP query now because of another run's on the same account (None when clear).
+    `shared`: (runs URL, step name, label) for each workflow to check; a run of the caller's own workflow must not
+    be in it. Any error reading GitHub counts as busy."""
+    for runs_url, step_name, label in shared:
+        try:
+            runs = get(runs_url).get("workflow_runs") or []
+            for run in runs:
+                started = _when(run.get("run_started_at") or run.get("created_at"))
+                if run.get("status") != "completed":
+                    return f"{label} {run.get('id')} is {run.get('status')}; its GP query may fall within the hour"
+                if started and (now - started).total_seconds() > SHARED_LOOKBACK_S:
+                    continue
+                for job in get(run["jobs_url"]).get("jobs") or []:
+                    for step in job.get("steps") or []:
+                        if step.get("name") != step_name or step.get("conclusion") == "skipped":
+                            continue
+                        done = _when(step.get("completed_at"))
+                        if done is None or (now - done).total_seconds() < MIN_GP_GAP_S:
+                            return f"{label}'s GP query (run {run.get('id')}) was under an hour ago on the shared account"
+        except Exception as exc:
+            return f"could not read {label}s from GitHub ({type(exc).__name__}); waiting keeps the hourly limit"
     return None
 
 

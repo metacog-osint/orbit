@@ -151,8 +151,9 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    is shared** with Noisefloor, whose daily workflow makes one GP query in its step "GEO region (Space-Track)"
    (Tom, 15 Nov 2026). The hourly limit is the account's, so from `orbit-2.8` Orbit reads that workflow's recent
    runs from GitHub's API just before asking: while a run is going, or within an hour of that step, it keeps its
-   last reading and says why on the lane; if GitHub cannot be read it waits too. Noisefloor does not yet check
-   Orbit's query (see `geo-move-plan.md`).
+   last reading and says why on the lane; if GitHub cannot be read it waits too. Noisefloor checks Orbit's
+   snapshot the other way (16 Nov 2026). From the GEO region lane (below), the update run also waits for
+   Orbit's own workflow `geo.yml`, and that workflow waits for the update run and Noisefloor's.
 2. **One set per epoch**, the later-created where Space-Track re-issued one.
 3. **Change against the object's own noise.** For each pair of consecutive sets: the change in semi-major axis,
    inclination, node and eccentricity, less the object's median drift over that interval (drag decay, nodal
@@ -294,6 +295,31 @@ draws a launch's payload paths only while that launch is picked, the same way as
 drag left out, for orientation, not for tracking). CelesTrak's policy: one download per 2-hour update; its 403
 for a repeat inside an update keeps the previous sets and is not retried. Space-Track stays the source for watched
 objects and orbit changes; these sets are never used to find orbit changes. Not in the feed.
+
+## The GEO region (16 Nov 2026; step 2 of `geo-move-plan.md`, Tom's "Start step 2")
+Moved from Noisefloor, where it ran from 27 Oct 2026 (`tools/geo_region.py` there). The GEO belt is Orbit's subject
+under the boundary Tom accepted on 16 Nov 2026 (Orbit: what is in orbit, who owns it, what it is doing; Noisefloor:
+signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit.py geo`, workflow `geo.yml`.
+1. **Source:** one Space-Track gp query a run for every object near GEO (mean motion 0.9-1.1 rev/day, eccentricity
+   under 0.3, not decayed), through Orbit's client and limits (item 1 of the orbit changes above): at most an hour
+   after any other gp query on the shared account, checked from GitHub's record of Noisefloor's daily runs and
+   Orbit's update runs; a run inside the hour skips and says so. Plus one CelesTrak request for its GEO group, the
+   list of active payloads that the "quiet" event uses (yesterday's list when CelesTrak is not read).
+2. **Rules unchanged from Noisefloor:** the zone (IADC protected region, GEO +-200 km, inclination 15 deg or less),
+   graveyard, below, crossing and inclined regions; 25 km and 0.25 deg edges against flicker; events new,
+   returned, arrived, left up, left down, left, quiet and gone between each day's inventory and the day before.
+   Checked 16 Nov 2026 on Noisefloor's own day files for 15 and 16 Nov 2026: the same 1,836 objects, regions,
+   counts and events (one "quiet", TIANTONG-1 1), from the same gp replies.
+3. **Files, public, release `geo-YYYY` of this repository:** `<day>.geo-region.json` (schema `orbit-geo-region/1`:
+   regions, counts, events, the objects with their latest elements, the active list used) and
+   `geo-elements-YYYY-MM.json.gz` (schema `orbit-geo-elements/1`, every element set held by epoch month from
+   1 Jul 2026, the columns Noisefloor's parquet files had). Basic SSA data, redistributed with Space-Track's
+   citation as Noisefloor did (Tom, 15 Nov 2026). Orbit's private watch list is not in them: they hold every
+   object near GEO, and the watch-list query stays separate.
+4. **History:** imported once from Noisefloor's public releases (`tools/geo_import.py`, workflow `geo-import.yml`;
+   no Space-Track request): 508,742 element sets July-November 2026 and 111 day files, measured 16 Nov 2026.
+5. **Not yet:** the callouts (step 3), the page (step 4), feed items. Nothing from this lane is on the site or in
+   the feed.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
