@@ -64,6 +64,14 @@ nothing (about 37 MB) unless one has changed.
    expanded to UTC pairs: explicit `DDHHMMZ TO DDHHMMZ` lists, `ALTERNATE` lists (the first is the primary), and
    `HHMMZ TO HHMMZ DAILY d THRU d` repeats (an end before the start runs past midnight). Areas that each carry
    their own windows are joined: windows opening together are one, ending when the last area closes.
+   **Times as written** (16 Nov 2026, a parser fix, method unchanged): 2400Z is midnight at the end of that day. A
+   window followed by a month takes it as its end's month; one without takes the month of the window listed after
+   it (or, after the last named month, before it), a month back (or on) only where the day number jumps by more than
+   15 (`310104Z TO 310351Z, 010039Z TO 010326Z SEP`: the first is 31 Aug), so alternates listed out of order a few
+   days apart stay in their month. A window or cancel time that does not exist (a typo such as `171190Z`, or the 31st
+   of a 30-day month), or a window that ends before it starts, is left out, and the rest of the warning is read.
+   Until this fix such a warning raised and was not read, a list like the one above put 28-31 Aug in September, and
+   a window ending before it started was read as a month long.
 3. **NAVAREA XI is not read directly** (since 14 Nov 2026): the Japan Coast Guard's robots.txt disallows `/TUHO/`,
    where its list and messages sit, for every crawler but the National Diet Library's. NAVAREA XI appears only where
    NGA rebroadcasts it (HYDROPAC, NAVAREA XII). Kept for a source that permits reading: **issue times are JST.** The Japan Coast Guard stamps each warning `発表日時` in Japan time; its own
