@@ -13,6 +13,17 @@
       "commercial_ok": true
     },
     {
+      "id": "tic-launch",
+      "name": "Launch (The Intelligence Company's launch-closure program): its place check on Orbit's own hazard areas and scheduled launches",
+      "url": "https://launch.theintelligence.company",
+      "licence": "The suite's own program, published openly (launch.theintelligence.company/data/snapshot.json). Orbit uses only Launch's match rows on Orbit's areas: the level (time and place, grouped, time), azimuth, distance and implied inclination. Each underlying item keeps its source's terms (NGA, Launch Library 2, GCAT).",
+      "use": "ingest",
+      "grade": "B2",
+      "independence_group": "tic-launch",
+      "commercial_ok": "unknown",
+      "note": "orbit-2.10 (Tom's 'do all four', 16 Nov 2026): one request a run. Grade is Orbit's call: Launch's method is published and tested (B); a place match is a geometric coincidence with its pad's closure history, not a confirmation that an area is for a launch (2)."
+    },
+    {
       "id": "ll2-thespacedevs",
       "name": "Launch Library 2, The Space Devs: upcoming launches, and every launch since 1 Jan 2024 (Orbit's ledger)",
       "url": "https://thespacedevs.com/llapi",

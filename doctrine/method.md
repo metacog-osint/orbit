@@ -1,4 +1,4 @@
-# Orbit method (`orbit-2.8`, 15 Nov 2026)
+# Orbit method (`orbit-2.10`, 16 Nov 2026)
 
 ## Purpose
 The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
@@ -7,7 +7,9 @@ live slice: launches, scheduled launches, reentries and catalog changes. Launch 
 test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
 launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree, and `orbit-2.7` adds SWF's
 rendezvous and proximity operations history. `orbit-2.8` lists low-orbit plane and shape changes only from 1 m/s,
-waits for Noisefloor's share of the Space-Track account, and adds baselines from GCAT's history.
+waits for Noisefloor's share of the Space-Track account, and adds baselines from GCAT's history. `orbit-2.9` adds
+the launch ledger; `orbit-2.10` adds each payload's orbit from GCAT, Launch's place check on Orbit's hazard areas,
+and the ledger's history and GCAT gap on the page.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
 shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
@@ -20,6 +22,7 @@ makes no warnings.
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
 | `ledger` (`orbit-2.9`) | Orbit's launch ledger from Launch Library 2, on Orbit's public release | Every launch since 1 Jan 2024, checked hourly; the launches GCAT hasn't listed yet |
+| `pairs` (`orbit-2.10`) | The suite's Launch program (launch.theintelligence.company), its published snapshot | Launch's place check on Orbit's own hazard areas and scheduled launches: time and place, grouped, or time only, with azimuth, distance and implied inclination |
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 | `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
@@ -221,6 +224,25 @@ status (Success, Failure, Partial Failure). Every field change is logged (newest
 kept and marked. A launch Launch Library 2 reports is reported, not measured, like a scheduled launch: kind
 observation, status_class reported. The ledger is the suite's shared launch record from 1 Jan 2024; GCAT stays
 the record for objects, reentries and the baselines, and `since_gcat` lists what LL2 has and GCAT doesn't yet.
+
+## Payload orbits (`orbit-2.10`, 16 Nov 2026)
+Each launch's payloads carry GCAT's own perigee and apogee (km), inclination (degrees) and the date of those
+elements (`inc`, `perigee`, `apogee`, `orbit_date`). GCAT writes 0 / 0 / 0.00 before an object has elements and
+`-` where none apply: both are null, never an orbit at zero. An escape trajectory's apogee (`Inf`, 95 objects on
+13 Nov 2026) is null with its perigee and inclination kept. Negative perigees and apogees (suborbital and
+hyperbolic paths) are GCAT's figures, kept as given. Launch reads `inc` from Orbit's snapshot for its joins and
+trajectory checks.
+
+## Launch's place check (`orbit-2.10`, 16 Nov 2026)
+Orbit's warnings table pairs a scheduled launch and a hazard area on time alone (NET in a window of four hours or
+less, or up to an hour before). Launch reads Orbit's areas and scheduled launches each hour and checks place too:
+the area's centre inside an azimuth band (+-5 degrees) and a downrange distance seen in that pad's closure history
+(x0.5 - 50 NM to x1.25 + 100 NM), or within 1,500 NM where the pad has no history. Orbit reads Launch's rows (lane
+`pairs`, one request), keeps the best row for each launch and area, and shows Launch's level, distance, azimuth and
+implied inclination under each pairing; a time-and-place pairing still in its window is drawn as a dotted great
+circle from the pad to the nearest polygon's centre. Launch's rows can be a run behind Orbit's; a pairing Launch has
+not checked says so. Every level is a coincidence, never a finding that an area is for a launch. Source
+`tic-launch`, graded B2 (Orbit's call).
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers),

@@ -139,6 +139,13 @@ ul.lanes > li { margin-bottom: 8px; }
 .mk.ring { border-radius: 50%; border: 3px solid var(--g-other); background: var(--panel); }
 .mk.area { border: 1.5px solid var(--text); background: var(--warn-bg); opacity: 0.8; }
 .mk.area.dash { border-style: dashed; }
+.mk.hist { border-radius: 50%; background: var(--g-other); opacity: 0.45; box-shadow: 0 0 0 1px var(--g-other); }
+.mk.pair { width: 16px; height: 0; border-top: 2px dotted var(--text); vertical-align: 3px; }
+.map-ctl { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 0 0 8px; }
+.map-ctl select { font: inherit; }
+.pick { border-left: 3px solid var(--border); padding: 2px 0 2px 10px; }
+.pick-h { font-weight: 600; }
+.pick ul { margin: 4px 0; }
 #map-info { min-height: 1.4em; margin: 6px 0 0; }
 button.linkish { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline;
   cursor: pointer; font: inherit; }

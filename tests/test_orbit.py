@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, launchpairs, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -104,6 +104,21 @@ class Catalog(unittest.TestCase):
         self.assertNotIn("2026-S267", got)  # a suborbital test is not an orbital launch
         newest = list(got)[0]
         self.assertEqual(newest, "2026-255")
+
+    def test_payload_orbits_and_none_before_elements(self):
+        got = {x["launch_tag"]: x for x in gcat.recent_launches(gcat.parse_tsv(body("launch.tsv")), self.objs,
+                                                                self.sites, TODAY)}
+        sl = got["2026-246"]["payloads"][0]  # Starlink 38432: elements dated 1 Nov
+        self.assertEqual((sl["inc"], sl["perigee"], sl["apogee"], sl["orbit_date"]), (70.0, 245, 256, "2026-11-01"))
+        nvs = got["2026-245"]["payloads"][0]  # NVS-03, still in its transfer orbit
+        self.assertEqual((nvs["inc"], nvs["perigee"], nvs["apogee"]), (20.71, 178, 37895))
+        usa = got["2026-255"]["payloads"][0]  # GCAT writes 0 / 0 / 0.00 before elements: no orbit, not zero
+        self.assertEqual((usa["inc"], usa["perigee"], usa["apogee"], usa["orbit_date"]), (None, None, None, None))
+        self.assertEqual(gcat.orbit_of({"Perigee": "-", "Apogee": "-", "Inc": "-"})["inc"], None)
+        self.assertEqual(gcat.orbit_of({"Perigee": "35780", "Apogee": "35792", "Inc": "0.00", "ODate": "2026 Nov 1"}),
+                         {"perigee": 35780, "apogee": 35792, "inc": 0.0, "orbit_date": "2026-11-01"})  # GEO at 0.00
+        esc = gcat.orbit_of({"Perigee": "185", "Apogee": "Inf", "Inc": "28.50", "ODate": "-"})  # GCAT's escape form
+        self.assertEqual((esc["perigee"], esc["apogee"], esc["inc"], esc["orbit_date"]), (185, None, 28.5, None))
 
     def test_launchers_and_site_countries(self):
         got = {x["launch_tag"]: x for x in gcat.recent_launches(gcat.parse_tsv(body("launch.tsv")), self.objs,
@@ -219,6 +234,8 @@ class EndToEnd(unittest.TestCase):
                 return body("navwarn/jcg_list.xml")
             if url == counterspace.URL:
                 return self.asat
+            if url == launchpairs.URL:
+                return body("launch_snapshot.json")
             if url.startswith(rpo.SHEET):
                 gid = url.rsplit("gid=", 1)[1]
                 tab = {s["gid"]: t for t, s in rpo.TABS.items()}.get(gid, "about")
@@ -248,6 +265,8 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["upcoming"]["status"], "ok")
         self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
         self.assertEqual(snap["lanes"]["rpo"]["status"], "ok")
+        self.assertEqual(snap["lanes"]["pairs"]["status"], "ok")
+        self.assertEqual(len(snap["launch_pairs"]["matches"]), 11)  # 14 rows, 11 launch-area pairs
         self.assertEqual(snap["rpo"]["counts"], {"commercial": 14, "military": 44, "planned": 4})
         self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "off")  # robots.txt disallows /TUHO/
         self.assertFalse([u for u in self.calls if "kaiho.mlit.go.jp" in u])
@@ -356,6 +375,32 @@ class EndToEnd(unittest.TestCase):
 
 NW = FIX / "navwarn"
 NOW_NW = datetime(2026, 11, 13, 23, 0, tzinfo=timezone.utc)
+
+
+class LaunchPairs(unittest.TestCase):
+    """Launch's place check on Orbit's areas: its snapshot as published 16 Nov 2026 03:58 UTC (matches only)."""
+
+    def test_best_row_per_pair_and_only_orbit_areas(self):
+        doc = json.loads(body("launch_snapshot.json"))
+        got = launchpairs.parse(body("launch_snapshot.json"))
+        self.assertEqual(got["generated_at"], "2026-11-16T03:58:13Z")
+        pairs = {(m["launch"], m["area"]) for m in doc["matches"]}
+        self.assertEqual({(m["launch"], m["area"]) for m in got["matches"]}, pairs)
+        two = [m for m in doc["matches"] if (m["launch"], m["area"]) == (got["matches"][0]["launch"], got["matches"][0]["area"])]
+        if len(two) > 1:  # several polygons: the nearest is kept when the levels agree
+            self.assertEqual(got["matches"][0]["distance_nm"], min(m["distance_nm"] for m in two))
+        # Synthetic, built here: a place match outranks a time-only row; an FAA TFR row is not Orbit's.
+        extra = dict(doc["matches"][0], level="time and place", distance_nm=900)
+        tfr = dict(doc["matches"][0], area_source="faa-tfr", area="FDC 6/1234")
+        doc["matches"] += [extra, tfr]
+        got = launchpairs.parse(json.dumps(doc).encode())
+        row = next(m for m in got["matches"] if (m["launch"], m["area"]) == (extra["launch"], extra["area"]))
+        self.assertEqual((row["level"], row["distance_nm"]), ("time and place", 900))
+        self.assertFalse([m for m in got["matches"] if m["area"] == "FDC 6/1234"])
+
+    def test_not_launchs_snapshot(self):
+        with self.assertRaises(ValueError):
+            launchpairs.parse(b'{"html": "maintenance"}')
 
 
 class NavWarnings(unittest.TestCase):
@@ -594,7 +639,7 @@ class Registers(unittest.TestCase):
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
-                                      "swf-counterspace", "swf-rpo", "space-track"})
+                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")

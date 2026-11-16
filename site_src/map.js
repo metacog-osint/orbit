@@ -5,6 +5,8 @@
 // What it draws: launches of the last 7 days at their GCAT site (filled dots), scheduled launches at their pad
 // (rings), and launch hazard and space-debris areas from navigational warnings in force (outlines; dashed for
 // debris). Dot colour is the launching country (GCAT) or the provider's country (Launch Library 2).
+// From orbit-2.10: launch history at each pad from Orbit's ledger (pale dots sized by count, under everything), and
+// a dashed great circle from a scheduled launch's pad to a hazard area where Launch's check finds time and place.
 import * as ml from "./vendor/maplibre-gl/maplibre-gl.mjs";
 
 const dark = matchMedia("(prefers-color-scheme: dark)");
@@ -13,7 +15,7 @@ const BASE = {
   light: { style: "https://tiles.openfreemap.org/styles/positron", land: "#F2F3F0", water: "#C2C8CA", border: "#B9BEC2" },
   dark: { style: "https://tiles.openfreemap.org/styles/dark", land: "#1A1D22", water: "#0C0F14", border: "#3A3F46" },
 };
-const CLICK = ["or-launch", "or-pad", "or-area-fill"];
+const CLICK = ["or-launch", "or-pad", "or-hist", "or-area-fill"];
 
 const theme = () => (dark.matches ? "dark" : "light");
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -83,6 +85,12 @@ export async function createMap(container, model, { onPick }) {
     map.addSource("or_areas", { type: "geojson", data: model.areas, maxzoom: 8 });
     map.addSource("or_launches", { type: "geojson", data: model.launches, maxzoom: 10 });
     map.addSource("or_pads", { type: "geojson", data: model.pads, maxzoom: 10 });
+    map.addSource("or_hist", { type: "geojson", data: history, maxzoom: 10 });
+    map.addSource("or_pairs", { type: "geojson", data: model.pairs, maxzoom: 8 });
+    map.addLayer({ id: "or-hist", type: "circle", source: "or_hist",
+      paint: { "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 3.5, 12, 15],
+        "circle-color": actor, "circle-opacity": 0.32, "circle-stroke-color": actor, "circle-stroke-width": 1,
+        "circle-stroke-opacity": 0.7 } });
     map.addLayer({ id: "or-area-fill", type: "fill", source: "or_areas", paint: { "fill-color": ink, "fill-opacity": 0.07 } });
     map.addLayer({ id: "or-area-line", type: "line", source: "or_areas", filter: ["!=", ["get", "debris"], true],
       paint: { "line-color": ink, "line-width": 1.4, "line-opacity": 0.8 } });
@@ -90,11 +98,14 @@ export async function createMap(container, model, { onPick }) {
       paint: { "line-color": ink, "line-width": 1.2, "line-opacity": 0.7, "line-dasharray": [3, 2] } });
     map.addLayer({ id: "or-sel", type: "line", source: "or_areas", filter: ["==", ["get", "key"], ""],
       paint: { "line-color": ink, "line-width": 3 } });
+    map.addLayer({ id: "or-pair", type: "line", source: "or_pairs",
+      paint: { "line-color": ink, "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [1, 2] } });
     map.addLayer({ id: "or-pad", type: "circle", source: "or_pads",
       paint: { "circle-radius": 5.5, "circle-color": ring, "circle-stroke-color": actor, "circle-stroke-width": 2.6 } });
     map.addLayer({ id: "or-launch", type: "circle", source: "or_launches",
       paint: { "circle-radius": 5.5, "circle-color": actor, "circle-stroke-color": ink, "circle-stroke-width": 1 } });
   }
+  let history = model.history;
   map.on("style.load", addLayers);
   dark.addEventListener("change", async () => {
     const next = await buildStyle();
@@ -105,8 +116,10 @@ export async function createMap(container, model, { onPick }) {
   const box = (pt, pad) => [[pt.x - pad, pt.y - pad], [pt.x + pad, pt.y + pad]];
   function pick(pt) {
     const live = CLICK.filter((id) => map.getLayer(id));
-    const pts = map.queryRenderedFeatures(box(pt, 7), { layers: live.filter((id) => id !== "or-area-fill") });
+    const pts = map.queryRenderedFeatures(box(pt, 7), { layers: live.filter((id) => id !== "or-area-fill" && id !== "or-hist") });
     if (pts.length) return pts[0].properties.key;
+    const hist = live.includes("or-hist") ? map.queryRenderedFeatures(box(pt, 4), { layers: ["or-hist"] }) : [];
+    if (hist.length) return hist[0].properties.key;
     const areas = map.queryRenderedFeatures(pt, { layers: live.filter((id) => id === "or-area-fill") });
     return areas.length ? areas[0].properties.key : null;
   }
@@ -115,6 +128,11 @@ export async function createMap(container, model, { onPick }) {
 
   return {
     resize: () => map.resize(),
+    setHistory(fc) {
+      history = fc;
+      const src = map.getSource("or_hist");
+      if (src) src.setData(fc);
+    },
     select(key) {
       if (map.getLayer("or-sel")) map.setFilter("or-sel", ["==", ["get", "key"], key || ""]);
     },
@@ -126,7 +144,7 @@ export async function createMap(container, model, { onPick }) {
         map.fitBounds(b, { padding: 30, maxZoom: 6, duration: 800 });
         return;
       }
-      const p = [...model.launches.features, ...model.pads.features].find((x) => x.properties.key === key);
+      const p = [...model.launches.features, ...model.pads.features, ...history.features].find((x) => x.properties.key === key);
       if (p) map.flyTo({ center: p.geometry.coordinates, zoom: Math.max(map.getZoom(), 5) });
     },
   };

@@ -196,5 +196,22 @@ class LedgerCommandTest(unittest.TestCase):
         self.assertEqual([x["id"] for x in out["ledger"]["since_gcat"]], ["id-002"])
 
 
+
+class HistoryTest(unittest.TestCase):
+    """ledger.history: the compact form Orbit's map draws (orbit-2.10)."""
+
+    def test_pads_once_rows_oldest_first_and_unplaced_counted(self):
+        doc = ledger.empty()
+        nowhere = rec(3, day(5), status="Failure")
+        nowhere["pad"] = {"name": "Unknown Pad", "location": {"name": "Unknown"}}
+        ledger.step(doc, page(rec(2, day(4)), rec(1, day(2)), nowhere), "t0")
+        h = ledger.history(doc)
+        self.assertEqual(h["pads"], [["Pad 1", "Cape", 28.5, -80.6, "US"]])
+        self.assertEqual([r[0] for r in h["launches"]], [day(2), day(4)])
+        self.assertEqual(h["launches"][0], [day(2), 0, "Success", "US", "Rocket | Mission 1"])
+        self.assertEqual(h["no_place"], 1)
+        self.assertEqual(ledger.summary(doc)["history"], h)
+
+
 if __name__ == "__main__":
     unittest.main()

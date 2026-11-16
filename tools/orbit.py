@@ -16,6 +16,8 @@ Lanes (method orbit-2.7):
   upcoming  Launch Library 2: launches scheduled in the next 14 days. One request.
   navwarn   Launch hazard and space-debris navigational warnings in force: NGA's five daily memoranda and
             NAVAREA XI (Japan Coast Guard), a list and one request per launch-related warning.
+  pairs     Launch's place check on Orbit's own hazard areas and scheduled launches (time and place, grouped,
+            or time only), from Launch's published snapshot: one request, no outside source.
   counterspace  Secure World Foundation's "History of ASAT Testing in Space" sheet (CSV export, CC BY-NC 4.0):
             every test with its debris counts, totals by country, and tests new since the last reading.
   rpo       Secure World Foundation's "History of Robotic Rendezvous and Proximity Operations in Space" sheet
@@ -44,7 +46,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, ledger, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
+from orbit import (counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
+                   spacetrack)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -53,13 +56,14 @@ LANE_FIELDS = {
     "ledger": ["ledger"],
     "news": ["news"],
     "navwarn": ["navwarn"],
+    "pairs": ["launch_pairs"],
     "counterspace": ["counterspace"],
     "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "ledger": {},
-         "news": {}, "navwarn": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
+         "news": {}, "navwarn": {}, "launch_pairs": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -70,7 +74,7 @@ MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fai
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
                "news": ["snapi-thespacedevs"],
-               "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
+               "navwarn": ["nga-msi"], "pairs": ["tic-launch"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
                "maneuver": ["space-track"]}
 
 
@@ -356,8 +360,15 @@ def _lane_ledger(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
     return {"ledger": ledger.summary(doc, max(dates) if dates else None)}, [rec], None
 
 
+def _lane_pairs(raw_dir: Path, prev: dict, getter, **_):
+    """Launch's place check on Orbit's hazard areas and scheduled launches (orbit/launchpairs.py): one request to
+    Launch's published snapshot. Launch reads Orbit's areas, so its rows can be up to a run behind Orbit's."""
+    body, rec = fetch.fetch("tic-launch", launchpairs.URL, raw_dir, "json", getter=getter, gz=True)
+    return {"launch_pairs": launchpairs.parse(body)}, [rec], None
+
+
 LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "upcoming": _lane_upcoming, "news": _lane_news,
-         "navwarn": _lane_navwarn,
+         "navwarn": _lane_navwarn, "pairs": _lane_pairs,
          "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver}
 
 

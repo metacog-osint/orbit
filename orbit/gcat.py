@@ -17,6 +17,7 @@ What Orbit reports from them is measured, never judged:
 """
 from __future__ import annotations
 
+import math
 import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
@@ -114,6 +115,27 @@ def _num(text: str) -> str | None:
     return t if t.isdigit() else None
 
 
+def _float(text: str) -> float | None:
+    """A number, or None for '-', blanks and GCAT's 'Inf' (an escape trajectory's apogee)."""
+    try:
+        x = float((text or "").strip())
+    except ValueError:
+        return None
+    return x if math.isfinite(x) else None
+
+
+def orbit_of(r: dict) -> dict:
+    """An object's orbit as GCAT gives it: perigee and apogee (km) and inclination (degrees), with the date of the
+    elements (ODate). GCAT writes 0 / 0 / 0.00 before an object has elements, and '-' where none apply (deep
+    space, or never in orbit): both read as None, never as an orbit at zero. An escape trajectory's apogee ('Inf')
+    reads as None; its perigee and inclination are kept."""
+    per, apo, inc = _float(r.get("Perigee", "")), _float(r.get("Apogee", "")), _float(r.get("Inc", ""))
+    if inc is None or (per == 0 and apo == 0 and inc == 0) or (per is None and apo is None):
+        return {"perigee": None, "apogee": None, "inc": None, "orbit_date": None}
+    return {"perigee": None if per is None else round(per), "apogee": None if apo is None else round(apo),
+            "inc": round(inc, 2), "orbit_date": vague_date(r.get("ODate", ""))["date"]}
+
+
 CATALOGS = ("satcat", "satcat100k", "auxcat", "tmpcat")
 US_CATALOGS = ("satcat", "satcat100k")
 
@@ -141,6 +163,7 @@ def objects(tables: dict[str, list[dict]]) -> list[dict]:
                 "owner": r.get("Owner", ""),
                 "state": r.get("State", ""),
                 "op_orbit": r.get("OpOrbit", ""),
+                **orbit_of(r),
             })
     return out
 
@@ -317,7 +340,9 @@ def recent_launches(launch_rows: list[dict], objs: list[dict], sites: dict, toda
             "site": site,
             "payloads_cataloged": len(pls),
             "payloads": [{"jcat": o["jcat"], "norad": o["norad"], "name": o["name"], "state": o["state"],
-                          "country": iso_country(o["state"]), "owner": o["owner"], "op_orbit": o["op_orbit"]}
+                          "country": iso_country(o["state"]), "owner": o["owner"], "op_orbit": o["op_orbit"],
+                          "inc": o.get("inc"), "perigee": o.get("perigee"), "apogee": o.get("apogee"),
+                          "orbit_date": o.get("orbit_date")}
                          for o in pls][:40],
             "payload_states": sorted({o["state"] for o in pls}),
         })

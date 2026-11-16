@@ -249,6 +249,31 @@
     return null;
   }
   var MODE = { alternates: "alternates", daily: "daily repeats", list: "more windows", single: "" };
+  /* Launch's place check (orbit-2.10): the suite's Launch program reads Orbit's areas and scheduled launches each
+     hour and says whether the area's centre lies along a bearing and at a distance seen in that pad's closure
+     history. Orbit shows Launch's row as Launch gives it; a coincidence, never an attribution. */
+  function pairOf(launchId, areaKey) {
+    var ms = ((snap && snap.launch_pairs) || {}).matches || [];
+    for (var i = 0; i < ms.length; i++) if (ms[i].launch === launchId && ms[i].area === areaKey) return ms[i];
+    return null;
+  }
+  var LEVEL = { "time and place": "Time and place", grouped: "Time and place, and a GCAT launch from that pad in the window",
+    time: "Time only" };
+  function placeLine(u, a) {
+    var pm = pairOf(u.id, a.key), lp = (snap && snap.launch_pairs) || {};
+    var d = el("div", "pl");
+    if (!pm) {
+      d.textContent = "Place not checked yet: Launch reads Orbit's warnings each hour" +
+        (lp.generated_at ? " (its last read " + fmt(lp.generated_at) + ")" : "") + ".";
+      return d;
+    }
+    if (pm.level !== "time") d.appendChild(el("span", "badge", LEVEL[pm.level] || pm.level));
+    else d.appendChild(el("span", "", "Time only"));
+    d.appendChild(document.createTextNode(" (Launch's check): " + num(pm.distance_nm) + " NM from the pad on azimuth " +
+      Math.round(pm.azimuth) + "°, implying about " + Math.round(pm.inclination_est) + "° inclination; " +
+      pm.place_basis + "."));
+    return d;
+  }
   function hazardTable() {
     var box = document.getElementById("hazard-table");
     var nw = (snap && snap.navwarn) || {};
@@ -297,7 +322,7 @@
       if (match.length) {
         match.forEach(function (u) {
           var link = el("a", "", u.name); link.href = "#up-" + u.id;
-          var d = el("div"); d.appendChild(link); mc.appendChild(d);
+          var d = el("div"); d.appendChild(link); d.appendChild(placeLine(u, a)); mc.appendChild(d);
         });
       } else mc.appendChild(el("span", "muted", "None listed"));
       cell(tr, mc);
@@ -314,7 +339,7 @@
     });
     box.textContent = "";
     box.appendChild(table(["Next window", "Hazard and area", "Broadcast as",
-      "Scheduled launches with NET in a window (time only)", "Map and cancellation"], rows));
+      "Scheduled launches with NET in a window, and Launch's place check", "Map and cancellation"], rows));
     fold(box, rows, 8, "warnings", "hazards");
   }
 
@@ -686,7 +711,103 @@
           properties: { key: "nw-" + a.key, debris: a.hazard.indexOf("debris") >= 0 } });
       });
     });
-    return { launches: launchesFc, pads: pads, areas: areas };
+    return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc() };
+  }
+  /* A dashed great circle from the pad to the nearest polygon's centre, for each pairing Launch finds in time and
+     place, while its NET is still in the window. Centres are vertex means, as Launch takes them. */
+  var RAD = Math.PI / 180;
+  function centre(coords) {
+    var pts = coords.slice(), lon0 = pts[0][0], sx = 0, sy = 0;
+    if (pts.length > 1 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) pts.pop();
+    pts.forEach(function (c) {
+      var lo = c[0];
+      while (lo - lon0 > 180) lo -= 360;
+      while (lo - lon0 < -180) lo += 360;
+      sx += lo; sy += c[1];
+    });
+    return [((sx / pts.length) + 540) % 360 - 180, sy / pts.length];
+  }
+  function greatCircle(a, b, n) {
+    var p1 = a[1] * RAD, l1 = a[0] * RAD, p2 = b[1] * RAD, l2 = b[0] * RAD;
+    var d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((p2 - p1) / 2), 2) +
+      Math.cos(p1) * Math.cos(p2) * Math.pow(Math.sin((l2 - l1) / 2), 2)));
+    if (!d) return [a, b];
+    var out = [], prev = null;
+    for (var i = 0; i <= n; i++) {
+      var f = i / n, A = Math.sin((1 - f) * d) / Math.sin(d), B = Math.sin(f * d) / Math.sin(d);
+      var x = A * Math.cos(p1) * Math.cos(l1) + B * Math.cos(p2) * Math.cos(l2);
+      var y = A * Math.cos(p1) * Math.sin(l1) + B * Math.cos(p2) * Math.sin(l2);
+      var z = A * Math.sin(p1) + B * Math.sin(p2);
+      var lon = Math.atan2(y, x) / RAD, lat = Math.atan2(z, Math.sqrt(x * x + y * y)) / RAD;
+      if (prev !== null) { while (lon - prev > 180) lon -= 360; while (lon - prev < -180) lon += 360; }
+      prev = lon; out.push([lon, lat]);
+    }
+    return out;
+  }
+  function pairLines() {
+    var fc = { type: "FeatureCollection", features: [] };
+    var ups = {}; (snap.upcoming || []).forEach(function (u) { ups[u.id] = u; });
+    var areas = {}; hazardAreas().forEach(function (a) { areas[a.key] = a; });
+    (((snap.launch_pairs || {}).matches) || []).forEach(function (m) {
+      var u = ups[m.launch], a = areas[m.area];
+      if (m.level === "time" || !u || !a || u.lat == null || !netInWindow(u.net, a)) return;
+      var best = null;
+      (a.areas || []).forEach(function (ar) {
+        if ((ar.coords || []).length < 3) return;
+        var c = centre(ar.coords), dx = Math.abs(((c[0] - u.lon + 540) % 360) - 180), dy = Math.abs(c[1] - u.lat);
+        if (!best || dx + dy < best.s) best = { c: c, s: dx + dy };
+      });
+      if (!best) return;
+      fc.features.push({ type: "Feature", geometry: { type: "LineString", coordinates: greatCircle([u.lon, u.lat], best.c, 48) },
+        properties: { key: "nw-" + a.key } });
+    });
+    return fc;
+  }
+  /* Launch history at each pad from Orbit's ledger (Launch Library 2, every launch since 1 Jan 2024), with the
+     viewer's year and country filters. Colour: the provider country most common at that pad in the filter. */
+  var histOn = true, histYear = "", histWho = "";
+  function ledgerHistory() { return ((snap && snap.ledger) || {}).history || { pads: [], launches: [] }; }
+  function histRows() {
+    return ledgerHistory().launches.filter(function (r) {
+      if (histYear && String(r[0]).slice(0, 4) !== histYear) return false;
+      if (histWho && groupOf(r[3], null) !== histWho) return false;
+      return true;
+    });
+  }
+  function historyFc() {
+    var fc = { type: "FeatureCollection", features: [] };
+    if (!histOn) return fc;
+    var h = ledgerHistory(), by = {};
+    histRows().forEach(function (r) {
+      var b = by[r[1]] || (by[r[1]] = { n: 0, cc: {} });
+      b.n++; b.cc[r[3] || "?"] = (b.cc[r[3] || "?"] || 0) + 1;
+    });
+    Object.keys(by).forEach(function (i) {
+      var p = h.pads[+i], b = by[i];
+      if (!p) return;
+      var top = Object.keys(b.cc).sort(function (x, y) { return b.cc[y] - b.cc[x]; })[0];
+      fc.features.push({ type: "Feature", geometry: { type: "Point", coordinates: [p[3], p[2]] },
+        properties: { key: "hist-" + i, n: b.n, group: groupOf(top === "?" ? null : top, null) } });
+    });
+    return fc;
+  }
+  function histControls() {
+    var on = document.getElementById("hist-on"), yr = document.getElementById("hist-year"),
+      who = document.getElementById("hist-who"), out = document.getElementById("hist-n");
+    if (!on || on.dataset.ready) return;
+    on.dataset.ready = "1";
+    var years = {};
+    ledgerHistory().launches.forEach(function (r) { years[String(r[0]).slice(0, 4)] = 1; });
+    Object.keys(years).sort().forEach(function (y) { var o = el("option", "", y); o.value = y; yr.appendChild(o); });
+    function apply() {
+      histOn = on.checked; histYear = yr.value; histWho = who.value;
+      yr.disabled = who.disabled = !histOn;
+      if (mapApi) mapApi.setHistory(historyFc());
+      var n = histOn ? histRows().length : 0;
+      out.textContent = histOn ? n + (n === 1 ? " launch" : " launches") + " in the filter" : "";
+    }
+    [on, yr, who].forEach(function (x) { x.addEventListener("change", apply); });
+    apply();
   }
   function describe(key) {
     var row = document.getElementById(key);
@@ -699,9 +820,78 @@
     }
     return main;
   }
+  /* A launch dot's card (orbit-2.10): GCAT's payloads with their orbits, grouped where they share one, and a link
+     to the same launch in Launch's history. */
+  function orbitText(p) {
+    if (p.inc == null) return "no orbital elements in GCAT yet";
+    return (p.apogee == null ? "perigee " + num(p.perigee) + " km, escape (no apogee)" :
+      num(p.perigee) + " x " + num(p.apogee) + " km") + ", " + p.inc.toFixed(1) + "°" +
+      (p.orbit_date ? " (elements of " + dayOnly(p.orbit_date) + ")" : "");
+  }
+  function launchCard(key) {
+    var x = (snap.launches || []).filter(function (l) { return "launch-" + l.launch_tag.replace(/ /g, "-") === key; })[0];
+    if (!x) return null;
+    var box = el("div", "pick");
+    var title = [x.flight, x.mission && x.mission !== x.flight ? "(" + x.mission + ")" : ""].join(" ").trim() || x.launch_tag;
+    box.appendChild(el("div", "pick-h", title));
+    var st = x.site || {};
+    box.appendChild(el("div", "pl", [x.vehicle + (x.variant ? " " + x.variant : ""), st.name || x.site_code,
+      x.time ? fmt(x.time) : dayOnly(x.date) + " ~", x.outcome].filter(Boolean).join(" · ")));
+    var groups = [], seen = {};
+    (x.payloads || []).forEach(function (p) {
+      var k = p.inc == null ? "none|" + (p.state || "") :
+        [p.inc.toFixed(1), Math.round((p.perigee || 0) / 10), p.apogee == null ? "esc" : Math.round(p.apogee / 10),
+          p.state || ""].join("|");
+      if (!seen[k]) { seen[k] = { p: p, names: [] }; groups.push(seen[k]); }
+      seen[k].names.push(p.name);
+    });
+    if (!groups.length) box.appendChild(el("div", "pl", "Payloads not yet cataloged by GCAT."));
+    var ul = el("ul", "plain small");
+    groups.slice(0, 8).forEach(function (g) {
+      var li = el("li");
+      li.appendChild(mark(g.p.country, g.p.state));
+      li.appendChild(document.createTextNode(" " + g.names[0] +
+        (g.names.length > 1 ? " and " + (g.names.length - 1) + " more" : "") + ": " + orbitText(g.p)));
+      ul.appendChild(li);
+    });
+    if (groups.length > 8) ul.appendChild(el("li", "muted", "+" + (groups.length - 8) + " more orbits"));
+    if (groups.length) box.appendChild(ul);
+    if ((x.payloads_cataloged || 0) > (x.payloads || []).length) {
+      box.appendChild(el("div", "pl", "Showing " + x.payloads.length + " of " + x.payloads_cataloged + " payloads."));
+    }
+    var links = el("div", "small");
+    var t = el("a", "", "Show in table"); t.href = "#" + key; links.appendChild(t);
+    links.appendChild(document.createTextNode(" · "));
+    var lh = el("a", "", "Find it in Launch's history");
+    lh.href = "https://launch.theintelligence.company/#history?st=launched&q=" + encodeURIComponent(x.launch_tag) +
+      "&sel=" + encodeURIComponent("gcat:" + x.launch_tag);
+    lh.rel = "noopener"; links.appendChild(lh);
+    box.appendChild(links);
+    return box;
+  }
+  function histCard(key) {
+    var i = +key.slice(5), h = ledgerHistory(), p = h.pads[i];
+    if (!p) return null;
+    var rows = histRows().filter(function (r) { return r[1] === i; });
+    var box = el("div", "pick");
+    box.appendChild(el("div", "pick-h", p[1] || p[0]));
+    var first = h.launches.length ? String(h.launches[0][0]).slice(0, 10) : "";
+    box.appendChild(el("div", "pl", p[0] + ": " + rows.length + (rows.length === 1 ? " launch" : " launches") +
+      " in Orbit's ledger" + (histYear ? " in " + histYear : first ? " since " + dayYear(first) : "") +
+      (histWho ? " (filtered by provider country)" : "") + "."));
+    var ul = el("ul", "plain small");
+    rows.slice(-6).reverse().forEach(function (r) {
+      ul.appendChild(el("li", "", dayYear(String(r[0]).slice(0, 10)) + " · " + r[4] + " · " + r[2]));
+    });
+    box.appendChild(ul);
+    var a = el("a", "small", "The ledger"); a.href = "#ledger"; box.appendChild(a);
+    return box;
+  }
   function onPick(key) {
     var info = document.getElementById("map-info");
     info.textContent = "";
+    var card = key.indexOf("launch-") === 0 ? launchCard(key) : key.indexOf("hist-") === 0 ? histCard(key) : null;
+    if (card) { info.appendChild(card); if (mapApi) mapApi.select(""); return; }
     var text = describe(key);
     if (!text) return;
     info.appendChild(document.createTextNode(text + " "));
@@ -724,7 +914,7 @@
     if (!gl) { box.textContent = "This browser has no WebGL, so the map cannot be drawn; the tables list everything."; return; }
     import("./map.js").then(function (m) {
       return m.createMap(box, mapModel(), { onPick: onPick });
-    }).then(function (api) { mapApi = api; }).catch(function (e) {
+    }).then(function (api) { mapApi = api; histControls(); }).catch(function (e) {
       box.textContent = "The map could not load (" + e + "); the tables list everything.";
     });
   }
@@ -887,6 +1077,8 @@
       news: "Spaceflight News API (headlines, links only)",
       navwarn: "Navigational warnings", counterspace: "Secure World Foundation, ASAT test history",
       rpo: "Secure World Foundation, RPO history",
+      ledger: "Orbit's launch ledger (Launch Library 2)",
+      pairs: "Launch (the suite's launch-closure program): place check on Orbit's areas",
       maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
@@ -957,9 +1149,59 @@
     }
   }
 
+  /* Orbit's launch ledger (Launch Library 2): its state, and the launches GCAT hasn't listed yet. */
+  function ledgerCard() {
+    var box = document.getElementById("ledger-body");
+    if (!box) return;
+    box.textContent = "";
+    var lg = snap.ledger || {}, lane = (snap.lanes || {}).ledger || {};
+    if (!lg.held) return empty(box, lane.status === "off" ? "Not published yet: the hourly ledger job writes it." :
+      "No ledger read yet.");
+    var lc = lg.last_check || {};
+    var p = el("p", "small");
+    p.textContent = "Holds " + num(lg.held) + (lg.held === 1 ? " launch" : " launches") + ", " +
+      dayYear(String(lg.first_net).slice(0, 10)) + " to " + dayYear(String(lg.last_net).slice(0, 10)) + ". " +
+      (lg.caught_up ? "Caught up: each hour checks the newest launch and adds any since." :
+        "Catching up from " + dayYear(String(lg.start).slice(0, 10)) + ", 14 launches an hour.") +
+      (lc.read_at ? " Last check " + fmt(lc.read_at) + ": " + (lc.added || 0) + " added" +
+        (lc.verified ? ", newest launch " + lc.verified : "") + ", " + (lc.requests || 0) +
+        (lc.requests === 1 ? " request" : " requests") + "." : "") +
+      (lg.changes_logged ? " " + lg.changes_logged + " field changes logged." : "");
+    box.appendChild(p);
+    var since = lg.since_gcat || [];
+    if (!lg.gcat_last_date) {
+      box.appendChild(el("p", "muted small", "GCAT's newest launch date was not read on this run, so the gap is not shown."));
+    } else if (!lg.caught_up && String(lg.last_net).slice(0, 10) <= lg.gcat_last_date) {
+      box.appendChild(el("p", "muted small", "The launches GCAT hasn't listed yet (after " + dayYear(lg.gcat_last_date) +
+        ") appear here once the ledger has caught up to that date."));
+    } else if (!since.length) {
+      box.appendChild(el("p", "muted small", "No launches after GCAT's newest launch date (" + dayYear(lg.gcat_last_date) + ")."));
+    } else {
+      box.appendChild(el("p", "small", "Launched after GCAT's newest launch date (" + dayYear(lg.gcat_last_date) +
+        "), so not yet in GCAT's list or in the launches table above:"));
+      var rows = since.map(function (r) {
+        var tr = el("tr");
+        cell(tr, fmt(r.net));
+        cell(tr, r.name);
+        cell(tr, who((r.provider_countries || []).map(function (c) { return mark(c, null); }), r.provider || ""));
+        cell(tr, who(r.pad_country ? [mark(r.pad_country, null)] : [], r.location || r.pad));
+        cell(tr, el("span", /Fail/.test(r.status || "") ? "badge badge-warn" : "badge", r.status_name || r.status));
+        return tr;
+      });
+      var wrap = el("div", "tbl-wrap");
+      wrap.appendChild(table(["NET", "Launch", "Provider", "Site", "Status (Launch Library 2)"], rows));
+      box.appendChild(wrap);
+    }
+    var cr = el("p", "muted small");
+    cr.appendChild(document.createTextNode(lg.attribution + ". Published for every program to read: "));
+    var a = el("a", "", "launch-ledger.json"); a.href = lg.url; a.rel = "noopener"; cr.appendChild(a);
+    cr.appendChild(document.createTextNode("."));
+    box.appendChild(cr);
+  }
+
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); maneuverCard(); baselineCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
     startMap();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();
