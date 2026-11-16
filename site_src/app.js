@@ -374,8 +374,10 @@
         "as a quiet one). " : "all with a recent element set. ") + countedText(mv.counted_not_listed) +
       "Read " + fmt(mv.read_at) + "."));
     if (!ev.length) return;
+    var mvIds = {};
     var rows = ev.map(function (e) {
       var tr = el("tr");
+      if (!mvIds[e.norad]) { mvIds[e.norad] = 1; tr.id = "mv-" + e.norad; }  // the globe's satellites open this row
       var who = el("div");
       who.appendChild(mark(e.cc, e.state));
       who.appendChild(document.createTextNode(e.gcat_name || e.name || ("NORAD " + e.norad)));
@@ -705,7 +707,7 @@
 
 
   /* The map loads after the tables, from map.js (an ES module with MapLibre); without WebGL it says so. */
-  var mapApi = null, mapStarted = false;
+  var mapApi = null, mapStarted = false, flatApi = null, globeApi = null, globeStarting = false, view = "flat";
   function groupOf(country, state) {
     if (state === "SU") return "ru";
     return BIG[country] || "other";
@@ -734,7 +736,18 @@
           properties: { key: "nw-" + a.key, debris: a.hazard.indexOf("debris") >= 0 } });
       });
     });
-    return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc() };
+    return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc(), tracks: trackList() };
+  }
+  /* For the globe: each satellite with a listed orbit change once, with the newest element set Orbit holds. */
+  function trackList() {
+    var seen = {}, out = [];
+    (((snap && snap.maneuvers) || {}).events || []).forEach(function (e) {
+      if (seen[e.norad]) return;
+      seen[e.norad] = 1;
+      out.push({ key: "mv-" + e.norad, name: e.gcat_name || e.name || ("NORAD " + e.norad), group: groupOf(e.cc, e.state),
+        elements: e.elements ? Object.assign({ norad: e.norad }, e.elements) : null });
+    });
+    return out;
   }
   /* A dashed great circle from the pad to the nearest polygon's centre, for each pairing Launch finds in time and
      place, while its NET is still in the window. Centres are vertex means, as Launch takes them. */
@@ -825,7 +838,9 @@
     function apply() {
       histOn = on.checked; histYear = yr.value; histWho = who.value;
       yr.disabled = who.disabled = !histOn;
-      if (mapApi) mapApi.setHistory(historyFc());
+      var fc = historyFc();
+      if (flatApi) flatApi.setHistory(fc);
+      if (globeApi) globeApi.setHistory(fc);
       var n = histOn ? histRows().length : 0;
       out.textContent = histOn ? n + (n === 1 ? " launch" : " launches") + " in the filter" : "";
     }
@@ -837,6 +852,16 @@
     if (!row) return null;
     var txt = function (c) { return c ? (c.innerText || c.textContent).replace(/\s+/g, " ").trim() : ""; };
     var main = txt(row.cells[1]).slice(0, 160);
+    if (key.indexOf("mv-") === 0) {  // name, when it began, and its size: the text of each cell's own lines, not the notes
+      var own = function (c) {
+        var out = [];
+        (function walk(n) { for (var k = n.firstChild; k; k = k.nextSibling) {
+          if (k.nodeType === 3) out.push(k.textContent); else if (!/\bpl\b/.test(k.className || "")) walk(k);
+        } })(c);
+        return out.join(" ").replace(/\s+/g, " ").trim();
+      };
+      return own(row.cells[0]) + ": orbit change from " + own(row.cells[1]) + ", " + own(row.cells[2]);
+    }
     if (key.indexOf("nw-") === 0) {
       var first = row.cells[2] && row.cells[2].querySelector("a");
       return (first ? first.textContent + ": " : "") + main;
@@ -927,6 +952,45 @@
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
     if (mapApi) { mapApi.select("nw-" + key); mapApi.flyTo("nw-" + key); onPick("nw-" + key); }
   }
+  /* The globe (globe.js: CesiumJS, loaded only when asked for, about 6 MB once): the flat map's layers and the same
+     cards, plus the paths of the satellites with listed orbit changes. "#globe" in the address opens it. */
+  function globeText(api) {
+    var d = api.drawn || {}, parts = [];
+    parts.push(d.tracks ? "Paths drawn for " + d.tracks + (d.tracks === 1 ? " satellite" : " satellites") +
+      " with a listed orbit change: each one's place when this page opened and one orbit around it (a day at GEO), " +
+      "propagated with SGP4 from the newest Space-Track element set Orbit holds, drag left out. For orientation, " +
+      "not for tracking." : "No satellite paths: no listed orbit change has an element set on the page yet.");
+    if (d.without) parts.push(d.without + " listed without a usable element set.");
+    parts.push(api.ion ? "Imagery: Cesium ion (Bing Maps)." : "Imagery: Natural Earth II, shipped with CesiumJS.");
+    return parts.join(" ");
+  }
+  function setView(v) {
+    var flat = document.getElementById("map"), glob = document.getElementById("globe"), note = document.getElementById("globe-note");
+    var bf = document.getElementById("view-flat"), bg = document.getElementById("view-globe");
+    if (!flat || !glob) return;
+    view = v === "globe" ? "globe" : "flat";
+    var g = view === "globe";
+    flat.hidden = g; glob.hidden = !g; note.hidden = !g;
+    bf.setAttribute("aria-pressed", String(!g)); bg.setAttribute("aria-pressed", String(g));
+    if (!g) { mapApi = flatApi; if (flatApi) flatApi.resize(); return; }
+    if (globeApi) { mapApi = globeApi; globeApi.resize(); return; }
+    if (globeStarting) return;
+    globeStarting = true;
+    note.textContent = "Loading the globe (about 6 MB, once).";
+    import("./globe.js").then(function (m) { return m.createGlobe(glob, mapModel(), { onPick: onPick }); })
+      .then(function (api) { globeApi = api; if (view === "globe") mapApi = api; note.textContent = globeText(api); })
+      .catch(function (e) {
+        globeStarting = false;
+        note.textContent = "The globe could not load (" + e + "); the flat map and the tables list everything.";
+      });
+  }
+  function viewControls() {
+    var bf = document.getElementById("view-flat"), bg = document.getElementById("view-globe");
+    if (!bf || !bg) return;
+    bf.addEventListener("click", function () { setView("flat"); });
+    bg.addEventListener("click", function () { setView("globe"); });
+    if (location.hash === "#globe") setView("globe");
+  }
   function startMap() {
     if (mapStarted) return;
     mapStarted = true;
@@ -937,7 +1001,7 @@
     if (!gl) { box.textContent = "This browser has no WebGL, so the map cannot be drawn; the tables list everything."; return; }
     import("./map.js").then(function (m) {
       return m.createMap(box, mapModel(), { onPick: onPick });
-    }).then(function (api) { mapApi = api; histControls(); }).catch(function (e) {
+    }).then(function (api) { flatApi = api; if (view === "flat") mapApi = api; histControls(); }).catch(function (e) {
       box.textContent = "The map could not load (" + e + "); the tables list everything.";
     });
   }
@@ -1226,6 +1290,7 @@
     if (!snap) return;
     tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
     startMap();
+    viewControls();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     markSection();
   }

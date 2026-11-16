@@ -71,6 +71,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python tools/orbit.py collect
       - name: Build site/
+        env:
+          # the globe's public Cesium ion token (read-only, restricted to Orbit's hosts), written to data/cesium.json
+          CESIUM_ION_TOKEN: ${{ vars.CESIUM_ION_TOKEN }}
         run: python tools/orbit.py build
       - name: Feed check
         run: python tools/orbit.py check

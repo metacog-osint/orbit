@@ -69,13 +69,16 @@
         for that pad's launches. Ctrl and scroll (or two fingers) to zoom.</p>
     </div>
     <p class="map-ctl small">
+      <span class="view-pick" role="group" aria-label="Map view"><button type="button" id="view-flat" aria-pressed="true">Flat map</button><button
+        type="button" id="view-globe" aria-pressed="false">Globe (3D)</button></span>
       <label><input type="checkbox" id="hist-on" checked> Launch history (ledger)</label>
       <label>Year <select id="hist-year"><option value="">All</option></select></label>
       <label>Provider <select id="hist-who"><option value="">Everyone</option><option value="us">United States</option>
         <option value="cn">China</option><option value="ru">Russia</option><option value="other">Everyone else</option></select></label>
       <span class="muted" id="hist-n" aria-live="polite"></span>
     </p>
-    <div class="map-stage"><div id="map" class="map"></div></div>
+    <div class="map-stage"><div id="map" class="map"></div><div id="globe" class="map globe" hidden></div></div>
+    <p class="small muted" id="globe-note" aria-live="polite" hidden></p>
     <p class="legend small muted" aria-label="Map key">
       <span><span class="mk dot"></span>Launch, last 7 days (colour: launching country)</span>
       <span><span class="mk ring"></span>Scheduled launch (colour: provider's country)</span>

@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://tiles.openfreemap.org; connect-src 'self' https://cop.theintelligence.company https://tiles.openfreemap.org; worker-src 'self' blob:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'sha256-BVJq0J0CcoIBO7ikkmisQ5kYoOnqxRUC37ihQ3YWZQQ=' 'sha256-gM2CWYHXIHTu7Ts6ncwv0GMWZ9LXGrz2qqqjyuDojl8='; img-src 'self' data: blob: https://tiles.openfreemap.org https://*.virtualearth.net https://*.cesium.com; connect-src 'self' https://cop.theintelligence.company https://tiles.openfreemap.org https://api.cesium.com https://assets.ion.cesium.com https://*.virtualearth.net; worker-src 'self' blob:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), camera=(), microphone=()

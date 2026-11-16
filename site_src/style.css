@@ -143,6 +143,14 @@ ul.lanes > li { margin-bottom: 8px; }
 .mk.pair { width: 16px; height: 0; border-top: 2px dotted var(--text); vertical-align: 3px; }
 .map-ctl { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 0 0 8px; }
 .map-ctl select { font: inherit; }
+.view-pick { display: inline-flex; }
+.view-pick button { font: inherit; padding: 2px 10px; border: 1px solid var(--border); background: var(--panel);
+  color: var(--text); cursor: pointer; }
+.view-pick button:first-child { border-radius: 4px 0 0 4px; }
+.view-pick button:last-child { border-radius: 0 4px 4px 0; border-left: 0; }
+.view-pick button[aria-pressed="true"] { background: var(--text); color: var(--panel); }
+.globe { overflow: hidden; position: relative; }
+.globe .cesium-widget-credits { font-size: 0.7rem; }
 .pick { border-left: 3px solid var(--border); padding: 2px 0 2px 10px; }
 .pick-h { font-weight: 600; }
 .pick ul { margin: 4px 0; }

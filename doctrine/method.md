@@ -9,7 +9,7 @@ launches (`orbit-2.5`) followed; `orbit-2.6` splits orbit changes that disagree,
 rendezvous and proximity operations history. `orbit-2.8` lists low-orbit plane and shape changes only from 1 m/s,
 waits for Noisefloor's share of the Space-Track account, and adds baselines from GCAT's history. `orbit-2.9` adds
 the launch ledger; `orbit-2.10` adds each payload's orbit from GCAT, Launch's place check on Orbit's hazard areas,
-and the ledger's history and GCAT gap on the page; `orbit-2.11` starts Orbit's own daily archive.
+and the ledger's history and GCAT gap on the page; `orbit-2.11` starts Orbit's own daily archive and adds the globe.
 
 Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
 shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
@@ -263,6 +263,19 @@ circle from the pad to the nearest polygon's centre. Launch's rows can be a run 
 not checked says so. Every level is a coincidence, never a finding that an area is for a launch. Source
 `tic-launch`, graded B2 (Orbit's call).
 
+## The globe (`orbit-2.11`, 16 Nov 2026)
+Tom's decisions 4 (Cesium ion) and 7 (ground tracks only on the 3D view; COP keeps pads). A "Globe (3D)" switch on
+the map card loads CesiumJS 1.146.0 (Apache-2.0) and satellite.js 7.1.0 (MIT), both self-hosted in `vendor/`, and
+draws the flat map's layers on a globe with the same cards. It adds the satellites whose orbit changes Orbit lists:
+each one's place when the page opened and its path over one orbit (a day at GEO), propagated with SGP4 from the
+newest Space-Track element set Orbit holds for that object (`elements` on each listed change), with drag, B* and the
+mean-motion derivatives set to zero. It is a drawing for orientation, not a tracking product: the set can be days
+old and the path drifts from the truth with time. Only listed objects' sets are published; the watch list is not.
+Imagery: Cesium ion's world imagery (Bing Maps aerial) with the site's public, read-only token restricted to
+Orbit's hosts (repository variable `CESIUM_ION_TOKEN`, written to `data/cesium.json` at build); without it, or if
+ion refuses it, Natural Earth II from Cesium's own assets. CesiumWidget only: the Viewer's widgets need eval,
+which the CSP forbids.
+
 ## Not built
-ITU filings (BR IFIC, after ITU's legal office answers),
-an optional 3D page (Cesium ion decision).
+ITU filings (BR IFIC, after ITU's legal office answers); paths for objects other than listed orbit changes (new
+launches' payloads would need another element-set source, such as CelesTrak, Tom's call).
