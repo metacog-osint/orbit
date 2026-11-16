@@ -89,6 +89,17 @@
       "note": "Sheet: docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4, tabs Commercial/Civil (gid 0), Military/Intelligence (gid 1789904048), Planned (gid 1403218889) and About (gid 1782604784, 'Last Updated 17 February 2026'), read as CSV with no key. Grade B3 is Orbit's call, graded apart from the ASAT sheet (Tom, 15 Nov 2026): the same reliable compiler, but many rows are SWF's reading of public tracking (an activity's purpose, its 'Intelligence' category, a span of months), not an operator's statement. Not in the feed."
     },
     {
+      "id": "celestrak-gp",
+      "name": "CelesTrak (T.S. Kelso): GP element sets, last-30-days group (the 18th Space Defense Squadron's GP data)",
+      "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=json",
+      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, read 16 Nov 2026, updated that day) states no redistribution or credit terms and asks for one download per update (GP data update every 2 hours). The sets are the 18th Space Defense Squadron's GP data, which USSPACECOM approves for redistribution as basic SSA data with citation (see space-track); credited as CelesTrak, from 18 SDS data.",
+      "use": "ingest",
+      "grade": "A2",
+      "independence_group": "usspacecom",
+      "commercial_ok": "unknown",
+      "note": "orbit-2.12 (Tom's yes, 16 Nov 2026): one request a run, for the globe's paths of recent launches' payloads only; Space-Track stays the source for watched objects and orbit changes. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
+    },
+    {
       "id": "space-track",
       "name": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron): GP and GP_HISTORY element sets",
       "url": "https://www.space-track.org/",

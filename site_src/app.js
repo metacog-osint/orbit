@@ -736,7 +736,8 @@
           properties: { key: "nw-" + a.key, debris: a.hazard.indexOf("debris") >= 0 } });
       });
     });
-    return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc(), tracks: trackList() };
+    return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc(), tracks: trackList(),
+      payloadTracks: payloadTracks() };
   }
   /* For the globe: each satellite with a listed orbit change once, with the newest element set Orbit holds. */
   function trackList() {
@@ -746,6 +747,22 @@
       seen[e.norad] = 1;
       out.push({ key: "mv-" + e.norad, name: e.gcat_name || e.name || ("NORAD " + e.norad), group: groupOf(e.cc, e.state),
         elements: e.elements ? Object.assign({ norad: e.norad }, e.elements) : null });
+    });
+    return out;
+  }
+  /* For the globe: the payloads of each launch of the last 7 days that CelesTrak's last-30-days group has a set
+     for, keyed by the launch's map key. Drawn only while that launch is picked. */
+  function payloadTracks() {
+    var by = ((snap && snap.payload_sets) || {}).by_launch || {}, out = {}, since7 = daysAgo(7);
+    (snap.launches || []).forEach(function (x) {
+      if (!(x.date >= since7)) return;  // only launches with a dot on the globe can be picked
+      var objs = by[x.launch_tag];
+      if (!objs || !objs.length) return;
+      var l = (x.launchers || [])[0] || {};
+      out["launch-" + x.launch_tag.replace(/ /g, "-")] = objs.map(function (o) {
+        return { key: "launch-" + x.launch_tag.replace(/ /g, "-"), name: o.name || o.cospar,
+          group: groupOf(l.country, l.state), elements: Object.assign({ norad: o.norad }, o.elements) };
+      });
     });
     return out;
   }
@@ -904,6 +921,13 @@
     });
     if (groups.length > 8) ul.appendChild(el("li", "muted", "+" + (groups.length - 8) + " more orbits"));
     if (groups.length) box.appendChild(ul);
+    var sets = (((snap.payload_sets || {}).by_launch) || {})[x.launch_tag] || [];
+    if (sets.length) {
+      box.appendChild(el("div", "pl small muted", (view === "globe" ? "Paths on the globe for " :
+        "On the globe: paths for ") + sets.length + (sets.length === 1 ? " object" : " objects") +
+        " of this launch, from CelesTrak's sets (18th Space Defense Squadron data, epoch " +
+        dayOnly(sets[0].elements.epoch.slice(0, 10)) + "). For orientation, not for tracking."));
+    }
     if ((x.payloads_cataloged || 0) > (x.payloads || []).length) {
       box.appendChild(el("div", "pl", "Showing " + x.payloads.length + " of " + x.payloads_cataloged + " payloads."));
     }
@@ -939,6 +963,7 @@
     var info = document.getElementById("map-info");
     info.textContent = "";
     var card = key.indexOf("launch-") === 0 ? launchCard(key) : key.indexOf("hist-") === 0 ? histCard(key) : null;
+    if (mapApi && mapApi.showPayloads) mapApi.showPayloads(key.indexOf("launch-") === 0 ? key : "");
     if (card) { info.appendChild(card); if (mapApi) mapApi.select(""); return; }
     var text = describe(key);
     if (!text) return;
@@ -961,6 +986,9 @@
       "propagated with SGP4 from the newest Space-Track element set Orbit holds, drag left out. For orientation, " +
       "not for tracking." : "No satellite paths: no listed orbit change has an element set on the page yet.");
     if (d.without) parts.push(d.without + " listed without a usable element set.");
+    if (d.launches) parts.push("Pick a launch of the last 7 days to draw its payloads' paths (" + d.launches +
+      (d.launches === 1 ? " launch has" : " launches have") + " sets from CelesTrak, from the 18th Space Defense " +
+      "Squadron's data).");
     parts.push(api.ion ? "Imagery: Cesium ion (Bing Maps)." : "Imagery: Natural Earth II, shipped with CesiumJS.");
     return parts.join(" ");
   }
@@ -1166,6 +1194,7 @@
       rpo: "Secure World Foundation, RPO history",
       ledger: "Orbit's launch ledger (Launch Library 2)",
       pairs: "Launch (the suite's launch-closure program): place check on Orbit's areas",
+      paths: "CelesTrak, last-30-days element sets (paths of new payloads on the globe)",
       maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
