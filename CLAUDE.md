@@ -171,6 +171,19 @@ Shipped 16 Nov 2026 as `1d6e6ce`. Rules in `doctrine/method.md`
 - The ion token's allowed URLs (orbit.theintelligence.company, orbit-q2t.pages.dev, 127.0.0.1:8761) don't include
   the local preview ports, so local checks show Natural Earth II; ion imagery can only be seen live.
 
+## Paths of new payloads (16 Nov 2026, `orbit-2.12`; Tom's "Yes, add CelesTrak")
+- Lane `paths` (`orbit/celestrak.py`): one request a run for CelesTrak's last-30-days GP group (JSON, about 200
+  objects, 87 KB on 16 Nov), source `celestrak-gp` (A2, independence group `usspacecom`: the same 18 SDS data as
+  Space-Track). Keeps the sets of GCAT's recent launches' objects by launch tag (GCAT payloads, plus unnamed
+  objects while GCAT hasn't listed them; R/B and DEB dropped) as snapshot block `payload_sets`. A 403 (repeat
+  download inside one of CelesTrak's 2-hour updates) keeps the previous sets, no retry. CelesTrak's usage policy
+  (read 16 Nov 2026) states no redistribution or credit terms. Space-Track stays the source for orbit changes.
+- Globe: picking a launch of the last 7 days draws its objects' paths (labels only when 6 or fewer); the launch
+  card says how many and the sets' epoch. Clicks now prefer a launch over the ledger's history dot at the same pad
+  (`clickKey`, drillPick): before this, a recent launch at a pad with ledger history couldn't be picked on the globe.
+- Checked 16 Nov 2026 on a local build (live snapshot plus that day's CelesTrak reply; headless Edge, Natural Earth
+  II): Soyuz Rideshare 17 (2026-257) drew 13 paths, QPS-SAR-19 (2026-258) 1 with its label; 122 tests pass.
+
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days
@@ -382,7 +395,7 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
    permission to read the English list by script, at most hourly (draft in `private/email-jcg-navarea11.md`, to
    tuho@jodc.go.jp, an address from coordinator lists of uncertain date). Until they answer, HYDROPAC and NAVAREA XII
    rebroadcasts only, and the page says XI is not read.
-10. **Decided 16 Nov 2026 (Tom):** CelesTrak's last-30-days group as a second element-set source, for paths of new
+10. **Decided 16 Nov 2026 (Tom); CelesTrak built the same day as `orbit-2.12`, above:** CelesTrak's last-30-days group as a second element-set source, for paths of new
     launches' payloads only (Space-Track stays primary; one request a run; CelesTrak's terms checked before
     building). GEO move question 3: numpy, sgp4 and pyarrow pinned at build time for the callouts only; live
     lanes stay standard library (`doctrine/geo-move-plan.md`).

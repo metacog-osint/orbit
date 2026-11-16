@@ -12,6 +12,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import urllib.error
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
@@ -20,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, launchpairs, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
+from orbit import celestrak, counterspace, feed, fetch, gcat, launches, launchpairs, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -209,6 +210,7 @@ class EndToEnd(unittest.TestCase):
         self.stamp = "Fri, 13 Nov 2026 00:23:02 GMT"
         self.fail = False
         self.api_doc = None
+        self.celestrak_403 = False
         self.asat = body("swf_asat.csv")
         by_url = {u: FILES[name] for name, u in gcat.URLS.items()}
 
@@ -236,6 +238,10 @@ class EndToEnd(unittest.TestCase):
                 return self.asat
             if url == launchpairs.URL:
                 return body("launch_snapshot.json")
+            if url == celestrak.URL:
+                if self.celestrak_403:
+                    raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+                return body("celestrak_last30.json")
             if url.startswith(rpo.SHEET):
                 gid = url.rsplit("gid=", 1)[1]
                 tab = {s["gid"]: t for t, s in rpo.TABS.items()}.get(gid, "about")
@@ -259,6 +265,17 @@ class EndToEnd(unittest.TestCase):
     def run_collect(self, **kw):
         return cli.collect(self.tmp, getter=self.getter, header=self.header, **kw)
 
+    def test_paths_kept_on_celestrak_403(self):
+        """A repeat download inside one of CelesTrak's 2-hour updates gets 403: sets kept, one request, no retry."""
+        snap = self.run_collect()
+        self.celestrak_403 = True
+        n = len(self.calls)
+        again = self.run_collect(only=["paths"])
+        self.assertEqual(again["lanes"]["paths"]["status"], "unchanged")
+        self.assertIn("403", again["lanes"]["paths"]["note"])
+        self.assertEqual(again["payload_sets"], snap["payload_sets"])
+        self.assertEqual([u for u in self.calls[n:] if "celestrak" in u], [celestrak.URL])
+
     def test_full_cycle(self):
         snap = self.run_collect()
         self.assertEqual(snap["lanes"]["catalog"]["status"], "ok")
@@ -266,6 +283,8 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
         self.assertEqual(snap["lanes"]["rpo"]["status"], "ok")
         self.assertEqual(snap["lanes"]["pairs"]["status"], "ok")
+        self.assertEqual(snap["lanes"]["paths"]["status"], "ok")
+        self.assertEqual(snap["payload_sets"]["objects_in_group"], 5)
         self.assertEqual(len(snap["launch_pairs"]["matches"]), 11)  # 14 rows, 11 launch-area pairs
         self.assertEqual(snap["rpo"]["counts"], {"commercial": 14, "military": 44, "planned": 4})
         self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "off")  # robots.txt disallows /TUHO/
@@ -375,6 +394,34 @@ class EndToEnd(unittest.TestCase):
 
 NW = FIX / "navwarn"
 NOW_NW = datetime(2026, 11, 13, 23, 0, tzinfo=timezone.utc)
+
+
+class PayloadSets(unittest.TestCase):
+    """orbit-2.12: CelesTrak's last-30-days group, cut to five rows of its 16 Nov 2026 reply (2026-257 and -258)."""
+    LAUNCHES = [{"launch_tag": "2026-258", "payloads": [{"norad": "101385", "name": "QPS-SAR-19"}]},
+                {"launch_tag": "2026-257", "payloads": []}]
+
+    def test_keeps_payloads_and_unnamed_objects_not_rocket_bodies(self):
+        got = celestrak.parse(body("celestrak_last30.json"), self.LAUNCHES)
+        self.assertEqual(got["objects_in_group"], 5)
+        self.assertEqual([o["cospar"] for o in got["by_launch"]["2026-258"]], ["2026-258A"])  # both R/B dropped
+        self.assertTrue(got["by_launch"]["2026-258"][0]["gcat_payload"])
+        self.assertEqual([o["cospar"] for o in got["by_launch"]["2026-257"]], ["2026-257A", "2026-257B"])
+        self.assertFalse(got["by_launch"]["2026-257"][0]["gcat_payload"])
+        el = got["by_launch"]["2026-258"][0]["elements"]
+        self.assertEqual(sorted(el), ["argp", "e", "epoch", "i", "ma", "n", "raan"])
+        self.assertGreater(el["n"], 10)  # LEO
+        self.assertEqual(got["sets"], 3)
+
+    def test_other_launches_and_bad_rows_left_out(self):
+        rows = json.loads(body("celestrak_last30.json"))
+        rows[0] = {**rows[0], "MEAN_MOTION": None}
+        got = celestrak.parse(json.dumps(rows).encode(), self.LAUNCHES[1:])
+        self.assertNotIn("2026-258", got["by_launch"])
+        got = celestrak.parse(json.dumps(rows).encode(), self.LAUNCHES)
+        self.assertEqual((got["unusable"], got["sets"]), (1, 2))
+        with self.assertRaises(ValueError):
+            celestrak.parse(b'{"error": "maintenance"}', self.LAUNCHES)
 
 
 class LaunchPairs(unittest.TestCase):
@@ -639,7 +686,7 @@ class Registers(unittest.TestCase):
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources (Space-Track, CelesTrak) stay off the page
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
-                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch"})
+                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch", "celestrak-gp"})
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")

@@ -146,13 +146,17 @@ export async function createGlobe(container, model, { onPick }) {
         arcType: C.ArcType.GEODESIC, material: new C.PolylineDashMaterialProperty({ color: ink().withAlpha(0.9), dashLength: 6 }) } });
     }
   }
-  const drawn = { tracks: 0, without: 0 };
+  const drawn = { tracks: 0, without: 0, launches: Object.keys(model.payloadTracks || {}).length };
+  let payloadKey = null;
   function tracks() {
     const now = new Date();
-    for (const t of model.tracks || []) {
+    drawn.tracks = 0; drawn.without = 0;
+    const list = [...(model.tracks || []), ...((payloadKey && (model.payloadTracks || {})[payloadKey]) || [])
+      .map((t, _, all) => ({ ...t, payload: true, quiet: all.length > 6 }))];  // a big batch: no labels
+    for (const t of list) {
       const p = path(t.elements, now);
-      if (!p) { drawn.without++; continue; }
-      drawn.tracks++;
+      if (!p) { if (!t.payload) drawn.without++; continue; }
+      if (!t.payload) drawn.tracks++;
       const c = actor(t.group);
       add(t.key, { polyline: { positions: p.orbit.map((x) => new C.Cartesian3(x[0], x[1], x[2])), width: 1.6,
         arcType: C.ArcType.NONE, material: c.withAlpha(0.85) } });
@@ -160,8 +164,8 @@ export async function createGlobe(container, model, { onPick }) {
         material: new C.PolylineDashMaterialProperty({ color: c.withAlpha(0.6), dashLength: 8 }) } });
       if (p.now) {
         add(t.key, { position: new C.Cartesian3(p.now[0], p.now[1], p.now[2]),
-          point: { pixelSize: 9, color: c, outlineColor: ink(), outlineWidth: 1 },
-          label: { text: t.name, font: "12px system-ui, sans-serif", fillColor: ink(), showBackground: true,
+          point: { pixelSize: t.payload ? 7 : 9, color: c, outlineColor: ink(), outlineWidth: 1 },
+          label: t.quiet ? undefined : { text: t.name, font: "12px system-ui, sans-serif", fillColor: ink(), showBackground: true,
             backgroundColor: col("--panel", 0.85), pixelOffset: new C.Cartesian2(0, -16),
             distanceDisplayCondition: new C.DistanceDisplayCondition(0, 1.2e8) } });
       }
@@ -190,7 +194,15 @@ export async function createGlobe(container, model, { onPick }) {
     const hit = widget.scene.pick(pos);
     return hit && hit.id ? keyOf.get(hit.id.id) || null : null;
   };
-  handler.setInputAction((ev) => { const k = pickKey(ev.position); if (k) onPick(k); }, C.ScreenSpaceEventType.LEFT_CLICK);
+  // A click takes everything under the pointer and prefers a recent launch, then a listed change, a scheduled
+  // launch, an area and last the ledger's history dot, which sits under a launch at the same pad and is larger.
+  const RANK = [["launch-", 0], ["mv-", 1], ["up-", 2], ["nw-", 3], ["hist-", 5]];
+  const rank = (k) => (RANK.find(([p]) => k.startsWith(p)) || [null, 4])[1];
+  const clickKey = (pos) => {
+    const keys = widget.scene.drillPick(pos, 10).map((h) => (h && h.id ? keyOf.get(h.id.id) : null)).filter(Boolean);
+    return keys.sort((a, b) => rank(a) - rank(b))[0] || null;
+  };
+  handler.setInputAction((ev) => { const k = clickKey(ev.position); if (k) onPick(k); }, C.ScreenSpaceEventType.LEFT_CLICK);
   handler.setInputAction((ev) => { widget.canvas.style.cursor = pickKey(ev.endPosition) ? "pointer" : ""; },
     C.ScreenSpaceEventType.MOUSE_MOVE);
 
@@ -200,6 +212,11 @@ export async function createGlobe(container, model, { onPick }) {
     resize: () => { widget.resize(); widget.scene.requestRender(); },
     setHistory(fc) { history = fc; draw(); },
     select(key) { selected = key || null; highlight(); },
+    showPayloads(key) {
+      const k = key && (model.payloadTracks || {})[key] ? key : null;
+      if (k === payloadKey) return;
+      payloadKey = k; draw();
+    },
     flyTo(key) {
       const area = model.areas.features.filter((x) => x.properties.key === key);
       if (area.length) {

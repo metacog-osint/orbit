@@ -284,6 +284,16 @@ Orbit's hosts (repository variable `CESIUM_ION_TOKEN`, written to `data/cesium.j
 ion refuses it, Natural Earth II from Cesium's own assets. CesiumWidget only: the Viewer's widgets need eval,
 which the CSP forbids.
 
+## Paths of new payloads (`orbit-2.12`, 16 Nov 2026)
+Tom's yes, 16 Nov 2026. Lane `paths` makes one request a run for CelesTrak's last-30-days GP group (JSON, about
+200 objects) and keeps the sets of objects of GCAT's recent launches, by launch tag: every object GCAT lists as a
+payload of that launch, and, while GCAT hasn't listed them, any other object of the launch whose name doesn't
+mark it as a rocket body, debris or a platform (CelesTrak's "OBJECT A" names stay). Snapshot block
+`payload_sets` (`by_launch`, each with NORAD number, name, COSPAR id, `gcat_payload` and `elements`). The globe
+draws a launch's payload paths only while that launch is picked, the same way as listed changes' paths (SGP4,
+drag left out, for orientation, not for tracking). CelesTrak's policy: one download per 2-hour update; its 403
+for a repeat inside an update keeps the previous sets and is not retried. Space-Track stays the source for watched
+objects and orbit changes; these sets are never used to find orbit changes. Not in the feed.
+
 ## Not built
-ITU filings (BR IFIC, after ITU's legal office answers); paths for objects other than listed orbit changes (new
-launches' payloads would need another element-set source, such as CelesTrak, Tom's call).
+ITU filings (BR IFIC, after ITU's legal office answers).

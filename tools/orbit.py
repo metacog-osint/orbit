@@ -46,7 +46,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (archive, counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
+from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, launches, launchpairs, ledger, maneuver, navwarn, news, rpo,  # noqa: E402
                    spacetrack)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -57,13 +57,14 @@ LANE_FIELDS = {
     "news": ["news"],
     "navwarn": ["navwarn"],
     "pairs": ["launch_pairs"],
+    "paths": ["payload_sets"],
     "counterspace": ["counterspace"],
     "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "ledger": {},
-         "news": {}, "navwarn": {}, "launch_pairs": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
+         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -76,7 +77,7 @@ MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fai
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
                "news": ["snapi-thespacedevs"],
-               "navwarn": ["nga-msi"], "pairs": ["tic-launch"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
+               "navwarn": ["nga-msi"], "pairs": ["tic-launch"], "paths": ["celestrak-gp"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
                "maneuver": ["space-track"]}
 
 
@@ -373,7 +374,20 @@ def _lane_pairs(raw_dir: Path, prev: dict, getter, **_):
     return {"launch_pairs": launchpairs.parse(body)}, [rec], None
 
 
-LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "upcoming": _lane_upcoming, "news": _lane_news,
+def _lane_paths(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
+    """CelesTrak's last-30-days GP group (orbit/celestrak.py): element sets for the payloads of GCAT's recent
+    launches, for their paths on the globe. One request a run; CelesTrak's 403 for a repeat download inside one
+    of its 2-hour updates keeps the previous sets and is not retried."""
+    try:
+        body, rec = fetch.fetch("celestrak-gp", celestrak.URL, raw_dir, "json", getter=getter, gz=True)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 403 and prev.get("payload_sets"):
+            return None, [], "CelesTrak: no new GP data since this address's last download (HTTP 403); sets kept"
+        raise
+    return {"payload_sets": {"read_at": rec["fetched_at"], **celestrak.parse(body, launches_30d or [])}}, [rec], None
+
+
+LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "paths": _lane_paths, "upcoming": _lane_upcoming, "news": _lane_news,
          "navwarn": _lane_navwarn, "pairs": _lane_pairs,
          "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver}
 
@@ -401,7 +415,7 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             kwargs = {"force": force, "header": header} if lane == "catalog" else {}
             if lane == "news":  # reads this run's scheduled launches (upcoming runs first)
                 kwargs = {"upcoming": snap.get("upcoming")}
-            if lane == "ledger":  # reads this run's GCAT launches (catalog runs first)
+            if lane in ("ledger", "paths"):  # read this run's GCAT launches (catalog runs first)
                 kwargs = {"launches_30d": snap.get("launches")}
             result, recs, stamps = fn(raw_dir, prev, getter, **kwargs)
             if result is None:
