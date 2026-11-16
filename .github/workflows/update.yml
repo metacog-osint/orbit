@@ -7,7 +7,7 @@ name: update
 # this repository's Actions cache, a live collection, the site build and feed check, then a deploy of site/ to
 # Cloudflare Pages.
 #
-# Load on sources: GCAT republishes once a day (about 00:20 UTC) from Jonathan McDowell's own server. The catalog
+# Load on sources: GCAT republishes about once a day, at no fixed time, from Jonathan McDowell's own server. The catalog
 # lane asks each file's Last-Modified date first and downloads nothing (about 37 MB otherwise) unless one has
 # changed, so only the first run after his update downloads. Never add --force here. Launch Library 2 is one
 # request a run (free limit 15 an hour).

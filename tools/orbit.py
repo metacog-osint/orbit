@@ -34,7 +34,9 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 import sys
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -42,12 +44,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import counterspace, feed, fetch, gcat, launches, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
+from orbit import counterspace, feed, fetch, gcat, launches, ledger, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
     "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes", "baseline"],
     "upcoming": ["upcoming"],
+    "ledger": ["ledger"],
     "news": ["news"],
     "navwarn": ["navwarn"],
     "counterspace": ["counterspace"],
@@ -55,6 +58,7 @@ LANE_FIELDS = {
     "maneuver": ["maneuvers"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
+         "ledger": {},
          "news": {}, "navwarn": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
@@ -64,7 +68,8 @@ ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
-LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "news": ["snapi-thespacedevs"],
+LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
+               "news": ["snapi-thespacedevs"],
                "navwarn": ["nga-msi"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
                "maneuver": ["space-track"]}
 
@@ -337,7 +342,22 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
     return {"maneuvers": out}, recs, None
 
 
-LANES = {"catalog": _lane_catalog, "upcoming": _lane_upcoming, "news": _lane_news, "navwarn": _lane_navwarn,
+def _lane_ledger(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
+    """Orbit's own launch ledger, read back from its public release (written hourly by `orbit.py ledger`): its
+    counts and the launches GCAT hasn't listed yet. One request to GitHub, none to Launch Library 2."""
+    try:
+        body, rec = fetch.fetch("orbit-ledger", ledger.PUBLIC_URL, raw_dir, "json", getter=getter, gz=True)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise spacetrack.NotReady("no ledger published yet (the hourly ledger workflow writes it)")
+        raise
+    doc = json.loads(body.decode("utf-8"))
+    dates = [x.get("date") for x in launches_30d or [] if x.get("date")]
+    return {"ledger": ledger.summary(doc, max(dates) if dates else None)}, [rec], None
+
+
+LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "upcoming": _lane_upcoming, "news": _lane_news,
+         "navwarn": _lane_navwarn,
          "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver}
 
 
@@ -364,6 +384,8 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             kwargs = {"force": force, "header": header} if lane == "catalog" else {}
             if lane == "news":  # reads this run's scheduled launches (upcoming runs first)
                 kwargs = {"upcoming": snap.get("upcoming")}
+            if lane == "ledger":  # reads this run's GCAT launches (catalog runs first)
+                kwargs = {"launches_30d": snap.get("launches")}
             result, recs, stamps = fn(raw_dir, prev, getter, **kwargs)
             if result is None:
                 keep_previous()
@@ -571,6 +593,42 @@ def maneuver_case(root: Path = ROOT, name: str = "sj21") -> int:
     return 0
 
 
+def ledger_pull(path: Path, getter=None, raw_dir: Path | None = ROOT / "data" / "raw") -> int:
+    """One hourly pull (orbit/ledger.py). An error from Launch Library 2 (a 429 included) changes nothing and is
+    not retried: the next hour tries again. Writes changed=true to GITHUB_OUTPUT when the ledger changed."""
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else ledger.empty()
+    get = getter or fetch.get
+
+    def lookup(launch_id):
+        try:
+            return get(ledger.id_url(launch_id), 120)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            raise
+
+    try:
+        body, _ = fetch.fetch("ll2-previous", ledger.next_url(doc), raw_dir, "json", getter=get, gz=True)
+        rep = ledger.step(doc, body, fetch.now_utc(), lookup)
+    except Exception as exc:
+        print(f"::warning::Launch Library 2 pull failed ({type(exc).__name__}: {str(exc)[:200]}); ledger unchanged, "
+              "next hour tries again")
+        return 0
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
+    changed = bool(rep["added"] or rep["changed"] or rep["verified"] in ("missing", "moved"))
+    rows = doc["launches"]
+    print(f"Ledger: {len(rows)} launches ({rows[0]['net'] if rows else '-'} to {rows[-1]['net'] if rows else '-'}); "
+          f"pulled {rep['pulled']}, added {rep['added']}, last saved launch {rep['verified']}, "
+          f"{len(rep['changed'])} changed, {rep['requests']} request(s); "
+          f"{'caught up' if doc['caught_up'] else 'catching up'}.")
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a", encoding="utf-8") as fh:
+            fh.write(f"changed={'true' if changed else 'false'}\n")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -583,6 +641,8 @@ def main(argv=None) -> int:
                                               "BeiDou-2 G2) or iss (2024 reboosts and the May storm)")
     mc.add_argument("case", nargs="?", default="sj21", choices=sorted(CASES))
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
+    lg = sub.add_parser("ledger", help="one Launch Library 2 pull into data/state/launch-ledger.json (hourly)")
+    lg.add_argument("--file", default=str(ROOT / "data" / "state" / ledger.ASSET))
     args = ap.parse_args(argv)
 
     if args.cmd == "collect":
@@ -601,6 +661,8 @@ def main(argv=None) -> int:
               + (f"Catalog changes since {ch['previous_reading_at']}: {ch['added']} added, {ch['removed']} removed, "
                  f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))
         return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
+    if args.cmd == "ledger":
+        return ledger_pull(Path(args.file))
     if args.cmd == "maneuver-case":
         return maneuver_case(ROOT, args.case)
     if args.cmd == "maneuver-report":

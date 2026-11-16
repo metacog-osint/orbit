@@ -14,9 +14,9 @@
     },
     {
       "id": "ll2-thespacedevs",
-      "name": "Launch Library 2, The Space Devs: upcoming launches",
+      "name": "Launch Library 2, The Space Devs: upcoming launches, and every launch since 1 Jan 2024 (Orbit's ledger)",
       "url": "https://thespacedevs.com/llapi",
-      "licence": "Free access to the whole database, 15 requests an hour without a key; no data licence stated (read 13 Nov 2026). Images not used.",
+      "licence": "Free access to the whole database (\"the entire database is accessible to everyone, for free\", thespacedevs.com/llapi, read 16 Nov 2026), 15 requests an hour without a key. No separate data licence is stated; Tom, 15 Nov 2026: freely available, so Orbit uses and republishes it with credit (the ledger on Orbit's public release). Images not used: each carries its own licence.",
       "use": "ingest",
       "grade": "B2",
       "independence_group": "thespacedevs",

@@ -1,0 +1,54 @@
+name: ledger
+# Orbit's launch ledger, hourly (Tom, 15 Nov 2026): one Launch Library 2 pull of 14 launches from the newest saved
+# one on, which verifies it and adds what follows (orbit/ledger.py), and at most one by-id lookup. The ledger lives
+# on this repository's public release `ledger` as launch-ledger.json, so the suite's programs can read it
+# (https://github.com/metacog-osint/orbit/releases/download/ledger/launch-ledger.json); Orbit's own update run reads
+# it from there too.
+#
+# Started by the hub's tic-dispatch Worker at :45 past every UTC hour (:55 at 01, 05, 09, 13, 17 and 21 UTC, Blackout's);
+# GitHub fires this account's schedules 4-9 hours late, so the cron below is only the fallback. Launch Library 2
+# allows 15 requests an hour without a key; this job makes one or two. A failed pull (a 429 included) changes
+# nothing and is not retried: the next hour tries again.
+#
+# No Space-Track, no deploy: this job never touches the shared Space-Track account or Cloudflare Pages.
+on:
+  schedule:
+    - cron: "45 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ledger
+  cancel-in-progress: false
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: Ledger tests
+        run: python -m unittest tests.test_ledger
+      - name: The ledger from the release (none before the first run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data/state
+          if gh release view ledger --json assets -q '.assets[].name' 2>/dev/null | grep -qx launch-ledger.json; then
+            # the release holds a ledger: a failed download stops the job rather than starting over from 1 Jan 2024
+            gh release download ledger --pattern launch-ledger.json --dir data/state --clobber
+          else
+            echo "::warning::No ledger on the release yet: this run starts it from 1 Jan 2024."
+          fi
+      - name: One Launch Library 2 pull
+        id: pull
+        run: python tools/orbit.py ledger
+      - name: Publish the ledger
+        if: steps.pull.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view ledger >/dev/null 2>&1 || gh release create ledger --title "Launch ledger" --latest=false \
+            --notes "Orbit's launch ledger: every launch since 1 Jan 2024 from Launch Library 2 (The Space Devs, thespacedevs.com), checked hourly. launch-ledger.json; schema orbit-ledger/1 (orbit/ledger.py). Launch data: Launch Library 2, The Space Devs."
+          gh release upload ledger data/state/launch-ledger.json --clobber
