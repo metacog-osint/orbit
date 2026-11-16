@@ -36,7 +36,8 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
    **Built 16 Nov 2026** (Tom's "build step 0 with the window skip", 15 Nov CST): Noisefloor `be45abe` (PR #12,
    merged after CI passed). `orbit_busy` in `tools/geo_region.py` also skips when Orbit's snapshot can't be read,
    and from :38 to :05 around 00, 06, 12 and 18 UTC (Orbit's :41 cron and :55 dispatch), because Orbit's snapshot
-   is published about a minute after its gp query and Orbit's private runs can't be seen from Noisefloor. Noisefloor's
+   is published about a minute after its gp query and Orbit's runs couldn't be seen from Noisefloor while Orbit's repo
+was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now read Orbit's runs too). Noisefloor's
    12:40 UTC second-look cron falls inside that window, so an on-time run skips its GEO pull (05:40 has pulled).
 1. **Decide the open questions below** (Tom).
 2. **Collector in Orbit:** lane `geo` (`orbit/geo_region.py`), standard library only, through Orbit's Space-Track
@@ -62,6 +63,9 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
    is private and keeps state in its Actions cache (evicted after 7 days unused, 10 GB a repo). Options: releases
    on Orbit's own repo (private), or keep publishing to Noisefloor's releases from Orbit. Recommended: Orbit's own
    releases, with the element sets kept private as Orbit does now ("raw element sets are not republished").
+
+**Decided 15 Nov 2026 (Tom, about 9:15 PM CST):** question 1, port the globe as is; question 2, Orbit's own
+releases. Questions 3 and 4 stay open. **Settled the same evening:** `metacog-osint/orbit` went public about 9:30 PM CST 15 Nov, so its releases are public. Tom (about 9:40 PM CST): drop the overly cautious rules, the programs must be able to read each other's data. So the GEO element sets go on Orbit's public releases with Space-Track's citation, under USSPACECOM's blanket approval for basic SSA data, as Noisefloor publishes them now. Orbit's private watch list stays private (it is watch configuration, not a licence matter), so its sets stay in the Actions cache.
 3. **Dependencies:** `geo_callouts.py` uses numpy and sgp4, and the monthly element files are parquet (pyarrow).
    Orbit's live lanes are standard library only. Options: callouts run at build time with those packages pinned,
    or rewritten to the standard library (SGP4 in pure Python is slower but small at GEO's few thousand objects).

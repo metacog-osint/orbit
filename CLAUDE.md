@@ -67,6 +67,7 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` (about 38 MB) | 83,476 objects across the four catalogs; 22 orbital launches in 30 days; 85 reentries in 30 days; 36,289 objects in orbit (RU 3,919, SU 3,029); 780 in orbit with no catalog number; 0 catalog numbers claimed twice in the US catalogs. First reading, so no changes yet |
 | `upcoming` | `launches.py` | Launch Library 2, detailed mode (about 450 KB; only it carries provider countries), one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
+| `ledger` | `ledger.py` | Orbit's own launch ledger, read back from its public release (one GitHub request, no LL2 request); written hourly by `ledger.yml` | Not run yet (built 16 Nov 2026) |
 | `navwarn` | `navwarn.py` | NGA daily in-force memoranda (5 text files, about 140 KB) and NAVAREA XI (Japan Coast Guard: list XML plus one page per launch-related warning) | 13 Nov, 5:57 PM CST: 25 launch-related warnings in force (NGA 23 of 321, NAVAREA XI 3), 20 areas after grouping |
 
 - **GCAT republishes about once a day, at no fixed time** (file headers seen: 13 Nov 2026 00:21 UTC, 15 Nov 10:18
@@ -81,6 +82,24 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
 - **A failed lane keeps its last good copy** (`from_previous`). A GCAT reading with under 90% of the last
   reading's objects fails the lane.
 - Raw copies (gzipped) and `index.jsonl` go to `data/raw/` (git-ignored), as in Headwind.
+
+## Launch ledger (16 Nov 2026, Tom's plan from his earlier launch mapper: "yes, build it")
+- `orbit/ledger.py`, `python tools/orbit.py ledger`, workflow `.github/workflows/ledger.yml`, hourly: one Launch
+  Library 2 pull of 14 launches (`launches/previous`, `ordering=net`, `net__gte` the newest saved launch's NET). The
+  first is the newest saved launch, which verifies it (fields refreshed, changes logged); the rest are added. At most
+  one more request: a by-id lookup of the newest saved launch when the pull doesn't hold it ("moved", or "missing",
+  kept and marked), or else of the earliest launch in the last 14 days still without a final status (Go, TBC, In
+  Flight), so an outcome posted after a launch was saved isn't lost. An error, a 429 included, changes nothing and
+  is not retried. From 1 Jan 2024: 887 launches to 15 Nov 2026, so about 64 hours of pulls to catch up.
+- Published on this repo's public release `ledger` as `launch-ledger.json` (schema `orbit-ledger/1`, about 780 bytes
+  a launch), for every program to read: https://github.com/metacog-osint/orbit/releases/download/ledger/launch-ledger.json.
+  The job creates the release on its first run; a release that holds a ledger it cannot download stops the job,
+  so a bad read never starts the ledger over.
+- Orbit's update run reads it back as lane `ledger`: snapshot block `ledger` (counts, last check, and `since_gcat`,
+  the launches after GCAT's newest launch date, the 1-3 day gap the 15 Nov suite review found). Page display: not
+  built yet.
+- tic-dispatch starts `ledger.yml` at :45 past every UTC hour, :55 at 01, 05, 09, 13, 17 and 21 UTC (Blackout has
+  :45 there); its own cron (`45 * * * *`) is the fallback. Hub change: the hub's `dispatch/dispatch.js`.
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
@@ -263,6 +282,10 @@ ASAT sheet stays B2 (Tom's "Keep B2"; an RPO sheet would be graded on its own).
 3. ~~Launch Library 2 has no stated data licence~~ Decided 15 Nov 2026 (Tom's "Keep, and ask them"): keep it
    (credited, images not used) and ask The Space Devs (support@thespacedevs.com, from their site) for a licence
    statement. Text drafted for Tom to send from his own account; not sent by Claude. Site still states none (15 Nov).
+   **Superseded about 9:40 PM CST 15 Nov:** Tom: LL2 is freely available ("the entire database is accessible to
+   everyone, for free"); drop the overly cautious rules, the programs need to read each other's data. Orbit uses
+   and republishes LL2 data with credit (the ledger below); the email is optional, not a hold. Images still not
+   used: each carries its photographer's or agency's own licence.
 4. ~~A 3D page: Cesium ion, or tiles without ion.~~ Decided 15 Nov 2026: **Cesium ion** (Tom: "not a commercial
    venture. If the day comes that we start generating revenue, then we'll change our status with cesium"). Not
    built. When it is: Tom creates the ion account and token (restrict the token to orbit.theintelligence.company);

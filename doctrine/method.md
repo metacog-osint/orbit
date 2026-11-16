@@ -19,6 +19,7 @@ makes no warnings.
 |---|---|---|
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
 | `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
+| `ledger` (`orbit-2.9`) | Orbit's launch ledger from Launch Library 2, on Orbit's public release | Every launch since 1 Jan 2024, checked hourly; the launches GCAT hasn't listed yet |
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 | `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
@@ -204,10 +205,22 @@ Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the c
 3. **The newest window fills in late** for payloads and reentries: GCAT adds payloads and dates reentries as it
    learns of them, so a "below" there can be lag. Launches are dated promptly. First measured on the 13 Nov GCAT
    copy: 21 launches in the last 30 days against a prior median of 26 (20 to 41); 83 reentries against 143 (114 to
-   274), below every prior window, which is likely lag.
+   274), below every prior window, which is likely lag. Checked 15-16 Nov 2026: the lag isn't seen yet. Between the
+   13 and 15 Nov copies GCAT added no reentry dated 17 Oct-12 Nov (80 then, 76 now); the 82 recent ones are spread
+   at 2-3 a day across the window rather than thinning toward today; and the four windows before it (139, 123, 119,
+   137) are not low. A lag of weeks or more is not ruled out.
 4. **Not from GCAT:** catalog additions by date of cataloging (GCAT keeps no such date) and Orbit's own counts
    (listed orbit changes per object, warnings per area). Those need Orbit's own daily archive, with baselines after
    90 days (decision 8, not built).
+
+## Launch ledger (`orbit-2.9`, 16 Nov 2026)
+Hourly, one Launch Library 2 request takes the 14 launches from the newest saved launch's NET on, in NET order. The
+first is that launch, which verifies it; the rest are new. A by-id lookup (at most one an hour) covers the newest
+saved launch when the pull doesn't hold it and, otherwise, the earliest launch in the last 14 days with no final
+status (Success, Failure, Partial Failure). Every field change is logged (newest 200 kept). A launch LL2 drops is
+kept and marked. A launch Launch Library 2 reports is reported, not measured, like a scheduled launch: kind
+observation, status_class reported. The ledger is the suite's shared launch record from 1 Jan 2024; GCAT stays
+the record for objects, reentries and the baselines, and `since_gcat` lists what LL2 has and GCAT doesn't yet.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers),
