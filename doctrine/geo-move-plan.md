@@ -1,7 +1,8 @@
 # Moving Noisefloor's GEO belt into Orbit: plan
 
-Drafted 15 Nov 2026 after Tom's "yes, plan on moving it and keeping sun outages in noisefloor". Nothing here is
-built. Each step needs Tom's yes before it is built, and its own yes to commit, push and deploy, in each repo.
+Drafted 15 Nov 2026 after Tom's "yes, plan on moving it and keeping sun outages in noisefloor". Step 0 is built
+(below); steps 1-5 are not. Each step needs Tom's yes before it is built, and its own yes to commit, push and deploy,
+in each repo.
 
 ## Why
 The GEO belt is space domain awareness: who sits where in the geostationary belt, who moved, who parked beside
@@ -32,6 +33,11 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
    snapshot (`orbit.theintelligence.company/data/snapshot.json`, `maneuvers.read_at`) and skips its query within
    the hour, as Orbit already does the other way. About 15 lines and a test. This closes the shared-account gap
    until step 2 lands.
+   **Built 16 Nov 2026** (Tom's "build step 0 with the window skip", 15 Nov CST): Noisefloor `be45abe` (PR #12,
+   merged after CI passed). `orbit_busy` in `tools/geo_region.py` also skips when Orbit's snapshot can't be read,
+   and from :38 to :05 around 00, 06, 12 and 18 UTC (Orbit's :41 cron and :55 dispatch), because Orbit's snapshot
+   is published about a minute after its gp query and Orbit's private runs can't be seen from Noisefloor. Noisefloor's
+   12:40 UTC second-look cron falls inside that window, so an on-time run skips its GEO pull (05:40 has pulled).
 1. **Decide the open questions below** (Tom).
 2. **Collector in Orbit:** lane `geo` (`orbit/geo_region.py`), standard library only, through Orbit's Space-Track
    client: one GP query a run for the GEO region and the watch list together where Space-Track allows it, else two
