@@ -23,7 +23,8 @@ makes no warnings.
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 | `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
 
-GCAT republishes once a day, about 00:20 UTC. A run asks each file's Last-Modified date first and downloads
+GCAT republishes about once a day, at no fixed time (file headers seen 13 Nov 2026 00:21 UTC and 15 Nov 10:18
+UTC), so a run reads it within six hours of an update. A run asks each file's Last-Modified date first and downloads
 nothing (about 37 MB) unless one has changed.
 
 ## Rules

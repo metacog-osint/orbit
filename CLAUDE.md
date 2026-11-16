@@ -69,7 +69,9 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
 | `upcoming` | `launches.py` | Launch Library 2, detailed mode (about 450 KB; only it carries provider countries), one request a run (free limit 15 an hour) | 14 launches in the next 14 days |
 | `navwarn` | `navwarn.py` | NGA daily in-force memoranda (5 text files, about 140 KB) and NAVAREA XI (Japan Coast Guard: list XML plus one page per launch-related warning) | 13 Nov, 5:57 PM CST: 25 launch-related warnings in force (NGA 23 of 321, NAVAREA XI 3), 20 areas after grouping |
 
-- **GCAT republishes once a day (about 00:20 UTC).** The lane asks Last-Modified first and downloads nothing if
+- **GCAT republishes about once a day, at no fixed time** (file headers seen: 13 Nov 2026 00:21 UTC, 15 Nov 10:18
+  UTC; the "about 00:20 UTC" first noted here was one sighting). Orbit's four runs a day pick an update up within
+  six hours. The lane asks Last-Modified first and downloads nothing if
   no file changed (status `unchanged`). Do not pass `--force` in a schedule: the files are on Jonathan
   McDowell's own server.
 - **`satcat.tsv` stops at catalog number 69999.** Recent objects are in `satcat100k.tsv` and, before
