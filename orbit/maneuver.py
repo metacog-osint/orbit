@@ -49,6 +49,7 @@ Z = 8.0
 FLOOR_MS = 0.05
 REPORT_MS = {"GEO": 0.25}  # smallest reported change by regime; FLOOR_MS where a regime is not listed
 LEO_OFF_TRACK_MS = {"cross-track": 1.0, "eccentricity": 1.0}  # LEO: smallest listed change by dominant term (orbit-2.8)
+IMPLAUSIBLE_FRAC = 1.0  # a pair needing more than the orbital speed itself is a fitting error, never published
 MIN_PAIRS = 10
 MERGE_DAYS = 1.0
 MIN_RATE_DT = 0.1   # days: pairs closer than this do not set the steady-drift rate
@@ -184,7 +185,9 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         v = math.sqrt(MU / p["a"]) * 1000.0  # m/s
         ja = p["da"] - rate["da"] * p["dt"]
         ji = math.radians(p["di"] - rate["di"] * p["dt"])
-        jn = math.radians(p["dnode"] - rate["dnode"] * p["dt"]) * math.sin(math.radians(p["i"]))
+        # Wrap the residual, not only the raw change: over a long gap the expected precession passes 180 degrees
+        # and an unwrapped residual is off by 360 (a 28.5 deg orbit, 30-day gap, gave 22,902 m/s cross-track).
+        jn = math.radians(_wrap180(p["dnode"] - rate["dnode"] * p["dt"])) * math.sin(math.radians(p["i"]))
         je = p["de"] - rate["de"] * p["dt"]
         p["ja"], p["v"] = ja, v
         p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
@@ -193,10 +196,15 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     base = {c: _robust([p["dv"][c] for p in pairs]) for c in COMPONENTS}
     out["noise_ms"] = {c: round(base[c][1], 4) for c in COMPONENTS}
     cutoff = _iso(now - timedelta(days=window_days))
+    out["implausible"] = 0
     marked = []
     for p in pairs:
         z = {c: (p["dv"][c] - base[c][0]) / max(base[c][1], 1e-6) for c in COMPONENTS}
         p["z"] = z
+        if p["total"] > p["v"] * IMPLAUSIBLE_FRAC:
+            if p["to"] >= cutoff:
+                out["implausible"] += 1  # counted, never listed: no burn changes velocity by the orbital speed
+            continue
         if max(z.values()) >= Z and p["total"] >= FLOOR_MS and p["to"] >= cutoff:
             marked.append(p)
     groups: list[list[dict]] = []

@@ -51,7 +51,7 @@ from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, geo_regi
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
-    "catalog": ["gcat_updated", "launches", "reentries", "hygiene", "catalog_changes", "baseline"],
+    "catalog": ["gcat_updated", "launches", "reentries", "breakups", "hygiene", "catalog_changes", "baseline"],
     "upcoming": ["upcoming"],
     "ledger": ["ledger"],
     "news": ["news"],
@@ -62,7 +62,7 @@ LANE_FIELDS = {
     "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
 }
-EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
+EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "ledger": {},
          "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
@@ -122,6 +122,7 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
         "launches": gcat.recent_launches(launch_rows, objs, sites, today, orgs=orgs),
         "baseline": gcat.baseline(launch_rows, objs, orgs, today),
         "reentries": gcat.recent_reentries(objs, today),
+        "breakups": gcat.recent_breakups(objs, today),
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
     }
