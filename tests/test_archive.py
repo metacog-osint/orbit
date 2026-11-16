@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -128,7 +130,7 @@ class CollectAndBuild(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         shutil.copytree(ROOT / "doctrine", self.tmp / "doctrine")
-        shutil.copytree(ROOT / "site_src", self.tmp / "site_src")
+        shutil.copytree(ROOT / "site_src", self.tmp / "site_src", ignore=shutil.ignore_patterns("cesium"))  # 14 MB, not needed
         (self.tmp / "data").mkdir()
         self.published = None
         self.calls = []
@@ -162,6 +164,22 @@ class CollectAndBuild(unittest.TestCase):
         files = cli.build_site(self.tmp, {"generated_at": s["generated_at"], "lanes": {}, "archive": {"days": 1}})
         self.assertEqual(json.loads(files["data/archive.json"])["schema"], archive.SCHEMA)
         self.assertTrue((self.tmp / "site" / "data" / "archive.json").exists())
+
+    def test_build_globe_token_and_binary_files(self):
+        """The globe (orbit-2.11): the ion token from the environment, and vendor images copied byte for byte."""
+        png = bytes(range(256)) * 4  # not UTF-8
+        (self.tmp / "site_src" / "vendor" / "x").mkdir(parents=True)
+        (self.tmp / "site_src" / "vendor" / "x" / "t.png").write_bytes(png)
+        doc = {"generated_at": "2026-11-16T00:55:00Z", "lanes": {}}
+        with mock.patch.dict(os.environ, {"CESIUM_ION_TOKEN": "test-token"}):
+            files = cli.build_site(self.tmp, doc)
+        self.assertEqual(json.loads(files["data/cesium.json"]), {"token": "test-token"})
+        self.assertEqual((self.tmp / "site" / "vendor" / "x" / "t.png").read_bytes(), png)
+        self.assertNotIn("vendor/x/t.png", files)
+        with mock.patch.dict(os.environ, {"CESIUM_ION_TOKEN": ""}):
+            files = cli.build_site(self.tmp, doc)
+        self.assertEqual(json.loads(files["data/cesium.json"]), {"token": None})
+        self.assertTrue((self.tmp / "site" / "globe.js").exists())
 
 
 if __name__ == "__main__":

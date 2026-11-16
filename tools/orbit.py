@@ -70,6 +70,7 @@ ST_WAIT = spacetrack.wait_for_clear_minute
 ST_SHARED = spacetrack.shared_gp_busy       # Noisefloor's GP query on the same account (replaceable in tests)
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
+TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".txt", ".md", ".glsl", ".xml"}
 ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
@@ -336,6 +337,10 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
         g = objs.get(f"S{ev['norad']:05d}")
         if g:
             ev.update({"gcat_name": g[4], "state": g[10], "cc": gcat.iso_country(g[10])})
+        sets = (store.get(str(ev["norad"])) or {}).get("sets") or []
+        if sets:  # the newest set, for the globe's path (orbit-2.11): basic SSA data, cited with the rest of the lane
+            s = sets[-1]
+            ev["elements"] = {"epoch": s[0], "n": s[1], "e": s[2], "i": s[3], "raan": s[4], "argp": s[5], "ma": s[6]}
     rep.update({"read_at": read_at, "watched": len(ids), "missing": [i for i in ids if str(i) not in store]})
     _st_write(data_dir, "report.json", rep)  # the full report, private
     out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
@@ -519,17 +524,31 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
              "data/archive.json": (root / "data" / ARCHIVE).read_text(encoding="utf-8")
              if (root / "data" / ARCHIVE).exists() else dump(archive.empty()),
              "data/world.geojson": json.dumps(world_shapes(countries), separators=(",", ":")) + "\n"}
+    # The globe's Cesium ion token (orbit-2.11): a public, read-only token restricted to Orbit's hosts, from the
+    # repository variable CESIUM_ION_TOKEN; without it the globe uses Cesium's own Natural Earth imagery.
+    files["data/cesium.json"] = dump({"token": os.environ.get("CESIUM_ION_TOKEN") or None})
     src_dir = root / "site_src"
+    binary = {}
     if src_dir.exists():
         for p in sorted(src_dir.rglob("*")):
             if p.is_file():
-                files[p.relative_to(src_dir).as_posix()] = p.read_text(encoding="utf-8")
+                rel = p.relative_to(src_dir).as_posix()
+                if p.suffix.lower() in TEXT_SUFFIXES or p.name == "_headers":
+                    files[rel] = p.read_text(encoding="utf-8")
+                else:  # images, wasm and the like in vendor/ (CesiumJS): copied byte for byte
+                    binary[rel] = p
     out_dir = root / "site"
     out_dir.mkdir(parents=True, exist_ok=True)
     for rel, text in files.items():
         dest = out_dir / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(text, encoding="utf-8", newline="\n")
+    for rel, src in binary.items():
+        dest = out_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        data = src.read_bytes()
+        if not dest.exists() or dest.read_bytes() != data:
+            dest.write_bytes(data)
     return files
 
 

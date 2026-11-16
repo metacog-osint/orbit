@@ -47,8 +47,7 @@ changes stay unstaged (other sessions build there).
 **Planned scope** (`D:\Projects\_ideas\new-programs.md`, program row and roadmap step 14): catalog changes,
 launches, manoeuvres, counterspace events; maneuver-detect, Secure World Foundation counterspace sheets, ITU
 Space Explorer, optional 3D page. Built: launches, scheduled launches, reentries, catalog changes, owner-code
-counts, ASAT test history, orbit changes in watched satellites (Space-Track, 14 Nov 2026). Not built: ITU, 3D
-page. Describe Orbit publicly from what is live.
+counts, ASAT test history, orbit changes in watched satellites (Space-Track, 14 Nov 2026). Not built: ITU. 3D globe built on a branch 16 Nov 2026 (`orbit-2.11`). Describe Orbit publicly from what is live.
 
 ## Commands
 ```bash
@@ -135,6 +134,33 @@ Built on branch `feat/orbit-next` (worktree `D:\Projects\_worktrees\orbit-next`,
   (14 Feb 2027 if the first day is 16 Nov 2026). The 90-day baselines themselves are not built.
 - Checked 16 Nov 2026 on a local build (local snapshot, lanes marked fresh for the check): 19 areas, 2 listed
   changes, the day marked as read from stale memoranda (13 Nov), note drawn, no console errors; 104 tests pass.
+
+## The globe (16 Nov 2026, `orbit-2.11`; decisions 4 and 7, Tom's "then work the 3d page in cesium")
+Same branch and worktree as the archive; not committed or pushed until Tom's yes. Rules in `doctrine/method.md`
+("The globe").
+- A "Flat map | Globe (3D)" switch on the map card (`#globe` in the address opens it). `site_src/globe.js` has the
+  same interface as `map.js` (`resize`, `setHistory`, `select`, `flyTo`), so the cards and filters work with either.
+  Cesium loads only when the globe is chosen (Cesium.js 5.9 MB).
+- Vendored: `site_src/vendor/cesium/` (CesiumJS 1.146.0 `Build/Cesium` minus `index.js`/`index.cjs`, 344 files,
+  14 MB, LICENSE.md and ThirdParty.json; npm tarball sha256 9e4166f2...48d5) and `site_src/vendor/satellite.js/`
+  (7.1.0, the non-wasm SGP4 files only, MIT; tarball sha256 b812da8a...a1b5). `build` now copies non-text files byte
+  for byte (`TEXT_SUFFIXES`); the tests copy `site_src` without `cesium`.
+- Satellite paths: the maneuver lane adds `elements` (newest stored set: epoch, n, e, i, raan, argp, ma) to each
+  listed change; SGP4 with drag zeroed, one orbit (a day at GEO) around the page's open time. Only listed objects.
+- Imagery: ion asset 2 (Bing aerial) with `data/cesium.json`'s token, written by `build` from `CESIUM_ION_TOKEN`
+  (update.yml passes `vars.CESIUM_ION_TOKEN`); Natural Earth II otherwise. CSP adds `https://*.virtualearth.net`,
+  `https://*.cesium.com` (img) and `api.cesium.com`, `assets.ion.cesium.com`, `*.virtualearth.net` (connect). The
+  earlier note that the CSP was "opened for ion's hosts" was wrong: `_headers` had no ion host before this branch.
+- CSP fixes, kept strict (no 'unsafe-eval', no blob: scripts; `tests/test_globe.py` holds them): Cesium.js is
+  patched once (Knockout's `(0,eval)("this")` -> `globalThis`; `vendor/cesium/PATCHED.md` has both hashes, redo it
+  on any upgrade); `globe.js` unsets `CESIUM_WORKERS` so workers load as modules from `Workers/`;
+  `'wasm-unsafe-eval'` in script-src; two sha256 hashes for Cesium's credit `<style>` blocks.
+- Checked 16 Nov 2026 on a local build (Natural Earth II, made-up element sets in the local snapshot only, the browser
+  pane hidden so animation frames were stood in by a timer): globe, pads, history, areas, both test paths and the
+  click card drawn; flat map unchanged; 110 tests pass. Not seen: ion imagery, a real element set's path (the live
+  lane fills them).
+- The ion token's allowed URLs (orbit.theintelligence.company, orbit-q2t.pages.dev, 127.0.0.1:8761) don't include
+  the local preview ports, so local checks show Natural Earth II; ion imagery can only be seen live.
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

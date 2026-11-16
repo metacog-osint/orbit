@@ -204,7 +204,7 @@ class EndToEnd(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         shutil.copytree(ROOT / "doctrine", self.tmp / "doctrine")
-        shutil.copytree(ROOT / "site_src", self.tmp / "site_src")
+        shutil.copytree(ROOT / "site_src", self.tmp / "site_src", ignore=shutil.ignore_patterns("cesium"))  # 14 MB, not needed
         self.calls = []
         self.stamp = "Fri, 13 Nov 2026 00:23:02 GMT"
         self.fail = False
@@ -1068,6 +1068,11 @@ class ManeuverLane(unittest.TestCase):
         self.assertIn("USSPACECOM", snap["maneuvers"]["attribution"])
         self.assertEqual(len(snap["maneuvers"]["events"]), 1)
         self.assertNotIn("objects", snap["maneuvers"])  # quiet watched objects are counted, not named
+        el = snap["maneuvers"]["events"][0]["elements"]  # the newest set of a listed object, for the globe
+        self.assertEqual(sorted(el), ["argp", "e", "epoch", "i", "ma", "n", "raan"])
+        self.assertGreater(el["n"], 0.9)
+        for f in ("snapshot.json", "state/daily_archive.json"):  # the quiet watched object stays unnamed
+            self.assertNotIn("34779", (self.tmp / "data" / f).read_text(encoding="utf-8"))
 
 
 class Baseline(unittest.TestCase):
