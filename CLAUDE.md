@@ -3,20 +3,30 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 15 Nov 2026, about 4 PM CST: live at https://orbit.theintelligence.company with `f9e81d7` (method
-`orbit-2.7`, RPO lane checked live). Local, not pushed: `32bbf31` (Space-Track terms notes, committed on Tom's
-yes) and uncommitted `orbit-2.8`, all approved by Tom 15 Nov:** swf-rpo regraded B2 ("I trust SWF"); low-orbit
-plane and shape changes listed only from 1 m/s, with the semi-major-axis velocity beside each total; a wait for
-Noisefloor's GP query on the shared Space-Track account (Tom: "they use the same account"); baselines from GCAT's
-history (card `#baseline`); and `doctrine/geo-move-plan.md` for moving Noisefloor's GEO belt into Orbit, sun
-outages staying in Noisefloor. Emails to The Space Devs, ITU and the Japan Coast Guard: not sent yet (Tom, 15 Nov). Seven lanes (method `orbit-2.8` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
+**State, 15 Nov 2026, about 7 PM CST: live at https://orbit.theintelligence.company with `8740711` (method
+`orbit-2.8`), deployed by the new repo's first run 43768395830 (workflow_dispatch, passed 22:17 UTC 15 Nov, every
+lane ok).** `orbit-2.8`, approved by Tom 15 Nov: swf-rpo regraded B2 ("I trust SWF"); low-orbit plane and shape
+changes listed only from 1 m/s, with the semi-major-axis velocity beside each total; a wait for Noisefloor's GP
+query on the shared Space-Track account (Tom: "they use the same account"); baselines from GCAT's history (card
+`#baseline`); and `doctrine/geo-move-plan.md` for moving Noisefloor's GEO belt into Orbit, sun outages staying in
+Noisefloor (plan only, nothing built).
+**Repo swap, 15 Nov 2026:** the old repository is now `metacog-osint/orbit-archive`; `metacog-osint/orbit` is a
+scrubbed copy with new shas (`8740711` holds the old `c899c2f`'s content). Every sha in these notes from before
+`8740711` (`c9f3b9c`, `f9e81d7`, `32bbf31`, `c899c2f`, `84190bb`, `aa932dc` and the rest) exists only in
+orbit-archive. Never push anything built on the old history. The new repo has secrets `SPACETRACK_IDENTITY`,
+`SPACETRACK_PASSWORD`, `ORBIT_WATCH`, `CLOUDFLARE_PAGES_TOKEN` and variables `CLOUDFLARE_ACCOUNT_ID`,
+`CESIUM_ION_TOKEN` (names checked, set by Tom), and Tom added it to the hub's `tic-dispatch` token about 4:40 PM CST
+15 Nov. Emails to The Space Devs, ITU and the Japan Coast Guard: not sent as of 15 Nov (none in metacog@'s mail at
+7 PM CST). Seven lanes (method `orbit-2.8` from 15 Nov 2026): `catalog` (GCAT), `upcoming` (Launch Library 2), `news`
 (Spaceflight News API headlines, links only), `navwarn`
 (NGA memoranda, API first), `counterspace` (SWF ASAT sheet), `rpo` (SWF RPO sheet), `maneuver` (Space-Track, published with Tom's approved
 disclaimer). Orbit's feed carries GCAT and Launch Library 2 items and, from 15 Nov 2026 (Tom's "Yes, add them"),
 the listed orbit changes (kind `maneuver`, off the map), which COP's gate holds from joins as military context. COP shows NGA's launch, debris and reentry
 warnings under "Spectrum and space" from Cordon's copies, not Orbit's (COP `1a6c577`, live 14 Nov). The hub's
-`tic-dispatch` starts Orbit at :55 past 00/06/12/18 UTC (workflow_dispatch runs at 06:55, 12:55 and 18:55 UTC on
-14 Nov), so the token's repository access is in place; Orbit's own cron (:41 every 6 h) still runs too.
+`tic-dispatch` starts Orbit at :55 past 00/06/12/18 UTC; on the new repo its first dispatched run was 43783187349
+(00:55 UTC 16 Nov, passed in 1m25s, catalog unchanged because GCAT had not republished, every other lane ok), so
+the token's access to the new repo works. Orbit's own cron (:41 every 6 h) is the fallback; its 00:41 UTC 16 Nov
+start had not fired by 00:57 (GitHub runs schedules late).
 
 Go-live record, 13 Nov 2026: first live slice and deploy workflow merged into `main` and pushed (`84190bb`, a
 fast-forward, on Tom's "merge and push", 3:25 PM CST). First GitHub run (43510613951) passed: tests, both lanes
