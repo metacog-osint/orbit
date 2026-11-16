@@ -61,7 +61,7 @@ HAZARD = re.compile(r"ROCKET LAUNCH\w*(?: SUSPENDED)?|SPACE DEBRIS|SPACE VEHICLE
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
 MON = "(" + "|".join(MONTHS) + ")"
 COORD = re.compile(r"(\d{1,2})-(\d{2}(?:\.\d+)?)\s?([NS])[,\s]+(\d{1,3})-(\d{2}(?:\.\d+)?)\s?([EW])")
-PAIR = re.compile(r"\b(\d{2})(\d{2})(\d{2})Z TO (\d{2})(\d{2})(\d{2})Z\b")
+SPAN = re.compile(r"\b(\d{2})(\d{2})(\d{2})Z TO (\d{2})(\d{2})(\d{2})Z\b")
 DAILY = re.compile(r"\b(\d{2})(\d{2})Z TO (\d{2})(\d{2})Z (?:COMMENCING )?DAILY (\d{1,2})(?: " + MON + r")?"
                    r" (?:THRU|THR|TO) (\d{1,2}) " + MON)
 DAILY_AND = re.compile(r"\b(\d{2})(\d{2})Z TO (\d{2})(\d{2})Z (?:COMMENCING )?DAILY ((?:\d{1,2}(?:, | AND ))+\d{1,2}) "
@@ -80,8 +80,58 @@ def _year_for(month: int, issued: datetime) -> int:
     return issued.year + 1 if month < issued.month - 6 else issued.year
 
 
+def _clock_ok(hh: int, mm: int) -> bool:
+    """A time of day as warnings write it: 0000-2359, or 2400 for the end of the day."""
+    return (0 <= hh <= 23 and 0 <= mm <= 59) or (hh == 24 and mm == 0)
+
+
 def _when(day: int, hh: int, mm: int, month: int, issued: datetime) -> datetime:
-    return datetime(_year_for(month, issued), month, day, hh, mm, tzinfo=timezone.utc)
+    """A day, time and month in a warning's text as UTC. 2400Z is midnight at the end of that day. Raises ValueError
+    on a date or time that does not exist (a typo such as 1190Z, or the 31st of a 30-day month)."""
+    if not _clock_ok(hh, mm):
+        raise ValueError(f"no such time {hh:02d}{mm:02d}Z")
+    return datetime(_year_for(month, issued), month, day, tzinfo=timezone.utc) + timedelta(hours=hh, minutes=mm)
+
+
+def _next_month(month: int, step: int) -> int:
+    return (month - 1 + step) % 12 + 1
+
+
+SPAN_OWN_MON = re.compile(r"[ ,]*" + MON + r"\b")  # a month written straight after a window ("... TO 052400Z DEC")
+NEXT_MON = re.compile(r"\b" + MON + r"\b")
+MONTH_TURN_DAYS = 15  # a list's day number jumping by more than this is a month change (31 -> 01), not an alternate
+
+
+def _span_months(t: str, spans: list) -> list[tuple[int, int] | None]:
+    """The (start month, end month) of each DDHHMMZ TO DDHHMMZ window. A window followed by a month takes it as its
+    end's month. A window without one takes the month of the window next to it, one month on (or back) only where
+    the day number jumps by more than MONTH_TURN_DAYS (310104Z TO 310351Z, 010039Z TO 010326Z SEP: the first is
+    31 Aug); alternates listed out of order a few days apart (252100Z TO 261100Z AUG, ALTERNATE 241200Z TO
+    251100Z ...) stay in the month. With no month after any window, the next month named in the text anchors the
+    last one. None where no month can be found."""
+    days = [(int(m.group(1)), int(m.group(4))) for m in spans]
+    out: list[tuple[int, int] | None] = [None] * len(spans)
+    for i, m in enumerate(spans):
+        own = SPAN_OWN_MON.match(t, m.end())
+        if own:
+            end = MONTHS.index(own.group(1)) + 1
+            out[i] = (_next_month(end, -1) if days[i][0] > days[i][1] else end, end)
+    if spans and not any(out):
+        later = NEXT_MON.search(t, spans[-1].end())
+        if later:
+            end = MONTHS.index(later.group(1)) + 1
+            out[-1] = (_next_month(end, -1) if days[-1][0] > days[-1][1] else end, end)
+    for i in range(len(spans) - 2, -1, -1):  # back from each named month, over the windows listed before it
+        if out[i] is None and out[i + 1] is not None:
+            end = (_next_month(out[i + 1][0], -1) if days[i][1] > days[i + 1][0] + MONTH_TURN_DAYS
+                   else out[i + 1][0])
+            out[i] = (_next_month(end, -1) if days[i][0] > days[i][1] else end, end)
+    for i in range(1, len(spans)):  # on from the last named month, over the windows listed after it
+        if out[i] is None and out[i - 1] is not None:
+            start = (_next_month(out[i - 1][1], 1) if days[i][0] < days[i - 1][1] - MONTH_TURN_DAYS
+                     else out[i - 1][1])
+            out[i] = (start, _next_month(start, 1) if days[i][1] < days[i][0] else start)
+    return out
 
 
 def parse_windows(text: str, issued: datetime) -> tuple[list[dict], str]:
@@ -90,15 +140,22 @@ def parse_windows(text: str, issued: datetime) -> tuple[list[dict], str]:
     t = re.sub(r"\s+", " ", text)
     out: list[dict] = []
     mode = ""
+    # A window whose date or time does not exist (a typo in the warning) is left out; the rest are still read.
     for m in DAILY.finditer(t):
         h0, m0, h1, m1, d0, mon0, d1, mon1 = m.groups()
+        h0, m0, h1, m1 = int(h0), int(m0), int(h1), int(m1)
         end_month = MONTHS.index(mon1) + 1
         start_month = MONTHS.index(mon0) + 1 if mon0 else end_month
-        day = _when(int(d0), 0, 0, start_month, issued)
-        last = _when(int(d1), 0, 0, end_month, issued)
+        try:
+            day = _when(int(d0), 0, 0, start_month, issued)
+            last = _when(int(d1), 0, 0, end_month, issued)
+        except ValueError:
+            continue
+        if not (_clock_ok(h0, m0) and _clock_ok(h1, m1)):
+            continue
         while day <= last and len(out) < 62:
-            s = day.replace(hour=int(h0), minute=int(m0))
-            e = day.replace(hour=int(h1), minute=int(m1))
+            s = day + timedelta(hours=h0, minutes=m0)
+            e = day + timedelta(hours=h1, minutes=m1)
             if e <= s:
                 e += timedelta(days=1)
             out.append({"start": _iso(s), "end": _iso(e)})
@@ -106,27 +163,35 @@ def parse_windows(text: str, issued: datetime) -> tuple[list[dict], str]:
         mode = "daily"
     for m in DAILY_AND.finditer(t):
         h0, m0, h1, m1, days, mon = m.groups()
+        h0, m0, h1, m1 = int(h0), int(m0), int(h1), int(m1)
+        if not (_clock_ok(h0, m0) and _clock_ok(h1, m1)):
+            continue
         for d in re.findall(r"\d{1,2}", days):
-            s = _when(int(d), int(h0), int(m0), MONTHS.index(mon) + 1, issued)
-            e = s.replace(hour=int(h1), minute=int(m1))
+            try:
+                day = _when(int(d), 0, 0, MONTHS.index(mon) + 1, issued)
+            except ValueError:
+                continue
+            s = day + timedelta(hours=h0, minutes=m0)
+            e = day + timedelta(hours=h1, minutes=m1)
             if e <= s:
                 e += timedelta(days=1)
             out.append({"start": _iso(s), "end": _iso(e)})
         mode = "daily"
-    pairs = list(PAIR.finditer(t))
-    for m in pairs:
-        mon = re.compile(r"\b" + MON + r"\b").search(t, m.end())
-        if not mon:
+    spans = list(SPAN.finditer(t))
+    for m, months in zip(spans, _span_months(t, spans)):
+        if not months:
             continue
-        month = MONTHS.index(mon.group(1)) + 1
         d0, h0, n0, d1, h1, n1 = (int(g) for g in m.groups())
-        s = _when(d0, h0, n0, month, issued)
-        e = _when(d1, h1, n1, month, issued)
-        if e <= s:  # the window ends in the next month: the month named is the end's
-            s = _when(d0, h0, n0, month - 1 or 12, issued)
+        try:
+            s = _when(d0, h0, n0, months[0], issued)
+            e = _when(d1, h1, n1, months[1], issued)
+        except ValueError:
+            continue
+        if e <= s:
+            continue
         out.append({"start": _iso(s), "end": _iso(e)})
-    if pairs:
-        mode = "alternates" if "ALTERNATE" in t else ("single" if len(pairs) == 1 and mode != "daily" else mode or "list")
+    if spans:
+        mode = "alternates" if "ALTERNATE" in t else ("single" if len(spans) == 1 and mode != "daily" else mode or "list")
     out.sort(key=lambda w: w["start"])
     seen, uniq = set(), []
     for w in out:
@@ -174,7 +239,10 @@ def parse_body(text: str, issued: datetime) -> dict | None:
     if cm:
         d, h, n, mon, yy = cm.groups()
         exp_issued = issued.replace(year=2000 + int(yy)) if yy else issued
-        expires = _iso(_when(int(d), int(h), int(n), MONTHS.index(mon) + 1, exp_issued))
+        try:
+            expires = _iso(_when(int(d), int(h), int(n), MONTHS.index(mon) + 1, exp_issued))
+        except ValueError:  # a cancel time that does not exist: no expiry rather than no warning
+            expires = None
     cancels = [((m.group(1) or "").strip() + " " + m.group(2) + "/" + m.group(3)).strip()
                for m in CANCEL_OTHER.finditer(full)]
     # Body of the hazard paragraph: from the hazard words to the next numbered paragraph or the cancel line.
