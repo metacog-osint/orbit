@@ -60,12 +60,12 @@ LANE_FIELDS = {
     "paths": ["payload_sets"],
     "counterspace": ["counterspace"],
     "rpo": ["rpo"],
-    "maneuver": ["maneuvers"],
+    "maneuver": ["maneuvers", "reentry_sets"],
     "decay": ["decay"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "ledger": {},
-         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "decay": {}}
+         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "reentry_sets": {}, "decay": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -291,9 +291,26 @@ def _st_raw(raw_dir: Path, source_id: str, cls: str, body: bytes) -> dict:
             "fetched_at": fetch.now_utc()}
 
 
-def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
+REENTRY_MAX = 30  # TIP objects added to the watch list's GP query, soonest first
+
+
+def _reentry_set(row: dict) -> dict | None:
+    """A GP row to the globe's element set for a reentry track (orbit-2.15): the mean elements plus BSTAR and the
+    mean-motion rate, since drag shapes a decaying object's track inside its window."""
+    try:
+        return {"epoch": row["EPOCH"], "n": float(row["MEAN_MOTION"]), "e": float(row["ECCENTRICITY"]),
+                "i": float(row["INCLINATION"]), "raan": float(row["RA_OF_ASC_NODE"]),
+                "argp": float(row["ARG_OF_PERICENTER"]), "ma": float(row["MEAN_ANOMALY"]),
+                "bstar": float(row.get("BSTAR") or 0), "ndot": float(row.get("MEAN_MOTION_DOT") or 0)}
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _lane_maneuver(raw_dir: Path, prev: dict, getter, reentry_norads=None, **_):
     """Orbit changes in watched objects (Space-Track GP and GP_HISTORY). Off without credentials or a watch list;
-    unchanged (no request) within an hour of the last GP query."""
+    unchanged (no request) within an hour of the last GP query. From orbit-2.15 the same GP query also asks for
+    the objects with an open TIP window (lane `decay`, run first), for the globe's reentry tracks: no extra request.
+    Their sets go to snapshot block `reentry_sets` only, never into the watch list's store, history or report."""
     data_dir = raw_dir.parent
     root = data_dir.parent
     cred = spacetrack.credentials(root)
@@ -316,8 +333,11 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
     client = ST_CLIENT(*cred)
     recs = []
     try:
+        extra = [n for n in (reentry_norads or []) if n not in ids][:REENTRY_MAX]
         client.login()
-        gp = client.query("gp", ids)
+        gp_all = client.query("gp", ids + extra)
+        watched_ids = set(ids)
+        gp = [r for r in gp_all if int(r.get("NORAD_CAT_ID") or 0) in watched_ids]
         recs.append(_st_raw(raw_dir, "spacetrack-gp", "gp", client.last_body))
         fresh = [i for i in ids if not (store.get(str(i)) or {}).get("history_at")]
         hist = []
@@ -352,7 +372,16 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, **_):
                                   "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"])},
            "quiet_or_untracked": sum(1 for o in rep["objects"] if not o["events"]),
            "stale": sum(1 for o in rep["objects"] if (o.get("note") or "").startswith("no new"))}
-    return {"maneuvers": out}, recs, None
+    want = set(reentry_norads or [])
+    sets: dict[str, dict] = {}
+    for r in gp_all:  # the newest set of each TIP object (watched ones included: the set says nothing of the list)
+        n = int(r.get("NORAD_CAT_ID") or 0)
+        el = _reentry_set(r) if n in want else None
+        if el and (str(n) not in sets or el["epoch"] > sets[str(n)]["epoch"]):
+            sets[str(n)] = el
+    resets = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "sets": sets,
+              "asked": len(want), "missing": sorted(want - {int(k) for k in sets})}
+    return {"maneuvers": out, "reentry_sets": resets}, recs, None
 
 
 def _lane_ledger(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
@@ -412,8 +441,8 @@ def _lane_decay(raw_dir: Path, prev: dict, getter, **_):
 
 LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "paths": _lane_paths, "upcoming": _lane_upcoming, "news": _lane_news,
          "navwarn": _lane_navwarn, "pairs": _lane_pairs,
-         "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver,
-         "decay": _lane_decay}
+         "counterspace": _lane_counterspace, "rpo": _lane_rpo, "decay": _lane_decay,
+         "maneuver": _lane_maneuver}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
@@ -441,6 +470,9 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
                 kwargs = {"upcoming": snap.get("upcoming")}
             if lane in ("ledger", "paths"):  # read this run's GCAT launches (catalog runs first)
                 kwargs = {"launches_30d": snap.get("launches")}
+            if lane == "maneuver":  # this run's open TIP windows (decay runs first), soonest first
+                kwargs = {"reentry_norads": [o["norad"] for o in (snap.get("decay") or {}).get("objects") or []
+                                             if not o.get("passed")]}
             result, recs, stamps = fn(raw_dir, prev, getter, **kwargs)
             if result is None:
                 keep_previous()

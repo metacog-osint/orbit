@@ -738,7 +738,21 @@
       });
     });
     return { launches: launchesFc, pads: pads, areas: areas, pairs: pairLines(), history: historyFc(), tracks: trackList(),
-      payloadTracks: payloadTracks() };
+      payloadTracks: payloadTracks(), reentryTracks: reentryTracks() };
+  }
+  /* For the globe (orbit-2.15): each object with a TIP prediction and a Space-Track set from the same run's GP
+     query, keyed "re-<NORAD>"; its track spans the TIP window (at most 24 h each side). Drawn only while picked. */
+  function reentryTracks() {
+    var dc = (snap && snap.decay) || {}, sets = ((snap && snap.reentry_sets) || {}).sets || {}, out = {};
+    (dc.objects || []).forEach(function (x) {
+      var s = sets[String(x.norad)];
+      if (!s) return;
+      var half = Math.min(x.window_min || 60, 1440) * 60000, t = Date.parse(x.decay_epoch);
+      out["re-" + x.norad] = { key: "re-" + x.norad, name: x.name || ("NORAD " + x.norad), group: groupOf(x.cc, x.state),
+        elements: Object.assign({ norad: x.norad }, s), from: new Date(t - half).toISOString(),
+        to: new Date(t + half).toISOString(), lat: x.lat, lon: x.lon };
+    });
+    return out;
   }
   /* For the globe: each satellite with a listed orbit change once, with the newest element set Orbit holds. */
   function trackList() {
@@ -960,9 +974,43 @@
     var a = el("a", "small", "The ledger"); a.href = "#ledger"; box.appendChild(a);
     return box;
   }
+  var pendingReentry = null;
+  function showReentry(key) {  // a decay row's button: the globe, then that object's track over its window
+    var card = document.getElementById("map-card");
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+    pendingReentry = key;
+    setView("globe");
+    if (globeApi) applyReentry();
+  }
+  function applyReentry() {
+    if (!pendingReentry || !globeApi || !globeApi.showReentry) return;
+    var k = pendingReentry; pendingReentry = null;
+    globeApi.showReentry(k);
+    onPick(k);
+  }
+  function reentryInfo(key) {
+    var x = (((snap.decay || {}).objects) || []).filter(function (o) { return "re-" + o.norad === key; })[0];
+    if (!x) return null;
+    var d = el("div");
+    d.appendChild(el("strong", "", (x.name || ("NORAD " + x.norad)) + ": predicted reentry " + fmt(x.decay_epoch) +
+      (x.window_min != null ? ", window \u00b1" + x.window_min + " min" : "")));
+    d.appendChild(el("p", "small", "The line is the ground track the object would follow through the whole window, " +
+      "propagated with SGP4 from the newest Space-Track element set, drag kept; it comes down somewhere along it, not " +
+      "at the dot. The dot is where TIP puts it at the predicted time. USSPACECOM's prediction (Space-Track.org TIP), " +
+      "quoted, not checked; Orbit's drawing. Not for operational use."));
+    var link = el("a", "small", "Show in table"); link.href = "#" + key;
+    d.appendChild(link);
+    return d;
+  }
   function onPick(key) {
     var info = document.getElementById("map-info");
     info.textContent = "";
+    if (mapApi && mapApi.showReentry && key.indexOf("re-") !== 0) mapApi.showReentry("");
+    if (key.indexOf("re-") === 0) {
+      var ri = reentryInfo(key);
+      if (ri) info.appendChild(ri);
+      return;
+    }
     var card = key.indexOf("launch-") === 0 ? launchCard(key) : key.indexOf("hist-") === 0 ? histCard(key) : null;
     if (mapApi && mapApi.showPayloads) mapApi.showPayloads(key.indexOf("launch-") === 0 ? key : "");
     if (card) { info.appendChild(card); if (mapApi) mapApi.select(""); return; }
@@ -990,6 +1038,8 @@
     if (d.launches) parts.push("Pick a launch of the last 7 days to draw its payloads' paths (" + d.launches +
       (d.launches === 1 ? " launch has" : " launches have") + " sets from CelesTrak, from the 18th Space Defense " +
       "Squadron's data).");
+    if (d.reentries) parts.push("Predicted reentries: " + d.reentries + (d.reentries === 1 ? " object has" : " objects have") +
+      " a track over its TIP window; open it from the Predicted reentries table.");
     parts.push(api.ion ? "Imagery: Cesium ion (Bing Maps)." : "Imagery: Natural Earth II, shipped with CesiumJS.");
     return parts.join(" ");
   }
@@ -1007,7 +1057,7 @@
     globeStarting = true;
     note.textContent = "Loading the globe (about 6 MB, once).";
     import("./globe.js").then(function (m) { return m.createGlobe(glob, mapModel(), { onPick: onPick }); })
-      .then(function (api) { globeApi = api; if (view === "globe") mapApi = api; note.textContent = globeText(api); })
+      .then(function (api) { globeApi = api; if (view === "globe") mapApi = api; note.textContent = globeText(api); applyReentry(); })
       .catch(function (e) {
         globeStarting = false;
         note.textContent = "The globe could not load (" + e + "); the flat map and the tables list everything.";
@@ -1125,8 +1175,10 @@
       " whose window closed in the last day" : "") + (dc.high_interest ? "; " + dc.high_interest + " flagged high interest by USSPACECOM" : "") +
       ". " + dc.messages + " TIP messages in the last " + dc.window_days + " days. Read " + fmt(dc.read_at) + "."));
     if (!objs.length) return;
+    var sets = ((snap.reentry_sets || {}).sets) || {};
     var rows = objs.map(function (x) {
       var tr = el("tr");
+      tr.id = "re-" + x.norad;  // the globe's reentry tracks open this row
       if (x.passed) tr.className = "muted";
       var when = el("div", "", fmt(x.decay_epoch));
       when.appendChild(el("div", "pl", (x.window_min != null ? "window ±" + (x.window_min >= 120 ?
@@ -1149,6 +1201,12 @@
       var msg = el("div", "", "issued " + fmt(x.msg_epoch));
       msg.appendChild(el("div", "pl", (x.messages > 1 ? x.messages + " messages in " + dc.window_days + " days" : "1 message") +
         (x.next_report_h ? "; next in about " + x.next_report_h + " h" : "")));
+      if (sets[String(x.norad)]) {
+        var b = el("button", "linkish small", "Track on the globe");
+        b.type = "button";
+        b.addEventListener("click", function () { showReentry("re-" + x.norad); });
+        msg.appendChild(b);
+      }
       cell(tr, msg);
       return tr;
     });

@@ -223,6 +223,13 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   the fixture injected, no console errors).
 - WINDOW is read as plus or minus minutes (Orbit's reading, 16-19% of the time left on 17 Nov; Space-Track's
   wording not found). Whether TIP goes into the feed, and under which requirement, is Tom's call.
+- **Reentry tracks (`orbit-2.15`, Tom's "Reentry tracks", 16 Nov 2026 about 10:30 PM CST; branch
+  `feat/rpo-globe-tip`):** the open TIP windows' objects (at most 30) ride the update run's one GP query; sets in
+  snapshot block `reentry_sets`, kept out of the watch store. Lane order: `decay` before `maneuver`. A row's "Track
+  on the globe" opens the globe and draws that object's ground track over its window (drag kept) with TIP's point.
+  If the manoeuvre lane is inside the hourly GP gap, the run keeps the previous `reentry_sets`, so a new TIP object
+  may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
+  within about 100 km of TIP's point).
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

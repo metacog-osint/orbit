@@ -130,5 +130,59 @@ class Lane(unittest.TestCase):
         self.assertEqual(cli.LANE_SOURCE["decay"], ["space-track"])
 
 
+class FakeBoth(FakeTip):
+    """TIP from the real fixture; GP from SYNTHETIC series (a watched GEO object and one TIP object)."""
+    series: dict = {}
+
+    def query(self, cls, ids, extra=""):
+        FakeTip.log.append((cls, tuple(ids), extra))
+        recs = [r for i in ids for r in (FakeBoth.series.get(i, [])[-1:] if cls == "gp" else FakeBoth.series.get(i, [])[:-1])]
+        self.last_body = json.dumps(recs).encode()
+        return recs
+
+
+class ReentrySets(unittest.TestCase):
+    """orbit-2.15: the open TIP windows' objects ride the watch list's GP query; their sets go only to
+    `reentry_sets`."""
+
+    def setUp(self):
+        import test_orbit as t  # the synthetic GP series helper
+        self.tmp = Path(tempfile.mkdtemp())
+        shutil.copytree(ROOT / "doctrine", self.tmp / "doctrine")
+        FakeTip.log = []
+        tip_row = dict(t.synth(53892, days=2)[-1], BSTAR="0.0012", MEAN_MOTION_DOT="0.05", MEAN_MOTION="16.2")
+        FakeBoth.series = {49330: t.synth(49330), 53892: [tip_row]}
+        self.patches = [mock.patch.object(cli, "ST_CLIENT", FakeBoth),
+                        mock.patch.object(cli, "ST_NOW", lambda: NOW),
+                        mock.patch.object(cli, "ST_WAIT", lambda: 0.0),
+                        mock.patch.object(cli, "ST_SHARED", lambda now: None),
+                        mock.patch.object(cli.spacetrack, "credentials", return_value=("u", "p")),
+                        mock.patch.dict(os.environ, {"ORBIT_WATCH": "49330"})]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_tip_objects_ride_the_gp_query_and_stay_out_of_the_watch_store(self):
+        snap = cli.collect(self.tmp, getter=_offline, header=lambda u: None, only=["decay", "maneuver"])
+        gp = [x for x in FakeTip.log if isinstance(x, tuple) and x[0] == "gp"]
+        self.assertEqual(len(gp), 1)  # one GP query, as before
+        open_ids = [o["norad"] for o in snap["decay"]["objects"] if not o["passed"]]
+        self.assertEqual(set(gp[0][1]), {49330, *open_ids})
+        hist = [x for x in FakeTip.log if isinstance(x, tuple) and x[0] == "gp_history"]
+        self.assertEqual([h[1] for h in hist], [(49330,)])  # no history for TIP objects
+        rs = snap["reentry_sets"]
+        self.assertEqual(list(rs["sets"]), ["53892"])
+        self.assertEqual((rs["sets"]["53892"]["bstar"], rs["sets"]["53892"]["ndot"]), (0.0012, 0.05))
+        self.assertIn(45710, rs["missing"])
+        store = json.loads(__import__("gzip").decompress(
+            (self.tmp / "data" / "state" / "spacetrack" / "sets.json.gz").read_bytes()))
+        self.assertEqual(sorted(store), ["49330"])
+        self.assertNotIn("49330", json.dumps(rs))
+
+
 if __name__ == "__main__":
     unittest.main()
