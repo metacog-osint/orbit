@@ -231,7 +231,7 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
   within about 100 km of TIP's point).
 
-## TIC satellite catalog (build steps 1-3, 17 Nov 2026; steps 1-2 committed `6a16e08`, step 3 not committed, nothing published)
+## TIC satellite catalog (build steps 1-3, 17 Nov 2026; merged to main, published on release `catalog`)
 Design and Tom's answers: `[local path]` (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
 - **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
@@ -276,9 +276,14 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   2/3 and others. Display: "USA 257 (NEMESIS 2)", "USA 253 (Hornet 1)", 55841 "LUCH (OLYMP) 2" (SWF's spelling).
   153 MB JSON, 8.2 MB gzipped. Tests `tests/test_stcat.py` (23, on real rows cut unchanged into
   `tests/fixtures/spacetrack_{satcat,decay}_20261117.json` and `catalog_satcat_extra.tsv`); 190 tests pass, check PASS.
-- Not done: no workflow runs `spacetrack-catalog` (needs Tom's yes; the decay store must then live in the Actions
-  cache or a release, since it is never fetched whole again). Before publishing (step 6), shrink the file: records
-  repeat source, read and ref.
+- **Workflow and release (Tom's "yes to all not done items", 17 Nov 2026 about 12:45 PM CST):** `catalog.yml`
+  (cron 17:23, 19:23, 21:23 UTC and dispatch; `spacetrack-catalog --release`): decay store and state from the public
+  release `catalog`, one read when `stcat.due` allows, GCAT's five tables (one request each), build, upload
+  `catalog.json.gz`, `spacetrack-decay.json.gz` (the store between runs; Actions cache can be evicted) and
+  `spacetrack-catalog.json`. If the release exists but the store will not download, or the history was read and
+  the store is missing, nothing is read (never the whole history again). The release was seeded from the local read
+  of 17 Nov 18:09 UTC. Not in the hub's `tic-dispatch` (hub change, not made). Still to do in step 6: the object
+  card "Names and sources" section, and a smaller file (records repeat source, read and ref; 153 MB JSON).
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

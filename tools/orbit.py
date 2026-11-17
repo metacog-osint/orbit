@@ -866,6 +866,42 @@ def spacetrack_catalog(data_dir: Path) -> int:
     return 0
 
 
+def catalog_release(data_dir: Path) -> int:
+    """Workflow catalog.yml: the decay store and state from the public release `catalog`, one Space-Track read when
+    due, GCAT's catalogs (one request each), the catalog built and uploaded with the store and state. Not due: exit 0
+    with a note. The release exists but its decay store will not download: exit 1, nothing read."""
+    repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
+    held = stcat.release_exists(repo)
+    if held and stcat.DECAY_ASSET not in stcat.release_get(data_dir, repo):
+        print(f"::error::release {stcat.RELEASE} exists but {stcat.DECAY_ASSET} did not download; not reading")
+        return 1
+    cred = spacetrack.credentials(ROOT)
+    if not cred:
+        print("No Space-Track credentials.")
+        return 1
+    try:
+        got = stcat.pull(data_dir, cred, history_held=held)
+    except spacetrack.NotReady as exc:
+        print(f"::notice::Not read: {exc}")
+        return 0
+    s = got["state"]
+    print(f"Space-Track: {s['satcat_rows']} SATCAT rows; DECAY ({s['decay_query']}) {s['decay_rows_read']} messages "
+          f"read, {s['decay_added']} new, {s['decay_held']} held; {got['requests']} requests.")
+    raw = data_dir / "raw"
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
+    for name in (*gcat.CATALOGS, "orgs"):
+        p = raw / f"gcat-{name}" / f"{stamp}.tsv.gz"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(gzip.compress(fetch.get(gcat.URLS[name]), 6))
+    out = data_dir / "catalog" / stcat.CATALOG_ASSET
+    if catalog_local(raw, out, data_dir):
+        return 1
+    stcat.release_put({stcat.CATALOG_ASSET: out, stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
+                       stcat.STATE_ASSET: data_dir / stcat.STATE}, repo)
+    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.DECAY_ASSET} and {stcat.STATE_ASSET} to release {stcat.RELEASE}.")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -893,9 +929,11 @@ def main(argv=None) -> int:
     sc = sub.add_parser("spacetrack-catalog", help="Space-Track SATCAT and DECAY for the catalog: once a day after "
                                                    "17:00 UTC, 4 requests; raw replies in data/raw (build step 3)")
     sc.add_argument("--data", default=str(ROOT / "data"))
+    sc.add_argument("--release", action="store_true", help="workflow catalog.yml: store and state from the public "
+                                                           "release `catalog`, build, upload (GitHub only)")
     args = ap.parse_args(argv)
     if args.cmd == "spacetrack-catalog":
-        return spacetrack_catalog(Path(args.data))
+        return catalog_release(Path(args.data)) if args.release else spacetrack_catalog(Path(args.data))
     if args.cmd == "catalog":
         return catalog_local(Path(args.raw), Path(args.out), Path(args.spacetrack))
     if args.cmd == "geo":

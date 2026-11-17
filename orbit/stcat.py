@@ -156,15 +156,20 @@ def write_json(path: Path, doc) -> None:
     path.write_bytes(gzip.compress(raw, 6) if path.name.endswith(".gz") else raw)
 
 
-def pull(data_dir: Path, cred: tuple[str, str], now: datetime | None = None, client=None, wait=None) -> dict:
+def pull(data_dir: Path, cred: tuple[str, str], now: datetime | None = None, client=None, wait=None,
+         history_held: bool = False) -> dict:
     """One SATCAT and one DECAY read (4 requests). Raw replies into data/raw/spacetrack-{satcat,decay}/, gzipped;
-    the decay store and state under data/state/. Raises spacetrack.NotReady when not due."""
+    the decay store and state under data/state/. Raises spacetrack.NotReady when not due. `history_held`: the
+    whole decay history was read before (the release exists), so a missing store stops the read."""
     now = now or datetime.now(timezone.utc)
     state_path = data_dir / STATE
     state = read_json(state_path, {})
     why = due(now, state)
     if why:
         raise spacetrack.NotReady(why)
+    if (history_held or state.get("decay_read_at")) and not (data_dir / DECAY_STORE).exists():
+        raise spacetrack.NotReady("the decay history was read before but its store is missing; Space-Track asks "
+                                  "that it never be downloaded again, so nothing is read until it is restored")
     (wait or spacetrack.wait_for_clear_minute)()
     c = client or spacetrack.Client(*cred)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
@@ -201,6 +206,62 @@ def load_local(data_dir: Path) -> dict | None:
         return None
     return {"satcat": json.loads(gzip.decompress((data_dir / RAW / f).read_bytes())),
             "decay": read_json(data_dir / DECAY_STORE, []), "state": state}
+
+
+# --- the public release `catalog` (gh, on GitHub's runners; Tom's yes to publish, 17 Nov 2026) ------------------
+# The release is also where the decay history lives between runs: Space-Track asks that it be stored, never fetched
+# whole again, and the Actions cache can be evicted. So a run on GitHub refuses to read when the release exists but
+# its decay store cannot be downloaded, and never asks for the whole history (the first read was made locally on
+# 17 Nov 2026 and seeded the release).
+RELEASE = "catalog"
+CATALOG_ASSET = "catalog.json.gz"
+DECAY_ASSET = "spacetrack-decay.json.gz"
+STATE_ASSET = "spacetrack-catalog.json"
+RELEASE_NOTES = (
+    "TIC's satellite catalog (schema tic-catalog/1): one entry per NORAD catalog number, every value with its source, "
+    "read date and basis; disagreements between sources listed, never resolved. Built by Orbit (orbit/catalog.py) "
+    "once a day after Space-Track's SATCAT update. catalog.json.gz: the catalog. spacetrack-decay.json.gz: every "
+    "Space-Track decay message Orbit holds (class decay, kept so the history is never downloaded again). "
+    "spacetrack-catalog.json: the last read's date and counts.\n\n"
+    "Sources: " + "GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0. " + CITATION)
+
+
+def _gh(*args):
+    import subprocess
+    return subprocess.run(["gh", *args], capture_output=True, text=True)
+
+
+def release_exists(repo: str, gh=_gh) -> bool:
+    return gh("release", "view", RELEASE, "-R", repo).returncode == 0
+
+
+def release_get(data_dir: Path, repo: str, gh=_gh) -> list[str]:
+    """The decay store and state from the release into data/state; returns the names downloaded."""
+    got = []
+    for name, rel in ((DECAY_ASSET, DECAY_STORE), (STATE_ASSET, STATE)):
+        dest = data_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if gh("release", "download", RELEASE, "-R", repo, "-p", name, "-O", str(dest), "--clobber").returncode == 0:
+            got.append(name)
+    return got
+
+
+def release_put(paths: dict[str, Path], repo: str, gh=_gh) -> None:
+    """Upload {asset name: local path} to the release, creating it (not marked latest) when missing."""
+    if not release_exists(repo, gh):
+        r = gh("release", "create", RELEASE, "-R", repo, "--title", "TIC satellite catalog", "--latest=false",
+               "--notes", RELEASE_NOTES)
+        if r.returncode:
+            raise RuntimeError(f"release {RELEASE} could not be created: {r.stderr.strip()[:300]}")
+    import shutil
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, p in paths.items():
+            q = Path(tmp) / name  # gh names the asset after the file
+            shutil.copyfile(p, q)
+            r = gh("release", "upload", RELEASE, "-R", repo, "--clobber", str(q))
+            if r.returncode:
+                raise RuntimeError(f"upload of {name} failed: {r.stderr.strip()[:300]}")
 
 
 # --- catalog records -------------------------------------------------------------------------------------------
