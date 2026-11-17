@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "2.6",
+  "version": "2.7",
   "sources": [
     {
       "id": "gcat-mcdowell",
@@ -113,26 +113,24 @@
     {
       "id": "celestrak-satcat",
       "name": "CelesTrak (T.S. Kelso): SATCAT records (names, international designators, owner, status)",
-      "url": "https://celestrak.org/satcat/records.php",
-      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 Nov 2026, read 16 Nov 2026) states no licence, redistribution or credit terms; it asks for one download per update and speaks of 'our long tradition of making data freely available to all users'. Ingested with credit, on the footing Tom chose for Launch Library 2 (Tom, 16 Nov 2026). Credit: 'CelesTrak SATCAT (T.S. Kelso, celestrak.org)'.",
-      "use": "excluded",
-      "planned_use": "ingest",
+      "url": "https://celestrak.org/pub/satcat.csv",
+      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 Nov 2026, re-read 17 Nov 2026 18:39 UTC) states no licence, redistribution or credit terms; it asks to 'only download data once per update' ('The SATCAT updates manually once or twice a day'), directory queries at most hourly, compressed requests, and that software 'immediately stop querying when it receives any non-HTTP 200 responses and report the results to a human'; it speaks of 'our long tradition of making data freely available to all users'. Ingested with credit, on the footing Tom chose for Launch Library 2 (Tom, 16 Nov 2026). Credit: 'CelesTrak SATCAT (T.S. Kelso, celestrak.org)'.",
+      "use": "ingest",
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": "unknown",
-      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Build step 4: the full SATCAT once a week. Names rank third after Space-Track and GCAT; CelesTrak often carries the programme name in brackets, e.g. 'USA 257 (CLIO)', 'LUCH-5X (OLYMP-K 2)' (read 16 Nov 2026)."
+      "note": "Satellite catalog build step 4 (17 Nov 2026, orbit/catsources.py): read in the run that makes the day's Space-Track SATCAT read (catalog.yml), as one directory request (satcat/jsonDir.php) and the full CSV (gzip) only when its FILE_MTIME changed and no read was made that UTC day; redirects never followed; any answer but 200 holds the source until a person clears it (a 500, 503 or 429 until the next UTC day). Records: OBJECT_ID, LAUNCH_DATE, OWNER (Space-Track's codes plus CelesTrak's own, compared as GCAT State), OBJECT_NAME kept as given ('USA 257 (CLIO)'), OPS_STATUS_CODE (operational status), DECAY_DATE. Ranks after GCAT for names, after Space-Track and GCAT for keys and status. First read 17 Nov 2026 18:43 UTC: 71,323 rows (file of 16 Nov 20:34 UTC). The first CSV request sent Accept: text/csv and drew a 406; the reader now sends */*."
     },
     {
       "id": "wikidata",
-      "name": "Wikidata: satellites carrying P377 (Satellite Catalog Number) and P247 (COSPAR ID), with labels and Wikipedia links",
-      "url": "https://query.wikidata.org/",
-      "licence": "CC0: structured data in the main namespace 'is released into the public domain under Creative Commons Zero' (wikidata.org/wiki/Wikidata:Licensing, read 16 Nov 2026). Credited anyway as 'Wikidata (CC0)' with the item's Q-id.",
-      "use": "excluded",
-      "planned_use": "ingest",
+      "name": "Wikidata: items carrying P377 (Satellite Catalog Number), with their labels, English aliases and P247 (COSPAR ID)",
+      "url": "https://query.wikidata.org/sparql",
+      "licence": "CC0: structured data in the main namespace 'is released into the public domain under Creative Commons Zero' (wikidata.org/wiki/Wikidata:Licensing, read 16 and 17 Nov 2026). Credited anyway as 'Wikidata (CC0)' with the item's Q-id.",
+      "use": "ingest",
       "grade": "C3",
       "independence_group": "wikimedia",
       "commercial_ok": true,
-      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Build step 4: one SPARQL query a week. 7,518 items carried P377 on 16 Nov 2026. Names rank after CelesTrak, before SWF (Tom, 16 Nov 2026). Grade is Orbit's proposal: open editing (C), names usually match other catalogs (3)."
+      "note": "Satellite catalog build step 4 (17 Nov 2026, orbit/catsources.py): one SPARQL query a week, in the run that makes the day's Space-Track read: every item with a truthy P377, its English and 'mul' labels, English aliases and P247. User-Agent names the repository and the word bot, no person (Wikimedia User-Agent policy, read 17 Nov 2026); query service: 60 s deadline, 60 s of processing a minute per client, 5 parallel queries per IP (WDQS user manual, read 17 Nov 2026). Matched on P377 only. First read 17 Nov 2026 18:42 UTC: 7,518 items, 7 with Wikidata's 'unknown value' (skipped), 10 numbers carried by two items (attached objects, noted on the entry, not flagged). Names rank after CelesTrak, before SWF (Tom, 16 Nov 2026). Grade is Orbit's proposal: open editing (C), names usually match other catalogs (3)."
     },
     {
       "id": "wmo-oscar-space",
@@ -144,7 +142,7 @@
       "grade": "A2",
       "independence_group": "wmo",
       "commercial_ok": "unknown",
-      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Added by Tom, 16 Nov 2026. REST API (space.oscar.wmo.int/apidoc/); endpoints and fields not read yet. Ranks with GCAT for operator, role and status of weather and Earth-observation satellites (declared by the agencies through WMO)."
+      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Added by Tom, 16 Nov 2026. API read 17 Nov 2026 (space.oscar.wmo.int/swagger/swagger.json): /api/v1/satellites, 30 a page, 1,062 satellites on 36 pages; fields id, slug, acronym, fullname, WIGOS_Station_Identifier (e.g. Metop-B 0-20009-0-003), space_agency, status (Operational, Inactive, Presumably inactive, Lost at launch, Mission concept...), orbit, launch_date, EoL, longitude, Altitude, ECT, instruments. No NORAD number and no COSPAR ID in the API or on the satellite pages, and no Wikidata item carries a WIGOS id (P4136: 0 of the 7,518 P377 items), so it cannot be matched on an id; held for Tom's decision on a reviewed slug-to-NORAD link file. Disclaimer re-read 17 Nov 2026, unchanged. Ranks with GCAT for operator, role and status of weather and Earth-observation satellites (declared by the agencies through WMO)."
     },
     {
       "id": "mccants-classfd",

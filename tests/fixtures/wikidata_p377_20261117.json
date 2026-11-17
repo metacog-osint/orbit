@@ -1,0 +1,453 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "scn",
+   "cospar",
+   "en",
+   "mul",
+   "alts"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q331785"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "25544"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1998-067A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Zarya"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "FGB\u001f77KM No. 175-01\u001f77KM-175-01\u001fFunctional Cargo Block"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q18550141"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "40258"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2014-058A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Olymp-K 1"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Luch-Kh/Olimp-K 1\u001fLuch-Olymp 1\u001fOlimp-K 11L\u001fOlimp-K No. 11L\u001fLuch-1"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q16322492"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "12842"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1981-093A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Shijian-2B"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Shi Jian 2B\u001fShijian 2B\u001fSJ-2B"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q111498490"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "24905"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1997-082B"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Iridium 46"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Iridium SV046"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q28668994"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "41745"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2016-052B"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-4"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 4\u001fUSA-271"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q28668993"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "41744"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2016-052A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-3"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 3\u001fUSA-270"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q108104301"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "12845"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1981-093D"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Shijian-2"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Shi Jian 2\u001fShijian 2\u001fSJ-2"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q25271"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "25544"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1998-067A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "International Space Station"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Station Alpha\u001fNA1SS"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q113633506"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "40100"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2014-043B"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-2"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 2\u001fUSA-254"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q113633507"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "51280"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2022-006A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-5"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 5\u001fUSA-324"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q113633505"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "40099"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2014-043A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-1"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 1\u001fUSA-253"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q113633508"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "51281"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2022-006B"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-6"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 6\u001fUSA-325"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q138349394"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "67759"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2026-029A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-7"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 7\u001fUSA-582"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q138349395"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "67760"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2026-029B"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GSSAP-8"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Hornet 8\u001fUSA-583"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q122748281"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "55841"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2023-031A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Olymp-K 2"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Luch-Kh/Olimp-K 2\u001fLuch-Olymp 2\u001fLuch-5Kh No. 3\u001fOlimp-K 13L\u001fLuch-2"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1485465"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "23558"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1986-017JE"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "GFZ 1"
+    },
+    "alts": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q18220634"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "40208"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "2014-055A"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "USA 257"
+    },
+    "alts": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q111498582"
+    },
+    "scn": {
+     "type": "literal",
+     "value": "25105"
+    },
+    "cospar": {
+     "type": "literal",
+     "value": "1997-043C"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Iridium 24"
+    },
+    "alts": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q141750843"
+    },
+    "scn": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/.well-known/genid/21b2b847860f8c2c11dd65b09961502d"
+    },
+    "cospar": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/.well-known/genid/f0249d34bcfaf24ca997018f19fae544"
+    },
+    "en": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "PROVES-Alcyone"
+    },
+    "alts": {
+     "type": "literal",
+     "value": "Pleiades-Alcyone"
+    }
+   }
+  ]
+ }
+}
