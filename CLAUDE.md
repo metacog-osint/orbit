@@ -231,7 +231,7 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
   within about 100 km of TIP's point).
 
-## TIC satellite catalog (build steps 1-2, 17 Nov 2026; not committed, nothing published)
+## TIC satellite catalog (build steps 1-3, 17 Nov 2026; steps 1-2 committed `6a16e08`, step 3 not committed, nothing published)
 Design and Tom's answers: `[local path]` (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
 - **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
@@ -248,8 +248,37 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   display rule "USA 253 (Hornet 1)" when the first name is a designation. On the 13 Nov GCAT copy: 70,731 numbered,
   12,745 without a number, 0 disagreements (one source), 95.5 MB JSON, 5.2 MB gzipped. Tests `tests/test_catalog.py`
   (18, on GCAT rows of the test objects); 167 tests pass, check PASS.
-- Next: step 3 (Space-Track SATCAT daily after 17:00 UTC, DECAY), each on Tom's yes. Before publishing (step 6),
-  shrink the file: records repeat source, read and ref.
+- **Step 3 (Tom's brief, 17 Nov 2026):** `orbit/stcat.py`, `python tools/orbit.py spacetrack-catalog` (local
+  only; no workflow change). Space-Track's use policy (read 17 Nov 2026) lists SATCAT ("Once per day after 1700
+  (UTC)") and DECAY (1 a day; store an object's history, never download it again) on their own rows; GP's hourly
+  rule is GP's alone, so `shared_gp_busy` is not used. No other TIC program queries satcat or decay (Noisefloor
+  reads CelesTrak's SATCAT and Space-Track gp/gp_history). `stcat.due` allows one read per UTC date from 17:00
+  UTC; the run keeps off :57-:03 and :27-:33. 4 requests: log in, satcat `CURRENT/Y`, decay (the whole history the
+  first time, then `MSG_EPOCH` since the last read less a day), log out. Raw replies gzipped in
+  `data/raw/spacetrack-{satcat,decay}/`; decay store and state in `data/state/spacetrack-{decay.json.gz,catalog.json}`.
+  `catalog.build(..., spacetrack=...)` adds Space-Track records (`intldes`, `launch_date`, `state` from COUNTRY,
+  `names` from SATNAME, `decayed`, `decay_date` from SATCAT and Historical DECAY messages; predictions stay in the
+  store only). COUNTRY is compared through `stcat.COUNTRY_TO_STATE` (built from a cross-tab on the real reading);
+  operator codes (ORB, GLOB, SES, O3B, SEAL, ITSO, EUTE, IM, ABS, AC) and TBD/UNKN are kept, never compared; analyst
+  objects' `YYYY-000x` and 1 January dates are placeholders; GCAT's pre-1963 Greek-letter pieces are not compared.
+  `swaps()` now flags a name only when each source gives it to a number the other does not, all from one launch.
+  `doctrine/sources.json` 2.6: Space-Track's note records the SATCAT and DECAY use.
+- **First real read, 17 Nov 2026 18:09 UTC** (Tom's account, 4 requests): 71,335 SATCAT rows; 144,363 decay
+  messages (whole history, stored). Built against GCAT of 15 Nov (`2026 Nov 15 1018:34`): 71,409 numbered entries
+  (70,702 in both, 633 Space-Track only, mostly `OBJECT x` and new 101xxx debris; 74 GCAT only, e.g. USA 726-736
+  SBST R-4); 2,560 with disagreements: decayed 1,093, launch date 863, state 744, intldes 41; 27 name swaps. Most are
+  definitional, all listed: 534 of the 628 launch-date gaps over 31 days are objects deployed from the ISS
+  (Space-Track gives Zarya's 1998-11-20, GCAT the deployment); 886 "decayed" are objects GCAT holds under its own
+  status codes (DK 462, DSO 137, TFR 78, GRP 59, ATT 41, OX 31, DSA 28, ERR 22, others) while Space-Track gives a
+  decay date, 207 the reverse; only 4 decayed after GCAT's file. State: Rocket Lab objects (GCAT NZ, Space-Track
+  US, 176), Satellogic (UY/ARGN, 55), Galileo (I-EU/ESA, 42). Intldes: real piece swaps (Iridium 24/46, Starlink
+  6115/6126, SL-6 platform/rocket body). Name swaps: Flock 1 (13), Globalstar M078/M095-97, RCM 2/3, SJ-2/2B, SSU
+  2/3 and others. Display: "USA 257 (NEMESIS 2)", "USA 253 (Hornet 1)", 55841 "LUCH (OLYMP) 2" (SWF's spelling).
+  153 MB JSON, 8.2 MB gzipped. Tests `tests/test_stcat.py` (23, on real rows cut unchanged into
+  `tests/fixtures/spacetrack_{satcat,decay}_20261117.json` and `catalog_satcat_extra.tsv`); 190 tests pass, check PASS.
+- Not done: no workflow runs `spacetrack-catalog` (needs Tom's yes; the decay store must then live in the Actions
+  cache or a release, since it is never fetched whole again). Before publishing (step 6), shrink the file: records
+  repeat source, read and ref.
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
