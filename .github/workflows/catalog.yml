@@ -1,0 +1,35 @@
+name: catalog
+# TIC's satellite catalog (orbit/catalog.py, orbit/stcat.py; build step 3, Tom's yes 17 Nov 2026): one Space-Track
+# read a day (class satcat, class decay; 4 requests), GCAT's catalogs, the catalog built and uploaded with the decay
+# store to this repository's public release `catalog`.
+#
+# Space-Track's use policy (read 17 Nov 2026): SATCAT "Once per day after 1700 (UTC)"; DECAY once a day, and an
+# object's decay history is stored and never downloaded again. Those rows are SATCAT's and DECAY's own, so GP's hourly
+# rule (and the shared-account gp checks in geo.yml and update.yml) does not apply. `stcat.due` allows one read per
+# UTC date from 17:00 UTC, the state riding the release, so the three starts below make at most one read; GitHub
+# fires this account's schedules hours late, and a start after midnight UTC waits for the next day.
+on:
+  schedule:
+    - cron: "23 17,19,21 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: catalog
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: Catalog tests
+        run: python -m unittest tests.test_catalog tests.test_stcat
+      - name: Catalog (Space-Track SATCAT and DECAY, GCAT)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
+          SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
+        run: python tools/orbit.py spacetrack-catalog --release

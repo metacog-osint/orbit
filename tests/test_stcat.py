@@ -126,6 +126,37 @@ class Pull(unittest.TestCase):
             self.assertEqual(len(stcat.load_local(d)["decay"]), len(DECAY) + 1)
 
 
+class Release(unittest.TestCase):
+    def test_missing_store_after_history_was_read_stops_the_read(self):
+        with tempfile.TemporaryDirectory() as d:
+            now = datetime(2026, 11, 18, 18, 0, tzinfo=timezone.utc)
+            c = FakeClient([])
+            with self.assertRaises(spacetrack.NotReady):
+                stcat.pull(Path(d), ("x", "y"), now=now, client=c, wait=lambda: 0, history_held=True)
+            self.assertEqual(c.requests, 0)
+
+    def test_upload_creates_the_release_once_and_names_assets(self):
+        calls = []
+
+        class R:
+            def __init__(self, code):
+                self.returncode, self.stderr = code, ""
+
+        def gh(*args):
+            calls.append(args)
+            return R(1 if args[:2] == ("release", "view") else 0)
+
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "local.gz"
+            p.write_bytes(b"x")
+            stcat.release_put({stcat.CATALOG_ASSET: p}, "o/r", gh=gh)
+        self.assertEqual(calls[1][:3], ("release", "create", "catalog"))
+        self.assertIn("--latest=false", calls[1])
+        self.assertIn("USSPACECOM", calls[1][-1])
+        self.assertIn("CC BY 4.0", calls[1][-1])
+        self.assertTrue(calls[2][-1].endswith(stcat.CATALOG_ASSET))
+
+
 class Records(unittest.TestCase):
     def test_every_space_track_value_is_a_record(self):
         for key in TEST:
