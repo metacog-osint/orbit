@@ -9,8 +9,9 @@ name: geo
 # way. Step name "GEO region (Space-Track)" is what the others look for: keep it.
 #
 # Twice a day, as Noisefloor's pull ran (its 05:40 and 12:40 UTC runs), at times clear of Orbit's update runs (:41
-# and :55 past 00, 06, 12, 18 UTC). GitHub fires this account's schedules hours late, so a tic-dispatch slot is the
-# lasting fix (hub change, not made here); a late start is still safe, because of the checks above.
+# and :55 past 00, 06, 12, 18 UTC). GitHub fires this account's schedules hours late, so the hub's tic-dispatch starts
+# this workflow at 03:15 and 15:15 UTC (from 17 Nov 2026); the cron below is the fallback, and a late start is still
+# safe, because of the checks above and because a run skips when today's file was pulled under an hour ago.
 on:
   schedule:
     - cron: "17 3,15 * * *"
