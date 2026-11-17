@@ -80,6 +80,31 @@ export function path(el, now = new Date(), steps = 120) {
   return out.orbit.length > 1 ? out : null;
 }
 
+// A reentry track (orbit-2.15): the ground track from t0 to t1 (ms), one point a minute at most 2,880, with drag
+// kept (BSTAR and the mean-motion rate from the set), since drag shapes a decaying object's track. Points SGP4
+// refuses (the orbit has decayed in the model) are left out. Returns [[lon, lat], ...] or null.
+export function span(el, t0, t1) {
+  if (!el || !el.n || !(t1 > t0)) return null;
+  let rec;
+  try {
+    rec = json2satrec({ NORAD_CAT_ID: el.norad || 0, EPOCH: el.epoch, MEAN_MOTION: el.n, ECCENTRICITY: el.e,
+      INCLINATION: el.i, RA_OF_ASC_NODE: el.raan, ARG_OF_PERICENTER: el.argp, MEAN_ANOMALY: el.ma,
+      BSTAR: el.bstar || 0, MEAN_MOTION_DOT: el.ndot || 0, MEAN_MOTION_DDOT: 0 });
+  } catch {
+    return null;
+  }
+  const steps = Math.min(2880, Math.max(2, Math.round((t1 - t0) / 60000)));
+  const out = [];
+  for (let k = 0; k <= steps; k++) {
+    const t = new Date(t0 + (k / steps) * (t1 - t0));
+    const pv = propagate(rec, t);
+    if (!pv || !pv.position || typeof pv.position === "boolean") continue;
+    const geo = eciToGeodetic(pv.position, gstime(t));
+    out.push([geo.longitude * 180 / Math.PI, geo.latitude * 180 / Math.PI]);
+  }
+  return out.length > 1 ? out : null;
+}
+
 export async function createGlobe(container, model, { onPick }) {
   const C = await loadCesium();
   // Cesium.js carries its workers as one string and starts them from blob: URLs, which script-src 'self' refuses.
@@ -146,8 +171,24 @@ export async function createGlobe(container, model, { onPick }) {
         arcType: C.ArcType.GEODESIC, material: new C.PolylineDashMaterialProperty({ color: ink().withAlpha(0.9), dashLength: 6 }) } });
     }
   }
-  const drawn = { tracks: 0, without: 0, launches: Object.keys(model.payloadTracks || {}).length };
-  let payloadKey = null;
+  const drawn = { tracks: 0, without: 0, launches: Object.keys(model.payloadTracks || {}).length,
+    reentries: Object.keys(model.reentryTracks || {}).length };
+  let payloadKey = null, reentryKey = null;
+  function reentry() {  // the picked object's track over its TIP window, and TIP's point at the predicted time
+    const r = reentryKey && (model.reentryTracks || {})[reentryKey];
+    if (!r) return;
+    const g = span(r.elements, Date.parse(r.from), Date.parse(r.to));
+    const c = actor(r.group);
+    if (g) {
+      add(r.key, { polyline: { positions: g.map(lonlat), width: 2, arcType: C.ArcType.GEODESIC, material: c.withAlpha(0.8) } });
+    }
+    if (r.lat != null && r.lon != null) {
+      add(r.key, { position: C.Cartesian3.fromDegrees(r.lon, r.lat), point: { pixelSize: 10, color: c, outlineColor: ink(),
+        outlineWidth: 1.5 }, label: { text: r.name + ": TIP point at the predicted time", font: "12px system-ui, sans-serif",
+        fillColor: ink(), showBackground: true, backgroundColor: col("--panel", 0.85), pixelOffset: new C.Cartesian2(0, -16) } });
+    }
+    drawn.reentryPoints = g ? g.length : 0;
+  }
   function tracks() {
     const now = new Date();
     drawn.tracks = 0; drawn.without = 0;
@@ -174,7 +215,7 @@ export async function createGlobe(container, model, { onPick }) {
   function draw() {
     E.removeAll();
     keyOf.clear();
-    areas(); points(); pairs(); tracks();
+    areas(); points(); pairs(); tracks(); reentry();
     highlight();
     widget.scene.requestRender();
   }
@@ -196,7 +237,7 @@ export async function createGlobe(container, model, { onPick }) {
   };
   // A click takes everything under the pointer and prefers a recent launch, then a listed change, a scheduled
   // launch, an area and last the ledger's history dot, which sits under a launch at the same pad and is larger.
-  const RANK = [["launch-", 0], ["mv-", 1], ["up-", 2], ["nw-", 3], ["hist-", 5]];
+  const RANK = [["launch-", 0], ["re-", 1], ["mv-", 1], ["up-", 2], ["nw-", 3], ["hist-", 5]];
   const rank = (k) => (RANK.find(([p]) => k.startsWith(p)) || [null, 4])[1];
   const clickKey = (pos) => {
     const keys = widget.scene.drillPick(pos, 10).map((h) => (h && h.id ? keyOf.get(h.id.id) : null)).filter(Boolean);
@@ -212,6 +253,13 @@ export async function createGlobe(container, model, { onPick }) {
     resize: () => { widget.resize(); widget.scene.requestRender(); },
     setHistory(fc) { history = fc; draw(); },
     select(key) { selected = key || null; highlight(); },
+    showReentry(key) {
+      const k = key && (model.reentryTracks || {})[key] ? key : null;
+      if (k === reentryKey) return;
+      reentryKey = k; draw();
+      const r = k && model.reentryTracks[k];
+      if (r && r.lat != null) widget.camera.flyTo({ destination: C.Cartesian3.fromDegrees(r.lon, r.lat, 2.2e7), duration: 0.8 });
+    },
     showPayloads(key) {
       const k = key && (model.payloadTracks || {})[key] ? key : null;
       if (k === payloadKey) return;

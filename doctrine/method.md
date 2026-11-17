@@ -343,13 +343,25 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    own wording for the field was not found, so this reading is Orbit's. A prediction whose whole window has closed
    is kept for a day, marked closed, then dropped; GCAT dates the reentry itself later (the reentries card).
 3. **Place:** where the object would be at the predicted time, not where debris falls. With a window of hours the
-   object circles the Earth several times inside it, so nothing from this lane is mapped (decision 7: reentries
-   stay off the map).
+   object circles the Earth several times inside it. Not on the flat map or in COP (decision 7: reentries stay
+   off the map). From `orbit-2.15`, on the globe only and only when picked: the ground track over the window
+   (item 6).
 4. USSPACECOM's predictions, quoted as issued: Orbit adds no probability, warning or judgment. Not in the feed;
    whether to add it, and under which requirement, is Tom's call.
 5. Checked on the reply of 17 Nov 2026 03:3x UTC: 191 messages over 14 days, 7 objects with an open window
    (fixture `tests/fixtures/spacetrack_tip_20261117.json`). Early messages give the next report in 72 h, hence
    5 days and not 3.
+6. **Reentry tracks on the globe (`orbit-2.15`, Tom's "Reentry tracks", 16 Nov 2026 about 10:30 PM CST).** The
+   update run's one GP query (the watch list's, orbit changes item 1) also asks for the objects with an open TIP
+   window, soonest first, at most 30: no extra request, and the hourly rule unchanged. Lane `decay` now runs
+   before `maneuver` so the same run's predictions are used. Their newest sets go to snapshot block
+   `reentry_sets` (mean elements plus BSTAR and the mean-motion rate), never into the watch list's store, history
+   or report; a set says nothing of the watch list. The globe draws, for the one picked object, the ground track
+   from the predicted time minus the window to plus the window (at most 24 h each side), one point a minute, SGP4
+   with drag kept, and TIP's point at the predicted time. The object comes down somewhere along the line, not at
+   the dot. Checked 17 Nov 2026 on Starlink 5046 (53892, TIP 08:59 UTC +-60 min) with CelesTrak's set of 16 Nov
+   22:56 UTC: the line passes within about 100 km of TIP's point (one point a minute limits it) and reaches it about
+   3 minutes before TIP's time; with drag left out, 130 km. A drawing for orientation, not a prediction of Orbit's.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
