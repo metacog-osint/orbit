@@ -32,6 +32,7 @@
     <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
     <a href="#ledger">Ledger</a>
     <a href="#reentries">Reentries <b data-n="reentries"></b></a>
+    <a href="#decay">Predicted reentries <b data-n="decay"></b></a>
     <a href="#catalog">Catalog</a>
     <a href="#baseline">Two-year baseline</a>
     <a href="#maneuvers">Orbit changes <b data-n="maneuvers"></b></a>
@@ -156,6 +157,24 @@
       <div id="catalog-body"></div>
     </section>
   </div>
+
+  <section class="card" id="decay" aria-labelledby="decay-h">
+    <div class="card-head">
+      <h2 id="decay-h">Predicted reentries</h2>
+      <div class="notice small source-note">
+        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
+          Squadron.</strong> Tracking and Impact Prediction (TIP) messages, redistributed under USSPACECOM's blanket
+          approval for basic space situational awareness data, which requires this citation. These are USSPACECOM's
+          predictions, quoted as issued; The Intelligence Company has not checked them. Not for operational use.</p>
+      </div>
+      <p class="muted small">The newest TIP message for each object, from the last 5 days: its predicted reentry time
+        and window (read as plus or minus that many minutes), and where the object would be at that time. That place
+        is not where debris falls: inside a window of hours the object circles the Earth several times, so nothing
+        here is mapped. A prediction whose whole window has closed stays for a day, marked closed; GCAT dates the
+        reentry itself later. Names and owners are GCAT's where GCAT lists the object.</p>
+    </div>
+    <div class="tbl-wrap" id="decay-body"></div>
+  </section>
 
   <section class="card" id="baseline" aria-labelledby="base-h">
     <div class="card-head">
