@@ -1104,6 +1104,57 @@
     if (other) box.appendChild(el("p", "muted small", "Also " + other + " rocket stages, components and debris."));
   }
 
+  var KIND = { P: "payload", R: "rocket stage", C: "component", D: "debris", S: "suborbital" };
+  function decayCard() {  // Space-Track TIP messages (orbit/tip.py, orbit-2.13)
+    var box = document.getElementById("decay-body");
+    var dc = (snap && snap.decay) || {};
+    var lane = (snap.lanes || {}).decay || {};
+    var n = document.querySelector('.secbar b[data-n="decay"]');
+    if (!dc.read_at) {
+      if (n) n.textContent = "";
+      return empty(box, lane.status === "off" ? "Not read: " + (lane.reason || "the lane is off") + "." :
+        "Not read yet: predictions appear after Orbit's next reading of Space-Track.");
+    }
+    var objs = dc.objects || [];
+    var ahead = objs.filter(function (x) { return !x.passed; });
+    if (n) n.textContent = ahead.length ? String(ahead.length) : "";
+    box.textContent = "";
+    box.appendChild(el("p", "small", ahead.length + (ahead.length === 1 ? " object" : " objects") +
+      " with a prediction window still open" + (objs.length > ahead.length ? ", " + (objs.length - ahead.length) +
+      " whose window closed in the last day" : "") + (dc.high_interest ? "; " + dc.high_interest + " flagged high interest by USSPACECOM" : "") +
+      ". " + dc.messages + " TIP messages in the last " + dc.window_days + " days. Read " + fmt(dc.read_at) + "."));
+    if (!objs.length) return;
+    var rows = objs.map(function (x) {
+      var tr = el("tr");
+      if (x.passed) tr.className = "muted";
+      var when = el("div", "", fmt(x.decay_epoch));
+      when.appendChild(el("div", "pl", (x.window_min != null ? "window ±" + (x.window_min >= 120 ?
+        (x.window_min / 60).toFixed(x.window_min % 60 ? 1 : 0) + " h" : x.window_min + " min") : "no window given") +
+        (x.passed ? ", closed" : "")));
+      cell(tr, when);
+      var who = el("div");
+      if (x.cc || x.state) who.appendChild(mark(x.cc, x.state));
+      who.appendChild(document.createTextNode(x.name || ("NORAD " + x.norad)));
+      var sub = [x.name ? "NORAD " + x.norad : "", x.launch_tag || "",
+        x.type && KIND[x.type.charAt(0)] ? KIND[x.type.charAt(0)] : "", x.high_interest ? "high interest" : ""]
+        .filter(Boolean).join(", ");
+      if (sub) who.appendChild(el("div", "pl", sub));
+      cell(tr, who);
+      var at = el("div", "", x.lat == null || x.lon == null ? "" : Math.abs(x.lat).toFixed(1) + "°" +
+        (x.lat < 0 ? "S" : "N") + " " + lonText(x.lon));
+      at.appendChild(el("div", "pl", [x.direction, x.incl != null ? "inclination " + x.incl + "°" : ""]
+        .filter(Boolean).join(", ")));
+      cell(tr, at);
+      var msg = el("div", "", "issued " + fmt(x.msg_epoch));
+      msg.appendChild(el("div", "pl", (x.messages > 1 ? x.messages + " messages in " + dc.window_days + " days" : "1 message") +
+        (x.next_report_h ? "; next in about " + x.next_report_h + " h" : "")));
+      cell(tr, msg);
+      return tr;
+    });
+    box.appendChild(table(["Predicted time", "Object", "Place at that time", "Message"], rows));
+    fold(box, rows, 10, "objects", "decay");
+  }
+
   function catalogBody() {
     var box = document.getElementById("catalog-body");
     box.textContent = "";
@@ -1195,7 +1246,8 @@
       ledger: "Orbit's launch ledger (Launch Library 2)",
       pairs: "Launch (the suite's launch-closure program): place check on Orbit's areas",
       paths: "CelesTrak, last-30-days element sets (paths of new payloads on the globe)",
-      maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)" };
+      maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)",
+      decay: "Space-Track.org TIP reentry predictions (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",
       "jcg-navarea11": "Japan Coast Guard, NAVAREA XI" };
     var ul = el("ul", "plain small lanes");
@@ -1317,7 +1369,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); decayCard(); catalogBody(); lanes();
     startMap();
     viewControls();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }

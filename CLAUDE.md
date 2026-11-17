@@ -202,6 +202,20 @@ belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules 
   its day file with Noisefloor's for two days; then merge Noisefloor's `geo/from-orbit` (its daily step reads Orbit's
   day file and stops querying Space-Track); then step 3 (callouts).
 
+## Predicted reentries (16-17 Nov 2026, `orbit-2.13`; Tom's "let's get all three items done", about 9:15 PM CST 16 Nov)
+Built on branch `feat/rpo-globe-tip` (worktree `_worktrees\orbit-rpo-tip`). Rules in `doctrine/method.md`
+("Predicted reentries").
+- Lane `decay` (`orbit/tip.py`): log in, one Space-Track `tip` query (messages of the last 5 days), log out; not GP,
+  so no hourly wait. Newest message per object, GCAT's name and owner joined from the catalog index; snapshot block
+  `decay` with `attribution`. Card `#decay` (after the reentries and catalog pair) with the citation at its head;
+  nothing mapped, not in the feed. Same secrets as the manoeuvre lane (update.yml's collect step already has them).
+- First read 17 Nov 2026 about 03:24 UTC from this PC (Tom's account, 4 requests including the model definition):
+  191 messages over 14 days, 7 objects with an open window; fixture `tests/fixtures/spacetrack_tip_20261117.json`.
+  144 tests pass; local build check PASS; card checked in the browser pane on a local build (live snapshot with
+  the fixture injected, no console errors).
+- WINDOW is read as plus or minus minutes (Orbit's reading, 16-19% of the time left on 17 Nov; Space-Track's
+  wording not found). Whether TIP goes into the feed, and under which requirement, is Tom's call.
+
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days

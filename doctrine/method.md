@@ -25,6 +25,7 @@ makes no warnings.
 | `pairs` (`orbit-2.10`) | The suite's Launch program (launch.theintelligence.company), its published snapshot | Launch's place check on Orbit's own hazard areas and scheduled launches: time and place, grouped, or time only, with azimuth, distance and implied inclination |
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
+| `decay` (`orbit-2.13`) | Space-Track.org TIP messages (USSPACECOM, 18th Space Defense Squadron), class `tip` | The newest reentry prediction for each object messaged in the last 5 days: predicted time, window, the object's place at that time, next report |
 | `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
 
 GCAT republishes about once a day, at no fixed time (file headers seen 13 Nov 2026 00:21 UTC and 15 Nov 10:18
@@ -320,6 +321,29 @@ signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit
    no Space-Track request): 508,742 element sets July-November 2026 and 111 day files, measured 16 Nov 2026.
 5. **Not yet:** the callouts (step 3), the page (step 4), feed items. Nothing from this lane is on the site or in
    the feed.
+
+## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
+Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
+log in, one query of Space-Track's class `tip` (messages of the last 5 days, newest first), log out; three
+requests a run on the shared account. TIP is not GP, so the account's once-an-hour GP rule and the wait for
+Noisefloor's and the GEO run's queries do not apply. Reentry and decay data are basic SSA data under USSPACECOM's
+blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card and `decay.attribution` carry it.
+1. **What is kept:** the newest message for each object (by message time, then message id), its predicted time
+   (`DECAY_EPOCH`), `WINDOW` in minutes, direction, latitude and longitude (TIP's 0-360 east turned to east and
+   west), inclination, revolution, hours to the next report and USSPACECOM's high-interest flag. GCAT's name, type,
+   launch and owner where GCAT's index lists the NORAD number.
+2. **Window:** read as plus or minus `WINDOW` minutes around the predicted time. In the first reply (17 Nov 2026)
+   it ran at 16-19% of the time left to the predicted reentry, close to the usual rule of a fifth; Space-Track's
+   own wording for the field was not found, so this reading is Orbit's. A prediction whose whole window has closed
+   is kept for a day, marked closed, then dropped; GCAT dates the reentry itself later (the reentries card).
+3. **Place:** where the object would be at the predicted time, not where debris falls. With a window of hours the
+   object circles the Earth several times inside it, so nothing from this lane is mapped (decision 7: reentries
+   stay off the map).
+4. USSPACECOM's predictions, quoted as issued: Orbit adds no probability, warning or judgment. Not in the feed;
+   whether to add it, and under which requirement, is Tom's call.
+5. Checked on the reply of 17 Nov 2026 03:3x UTC: 191 messages over 14 days, 7 objects with an open window
+   (fixture `tests/fixtures/spacetrack_tip_20261117.json`). Early messages give the next report in 72 h, hence
+   5 days and not 3.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).

@@ -47,7 +47,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
 from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
-                   news, rpo, spacetrack)
+                   news, rpo, spacetrack, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -61,10 +61,11 @@ LANE_FIELDS = {
     "counterspace": ["counterspace"],
     "rpo": ["rpo"],
     "maneuver": ["maneuvers"],
+    "decay": ["decay"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
          "ledger": {},
-         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}}
+         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "decay": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -78,7 +79,7 @@ MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fai
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
                "news": ["snapi-thespacedevs"],
                "navwarn": ["nga-msi"], "pairs": ["tic-launch"], "paths": ["celestrak-gp"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
-               "maneuver": ["space-track"]}
+               "maneuver": ["space-track"], "decay": ["space-track"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -388,9 +389,31 @@ def _lane_paths(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
     return {"payload_sets": {"read_at": rec["fetched_at"], **celestrak.parse(body, launches_30d or [])}}, [rec], None
 
 
+def _lane_decay(raw_dir: Path, prev: dict, getter, **_):
+    """Space-Track's reentry predictions (TIP, orbit/tip.py): log in, one TIP query, log out. Off without
+    credentials. Not GP, so no wait for the shared account's hourly GP query."""
+    data_dir = raw_dir.parent
+    cred = spacetrack.credentials(data_dir.parent)
+    if not cred:
+        raise spacetrack.NotReady("no Space-Track credentials (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD)")
+    client = ST_CLIENT(*cred)
+    try:
+        client.login()
+        rows = client.query_path(tip.URL, "tip")
+        body = client.last_body
+    finally:
+        client.logout()
+    rec = _st_raw(raw_dir, "spacetrack-tip", "tip", body)
+    rec["url"] = tip.URL  # no watch list in this query, so the real URL is kept
+    objs = (_read_index(data_dir) or {}).get("objects") or {}
+    doc = tip.parse(rows, ST_NOW(), objs)
+    return {"decay": {"attribution": tip.ATTRIBUTION, "read_at": rec["fetched_at"], **doc}}, [rec], None
+
+
 LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "paths": _lane_paths, "upcoming": _lane_upcoming, "news": _lane_news,
          "navwarn": _lane_navwarn, "pairs": _lane_pairs,
-         "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver}
+         "counterspace": _lane_counterspace, "rpo": _lane_rpo, "maneuver": _lane_maneuver,
+         "decay": _lane_decay}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
