@@ -285,6 +285,20 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   the store is missing, nothing is read (never the whole history again). The release was seeded from the local read
   of 17 Nov 18:09 UTC. Not in the hub's `tic-dispatch` (hub change, not made). Still to do in step 6: the object
   card "Names and sources" section, and a smaller file (records repeat source, read and ref; 153 MB JSON).
+- **Step 4 (17 Nov 2026, branch `feat/catalog-step4`, worktree `_worktrees\orbit-catalog-step4`; not committed):**
+  `orbit/catsources.py`: CelesTrak SATCAT (`/pub/satcat.csv`, gzip, only when `satcat/jsonDir.php` shows a new
+  FILE_MTIME and no read that UTC day) and Wikidata (one SPARQL query a week: P377 items, en and mul labels, en
+  aliases, P247; UA names the repo, no person). No redirect is followed; any non-200 puts the source on hold in
+  `data/state/catalog-sources.json` (5xx and 429 until the next UTC day, anything else until a person runs
+  `--clear-hold`). `catalog.add_celestrak` / `add_wikidata`: OBJECT_NAME kept as given, OWNER compared as GCAT State
+  through Space-Track's codes plus `catsources.CT_OWNER_TO_STATE` (ISS not compared), OPS_STATUS_CODE in a new
+  field `ops_status` (FLAGGED; compared only where two sources give one), Wikidata names with the Q-id as ref,
+  two items on one number noted as `wikidata_items`. `python tools/orbit.py catalog-sources` reads locally;
+  `catalog --sources DIR` builds with them. In `catalog.yml` (drafted, not live) both are read only in the run that
+  makes the Space-Track read; replies ride the Actions cache, the state rides the release (`catalog-sources.json`),
+  and the release notes are re-set each upload with both credits. `doctrine/sources.json` 2.7: both `ingest`
+  (no page lane, so the page does not list them). WMO OSCAR/Space not built: no NORAD number or COSPAR ID in its
+  API, so it cannot be matched on an id (Tom decides). Real read and counts: design note section 10.
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

@@ -1,9 +1,9 @@
 """TIC's satellite catalog (schema `tic-catalog/1`): one entry per NORAD number, every value with its source.
 
 Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md (Tom's answers in its section 9). Build step 2: GCAT.
-Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Later steps add CelesTrak SATCAT,
-Wikidata, WMO OSCAR/Space and the hand-kept alias file; each arrives as more value records on the same entries,
-ranked by `RANK`.
+Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Build step 4 (17 Nov 2026): CelesTrak
+SATCAT and Wikidata (orbit/catsources.py). Later steps add WMO OSCAR/Space and the hand-kept alias file; each arrives
+as more value records on the same entries, ranked by `RANK`.
 
 Rules kept here:
 - Entries key on the NORAD number. Names are display text and never join anything.
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import re
 
-from . import gcat, stcat
+from . import catsources, gcat, stcat
 
 SCHEMA = "tic-catalog/1"
 
@@ -28,10 +28,16 @@ RANK = ("space-track", "gcat-mcdowell", "celestrak-satcat", "wikidata", "swf-rpo
 DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.I)
 
 # Fields compared between sources for `disagreements` (names are listed, not flagged: they differ by design).
-FLAGGED = ("intldes", "launch_date", "state", "decayed")
+# `ops_status` is an operational status (CelesTrak's +/-/P/B/S/X), compared only where two sources both give one;
+# GCAT's `status` is an orbital status (in orbit, reentered, docked...), not an operational one, so it is not compared.
+FLAGGED = ("intldes", "launch_date", "state", "decayed", "ops_status")
 
 GCAT = "gcat-mcdowell"
 ST = stcat.SOURCE
+CT = catsources.CT
+WD = catsources.WD
+FIELDS = ("intldes", "launch_tag", "launch_date", "names", "owner", "state", "status", "ops_status", "decayed",
+          "decay_date")
 
 
 def rec(value, source: str, read: str, basis: str = "attributed", ref: str | None = None, **extra) -> dict:
@@ -175,16 +181,7 @@ def add_spacetrack(numbered: dict, satcat: list[dict], decay_store: list[dict], 
             e["launch_date"].append(rec(ldate, ST, read, "catalog" if analyst else "attributed", ref=key, **ph))
         country = (row.get("COUNTRY") or "").strip()
         if country:
-            gstates = [r["value"] for r in e["state"] if r["source"] == GCAT]
-            match = next((g for g in gstates if stcat.state_matches(country, g)), None)
-            mapped = stcat.COUNTRY_TO_STATE.get(country, (country,))[0]
-            if country in stcat.PLACEHOLDER_COUNTRY:
-                extra = {"placeholder": True, "nocompare": True}
-            elif country in stcat.OPERATOR_CODES:
-                extra = {"operator_code": True, "nocompare": True}  # an operator, not a state: nothing to compare
-            else:
-                extra = {"cmp": match or mapped}
-            e["state"].append(rec(country, ST, read, "attributed", ref=key, field="COUNTRY", **extra))
+            e["state"].append(state_rec(e, country, ST, read, key, "COUNTRY"))
         name = (row.get("SATNAME") or row.get("OBJECT_NAME") or "").strip()
         if name:
             e["names"].insert(sum(1 for r in e["names"] if r["source"] == ST),
@@ -212,6 +209,127 @@ def add_spacetrack(numbered: dict, satcat: list[dict], decay_store: list[dict], 
         finish(e)
     counts["gcat_not_in_satcat"] = sum(1 for k, e in numbered.items()
                                        if k not in seen and not e.get("space_track_only"))
+    return counts
+
+
+def state_rec(e: dict, code: str, source: str, read: str, ref: str, field: str) -> dict:
+    """A Space-Track country code (Space-Track COUNTRY; CelesTrak's OWNER uses the same codes) as a state record,
+    compared with GCAT's State through stcat.COUNTRY_TO_STATE; operator codes and placeholders are kept, never
+    compared."""
+    table, operators = stcat.COUNTRY_TO_STATE, stcat.OPERATOR_CODES
+    if source == CT:  # CelesTrak adds codes of its own (catsources.CT_OWNER_TO_STATE)
+        table, operators = {**table, **catsources.CT_OWNER_TO_STATE}, operators | catsources.CT_PROGRAM_CODES
+    gstates = [r["value"] for r in e["state"] if r["source"] == GCAT]
+    match = next((g for g in gstates if g in table.get(code, (code,))), None)
+    mapped = table.get(code, (code,))[0]
+    if code in stcat.PLACEHOLDER_COUNTRY:
+        extra = {"placeholder": True, "nocompare": True}
+    elif code in operators:
+        extra = {"operator_code": True, "nocompare": True}  # an operator, not a state: nothing to compare
+    else:
+        extra = {"cmp": match or mapped}
+    return rec(code, source, read, "attributed", ref=ref, field=field, **extra)
+
+
+def _entry(numbered: dict, key: str, source: str, type_: str = "other") -> tuple[dict, bool]:
+    """The entry for a number; an empty one, marked `only_in`, when no earlier source lists the number."""
+    e = numbered.get(key)
+    if e is None:
+        e = numbered[key] = {"norad": int(key), "jcat": None, "type": type_, **{f: [] for f in FIELDS},
+                             "only_in": [source]}
+        return e, True
+    for f in FIELDS:
+        e.setdefault(f, [])
+    if e.get("only_in") is not None and source not in e["only_in"]:
+        e["only_in"].append(source)
+    return e, False
+
+
+def _norad(cell) -> str | None:
+    n = str(cell or "").strip()
+    return str(int(n)) if n.isdigit() else None
+
+
+CT_TYPES = {"PAY": "payload", "R/B": "rocket stage", "DEB": "debris"}
+
+
+def add_celestrak(numbered: dict, rows: list[dict], read: str) -> dict:
+    """CelesTrak SATCAT rows (CSV; celestrak.org/satcat/satcat-format.php) as records. OBJECT_NAME is kept as given:
+    CelesTrak puts alternate names in brackets ("USA 257 (CLIO)") and object kinds in square brackets."""
+    counts = {"rows": 0, "added_to_entry": 0, "celestrak_only": 0, "with_ops_status": 0}
+    seen = set()
+    for row in rows:
+        key = _norad(row.get("NORAD_CAT_ID"))
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        counts["rows"] += 1
+        e, new = _entry(numbered, key, CT, CT_TYPES.get((row.get("OBJECT_TYPE") or "").strip(), "other"))
+        counts["celestrak_only" if new else "added_to_entry"] += 1
+        intl = (row.get("OBJECT_ID") or "").strip()
+        if intl:
+            e["intldes"].append(rec(intl, CT, read, "catalog", ref=key))
+        ldate = (row.get("LAUNCH_DATE") or "").strip()[:10]
+        if ldate:
+            e["launch_date"].append(rec(ldate, CT, read, "attributed", ref=key))
+        owner = (row.get("OWNER") or "").strip()
+        if owner:
+            e["state"].append(state_rec(e, owner, CT, read, key, "OWNER"))
+        name = (row.get("OBJECT_NAME") or "").strip()
+        if name:
+            e["names"].append(rec(name, CT, read, name_basis(name), ref=key, field="OBJECT_NAME"))
+        ops = (row.get("OPS_STATUS_CODE") or "").strip()
+        ddate = (row.get("DECAY_DATE") or "").strip()[:10] or None
+        if ops:
+            counts["with_ops_status"] += 1
+            cls = catsources.CT_OPS.get(ops)
+            e["ops_status"].append(rec(ops, CT, read, "attributed", ref=key, field="OPS_STATUS_CODE",
+                                       **({"cmp": cls} if cls else {"nocompare": True})))
+        e["decayed"].append(rec(bool(ddate) or ops == "D", CT, read, "attributed", ref=key, date=ddate))
+        if ddate:
+            e["decay_date"].append(rec(ddate, CT, read, "attributed", ref=key, field="DECAY_DATE"))
+    for e in numbered.values():
+        finish(e)
+    counts["not_in_celestrak"] = sum(1 for k in numbered if k not in seen)
+    return counts
+
+
+def add_wikidata(numbered: dict, rows: list[dict], read: str) -> dict:
+    """Wikidata items carrying P377 (rows from catsources.wd_parse): English and multilingual labels and English
+    aliases as names, P247 as `intldes`; ref is the Q-id. Wikidata's "unknown value" (no number) is skipped."""
+    counts = {"rows": 0, "items": 0, "added_to_entry": 0, "wikidata_only": 0, "unknown_value_skipped": 0,
+              "numbers_on_two_items": 0}
+    items_by_key: dict[str, set] = {}
+    for row in rows:
+        key = _norad(row.get("scn"))
+        if not key:
+            counts["unknown_value_skipped"] += 1
+            continue
+        counts["rows"] += 1
+        qid = row["qid"]
+        first = key not in items_by_key
+        items_by_key.setdefault(key, set()).add(qid)
+        e, new = _entry(numbered, key, WD)
+        if first:
+            counts["wikidata_only" if new else "added_to_entry"] += 1
+        cospar = (row.get("cospar") or "").strip()
+        if cospar and not cospar.startswith("http") and not any(
+                r["source"] == WD and r["ref"] == qid and r["value"] == cospar for r in e["intldes"]):
+            e["intldes"].append(rec(cospar, WD, read, "catalog", ref=qid, field="P247"))
+        have = {r["value"].lower() for r in e["names"] if r["source"] == WD and r["ref"] == qid}
+        for name, field in ([(row.get("en"), "label:en"), (row.get("mul"), "label:mul")]
+                            + [(a, "altLabel:en") for a in row.get("alts") or []]):
+            name = (name or "").strip()
+            if name and name.lower() not in have:
+                have.add(name.lower())
+                e["names"].append(rec(name, WD, read, name_basis(name), ref=qid, field=field))
+    counts["items"] = len({q for qs in items_by_key.values() for q in qs})
+    counts["numbers_on_two_items"] = sum(1 for qs in items_by_key.values() if len(qs) > 1)
+    for key, qs in items_by_key.items():
+        if len(qs) > 1:  # attached objects (ISS and Zarya, Transit 3B/LOFTI 1): a note, not a disagreement
+            numbered[key]["wikidata_items"] = sorted(qs)
+    for e in numbered.values():
+        finish(e)
     return counts
 
 
@@ -306,14 +424,24 @@ def swaps(numbered: dict) -> list[dict]:
 
 
 def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: str | None = None,
-          spacetrack: dict | None = None) -> dict:
-    """`spacetrack`: {"satcat": rows, "decay": every DECAY message held, "read": 'YYYY-MM-DD', "read_at": ...}."""
+          spacetrack: dict | None = None, celestrak: dict | None = None, wikidata: dict | None = None) -> dict:
+    """`spacetrack`: {"satcat": rows, "decay": every DECAY message held, "read": 'YYYY-MM-DD', "read_at": ...}.
+    `celestrak`, `wikidata`: {"rows": ..., "read": 'YYYY-MM-DD', "read_at": ...}, as catsources.load gives them."""
     numbered, unnumbered = from_gcat(tables, orgs, read)
     sources = {GCAT: {"read": read, "updated": gcat_updated, "citation": gcat.CITATION}}
     st_counts = None
     if spacetrack:
         st_counts = add_spacetrack(numbered, spacetrack["satcat"], spacetrack.get("decay") or [], spacetrack["read"])
         sources[ST] = {"read": spacetrack["read"], "read_at": spacetrack.get("read_at"), "citation": stcat.CITATION}
+    more = {}
+    if celestrak:
+        more[CT] = add_celestrak(numbered, celestrak["rows"], celestrak["read"])
+        sources[CT] = {"read": celestrak["read"], "read_at": celestrak.get("read_at"),
+                       "file_time": celestrak.get("file_mtime"), "citation": catsources.CT_CITATION}
+    if wikidata:
+        more[WD] = add_wikidata(numbered, wikidata["rows"], wikidata["read"])
+        sources[WD] = {"read": wikidata["read"], "read_at": wikidata.get("read_at"),
+                       "citation": catsources.WD_CITATION}
     flags: dict = {}
     for e in numbered.values():
         for d in e["disagreements"]:
@@ -325,7 +453,7 @@ def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: st
         "rank": list(RANK),
         "counts": {"numbered": len(numbered), "unnumbered": len(unnumbered),
                    "with_disagreements": sum(1 for e in numbered.values() if e["disagreements"]),
-                   "disagreements_by_field": flags, **({"space_track": st_counts} if st_counts else {})},
+                   "disagreements_by_field": flags, **({"space_track": st_counts} if st_counts else {}), **more},
         "objects": numbered,
         "unnumbered": unnumbered,
         "swaps": swaps(numbered),
