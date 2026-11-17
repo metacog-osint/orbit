@@ -1,0 +1,77 @@
+# TIC satellite catalog: hand-kept aliases (design note [local path], section 3).
+# One claim per entry, reviewed by diff. Never edit an entry to change its number: add `withdrawn: <date>` and
+# `reason`, and add a new entry. Every link needs evidence beyond a name. Read by orbit/aliases.py (a YAML subset:
+# scalars, quoted strings, [flow lists] and block lists of strings).
+#
+# Build step 5 (17 Nov 2026): the five test objects of section 7. Evidence from the catalog built that day from
+# Space-Track SATCAT (18:09 UTC), GCAT of 15 Nov, CelesTrak SATCAT (file of 16 Nov 20:34 UTC) and Wikidata
+# (18:42 UTC), and SWF's RPO sheet (last updated 17 Feb 2026, Military/Intelligence tab).
+
+- norad: 55841
+  name: "Luch (Olymp) 2"
+  swf_key: "Luch (Olymp) 2"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, row 'Mar 2023 - Present', chaser"
+  read: 2026-11-17
+  evidence:
+    - "Space-Track SATNAME of 55841 is 'LUCH (OLYMP) 2' (SATCAT read 17 Nov 2026)"
+    - "Launched 2023-03-12 (GCAT, Space-Track, CelesTrak agree), the month SWF's row starts"
+    - "Wikidata Q122748281 'Olymp-K 2' carries P377 55841; CelesTrak's name is 'LUCH-5X (OLYMP-K 2)'"
+  added_by: tic-analyst
+  added: 2026-11-17
+
+- norad: 40258
+  name: "Luch (Olymp)"
+  swf_key: "Luch (Olymp)"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, rows 'Oct 2014 - Present' and 'February 2019', chaser"
+  read: 2026-11-17
+  evidence:
+    - "Space-Track SATNAME of 40258 is 'LUCH (OLYMP)' (SATCAT read 17 Nov 2026)"
+    - "Launched 2014-09-27 (GCAT, Space-Track, CelesTrak agree), the month before SWF's 'Oct 2014 - Present'"
+    - "The only other payload named Luch in GCAT, 23426, was launched 1994-12-16; Luch (Olymp) 2 (55841) was launched 2023-03-12, after the February 2019 row"
+    - "Wikidata Q18550141 'Olymp-K 1' carries P377 40258"
+  added_by: tic-analyst
+  added: 2026-11-17
+
+- norad: 43917
+  name: "TJS-3 AKM"
+  swf_key: "TJS-3 AKM"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, row 'Jan - Apr 2019', chaser (target TJS-3)"
+  read: 2026-11-17
+  evidence:
+    - "Space-Track SATNAME and CelesTrak OBJECT_NAME of 43917 are 'TJS-3 AKM'; GCAT names it 'TJS-3 subsatellite' (AltNames TJS-X1B)"
+    - "43917 is 2018-110C, the same launch as TJS-3 (43874, 2018-110A), SWF's target on the same row"
+  added_by: tic-analyst
+  added: 2026-11-17
+
+- norad: 40208
+  name: "CLIO (USA 257)"
+  swf_key: "CLIO (USA 257)"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, row '2014 - Present', chaser"
+  read: 2026-11-17
+  evidence:
+    - "Space-Track SATNAME of 40208 is 'USA 257'; CelesTrak OBJECT_NAME 'USA 257 (CLIO)'; GCAT AltNames 'USA-257, CLIO'"
+    - "Launched 2014-09-17 (GCAT, Space-Track, CelesTrak agree), in SWF's start year 2014"
+  added_by: tic-analyst
+  added: 2026-11-17
+
+- swf_key: "GSSAP"
+  program: GSSAP
+  members: [40099, 40100, 41744, 41745, 51280, 51281, 67759, 67760]
+  basis: attributed
+  source: gcat-mcdowell
+  source_ref: "GCAT satcat AltNames 'GSSAP 1' to 'GSSAP 8'"
+  read: 2026-11-17
+  evidence:
+    - "GCAT AltNames 'GSSAP 1' to 'GSSAP 8' on 40099, 40100, 41744, 41745, 51280, 51281, 67759, 67760 (Space-Track names USA 253, 254, 270, 271, 324, 325, 582, 583)"
+    - "Wikidata labels 'GSSAP-1' to 'GSSAP-8' carry the same eight P377 numbers (Q113633505-08, Q28668993-94, Q138349394-95)"
+    - "SWF's row 'Jul 2014 - Present' starts with the launch of GSSAP 1 and 2 (2014-043, 2014-07-28)"
+  added_by: tic-analyst
+  added: 2026-11-17

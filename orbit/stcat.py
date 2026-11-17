@@ -217,6 +217,7 @@ RELEASE = "catalog"
 CATALOG_ASSET = "catalog.json.gz"
 DECAY_ASSET = "spacetrack-decay.json.gz"
 STATE_ASSET = "spacetrack-catalog.json"
+NAMES_ASSET = "catalog-names.json.gz"  # the name index Orbit's rpo lane matches on (catalog.names_index)
 SOURCES_STATE_ASSET = "catalog-sources.json"  # CelesTrak and Wikidata read dates and holds (orbit/catsources.py)
 RELEASE_NOTES = (
     "TIC's satellite catalog (schema tic-catalog/1): one entry per NORAD catalog number, every value with its source, "

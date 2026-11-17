@@ -14,7 +14,8 @@ Servicer, Mission Type, Launch Site, Notes, Source).
 Orbit keeps SWF's own text for every field. Dates are free text ("Apr 14, 2005", "Mar - Apr 2017", "Oct 2014 -
 Present", "1990-1998"); Orbit reads them into a start, an end, a precision (day, month or year) and whether the
 activity is ongoing, and lists the rows it cannot read apart, with SWF's text, rather than guessing. Satellite
-names are matched to GCAT only where exactly one GCAT payload fits (see `link`). History, not events: nothing goes
+names are matched to TIC's satellite catalog (every source's names, orbit-2.16) or, failing that, GCAT, only where
+exactly one payload fits, or by a reviewed alias-file entry (see `link`). History, not events: nothing goes
 into the feed.
 """
 from __future__ import annotations
@@ -201,14 +202,73 @@ def names(cell: str) -> list[list[str]]:
     return out
 
 
+def _cand(jcat: str, norad, name: str, launched: date | None, launch_year: int | None,
+          gone_year: int | None) -> dict:
+    """One object a name can mean: its keys, the catalog's name for it, launch day (or year) and, when it is no
+    longer in orbit, the year it left."""
+    return {"jcat": jcat, "norad": norad if norad not in ("", "-", None) else None, "cat_name": name,
+            "ld": launched, "ly": launch_year, "gy": gone_year}
+
+
 def gcat_names(objects: dict) -> dict[str, list]:
-    """GCAT's catalog index (JCAT -> fields as in gcat.INDEX_FIELDS) to normalized payload name -> [(JCAT, row)]."""
+    """GCAT's catalog index (JCAT -> fields as in gcat.INDEX_FIELDS) to normalized payload name -> [candidate]. The
+    fallback when the TIC catalog's name index cannot be read (orbit-2.7 to 2.15 matched on this alone)."""
     out: dict[str, list] = {}
     for jcat, row in objects.items():
         if not (row[3] or "").startswith("P"):
             continue
-        out.setdefault(_norm(row[4]), []).append((jcat, row))
+        gone = _gcat_year(row[7]) if row[8] in GONE else None
+        out.setdefault(_norm(row[4]), []).append(
+            _cand(jcat, row[1], row[4], _gcat_date(row[5]), _gcat_year(row[5]), gone))
     return out
+
+
+def _iso_day(s) -> date | None:
+    try:
+        return date.fromisoformat(s) if s and len(s) == 10 else None
+    except ValueError:
+        return None
+
+
+def catalog_names(names_doc: dict) -> dict[str, list]:
+    """The TIC catalog's name index (`tic-catalog-names/1`, catalog.names_index) to normalized name -> [candidate]:
+    every name every source gives a payload (Space-Track, GCAT, CelesTrak, Wikidata, the alias file), so SWF's
+    "Luch (Olymp) 2" meets Space-Track's "LUCH (OLYMP) 2". Rows: [key, norad, jcat, type, launch date, gone date
+    (or "" when gone with no date, None when in orbit), display name, names]."""
+    out: dict[str, list] = {}
+    for key, norad, jcat, type_, launched, gone, display, names_ in names_doc.get("objects") or []:
+        if type_ != "payload":
+            continue
+        ld = _iso_day(launched)
+        ly = int(launched[:4]) if launched and launched[:4].isdigit() else None
+        gy = int(gone[:4]) if gone and gone[:4].isdigit() else None
+        c = _cand(jcat or key, norad, display, ld, ly, gy)
+        for n in {_norm(x) for x in names_}:
+            if n:
+                out.setdefault(n, []).append(c)
+    return out
+
+
+def alias_pins(entries: list[dict], names_doc: dict | None = None) -> dict:
+    """Reviewed links from the alias file (orbit/aliases.py) for SWF's text: (normalized swf_key, swf_date or None)
+    -> link. A pin is a person's reviewed claim with its evidence, so no date rule applies to it."""
+    rows = {r[0]: r for r in (names_doc or {}).get("objects") or []}
+    pins = {}
+    for e in entries:
+        if not e.get("swf_key"):
+            continue
+        k = (_norm(e["swf_key"]), e.get("swf_date"))
+        ref = f"aliases.yml:{e['line']}"
+        if "program" in e:
+            pins[k] = {"program": e["program"], "members": list(e["members"]), "by": "alias", "alias_ref": ref,
+                       "cited": e["source"]}
+        else:
+            key = str(e["norad"]) if "norad" in e else e["jcat"]
+            r = rows.get(key)
+            pins[k] = {"jcat": (r[2] if r else None) or (key if not key.isdigit() else None),
+                       "norad": e.get("norad"), "cat_name": (r[6] if r else None) or e["name"], "by": "alias",
+                       "alias_ref": ref, "cited": e["source"]}
+    return pins
 
 
 def _gcat_year(s: str) -> int | None:
@@ -248,50 +308,80 @@ def _launched_just_before(fits: list, when: dict | None) -> list:
     if not span:
         return []
     lo = date.fromordinal(span[0].toordinal() - 366)
-    return [(j, r) for j, r in fits if (d := _gcat_date(r[5])) and lo <= d <= span[1]]
+    return [c for c in fits if c["ld"] and lo <= c["ld"] <= span[1]]
 
 
-def link(cell: str, when: dict | None, index: dict[str, list]) -> list[dict]:
-    """GCAT objects for a satellite cell. A name links only when exactly one GCAT payload of that name was launched
-    by the activity's last year (or this year if ongoing or undated) and had not reentered before its first year;
-    names that fit none are left unlinked. Of several, the one launched in the year up to the activity's start is
-    taken when it is the only one (`by` "launch date"); otherwise none, rather than a guess."""
+def _same(a: dict, b: dict) -> bool:
+    return a.get("jcat") == b.get("jcat") if a.get("jcat") and b.get("jcat") else \
+        a.get("norad") is not None and str(a.get("norad")) == str(b.get("norad"))
+
+
+def link(cell: str, when: dict | None, index: dict[str, list], pins: dict | None = None,
+         date_text: str | None = None) -> list[dict]:
+    """Catalog objects for a satellite cell. A reviewed alias-file entry for SWF's text (and, where given, this
+    row's date text) links first (`by` "alias"). Otherwise a name links only when exactly one payload of that name
+    was launched by the activity's last year (or this year if ongoing or undated) and had not left orbit before its
+    first year; names that fit none are left unlinked. Of several, the one launched in the year up to the activity's
+    start is taken when it is the only one (`by` "launch date"); otherwise none, rather than a guess."""
     end = (when or {}).get("end")
     last = int(end[:4]) if end else date.today().year
     first = int(when["start"][:4]) if when and when.get("start") else None
-    out = []
+    out: list[dict] = []
     for forms in names(cell):
         for form in forms:
-            fits = [(j, r) for j, r in index.get(_norm(form), [])
-                    if (_gcat_year(r[5]) or 0) <= last
-                    and not (first and r[8] in GONE and (_gcat_year(r[7]) or 9999) < first)]
+            n = _norm(form)
+            pin = (pins or {}).get((n, date_text)) or (pins or {}).get((n, None))
+            if pin:
+                if not any(_same(o, pin) for o in out if "program" not in o):
+                    out.append({"name": form, **pin})
+                break
+            fits, seen = [], set()
+            for c in index.get(n, []):
+                k = c["jcat"] or c["norad"]
+                if k in seen:
+                    continue  # one object under two of its names
+                seen.add(k)
+                if (c["ly"] or 0) <= last and not (first and c["gy"] is not None and c["gy"] < first):
+                    fits.append(c)
             by = "name"
             if len(fits) > 1:
                 near = _launched_just_before(fits, when)
                 if len(near) == 1:
                     fits, by = near, "launch date"
             if len(fits) == 1:
-                j, r = fits[0]
-                if any(o["jcat"] == j for o in out):
+                c = fits[0]
+                if any(_same(o, c) for o in out):
                     break  # "ShiJian-21 (SJ-21)": one object, named twice
-                out.append({"name": form, "jcat": j, "norad": r[1] if r[1] not in ("", "-") else None,
-                            "gcat_name": r[4], "by": by})
+                out.append({"name": form, "jcat": c["jcat"], "norad": c["norad"], "cat_name": c["cat_name"],
+                            "by": by})
                 break
             if len(fits) > 1:
                 break  # several fit: no link rather than a guess
     return out
 
 
-def read(bodies: dict[str, bytes], objects: dict | None) -> dict:
-    """Every tab's rows, the About tab's date, the rows whose date Orbit could not read, and GCAT links."""
-    index = gcat_names(objects or {})
+def read(bodies: dict[str, bytes], objects: dict | None, names_doc: dict | None = None,
+         alias_entries: list[dict] | None = None) -> dict:
+    """Every tab's rows, the About tab's date, the rows whose date Orbit could not read, and catalog links: on the
+    TIC catalog's name index and the alias file when `names_doc` is given (`matched_on` "catalog"), else on GCAT's
+    names alone ("gcat")."""
+    if names_doc:
+        index, on = catalog_names(names_doc), "catalog"
+    else:
+        index, on = gcat_names(objects or {}), "gcat"
+    pins = alias_pins(alias_entries or [], names_doc)
     rows = []
     for tab in TABS:
         rows += parse_tab(bodies[tab], tab)
     for r in rows:
-        r["gcat"] = {"target": link(r["target"], r["when"], index), "chaser": link(r["chaser"], r["when"], index)}
+        r["gcat"] = {role: link(r[role], r["when"], index, pins, r["date_text"]) for role in ("target", "chaser")}
     unread = [{"tab": r["tab"], "country": r["country"], "date_text": r["date_text"], "chaser": r["chaser"]}
               for r in rows if not r["when"]]
     counts = {t: sum(1 for r in rows if r["tab"] == t) for t in TABS}
+    names_n = sum(len(names(r[role])) for r in rows for role in ("target", "chaser"))
+    linked_n = sum(1 for r in rows for role in ("target", "chaser") for forms in names(r[role])
+                   if any(g["name"] in forms for g in r["gcat"][role]))
     return {"updated": parse_updated(bodies.get("about") or b""), "rows": rows, "unread_dates": unread,
-            "counts": counts}
+            "counts": counts, "matched_on": on, "names_read": (names_doc or {}).get("read"),
+            "links": {"names": names_n, "linked": linked_n, "by_alias": sum(
+                1 for r in rows for role in ("target", "chaser") for g in r["gcat"][role] if g["by"] == "alias")}}

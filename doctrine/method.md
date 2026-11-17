@@ -26,7 +26,7 @@ makes no warnings.
 | `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 | `decay` (`orbit-2.13`) | Space-Track.org TIP messages (USSPACECOM, 18th Space Defense Squadron), class `tip` | The newest reentry prediction for each object messaged in the last 5 days: predicted time, window, the object's place at that time, next report |
-| `rpo` (`orbit-2.7`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
+| `rpo` (`orbit-2.7`, matching `orbit-2.16`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
 
 GCAT republishes about once a day, at no fixed time (file headers seen 13 Nov 2026 00:21 UTC and 15 Nov 10:18
 UTC), so a run reads it within six hours of an update. A run asks each file's Last-Modified date first and downloads
@@ -132,6 +132,18 @@ the card says so.
    (40258), not the Luch of 16 Dec 1994. "Luch", Feb 2019, stays unlinked. Names GCAT spells differently stay
    unlinked (SWF's "SDX01"/"SDX02" are GCAT's SPADEX-A/B; "Luch (Olymp) 2" has no GCAT name match); GSSAP names a
    program, not one satellite.
+   **From orbit-2.16 (17 Nov 2026, catalog build step 5):** names are matched on TIC's satellite catalog instead of
+   GCAT alone: every name any source gives a payload (Space-Track, GCAT, CelesTrak, Wikidata, the alias file), read
+   from the name index `catalog-names.json.gz` on Orbit's public release `catalog` (one request a run; written by
+   `catalog.yml`). The same rules apply: one fitting object or none, launch-date tiebreak, and an object two
+   sources disagree on fits twice, so it is not linked. A reviewed entry in the alias file
+   (`orbit/data/catalog/aliases.yml`: SWF's text, optionally SWF's date text, the object or program, the evidence)
+   links first, marked `by` "alias"; a program entry links the program and its members (GSSAP, 8). If the index
+   cannot be read, the lane matches on GCAT's names and the alias file, with a note (`names_note`). On the 15 Nov
+   rows and the 17 Nov catalog: 99 of 143 names linked (78 before), 6 by the alias file; no link moved to another
+   object; two links dropped because sources disagree: "Cosmos 2536" (Space-Track gives it to 44422, GCAT to 44424)
+   and "Prowler" (Wikidata's item carries USA 67's number 20963; GCAT lists Prowler apart as A04907). Either can be
+   linked only by a reviewed alias entry.
 4. **History, not events.** Nothing goes into the feed or onto the map. A changed layout, or a tab with fewer rows
    than a good reading has, fails the lane, which keeps its last good copy.
 

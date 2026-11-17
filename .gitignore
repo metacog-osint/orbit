@@ -7,3 +7,5 @@ private/
 .claude/
 data/
 .wrangler/
+# the hand-kept alias file (catalog build step 5) is source, not data
+!/orbit/data/

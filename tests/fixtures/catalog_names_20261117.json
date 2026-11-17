@@ -1,0 +1,372 @@
+{
+"schema": "tic-catalog-names/1",
+"read": "2026-11-17",
+"catalog_schema": "tic-catalog/1",
+"sources": {
+"gcat-mcdowell": "2026-11-17",
+"space-track": "2026-11-17",
+"celestrak-satcat": "2026-11-17",
+"wikidata": "2026-11-17"
+},
+"objects": [
+[
+"20963",
+20963,
+"S20963",
+"payload",
+"1990-11-15",
+null,
+"USA 67 (QUASAR 8)",
+[
+"USA 67",
+"QUASAR 8",
+"SDS B-2 GEO",
+"Prowler",
+"Prowler (satellite)"
+]
+],
+[
+"23426",
+23426,
+"S23426",
+"payload",
+"1994-12-16",
+null,
+"LUCH",
+[
+"LUCH",
+"Luch",
+"Al'tair No. 13L"
+]
+],
+[
+"34779",
+34779,
+"S34779",
+"payload",
+"2009-04-14",
+null,
+"COMPASS G2",
+[
+"COMPASS G2",
+"Beidou DW 2",
+"Beidou-2 G2",
+"Beidou C02/C002",
+"BEIDOU-2 G2",
+"34779",
+"Beidou G2",
+"Compass-G2"
+]
+],
+[
+"35815",
+35815,
+"S35815",
+"payload",
+"2009-09-08",
+null,
+"USA 207 (NEMESIS 1)",
+[
+"USA 207",
+"NEMESIS 1",
+"P360/PAN",
+"USA-207",
+"PAN",
+"Nemesis 1",
+"P360",
+"Palladium At Night",
+"Program 360"
+]
+],
+[
+"40099",
+40099,
+"S40099",
+"payload",
+"2014-07-28",
+null,
+"USA 253 (Hornet 1)",
+[
+"USA 253",
+"Hornet 1",
+"AFSPC-4 F1",
+"GSSAP 1",
+"GSSAP-1",
+"USA-253"
+]
+],
+[
+"40100",
+40100,
+"S40100",
+"payload",
+"2014-07-28",
+null,
+"USA 254 (Hornet 2)",
+[
+"USA 254",
+"Hornet 2",
+"AFSPC-4 F2",
+"GSSAP 2",
+"GSSAP-2",
+"USA-254"
+]
+],
+[
+"40101",
+40101,
+"S40101",
+"payload",
+"2014-07-28",
+null,
+"USA 255 (ANGELS)",
+[
+"USA 255",
+"ANGELS",
+"Automated Navigation and Guidance Experiment for Local Space",
+"Autonomous Nanosatellite Guardian for Evaluating Local Space",
+"USA-255"
+]
+],
+[
+"40208",
+40208,
+"S40208",
+"payload",
+"2014-09-17",
+null,
+"USA 257 (NEMESIS 2)",
+[
+"USA 257",
+"NEMESIS 2",
+"USA-257",
+"CLIO",
+"USA 257 (CLIO)",
+"CLIO (USA 257)"
+]
+],
+[
+"40258",
+40258,
+"S40258",
+"payload",
+"2014-09-27",
+null,
+"LUCH (OLYMP)",
+[
+"LUCH (OLYMP)",
+"Luch",
+"Olimp-K No. 11L",
+"Luch No. 794-48-211",
+"LUCH (OLYMP-K 1)",
+"Olymp-K 1",
+"Luch-Kh/Olimp-K 1",
+"Luch-Olymp 1",
+"Olimp-K 11L",
+"Luch-1",
+"Luch (Olymp)"
+]
+],
+[
+"41744",
+41744,
+"S41744",
+"payload",
+"2016-08-19",
+null,
+"USA 270 (Hornet 3)",
+[
+"USA 270",
+"Hornet 3",
+"AFSPC-6 F1",
+"GSSAP 3",
+"GSSAP-3",
+"USA-270"
+]
+],
+[
+"41745",
+41745,
+"S41745",
+"payload",
+"2016-08-19",
+null,
+"USA 271 (Hornet 4)",
+[
+"USA 271",
+"Hornet 4",
+"AFSPC-6 F2",
+"GSSAP 4",
+"GSSAP-4",
+"USA-271"
+]
+],
+[
+"43874",
+43874,
+"S43874",
+"payload",
+"2018-12-24",
+null,
+"TJS-3",
+[
+"TJS-3",
+"Tongxin Jishu Shiyan 3",
+"TJS-X1A"
+]
+],
+[
+"43917",
+43917,
+"S43917",
+"payload",
+"2018-12-24",
+null,
+"TJS-3 AKM",
+[
+"TJS-3 AKM",
+"TJS-3 subsatellite",
+"TJS-X1B"
+]
+],
+[
+"44421",
+44421,
+"S44421",
+"payload",
+"2019-07-10",
+null,
+"COSMOS 2535",
+[
+"COSMOS 2535",
+"Kosmos-2535",
+"Burevestnik No. 1?"
+]
+],
+[
+"44422",
+44422,
+"S44422",
+"payload",
+"2019-07-10",
+"2024-06-21",
+"COSMOS 2536",
+[
+"COSMOS 2536",
+"Kosmos-2537",
+"Naprazheniye No. 2?"
+]
+],
+[
+"44424",
+44424,
+"S44424",
+"payload",
+"2019-07-10",
+null,
+"COSMOS 2538",
+[
+"COSMOS 2538",
+"Kosmos-2536",
+"Nivelir No. 5?"
+]
+],
+[
+"51280",
+51280,
+"S51280",
+"payload",
+"2022-01-21",
+null,
+"USA 324 (Hornet 5)",
+[
+"USA 324",
+"Hornet 5",
+"GSSAP 5",
+"GSSAP-5",
+"USA-324"
+]
+],
+[
+"51281",
+51281,
+"S51281",
+"payload",
+"2022-01-21",
+null,
+"USA 325 (Hornet 6)",
+[
+"USA 325",
+"Hornet 6",
+"GSSAP 6",
+"GSSAP-6",
+"USA-325"
+]
+],
+[
+"55841",
+55841,
+"S55841",
+"payload",
+"2023-03-12",
+null,
+"LUCH (OLYMP) 2",
+[
+"LUCH (OLYMP) 2",
+"Luch-5Kh No. 3",
+"Yenisey-2 No. 13L?",
+"LUCH-5X (OLYMP-K 2)",
+"Olymp-K 2",
+"Luch-Kh/Olimp-K 2",
+"Luch-Olymp 2",
+"Olimp-K 13L",
+"Luch-2",
+"Luch (Olymp) 2"
+]
+],
+[
+"67759",
+67759,
+"S67759",
+"payload",
+"2026-02-12",
+null,
+"USA 582 (Hornet 7)",
+[
+"USA 582",
+"Hornet 7",
+"GSSAP 7",
+"GSSAP-7",
+"USA-582"
+]
+],
+[
+"67760",
+67760,
+"S67760",
+"payload",
+"2026-02-12",
+null,
+"USA 583 (Hornet 8)",
+[
+"USA 583",
+"Hornet 8",
+"GSSAP 8",
+"GSSAP-8",
+"USA-583"
+]
+],
+[
+"A04907",
+null,
+"A04907",
+"payload",
+"1990-11-15",
+null,
+"PROWLER",
+[
+"PROWLER"
+]
+]
+]
+}
