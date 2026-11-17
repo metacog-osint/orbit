@@ -126,6 +126,12 @@ the card says so.
    of that name (spaces and punctuation ignored; Cosmos read as Kosmos, Shi Jian as SJ, Shiyan as SY, Tongxin Jishu
    Shiyan as TJS) was launched by the operation's last year and had not reentered before its first. Several or
    none: no link. 15 Nov 2026: 78 of 143 names linked; "Luch (Olymp)" is not, since GCAT has more than one Luch.
+   **From orbit-2.13 (17 Nov 2026):** of several, the one launched in the 366 days up to the activity's start (its
+   start read at SWF's precision) is taken when it is the only one, marked `by` "launch date" and labelled on the
+   card. On the 16 Nov rows it changes one link: "Luch (Olymp)", Oct 2014 - Present, to GCAT's Luch of 27 Sep 2014
+   (40258), not the Luch of 16 Dec 1994. "Luch", Feb 2019, stays unlinked. Names GCAT spells differently stay
+   unlinked (SWF's "SDX01"/"SDX02" are GCAT's SPADEX-A/B; "Luch (Olymp) 2" has no GCAT name match); GSSAP names a
+   program, not one satellite.
 4. **History, not events.** Nothing goes into the feed or onto the map. A changed layout, or a tab with fewer rows
    than a good reading has, fails the lane, which keeps its last good copy.
 

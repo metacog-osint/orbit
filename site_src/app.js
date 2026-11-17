@@ -636,7 +636,8 @@
     var d = el("div");
     d.appendChild(el("div", "", cellText || "Not given"));
     (links || []).forEach(function (g) {
-      d.appendChild(el("div", "pl", "GCAT: " + g.gcat_name + (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")")));
+      d.appendChild(el("div", "pl", "GCAT: " + g.gcat_name + (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")") +
+        (g.by === "launch date" ? ", the one of that name launched in the year before" : "")));
     });
     return d;
   }

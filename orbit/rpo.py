@@ -216,10 +216,46 @@ def _gcat_year(s: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _gcat_date(s: str) -> date | None:
+    """GCAT's launch date ("2014 Sep 27"); None when it is vaguer than a day."""
+    m = re.match(r"\s*(\d{4})\s+([A-Za-z]{3})\s+(\d{1,2})\b", s or "")
+    try:
+        return date(int(m.group(1)), _mon(m.group(2)), int(m.group(3))) if m else None
+    except (ValueError, KeyError):
+        return None
+
+
+def _start_span(when: dict | None) -> tuple[date, date] | None:
+    """The first and last day the activity's start can mean, at the precision SWF gave it."""
+    st = (when or {}).get("start")
+    if not st:
+        return None
+    y = int(st[:4])
+    if len(st) == 4:
+        return date(y, 1, 1), date(y, 12, 31)
+    m = int(st[5:7])
+    if len(st) == 7:
+        nxt = date(y + (m == 12), m % 12 + 1, 1)
+        return date(y, m, 1), date.fromordinal(nxt.toordinal() - 1)
+    d = date.fromisoformat(st)
+    return d, d
+
+
+def _launched_just_before(fits: list, when: dict | None) -> list:
+    """Of several GCAT payloads with the same name, those launched in the year up to the activity's start
+    (orbit-2.13): SWF's "Luch (Olymp)", Oct 2014 - Present, is the Luch of 27 Sep 2014, not the Luch of 1994."""
+    span = _start_span(when)
+    if not span:
+        return []
+    lo = date.fromordinal(span[0].toordinal() - 366)
+    return [(j, r) for j, r in fits if (d := _gcat_date(r[5])) and lo <= d <= span[1]]
+
+
 def link(cell: str, when: dict | None, index: dict[str, list]) -> list[dict]:
     """GCAT objects for a satellite cell. A name links only when exactly one GCAT payload of that name was launched
     by the activity's last year (or this year if ongoing or undated) and had not reentered before its first year;
-    names that fit none or several are left unlinked."""
+    names that fit none are left unlinked. Of several, the one launched in the year up to the activity's start is
+    taken when it is the only one (`by` "launch date"); otherwise none, rather than a guess."""
     end = (when or {}).get("end")
     last = int(end[:4]) if end else date.today().year
     first = int(when["start"][:4]) if when and when.get("start") else None
@@ -229,12 +265,17 @@ def link(cell: str, when: dict | None, index: dict[str, list]) -> list[dict]:
             fits = [(j, r) for j, r in index.get(_norm(form), [])
                     if (_gcat_year(r[5]) or 0) <= last
                     and not (first and r[8] in GONE and (_gcat_year(r[7]) or 9999) < first)]
+            by = "name"
+            if len(fits) > 1:
+                near = _launched_just_before(fits, when)
+                if len(near) == 1:
+                    fits, by = near, "launch date"
             if len(fits) == 1:
                 j, r = fits[0]
                 if any(o["jcat"] == j for o in out):
                     break  # "ShiJian-21 (SJ-21)": one object, named twice
                 out.append({"name": form, "jcat": j, "norad": r[1] if r[1] not in ("", "-") else None,
-                            "gcat_name": r[4]})
+                            "gcat_name": r[4], "by": by})
                 break
             if len(fits) > 1:
                 break  # several fit: no link rather than a guess

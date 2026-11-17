@@ -3,7 +3,15 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
-**State, 16 Nov 2026, about 10 AM CST: live with `1d6e6ce` (method `orbit-2.11`), pushed on Tom's "Push both"
+**State, 16 Nov 2026, about 9:40 PM CST: live with `665c9ad` (method `orbit-2.13`, predicted reentries), pushed
+on Tom's "Ship it"; update run 44011432924 passed in 1m35s.** Live read 03:38 UTC 17 Nov: lane `decay` ok, 66 TIP
+messages in 5 days, 7 open windows (all Starlink, GCAT-named). Next on branch `feat/rpo-globe-tip`, not yet pushed:
+the RPO launch-date tiebreak (method.md, RPO item 3). RPO pairs on the globe: not built; Orbit holds no element sets
+for the RPO objects (only the private watch list's and recent launches'), so it is left for GEO step 4, which reads
+the GEO region's public element files. GCAT still 15 Nov 10:19:45 GMT at 03:20 UTC 17 Nov (about 41 h; McDowell's
+JSR draft says he is moving into his new library near London; a plausible cause, not stated).
+
+**Earlier state, 16 Nov 2026, about 10 AM CST: live with `1d6e6ce` (method `orbit-2.11`), pushed on Tom's "Push both"
 about 9:21 AM CST; update run 43895370439 passed.** Another session's `3100c21` (warning times) followed it.
 Checked live 15:21-15:45 UTC 16 Nov: `#globe` loads Cesium ion (Bing) tiles in headless Edge and draws paths for
 the 2 listed orbit changes from real Space-Track sets; `/data/archive.json` holds its first day; lane `pairs` ok
@@ -203,8 +211,8 @@ belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules 
   day file and stops querying Space-Track); then step 3 (callouts).
 
 ## Predicted reentries (16-17 Nov 2026, `orbit-2.13`; Tom's "let's get all three items done", about 9:15 PM CST 16 Nov)
-Built on branch `feat/rpo-globe-tip` (worktree `_worktrees\orbit-rpo-tip`). Rules in `doctrine/method.md`
-("Predicted reentries").
+Built on branch `feat/rpo-globe-tip` (worktree `_worktrees\orbit-rpo-tip`); **live with `665c9ad`** (Tom's "Ship
+it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
 - Lane `decay` (`orbit/tip.py`): log in, one Space-Track `tip` query (messages of the last 5 days), log out; not GP,
   so no hourly wait. Newest message per object, GCAT's name and owner joined from the catalog index; snapshot block
   `decay` with `attribution`. Card `#decay` (after the reentries and catalog pair) with the citation at its head;
