@@ -197,8 +197,9 @@ Built on branch `feat/geo-lane` (worktree `_worktrees\orbit-geo-lane`); **pushed
 side", 16 Nov 2026** (Noisefloor's `geo/from-orbit` not merged). Tom accepted the program boundaries on 16 Nov 2026 (`_ideas/space-programs-reorg-2026-11-16.md`): the GEO
 belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules in `doctrine/method.md` ("The GEO region").
 - `orbit/geo_region.py` (standard library port of Noisefloor's `tools/geo_region.py`, rules unchanged), `python
-  tools/orbit.py geo [--day] [--out data/geo] [--upload]`, workflow `geo.yml` at 03:17 and 15:17 UTC (no tic-dispatch
-  slot yet: a hub change). One gp query for every object near GEO and one CelesTrak GEO-group request a run; files on
+  tools/orbit.py geo [--day] [--out data/geo] [--upload]`, workflow `geo.yml`, started by the hub's `tic-dispatch` at
+  03:15 and 15:15 UTC (hub `23c9f5c`, deployed 03:29 UTC 17 Nov 2026), with its own cron at 03:17 and 15:17 UTC as the
+  fallback (it skips when today's file is under an hour old). First pull: run 44008127067, 03:09 UTC 17 Nov 2026. One gp query for every object near GEO and one CelesTrak GEO-group request a run; files on
   public releases `geo-YYYY`: `<day>.geo-region.json` and `geo-elements-YYYY-MM.json.gz`.
 - Shared account: `spacetrack.shared_gp_busy(now, get, shared)`; the update run checks Noisefloor and `geo.yml`
   (`FOR_MANEUVER`), `geo.yml` checks Noisefloor and the update run (`FOR_GEO`). The step names in both workflows are
