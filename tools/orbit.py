@@ -46,7 +46,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (archive, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (archive, catalog, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
                    news, rpo, spacetrack, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -811,6 +811,32 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     return 0
 
 
+def catalog_local(raw_dir: Path, out: Path) -> int:
+    """Build the catalog from the newest GCAT copy of each table in data/raw (gzipped, as `collect` keeps them)."""
+    def newest(name: str) -> bytes | None:
+        files = sorted((raw_dir / f"gcat-{name}").glob("*"), key=lambda p: p.stat().st_mtime)
+        if not files:
+            return None
+        body = files[-1].read_bytes()
+        return gzip.decompress(body) if files[-1].name.endswith(".gz") else body
+    bodies = {n: newest(n) for n in (*gcat.CATALOGS, "orgs")}
+    missing = [n for n, b in bodies.items() if b is None]
+    if missing:
+        print(f"No GCAT copy in {raw_dir} for: {', '.join(missing)}. Run collect first.")
+        return 1
+    tables = {n: gcat.parse_tsv(bodies[n]) for n in gcat.CATALOGS}
+    orgs = gcat.orgs_table(gcat.parse_tsv(bodies["orgs"]))
+    stamp = gcat.updated_stamp(bodies["satcat"])
+    doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    out.write_bytes(gzip.compress(raw, 6) if out.name.endswith(".gz") else raw)
+    c = doc["counts"]
+    print(f"Catalog from GCAT ({stamp}): {c['numbered']} numbered, {c['unnumbered']} without a number, "
+          f"{c['with_disagreements']} with disagreements; {len(raw) / 1e6:.1f} MB JSON -> {out}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -829,7 +855,13 @@ def main(argv=None) -> int:
     gp.add_argument("--day", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     gp.add_argument("--out", default=str(ROOT / "data" / "geo"))
     gp.add_argument("--upload", action="store_true", help="read and write the public release geo-YYYY (GitHub only)")
+    cg = sub.add_parser("catalog", help="TIC's satellite catalog (tic-catalog/1) from the GCAT copies already in "
+                                        "data/raw; local only, no request (build step 2)")
+    cg.add_argument("--raw", default=str(ROOT / "data" / "raw"))
+    cg.add_argument("--out", default=str(ROOT / "data" / "catalog" / "catalog.json.gz"))
     args = ap.parse_args(argv)
+    if args.cmd == "catalog":
+        return catalog_local(Path(args.raw), Path(args.out))
     if args.cmd == "geo":
         return geo_pull(args.day, Path(args.out), args.upload)
 

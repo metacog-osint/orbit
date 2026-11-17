@@ -1,0 +1,8 @@
+#Code	UCode	StateCode	Type	Class	TStart	TStop	ShortName	Name	Location	Longitude	Latitude	Error	Parent	ShortEName	EName	UName
+# Updated 2026 Nov 13 0020:25
+AFRL	AFRL	US	O/LA/PL/S	D	1997 Oct	2026 Jul	AFRL/RV	US Air Force Research Laboratories/RV (Space Vehicles Directorate)	Kirtland AFB, Albuquerque, New Mexico	   -106.6100 	   35.0400 	0.0200 	USAF	AFRL/RV	-	US Air Force Research Laboratories/RV (Space Vehicles Directorate)
+AFSPC	AFSPC	US	O/LA/S	D	1982 Sep  1	2019 Dec 20	USAF AFSPC	US Air Force Space Command	Peterson AFB, Colorado	   -104.7000 	   38.8200 	0.0200 	USAF	-	-	US Air Force Space Command
+CASC	CASC	CN	O/LA/LV/PL	C	1999 Jul	-	CASC	Zhongguo hangtian keji jituangongsi	Beijing, Zhongguo	    116.3800 	   39.9200 	0.0200 	-	China Aerospace	China Aerospace Corp	中国航天科技集团公司
+FSB	KGB	RU	O	D	1995	-	FSB	Federal'naya sluzhba bezopasnosti Rossiyskoy Federatsii	Moskva	     37.6200 	   55.7500 	0.0200 	-	-	-	Федеральная служба безопасности Российской Федерации
+NROC	NRO	US	O/LA	D	1994	-	NRO	National Reconnaissance Office	Chantilly, Virginia	    -77.4000 	   38.8800 	0.0200 	-	-	-	National Reconnaissance Office
+USSF	AFSPC	US	O/LA/PL/LS/S	D	2019 Dec 20	-	USSF	United States Space Force	Washington, DC:Pentagon	    -77.0600 	   38.8700 	0.0200 	-	-	-	United States Space Force
