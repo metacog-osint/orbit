@@ -1,6 +1,6 @@
 {
   "program": "orbit",
-  "version": "2.4",
+  "version": "2.5",
   "sources": [
     {
       "id": "gcat-mcdowell",
@@ -105,18 +105,138 @@
       "url": "https://www.space-track.org/",
       "licence": "Account required. User Agreement (read 14 Nov 2026): no transfer of data 'including the analysis of data' 'without prior express approval'. Space-Track's documentation (read 14 Nov 2026): 'USSPACECOM has provided express blanket approval for transfer/redistribution of basic SSA data and services ... conditioned on appropriate citation', and 'Publications of analysis based on USSPACECOM data also require appropriate citations.' Credit wording: doctrine/spacetrack-disclaimer.md, approved by Tom 14 Nov 2026.",
       "use": "ingest",
-      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. The watch list's raw element sets are not republished: the page shows changes and positions derived from them, credited as the disclaimer gives. From 17 Nov 2026 (orbit-2.13) also its TIP messages (lane decay, orbit/tip.py): one query a run, the newest reentry prediction per object, published with the citation; reentry and decay data are named among the basic SSA data the blanket approval covers. From 16 Nov 2026 also the GEO region (orbit/geo_region.py, moved from Noisefloor): one GP query for every object near GEO, published with the citation on the public releases geo-YYYY, as Noisefloor published it (Tom, 15 Nov 2026). Grade is Orbit's call, to be confirmed by Tom.",
+      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. The watch list's raw element sets are not republished: the page shows changes and positions derived from them, credited as the disclaimer gives. From 17 Nov 2026 (orbit-2.13) also its TIP messages (lane decay, orbit/tip.py): one query a run, the newest reentry prediction per object, published with the citation; reentry and decay data are named among the basic SSA data the blanket approval covers. From 16 Nov 2026 also the GEO region (orbit/geo_region.py, moved from Noisefloor): one GP query for every object near GEO, published with the citation on the public releases geo-YYYY, as Noisefloor published it (Tom, 15 Nov 2026). Grade is Orbit's call, to be confirmed by Tom. Catalog (design 17 Nov 2026, build step 3, not built): SATCAT once a day after 17:00 UTC and DECAY once per object, both basic SSA data under the same blanket approval (space-track.org/documentation, read 16 Nov 2026: 'Basic SSA data are Two-Line Elements (TLEs) and Orbital Mean-element Messages (OMMs); SATCAT; and Satellite Decay and Reentry Data'). Identity keys, decay and the first-ranked name.",
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": false
     },
     {
-      "id": "celestrak-gp",
-      "name": "CelesTrak GP element sets",
-      "url": "https://celestrak.org/NORAD/elements/",
-      "licence": "Not yet checked",
+      "id": "celestrak-satcat",
+      "name": "CelesTrak (T.S. Kelso): SATCAT records (names, international designators, owner, status)",
+      "url": "https://celestrak.org/satcat/records.php",
+      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 Nov 2026, read 16 Nov 2026) states no licence, redistribution or credit terms; it asks for one download per update and speaks of 'our long tradition of making data freely available to all users'. Ingested with credit, on the footing Tom chose for Launch Library 2 (Tom, 16 Nov 2026). Credit: 'CelesTrak SATCAT (T.S. Kelso, celestrak.org)'.",
       "use": "excluded",
-      "note": "Candidate source for a public element-set history archived by Orbit going forward."
+      "planned_use": "ingest",
+      "grade": "A2",
+      "independence_group": "usspacecom",
+      "commercial_ok": "unknown",
+      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Build step 4: the full SATCAT once a week. Names rank third after Space-Track and GCAT; CelesTrak often carries the programme name in brackets, e.g. 'USA 257 (CLIO)', 'LUCH-5X (OLYMP-K 2)' (read 16 Nov 2026)."
+    },
+    {
+      "id": "wikidata",
+      "name": "Wikidata: satellites carrying P377 (Satellite Catalog Number) and P247 (COSPAR ID), with labels and Wikipedia links",
+      "url": "https://query.wikidata.org/",
+      "licence": "CC0: structured data in the main namespace 'is released into the public domain under Creative Commons Zero' (wikidata.org/wiki/Wikidata:Licensing, read 16 Nov 2026). Credited anyway as 'Wikidata (CC0)' with the item's Q-id.",
+      "use": "excluded",
+      "planned_use": "ingest",
+      "grade": "C3",
+      "independence_group": "wikimedia",
+      "commercial_ok": true,
+      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Build step 4: one SPARQL query a week. 7,518 items carried P377 on 16 Nov 2026. Names rank after CelesTrak, before SWF (Tom, 16 Nov 2026). Grade is Orbit's proposal: open editing (C), names usually match other catalogs (3)."
+    },
+    {
+      "id": "wmo-oscar-space",
+      "name": "WMO OSCAR/Space: Earth-observation and weather satellites (operator, programme, orbit, status)",
+      "url": "https://space.oscar.wmo.int/",
+      "licence": "'All information available on these pages may be used and redistributed freely, … any publication using this information should acknowledge WMO' (space.oscar.wmo.int/pages/disclaimer, read 16 Nov 2026); '© World Meteorological Organization 2011-2026'; no warranty. Credit: 'WMO OSCAR/Space'.",
+      "use": "excluded",
+      "planned_use": "ingest",
+      "grade": "A2",
+      "independence_group": "wmo",
+      "commercial_ok": "unknown",
+      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Added by Tom, 16 Nov 2026. REST API (space.oscar.wmo.int/apidoc/); endpoints and fields not read yet. Ranks with GCAT for operator, role and status of weather and Earth-observation satellites (declared by the agencies through WMO)."
+    },
+    {
+      "id": "mccants-classfd",
+      "name": "Mike McCants: classified elements (classfd.zip) from hobbyist observations",
+      "url": "https://www.mmccants.org/tles/index.html",
+      "licence": "No terms, copyright or credit text on the page (read 16 Nov 2026). Tom, 16 Nov 2026: name and number pairs used as attributed aliases, credited 'Mike McCants, classified elements, mmccants.org'. Element files are not republished.",
+      "use": "excluded",
+      "planned_use": "ingest",
+      "grade": "C3",
+      "independence_group": "hobbyist-observers",
+      "commercial_ok": "unknown",
+      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. classfd.zip is 'updated whenever I receive and process new observations'; read daily at most. Grade is Orbit's proposal."
+    },
+    {
+      "id": "gunter-space-page",
+      "name": "Gunter's Space Page (G.D. Krebs): spacecraft and programme pages",
+      "url": "https://space.skyrocket.de/",
+      "licence": "Terms of use (space.skyrocket.de/about/terms-of-use.htm, updated 27 Jul 2026, read 16 Nov 2026): 'All rights reserved'; no republishing or 'systematic extraction' without written consent; 'Automated scraping … prohibited'; use 'to inform your own analysis, research, or reports' allowed; citations need full page title, publisher, canonical URL and retrieval date. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "use": "link",
+      "grade": "B2",
+      "independence_group": "gunter",
+      "commercial_ok": false
+    },
+    {
+      "id": "orbital-focus",
+      "name": "Orbital Focus (Robert Christy): launch lists, GEO and sun-synchronous lists, manoeuvre histories",
+      "url": "https://orbitalfocus.uk/",
+      "licence": "'Copyright © Robert Christy, all rights reserved'; 'Reproduction of this web page or any of its content without permission from the website owner is prohibited' (orbitalfocus.uk, read 16 Nov 2026). Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "use": "link",
+      "grade": "B2",
+      "independence_group": "orbital-focus",
+      "commercial_ok": false
+    },
+    {
+      "id": "unoosa-register",
+      "name": "UN Register of Objects Launched into Outer Space (UNOOSA): registration documents (ST/SG/SER.E) and the Online Index",
+      "url": "https://www.unoosa.org/oosa/en/spaceobjectregister/index.html",
+      "licence": "UN terms (unoosa.org/oosa/en/aboutus/terms-of-use.html, read 16 Nov 2026): 'personal, non-commercial use, without any right to resell or redistribute', not 'to compile or create derivative works'. The Online Index was unavailable (IT changes) on 16 Nov 2026. Tom, 16 Nov 2026: a state's registered name is shown as declared by that state, one object at a time, with the document symbol and a link; ids, dates and links otherwise; no bulk table.",
+      "use": "link",
+      "grade": "A1",
+      "independence_group": "un",
+      "commercial_ok": false
+    },
+    {
+      "id": "itu-space-explorer",
+      "name": "ITU Space Explorer: satellite network filings, notices and regulatory status",
+      "url": "https://www.itu.int/go/ITUSpaceExplorer",
+      "licence": "ITU website terms (itu.int/en/about/Pages/terms-of-use.aspx, read 16 Nov 2026): download, copy and use 'for personal, educational, or non-commercial purposes' with the source acknowledged; no reproduction or distribution without written permission. Network name, slot and status cited per object with a link; no bulk tables.",
+      "use": "link",
+      "grade": "A2",
+      "independence_group": "itu",
+      "commercial_ok": false
+    },
+    {
+      "id": "wikipedia",
+      "name": "Wikipedia articles on satellites, programmes, operators and launch lists",
+      "url": "https://en.wikipedia.org/",
+      "licence": "Text CC BY-SA 4.0 (and GFDL): reused text must stay CC BY-SA, attributed by a link to the page and a licence notice (en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content, read 16 Nov 2026). No text is copied: names reach the catalog through Wikidata (CC0); the article is an evidence link.",
+      "use": "link",
+      "grade": "C3",
+      "independence_group": "wikimedia",
+      "commercial_ok": true
+    },
+    {
+      "id": "nssdca",
+      "name": "NASA NSSDCA Master Catalog: spacecraft records",
+      "url": "https://nssdc.gsfc.nasa.gov/nmc/SpacecraftQuery.jsp",
+      "licence": "NASA work, US Government (17 U.S.C. 105); NASA's notices page holds no copyright text (read 16 Nov 2026). Spacecraft display pages returned 'An error has occurred' for 2018-110A, 2014-055A and 1994-082A on 16 Nov 2026, so record fields were not seen. Cited per object.",
+      "use": "link",
+      "grade": "A2",
+      "independence_group": "nasa",
+      "commercial_ok": true
+    },
+    {
+      "id": "seesat-l",
+      "name": "SeeSat-L mailing list archives (visual satellite observers)",
+      "url": "https://www.satobs.org/seesat/",
+      "licence": "No terms on the archive page (read 16 Nov 2026); posts are their authors'. Facts cited with author, date and a link to the post; no text copied.",
+      "use": "link",
+      "grade": "C3",
+      "independence_group": "hobbyist-observers",
+      "commercial_ok": "unknown"
+    },
+    {
+      "id": "operator-pages",
+      "name": "Operator, programme-owner and manufacturer pages (e.g. NSMC for Fengyun, Geespace for its constellation)",
+      "url": "https://orbit.theintelligence.company/",
+      "licence": "Each site's own terms, not checked as a class. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations'). The main source of declared names and roles.",
+      "use": "link",
+      "grade": "A2",
+      "independence_group": "operators",
+      "commercial_ok": "unknown"
     }
   ]
 }

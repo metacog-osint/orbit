@@ -231,6 +231,26 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
   within about 100 km of TIP's point).
 
+## TIC satellite catalog (build steps 1-2, 17 Nov 2026; not committed, nothing published)
+Design and Tom's answers: `D:\Projects\_ideas\sat-catalog-design-2026-11.md` (section 9). Branch `feat/sat-catalog`,
+worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
+- **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
+  ingest (`use` `excluded` with `planned_use` `ingest` until each build step lands, so the page lists only live
+  sources) for `celestrak-satcat`, `wikidata`, `wmo-oscar-space`, `mccants-classfd`; `use` `link` (cited per object,
+  never scraped) for `gunter-space-page`, `orbital-focus`, `unoosa-register`, `itu-space-explorer`, `wikipedia`,
+  `nssdca`, `seesat-l`, `operator-pages`. Space-Track's note adds SATCAT and DECAY. The stale duplicate
+  `celestrak-gp` entry ("Not yet checked", excluded) was removed; the live one stays.
+- **Step 2:** `orbit/catalog.py` (schema `tic-catalog/1`) from GCAT alone; `python tools/orbit.py catalog`
+  builds it locally from the GCAT copies in `data/raw` (no request) into `data/catalog/catalog.json.gz`. Keys:
+  NORAD numbers from satcat and satcat100k only; auxcat and tmpcat stay keyed by JCAT (auxcat's Satcat cell cites a
+  related US number, e.g. A00002 -> 00003, and is not a claim to it). Every value is {value, source, ref, read,
+  basis}; names from Name, PLName and AltNames (`:JP`/`:RA` kept as `qualifier`, GCAT's `?` as `uncertain`);
+  display rule "USA 253 (Hornet 1)" when the first name is a designation. On the 13 Nov GCAT copy: 70,731 numbered,
+  12,745 without a number, 0 disagreements (one source), 95.5 MB JSON, 5.2 MB gzipped. Tests `tests/test_catalog.py`
+  (18, on GCAT rows of the test objects); 167 tests pass, check PASS.
+- Next: step 3 (Space-Track SATCAT daily after 17:00 UTC, DECAY), each on Tom's yes. Before publishing (step 6),
+  shrink the file: records repeat source, read and ref.
+
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled
 launches at the pad; one reentry summary (off-map); catalog-change items (new entries from launches over 30 days
