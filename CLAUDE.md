@@ -355,8 +355,7 @@ disclaimer drafted as needed." No written question to Space-Track first. The dra
 - **Review fixes, 16 Nov 2026 (branch `fix/node-wrap-and-breakups`, pushed to `main` on Tom's "Yes, ship both"):** the node residual is wrapped
   after the expected precession is taken off (a 30-day gap at 28.5 deg had listed 22,902 m/s); a pair needing more
   than the orbital speed is counted in `implausible`, never listed. GCAT statuses E (exploded) and C (collided)
-  are no longer reentries: `gcat.recent_breakups` puts them in the snapshot's `breakups`; no card or feed item yet
-  (which requirement id it serves is Tom's call).
+  are no longer reentries: `gcat.recent_breakups` puts them in the snapshot's `breakups`; a feed item per object since `orbit-2.14` (16 Nov 2026, Tom's yes: new requirement OR-EEI-5 under OR-PIR-2, beside OR-EEI-4; `feed._breakup_item`, id `orbit:breakup:<jcat>`, routine, off the map, the 30 days `recent_breakups` keeps, at most 10). No page card yet; built in worktree `_worktrees\orbit-breakups`, branch `feed/breakups-or-eei-5`.
 
 Earlier notes (13 Nov 2026), kept for the record:
 

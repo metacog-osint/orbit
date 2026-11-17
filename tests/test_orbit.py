@@ -714,6 +714,21 @@ class Registers(unittest.TestCase):
             errs = [m for _, sev, m in contract.check(f, regs) if sev == "error"]
             self.assertEqual(errs, [], f["properties"]["id"])
 
+    def test_breakups_are_feed_items_under_or_eei_5(self):
+        b = {"jcat": "S2", "norad": 99002, "name": "TEST S2", "type": "rocket stage", "launch_tag": "2020-001",
+             "launch_date": "2020-01-01", "parent": "", "state": "CN", "country": "CN", "owner": "", "status": "E",
+             "op_orbit": "LEO/I", "breakup_date": "2026-11-10", "breakup_time": None, "breakup_uncertain": False}
+        doc = feed.build_feed({"generated_at": "2026-11-16T18:00:00Z", "lanes": {}, "breakups": [b]})
+        (f,) = [x for x in doc["features"] if x["properties"]["id"].startswith("orbit:breakup:")]
+        p = f["properties"]
+        self.assertEqual((p["id"], p["requirement_ids"], p["tier"], p["countries"]),
+                         ("orbit:breakup:S2", ["OR-EEI-5"], "routine", ["CN"]))
+        self.assertIsNone(f["geometry"])
+        self.assertIn("exploded (broke up in orbit)", p["title"])
+        self.assertIn("not a reentry", p["summary"])
+        regs = registers.ids(ROOT / "doctrine")
+        self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
+
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
               "from": "2026-10-12T18:06:12Z", "to": "2026-11-02T06:44:40Z", "dv_ms": 0.887, "dominant": "in-track",

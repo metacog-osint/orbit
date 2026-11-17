@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.13"
+METHOD = "orbit-2.14"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -190,6 +190,38 @@ def _reentry_item(rows: list[dict], generated: str, accessed: str, since: str) -
     return {"type": "Feature", "geometry": None, "properties": props}
 
 
+BREAKUP_WORD = {"E": "exploded (broke up in orbit)", "C": "collided"}
+
+
+def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
+    """One object GCAT marks as broken up (E) or collided (C) in the last 30 days (OR-EEI-5, Tom's yes 16 Nov 2026).
+    Kept apart from reentries since orbit-2.12: the object did not come down; its fragments are catalogued anew."""
+    word = BREAKUP_WORD.get(b.get("status"), "ended in orbit")
+    when = b["breakup_date"] + (" (GCAT marks the date uncertain)" if b.get("breakup_uncertain") else "")
+    parent = f", from {b['parent']}" if b.get("parent") else ""
+    launched = f" Launched {b['launch_date']} ({b['launch_tag']})." if b.get("launch_date") else ""
+    props = {
+        **_base(generated, 48),
+        "id": f"orbit:breakup:{b['jcat']}",
+        "title": f"{b['name']} ({b['type']}, {b['state']}) {word}, {b['breakup_date']} (GCAT)",
+        "summary": (f"GCAT gives {b['name']} ({b['jcat']}{', NORAD ' + str(b['norad']) if b.get('norad') else ''}"
+                    f"{parent}) status {b.get('status')}: {word}, on {when}.{launched} Orbit class "
+                    f"{b.get('op_orbit') or 'not given'}. This is GCAT's record, not a reentry; any fragments get "
+                    "their own catalog entries, which Orbit's catalog-change items count. GCAT's dates are often "
+                    "approximate and are revised as reports arrive."),
+        "data_as_of": accessed,
+        "countries": _countries(b.get("country")),
+        "requirement_ids": ["OR-EEI-5"],
+        "coverage_fraction": 1.0,
+        "precision_class": "none",
+        "measures": {"status": b.get("status"), "breakup_date": b["breakup_date"],
+                     "uncertain": bool(b.get("breakup_uncertain"))},
+        "visual": {"type": "table", "url": f"{SITE}/"},   # no breakups card on the page yet
+        "sources": [{**SRC_GCAT, "accessed_at": accessed}],
+    }
+    return {"type": "Feature", "geometry": None, "properties": props}
+
+
 def _late_item(g: dict, generated: str, accessed: str, prev_at: str) -> dict:
     types = ", ".join(f"{n} {t}" for t, n in sorted(g["by_type"].items(), key=lambda kv: -kv[1]))
     names = ", ".join(f"{o['name']} ({o['jcat']})" for o in g["objects"][:10])
@@ -310,6 +342,8 @@ def build_feed(snap: dict) -> dict:
     rows = [r for r in snap.get("reentries") or [] if r["reentry_date"] >= re_since]
     if rows:
         features.append(_reentry_item(rows, generated, cat_at, re_since))
+    for b in (snap.get("breakups") or [])[:10]:   # GCAT E and C, last 30 days (gcat.recent_breakups)
+        features.append(_breakup_item(b, generated, cat_at))
 
     changes = snap.get("catalog_changes") or {}
     # Change items stay in the feed for two days after the reading that found them.
