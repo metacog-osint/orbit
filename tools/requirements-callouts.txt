@@ -1,0 +1,7 @@
+# tools/geo_callouts.py only (step 3 of doctrine/geo-move-plan.md; pinned at build time, decided 16 Nov 2026).
+# Orbit's collector and live lanes stay standard library. These are the versions the port was checked with on
+# 17 Nov 2026 (byte-identical to Noisefloor's run on the same input; score-v1 identical). Both have Python 3.12
+# wheels for the Linux runners (numpy cp312 manylinux, sgp4 cp311-abi3).
+#   pip install -r tools/requirements-callouts.txt
+numpy==2.5.4
+sgp4==2.27
