@@ -232,7 +232,7 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
   within about 100 km of TIP's point).
 
-## TIC satellite catalog (build steps 1-3, 17 Nov 2026; merged to main, published on release `catalog`)
+## TIC satellite catalog (build steps 1-4 live 17 Nov 2026, published on release `catalog`; step 5 on a branch)
 Design and Tom's answers: `D:\Projects\_ideas\sat-catalog-design-2026-11.md` (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
 - **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
@@ -295,10 +295,31 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   field `ops_status` (FLAGGED; compared only where two sources give one), Wikidata names with the Q-id as ref,
   two items on one number noted as `wikidata_items`. `python tools/orbit.py catalog-sources` reads locally;
   `catalog --sources DIR` builds with them. In `catalog.yml` (drafted, not live) both are read only in the run that
-  makes the Space-Track read; replies ride the Actions cache, the state rides the release (`catalog-sources.json`),
+  makes the Space-Track read; replies ride the Actions cache, the state rides the release (`catalog-sources.json`).
+  **Merged and live 17 Nov 2026 as `ffb320c`** (update run 44154083184 passed); first scheduled read with it: 18 Nov
+  after 17:23 UTC (17 Nov's read was made by hand before the merge, so no CelesTrak or Wikidata read that day),
   and the release notes are re-set each upload with both credits. `doctrine/sources.json` 2.7: both `ingest`
   (no page lane, so the page does not list them). WMO OSCAR/Space not built: no NORAD number or COSPAR ID in its
-  API, so it cannot be matched on an id (Tom decides). Real read and counts: design note section 10.
+  API, so it cannot be matched on an id. **Tom, 17 Nov 2026:** a hand-reviewed slug-to-NORAD link file, the 414
+  operational satellites first (not built). Real read and counts: design note section 10.
+- **Step 5 (17 Nov 2026, Tom's "Step 5: aliases + rpo"; branch `feat/catalog-step5`, worktree
+  `_worktrees\orbit-catalog-step5`; not committed):** `orbit/aliases.py` reads `orbit/data/catalog/aliases.yml`
+  (standard library, a strict YAML subset: errors name the line; `.gitignore` re-includes `orbit/data/`). Entries:
+  a name (`norad` or `jcat`, `name`, `basis`, `source` from doctrine/sources.json, `read`, `evidence` list, optional
+  `swf_key` and `swf_date`) or a program (`swf_key`, `program`, `members`); `withdrawn` + `reason` keeps an entry and
+  skips it; `swap` entries are refused until built. Five entries: 55841, 40258, 43917 (TJS-3 AKM), 40208 (CLIO), and
+  program GSSAP (8 members). `catalog.build(..., alias_entries=)` adds name records (source `aliases`, `cited` the
+  claim's source) and `program` records; `catalog.names_index` writes `catalog-names.json.gz` (schema
+  `tic-catalog-names/1`, every payload plus alias targets: 31,658 rows, 0.87 MB gzipped), uploaded by `catalog.yml`
+  with the catalog (code only, no workflow change). Lane `rpo` (method `orbit-2.16`) reads that asset from the
+  release (one request) and matches on every source's names plus alias pins; without it, GCAT's names plus pins, with
+  `names_note`. Card labels "Catalog: ..." and "Program GSSAP: 8 objects". Real comparison (SWF tabs of 15 Nov,
+  catalog of 17 Nov): 99 of 143 names linked (78 before), 6 by alias, none moved to another object; dropped where
+  sources disagree: Cosmos 2536 (Space-Track 44422, GCAT 44424) and Prowler (Wikidata 20963, GCAT A04907). Until
+  the first `catalog.yml` run with this code (18 Nov), the lane falls back to GCAT plus the alias file. Tests
+  `tests/test_aliases.py` (16, on the real alias file, SWF fixtures and 22 real name-index rows in
+  `tests/fixtures/catalog_names_20261117.json`); 229 tests pass, check PASS; card checked in the browser pane on a
+  local build (99 links, no console errors).
 
 ## Feed (`site/data/feed.geojson`)
 Launches of the last 7 days at the launch site (GCAT site coordinates, precision `approximate`); scheduled

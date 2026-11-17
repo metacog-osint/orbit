@@ -2,7 +2,8 @@
 
 Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md (Tom's answers in its section 9). Build step 2: GCAT.
 Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Build step 4 (17 Nov 2026): CelesTrak
-SATCAT and Wikidata (orbit/catsources.py). Later steps add WMO OSCAR/Space and the hand-kept alias file; each arrives
+SATCAT and Wikidata (orbit/catsources.py). Build step 5 (17 Nov 2026): the hand-kept alias file (orbit/aliases.py)
+and a name index for readers (`names_index`). WMO OSCAR/Space comes through a reviewed link file; each source arrives
 as more value records on the same entries, ranked by `RANK`.
 
 Rules kept here:
@@ -17,7 +18,7 @@ from __future__ import annotations
 
 import re
 
-from . import catsources, gcat, stcat
+from . import aliases, catsources, gcat, stcat
 
 SCHEMA = "tic-catalog/1"
 
@@ -423,10 +424,71 @@ def swaps(numbered: dict) -> list[dict]:
     return out
 
 
+def add_aliases(numbered: dict, unnumbered: dict, entries: list[dict]) -> dict:
+    """The alias file's live entries (orbit/aliases.py, build step 5): a name entry adds a name record (source
+    `aliases`, the cited source kept as `cited`) to its object; a program entry adds a `program` record to each
+    member. An entry naming an object the catalog does not hold is counted in `not_in_catalog`, never invented."""
+    counts = {"names": 0, "programs": 0, "not_in_catalog": []}
+    for e in entries:
+        ref = f"aliases.yml:{e['line']}"
+        if "program" in e:
+            counts["programs"] += 1
+            for m in e["members"]:
+                obj = numbered.get(str(m))
+                if obj is None:
+                    counts["not_in_catalog"].append(str(m))
+                    continue
+                obj.setdefault("program", []).append(
+                    rec(e["program"], aliases.SOURCE, e["read"], e["basis"], ref, cited=e["source"]))
+            continue
+        key = aliases.key_of(e)
+        obj = numbered.get(key) or unnumbered.get(key)
+        if obj is None:
+            counts["not_in_catalog"].append(key)
+            continue
+        obj["names"].append(aliases.name_record(e))
+        counts["names"] += 1
+        finish(obj)
+    return counts
+
+
+NAMES_SCHEMA = "tic-catalog-names/1"
+
+
+def _first(e: dict, field: str):
+    recs = sorted(e.get(field) or [], key=lambda r: _rank(r["source"]))
+    return recs[0]["value"] if recs else None
+
+
+def names_index(doc: dict, keys: set[str] | None = None) -> dict:
+    """A small index for readers that match names (Orbit's `rpo` lane): every payload, numbered or not, plus any
+    object in `keys` (the alias file's), as [key, norad, jcat, type, launch date, gone date, display name, names].
+    Gone date: the best-ranked decay date when the best-ranked source says the object has left orbit ("" when it
+    gives no date), None while in orbit."""
+    rows = []
+    keys = keys or set()
+    for group in ("objects", "unnumbered"):
+        for key, e in doc[group].items():
+            if e["type"] != "payload" and key not in keys:
+                continue
+            gone = (_first(e, "decay_date") or "") if _first(e, "decayed") else None
+            seen, ns = set(), []
+            for n in sorted(e["names"], key=lambda r: _rank(r["source"])):
+                if n["value"] not in seen:
+                    seen.add(n["value"])
+                    ns.append(n["value"])
+            rows.append([key, e.get("norad"), e.get("jcat"), e["type"], _first(e, "launch_date"), gone, e.get("name"),
+                         ns])
+    return {"schema": NAMES_SCHEMA, "read": doc["read"], "catalog_schema": doc["schema"],
+            "sources": {s: v.get("read") for s, v in doc["sources"].items()}, "objects": rows}
+
+
 def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: str | None = None,
-          spacetrack: dict | None = None, celestrak: dict | None = None, wikidata: dict | None = None) -> dict:
+          spacetrack: dict | None = None, celestrak: dict | None = None, wikidata: dict | None = None,
+          alias_entries: list[dict] | None = None) -> dict:
     """`spacetrack`: {"satcat": rows, "decay": every DECAY message held, "read": 'YYYY-MM-DD', "read_at": ...}.
-    `celestrak`, `wikidata`: {"rows": ..., "read": 'YYYY-MM-DD', "read_at": ...}, as catsources.load gives them."""
+    `celestrak`, `wikidata`: {"rows": ..., "read": 'YYYY-MM-DD', "read_at": ...}, as catsources.load gives them.
+    `alias_entries`: the alias file's live entries (aliases.load)."""
     numbered, unnumbered = from_gcat(tables, orgs, read)
     sources = {GCAT: {"read": read, "updated": gcat_updated, "citation": gcat.CITATION}}
     st_counts = None
@@ -442,6 +504,10 @@ def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: st
         more[WD] = add_wikidata(numbered, wikidata["rows"], wikidata["read"])
         sources[WD] = {"read": wikidata["read"], "read_at": wikidata.get("read_at"),
                        "citation": catsources.WD_CITATION}
+    if alias_entries:
+        more[aliases.SOURCE] = add_aliases(numbered, unnumbered, alias_entries)
+        sources[aliases.SOURCE] = {"read": max(e["read"] for e in alias_entries), "entries": len(alias_entries),
+                                   "file": "orbit/data/catalog/aliases.yml"}
     flags: dict = {}
     for e in numbered.values():
         for d in e["disagreements"]:

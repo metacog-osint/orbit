@@ -635,9 +635,17 @@
   function rpoSats(cellText, links) {
     var d = el("div");
     d.appendChild(el("div", "", cellText || "Not given"));
+    var on = ((snap && snap.rpo) || {}).matched_on === "catalog" ? "Catalog" : "GCAT";
     (links || []).forEach(function (g) {
-      d.appendChild(el("div", "pl", "GCAT: " + g.gcat_name + (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")") +
-        (g.by === "launch date" ? ", the one of that name launched in the year before" : "")));
+      if (g.program) {
+        d.appendChild(el("div", "pl", "Program " + g.program + ": " + g.members.length + " objects (" +
+          g.members.join(", ") + "), from the alias file"));
+        return;
+      }
+      d.appendChild(el("div", "pl", on + ": " + (g.cat_name || g.gcat_name) +
+        (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")") +
+        (g.by === "launch date" ? ", the one of that name launched in the year before" :
+          g.by === "alias" ? ", from the alias file" : "")));
     });
     return d;
   }
@@ -693,7 +701,14 @@
           return u.country + ", " + u.date_text + ", " + (u.chaser || "not given");
         }).join("; ") + ".");
     }
-    bits.push("Categories, purposes and spans are SWF's; a GCAT match is Orbit's, by name and launch date.");
+    if (rp.matched_on === "catalog") {
+      bits.push("Categories, purposes and spans are SWF's. A catalog match is Orbit's: on every name TIC's " +
+        "satellite catalog holds (Space-Track, GCAT, CelesTrak, Wikidata) and launch date, or a reviewed entry " +
+        "in Orbit's alias file; where two objects fit, none is shown." +
+        (rp.links ? " " + rp.links.linked + " of " + rp.links.names + " names matched." : ""));
+    } else {
+      bits.push("Categories, purposes and spans are SWF's; a GCAT match is Orbit's, by name and launch date.");
+    }
     note.appendChild(el("p", "", bits.join(" ")));
     var cr = el("p", "");
     cr.appendChild(document.createTextNode("Secure World Foundation, Global Counterspace Capabilities (2026), " +

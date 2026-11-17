@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (aliases, archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
                    news, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -244,9 +244,29 @@ def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
     }}, [rec], None
 
 
+NAMES_URL = f"https://github.com/{geo_region.REPO}/releases/download/{stcat.RELEASE}/{stcat.NAMES_ASSET}"
+
+
+def _catalog_names(raw_dir: Path, getter) -> tuple[dict | None, dict | None, str | None]:
+    """The TIC catalog's name index from the public release `catalog` (one GitHub request): (doc, record, None),
+    or (None, None, why) when it cannot be read, so the rpo lane falls back to GCAT's names."""
+    try:
+        body, rec = fetch.fetch("tic-catalog-names", NAMES_URL, raw_dir, "json", getter=getter, gz=True)
+        if body[:2] == b"\x1f\x8b":
+            body = gzip.decompress(body)
+        doc = json.loads(body.decode("utf-8"))
+        if doc.get("schema") != catalog.NAMES_SCHEMA:
+            return None, None, f"name index schema {doc.get('schema')!r}, not {catalog.NAMES_SCHEMA}"
+        return doc, rec, None
+    except Exception as exc:  # noqa: BLE001 - GCAT's names are the fallback
+        return None, None, f"TIC catalog name index not read ({type(exc).__name__}: {exc})"
+
+
 def _lane_rpo(raw_dir: Path, prev: dict, getter, **_):
     """Secure World Foundation's RPO history: one request per data tab, and one for the About tab's date (that
-    one may fail alone). Names are matched to the GCAT index Orbit keeps (data/state), if there is one."""
+    one may fail alone). Names are matched on the TIC catalog's name index (one request to Orbit's release
+    `catalog`) and the alias file (catalog build step 5); if the index cannot be read, on the GCAT index Orbit
+    keeps (data/state), with a note."""
     bodies, recs = {}, []
     for tab, spec in rpo.TABS.items():
         bodies[tab], rec = fetch.fetch(f"swf-rpo-{tab}", rpo.EXPORT.format(gid=spec["gid"]), raw_dir, "csv",
@@ -258,10 +278,15 @@ def _lane_rpo(raw_dir: Path, prev: dict, getter, **_):
         recs.append(rec)
     except Exception:  # noqa: BLE001 - the date is shown as unknown
         bodies["about"] = b""
-    doc = rpo.read(bodies, (_read_index(Path(raw_dir).parent) or {}).get("objects"))
+    names_doc, nrec, why = _catalog_names(raw_dir, getter)
+    if nrec:
+        recs.append(nrec)
+    entries = aliases.load(source_ids=aliases.source_ids(ROOT))
+    doc = rpo.read(bodies, (_read_index(Path(raw_dir).parent) or {}).get("objects"), names_doc, entries)
     return {"rpo": {"read_at": recs[0]["fetched_at"], "sheet": rpo.SHEET, "report": rpo.REPORT,
                     "tabs": {t: s["name"] for t, s in rpo.TABS.items()},
-                    "roles": {t: list(s["roles"]) for t, s in rpo.TABS.items()}, **doc}}, recs, None
+                    "roles": {t: list(s["roles"]) for t, s in rpo.TABS.items()},
+                    **({"names_note": why} if why else {}), **doc}}, recs, None
 
 
 def _st_read(data_dir: Path, name: str, default):
@@ -836,18 +861,23 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
         st = {"satcat": st["satcat"], "decay": st["decay"], "read": st["state"]["satcat_read_at"][:10],
               "read_at": st["state"]["satcat_read_at"]}
     more = catsources.load(src_dir or raw_dir.parent)
+    entries = aliases.load(source_ids=aliases.source_ids(ROOT))
     doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st,
-                        celestrak=more[catsources.CT], wikidata=more[catsources.WD])
+                        celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries)
     out.parent.mkdir(parents=True, exist_ok=True)
     raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     out.write_bytes(gzip.compress(raw, 6) if out.name.endswith(".gz") else raw)
+    idx = catalog.names_index(doc, {aliases.key_of(e) for e in entries if "program" not in e})
+    idx_raw = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    (out.parent / stcat.NAMES_ASSET).write_bytes(gzip.compress(idx_raw, 9))
     c = doc["counts"]
     held = ", ".join(f"{s} ({v['read_at']})" for s, v in more.items() if v) or "no CelesTrak or Wikidata copy"
     print(f"Catalog from GCAT ({stamp})" + (f", Space-Track ({st['read_at']})" if st else ", no Space-Track copy")
           + f", {held}: {c['numbered']} numbered, {c['unnumbered']} without a number, "
           f"{c['with_disagreements']} with disagreements {c['disagreements_by_field']}, {len(doc['swaps'])} name "
-          f"swaps; {len(raw) / 1e6:.1f} MB JSON -> {out}")
-    for k in ("space_track", catsources.CT, catsources.WD):
+          f"swaps; {len(raw) / 1e6:.1f} MB JSON -> {out}; name index {len(idx['objects'])} objects, "
+          f"{len(idx_raw) / 1e6:.1f} MB JSON -> {out.parent / stcat.NAMES_ASSET}")
+    for k in ("space_track", catsources.CT, catsources.WD, aliases.SOURCE):
         if c.get(k):
             print(f"{k}: {c[k]}")
     return 0
@@ -927,10 +957,11 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     out = data_dir / "catalog" / stcat.CATALOG_ASSET
     if catalog_local(raw, out, data_dir):
         return 1
-    stcat.release_put({stcat.CATALOG_ASSET: out, stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
+    stcat.release_put({stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
+                       stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
                        stcat.STATE_ASSET: data_dir / stcat.STATE,
                        stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
-    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
+    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
           f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
     return 1 if refused else 0
 
