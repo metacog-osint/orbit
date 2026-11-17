@@ -211,6 +211,16 @@ belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules 
   its day file with Noisefloor's for two days; then merge Noisefloor's `geo/from-orbit` (its daily step reads Orbit's
   day file and stops querying Space-Track); then step 3 (callouts).
 
+## GEO callouts (17 Nov 2026; step 3 of `doctrine/geo-move-plan.md`, Tom's "yes please, but do it all now")
+- `tools/geo_callouts.py` (Noisefloor's at `35328c0`, rules C1-C8 unchanged), `docs/validation/` and
+  `site_src/geo_roles.json` copied unchanged. numpy and sgp4 only here, pinned in `tools/requirements-callouts.txt`
+  (`pip install -r` it first); offline tests do not import it. Local data (git-ignored): `data/geo/region` (Orbit's
+  element and day files from the `geo-2026` release, the case histories in `history/cases/` copied from Noisefloor).
+- Proof and the one input change (catalogue from every day file) in `doctrine/method.md` "GEO callouts": the port
+  matches Noisefloor's held run 11,022 of 11,023 and its `score-v1.json` exactly.
+- **GEO orbit changes use Orbit's rule, not C5 (Tom, 17 Nov 2026).** C5 stays in the script as the scored v1
+  record. Not built: a workflow that runs the callouts, the page and feed items (step 4).
+
 ## Predicted reentries (16-17 Nov 2026, `orbit-2.13`; Tom's "let's get all three items done", about 9:15 PM CST 16 Nov)
 Built on branch `feat/rpo-globe-tip` (worktree `_worktrees\orbit-rpo-tip`); **live with `665c9ad`** (Tom's "Ship
 it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").

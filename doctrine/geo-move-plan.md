@@ -81,3 +81,6 @@ releases. Questions 3 and 4 stay open. **Settled the same evening:** `metacog-os
 4. **Which rule wins for GEO orbit changes:** Orbit's (8 robust deviations of the object's own noise, 0.25 m/s
    floor) or Noisefloor's C5 (drift 0.02 deg/day, inclination 0.02 deg, or 0.15 deg longitude off prediction).
    Decided after step 3's comparison.
+   **Decided 17 Nov 2026 (Tom): Orbit's rule.** On the same history it hit 6 of 6 of C5's published cases (C5 5 of 6);
+   most of C5's extra marks were station-keeping, a drifting object and natural inclination drift (`method.md`,
+   "GEO callouts").

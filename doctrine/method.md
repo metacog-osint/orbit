@@ -325,8 +325,33 @@ signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit
    object near GEO, and the watch-list query stays separate.
 4. **History:** imported once from Noisefloor's public releases (`tools/geo_import.py`, workflow `geo-import.yml`;
    no Space-Track request): 508,742 element sets July-November 2026 and 111 day files, measured 16 Nov 2026.
-5. **Not yet:** the callouts (step 3), the page (step 4), feed items. Nothing from this lane is on the site or in
-   the feed.
+5. **Not yet:** the page (step 4), feed items. Nothing from this lane is on the site or in the feed.
+
+## GEO callouts (17 Nov 2026; step 3 of `geo-move-plan.md`)
+`tools/geo_callouts.py`, moved from Noisefloor (`35328c0`) with its pre-registered rules C1-C8, thresholds, cases
+and scoring unchanged (`docs/validation/geo-callouts.md`, `geo-callouts-cases.json`, `site_src/geo_roles.json`
+copied unchanged). Run at build time only, with numpy and sgp4 pinned in `tools/requirements-callouts.txt`; the
+collector and live lanes stay standard library. Nothing is published yet (step 4).
+1. **Same results:** on the same input (Noisefloor's parquet of 27 Oct) Noisefloor's script and the port write
+   byte-identical files (11,009 callouts). On Orbit's own element history the port matches Noisefloor's held run of
+   31 Oct (8 Jul-30 Oct): 11,022 of 11,023 callouts identical, none missing either side; one C2 distance differs
+   (SESAT 2 / LDPE-1, 30 Oct, 152.9 vs 152.5 km; both objects' sets are the same in both histories, so probably a
+   set published after the held run's pull, unverified). `score` gives Noisefloor's `score-v1.json` exactly (40
+   expectations, every case run, every rule's decision).
+2. **One input change:** the catalogue (name, owner, type) is the newest entry per object across every day file.
+   Noisefloor read the newest file only, so LDPE-2 (54219), gone from the public catalogue on 10 Nov 2026, lost its
+   type in any later rerun and with it 14 callouts.
+3. **GEO orbit changes: Orbit's rule, not C5 (Tom, 17 Nov 2026).** Compared on the same element history
+   (8 Jul-16 Nov 2026) for the 10 listed-role objects and the GEO objects Orbit watches: C5 marked 53 days, Orbit's
+   rule ("Orbit changes in watched objects", item 3: 8 robust deviations of the object's own noise, 0.25 m/s floor at GEO) 29
+   changes; 27 agree. C5's 26 others: Luch (Olymp) 2 drifting along the belt (15, 0.06-0.55 m/s, within 2-9 of its
+   own noisy baseline), SJ-21 station-keeping (4, 0.20-0.25 m/s), 0.02 deg inclination changes over 7-9 day gaps
+   that natural drift explains (3; C5 takes no rate off), USA 324/325 with 2-3 sets (2), and two burns just under
+   0.25 m/s. Orbit's 6 others: MEV-1 12-19 Aug (0.77 m/s, the A6 undocking C5 missed) and five MEV-2 cross-track
+   changes of 0.32-0.75 m/s. On C5's own published cases Orbit's rule hits 6 of 6 (C5 5 of 6). Known gap: an
+   object with under 10 set pairs is not judged (USA 324 moved +0.66 deg/day over a 24-day gap and was not
+   marked). C5 stays in the script as the scored v1 record; the page (step 4) uses Orbit's rule for listed-role
+   orbit changes.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
