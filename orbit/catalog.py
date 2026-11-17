@@ -1,8 +1,9 @@
 """TIC's satellite catalog (schema `tic-catalog/1`): one entry per NORAD number, every value with its source.
 
-Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md (Tom's answers in its section 9). Build step 2: GCAT only.
-Later steps add Space-Track SATCAT and DECAY, CelesTrak SATCAT, Wikidata, WMO OSCAR/Space and the hand-kept alias
-file; each arrives as more value records on the same entries, ranked by `RANK`.
+Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md (Tom's answers in its section 9). Build step 2: GCAT.
+Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Later steps add CelesTrak SATCAT,
+Wikidata, WMO OSCAR/Space and the hand-kept alias file; each arrives as more value records on the same entries,
+ranked by `RANK`.
 
 Rules kept here:
 - Entries key on the NORAD number. Names are display text and never join anything.
@@ -16,7 +17,7 @@ from __future__ import annotations
 
 import re
 
-from . import gcat
+from . import gcat, stcat
 
 SCHEMA = "tic-catalog/1"
 
@@ -30,6 +31,7 @@ DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.
 FLAGGED = ("intldes", "launch_date", "state", "decayed")
 
 GCAT = "gcat-mcdowell"
+ST = stcat.SOURCE
 
 
 def rec(value, source: str, read: str, basis: str = "attributed", ref: str | None = None, **extra) -> dict:
@@ -113,6 +115,7 @@ def from_gcat(tables: dict[str, list[dict]], orgs: dict, read: str) -> tuple[dic
                 "state": [rec(r.get("State", ""), GCAT, read, "attributed", ref=jcat)],
                 "status": [rec(status, GCAT, read, "attributed", ref=jcat)],
                 "decayed": [rec(status in gcat.GONE, GCAT, read, "attributed", ref=jcat, date=ddate)],
+                "decay_date": [rec(ddate, GCAT, read, "attributed", ref=jcat)] if ddate else [],
                 "gcat_catalog": cat,
             }
             if norad and cat in gcat.US_CATALOGS:
@@ -132,6 +135,84 @@ def from_gcat(tables: dict[str, list[dict]], orgs: dict, read: str) -> tuple[dic
     for e in list(numbered.values()) + list(unnumbered.values()):
         finish(e)
     return numbered, unnumbered
+
+
+def add_spacetrack(numbered: dict, satcat: list[dict], decay_store: list[dict], read: str) -> dict:
+    """Space-Track's SATCAT rows (and every DECAY message held) as records on the NORAD-keyed entries. An object
+    GCAT does not list gets an entry of its own. Returns counts. Space-Track's values never replace GCAT's: both
+    are kept, ranked by RANK, and differences are listed by `disagreements`."""
+    by_decay = stcat.decay_messages(decay_store)
+    counts = {"satcat_rows": 0, "added_to_gcat_entry": 0, "space_track_only": 0, "analyst_placeholders": 0,
+              "with_decay_messages": 0}
+    seen = set()
+    for row in satcat:
+        n = str(row.get("NORAD_CAT_ID") or "").strip()
+        if not n.isdigit():
+            continue
+        key = str(int(n))
+        if key in seen:  # CURRENT/Y gives one row per number; a repeat would be Space-Track's, kept once
+            continue
+        seen.add(key)
+        counts["satcat_rows"] += 1
+        e = numbered.get(key)
+        if e is None:
+            e = numbered[key] = {"norad": int(key), "jcat": None,
+                                 "type": stcat.TYPES.get((row.get("OBJECT_TYPE") or "").upper(), "other"),
+                                 "intldes": [], "launch_tag": [], "launch_date": [], "names": [], "owner": [],
+                                 "state": [], "status": [], "decayed": [], "decay_date": [], "space_track_only": True}
+            counts["space_track_only"] += 1
+        else:
+            counts["added_to_gcat_entry"] += 1
+        e.setdefault("decay_date", [])
+        analyst = stcat.placeholder_analyst(row)
+        counts["analyst_placeholders"] += analyst
+        ph = {"placeholder": True, "nocompare": True} if analyst else {}
+        intl = (row.get("INTLDES") or row.get("OBJECT_ID") or "").strip()
+        if intl:
+            e["intldes"].append(rec(intl, ST, read, "catalog", ref=key, **ph))
+        ldate = stcat._date(row.get("LAUNCH"))
+        if ldate:
+            e["launch_date"].append(rec(ldate, ST, read, "catalog" if analyst else "attributed", ref=key, **ph))
+        country = (row.get("COUNTRY") or "").strip()
+        if country:
+            gstates = [r["value"] for r in e["state"] if r["source"] == GCAT]
+            match = next((g for g in gstates if stcat.state_matches(country, g)), None)
+            mapped = stcat.COUNTRY_TO_STATE.get(country, (country,))[0]
+            if country in stcat.PLACEHOLDER_COUNTRY:
+                extra = {"placeholder": True, "nocompare": True}
+            elif country in stcat.OPERATOR_CODES:
+                extra = {"operator_code": True, "nocompare": True}  # an operator, not a state: nothing to compare
+            else:
+                extra = {"cmp": match or mapped}
+            e["state"].append(rec(country, ST, read, "attributed", ref=key, field="COUNTRY", **extra))
+        name = (row.get("SATNAME") or row.get("OBJECT_NAME") or "").strip()
+        if name:
+            e["names"].insert(sum(1 for r in e["names"] if r["source"] == ST),
+                              rec(name, ST, read, name_basis(name), ref=key, field="SATNAME"))
+        ddate = stcat._date(row.get("DECAY"))
+        e["decayed"].append(rec(bool(ddate), ST, read, "attributed", ref=key, date=ddate))
+        if ddate:
+            e["decay_date"].append(rec(ddate, ST, read, "attributed", ref=key, field="SATCAT DECAY"))
+        msgs = by_decay.get(key) or []
+        if msgs:
+            counts["with_decay_messages"] += 1
+            # Space-Track's glossary: "In the Decay class, lower PRECEDENCE values indicate more recent data." Only
+            # "Historical" messages are decay dates; "Prediction" messages (60-day decay) stay in the store only.
+            # One record per date: the first by precedence.
+            dates = {r["value"] for r in e["decay_date"] if r["source"] == ST and r.get("field") == "DECAY"}
+            for m in sorted(msgs, key=lambda m: (int(m.get("PRECEDENCE") or 99), m.get("MSG_EPOCH") or "")):
+                d = stcat._date(m.get("DECAY_EPOCH"))
+                if d and m.get("MSG_TYPE") == "Historical" and d not in dates:
+                    dates.add(d)
+                    e["decay_date"].append(rec(d, ST, read, "attributed", ref=key, field="DECAY",
+                                               msg_type=m.get("MSG_TYPE"), msg_epoch=m.get("MSG_EPOCH"),
+                                               precedence=m.get("PRECEDENCE"), st_source=m.get("SOURCE")))
+        e["decay_date"].sort(key=lambda r: _rank(r["source"]))
+    for e in numbered.values():
+        finish(e)
+    counts["gcat_not_in_satcat"] = sum(1 for k, e in numbered.items()
+                                       if k not in seen and not e.get("space_track_only"))
+    return counts
 
 
 def _rank(source: str) -> int:
@@ -158,12 +239,25 @@ def disagreements(e: dict) -> list[dict]:
     out = []
     for field in FLAGGED:
         by_value: dict = {}
+        given: dict = {}
         for r in e.get(field) or []:
-            if r["value"] in (None, ""):
+            if r["value"] in (None, "") or r.get("nocompare"):
                 continue
-            by_value.setdefault(r["value"], []).append(r["source"])
+            v = r.get("cmp", r["value"])
+            if field == "intldes":
+                v = stcat.comparable_intldes(r["value"])
+                if v is None:  # GCAT's pre-1963 Greek-letter pieces: no table maps them, so not compared
+                    continue
+            by_value.setdefault(v, []).append(r["source"])
+            given.setdefault(v, []).append(r["value"])
         if len(by_value) > 1:
-            out.append({"field": field, "claims": [{"value": v, "sources": s} for v, s in by_value.items()]})
+            claims = []
+            for v, s in by_value.items():
+                c = {"value": v, "sources": s}
+                if any(g != v for g in given[v]):
+                    c["as_given"] = given[v]  # e.g. Space-Track's COUNTRY "PRC", compared as GCAT's "CN"
+                claims.append(c)
+            out.append({"field": field, "claims": claims})
     if e.get("also_in_gcat"):
         out.append({"field": "gcat_catalog", "claims": [{"value": x["jcat"], "sources": [GCAT]}
                                                         for x in [e] + e["also_in_gcat"]]})
@@ -174,6 +268,15 @@ def finish(e: dict) -> dict:
     e["name"] = display_name(e["names"])
     e["disagreements"] = disagreements(e)
     return e
+
+
+def _launch(e: dict) -> str | None:
+    """The launch part of the best-ranked comparable designation ('2014-043' from '2014-043A')."""
+    for r in sorted(e.get("intldes") or [], key=lambda r: _rank(r["source"])):
+        v = stcat.comparable_intldes(r["value"])
+        if v:
+            return v[:8]
+    return None
 
 
 def swaps(numbered: dict) -> list[dict]:
@@ -189,22 +292,40 @@ def swaps(numbered: dict) -> list[dict]:
             claims.setdefault(n["value"].lower(), {}).setdefault(n["source"], set()).add(key)
     out = []
     for name, by_src in sorted(claims.items()):
-        numbers = set().union(*by_src.values())
-        if len(by_src) > 1 and len(numbers) > 1 and len({frozenset(v) for v in by_src.values()}) > 1:
+        # A swap needs each of two sources to give the name to a number the other does not, and every number to
+        # come from one launch. A source that gives one name to more numbers than another does is not a swap, nor
+        # is one name used again on a later launch ("Early Bird", 1965 and 1997: 17 Nov 2026 reading).
+        sets = list(by_src.values())
+        if not any(a - b and b - a for i, a in enumerate(sets) for b in sets[i + 1:]):
+            continue
+        launches = {_launch(numbered[k]) for k in set().union(*sets)}
+        if len(launches) == 1 and None not in launches:
             out.append({"name": name, "claims": {s: sorted(v, key=int) for s, v in by_src.items()},
                         "status": "open"})
     return out
 
 
-def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: str | None = None) -> dict:
+def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: str | None = None,
+          spacetrack: dict | None = None) -> dict:
+    """`spacetrack`: {"satcat": rows, "decay": every DECAY message held, "read": 'YYYY-MM-DD', "read_at": ...}."""
     numbered, unnumbered = from_gcat(tables, orgs, read)
+    sources = {GCAT: {"read": read, "updated": gcat_updated, "citation": gcat.CITATION}}
+    st_counts = None
+    if spacetrack:
+        st_counts = add_spacetrack(numbered, spacetrack["satcat"], spacetrack.get("decay") or [], spacetrack["read"])
+        sources[ST] = {"read": spacetrack["read"], "read_at": spacetrack.get("read_at"), "citation": stcat.CITATION}
+    flags: dict = {}
+    for e in numbered.values():
+        for d in e["disagreements"]:
+            flags[d["field"]] = flags.get(d["field"], 0) + 1
     return {
         "schema": SCHEMA,
         "read": read,
-        "sources": {GCAT: {"read": read, "updated": gcat_updated, "citation": gcat.CITATION}},
+        "sources": sources,
         "rank": list(RANK),
         "counts": {"numbered": len(numbered), "unnumbered": len(unnumbered),
-                   "with_disagreements": sum(1 for e in numbered.values() if e["disagreements"])},
+                   "with_disagreements": sum(1 for e in numbered.values() if e["disagreements"]),
+                   "disagreements_by_field": flags, **({"space_track": st_counts} if st_counts else {})},
         "objects": numbered,
         "unnumbered": unnumbered,
         "swaps": swaps(numbered),

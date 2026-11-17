@@ -29,6 +29,8 @@ Lanes (method orbit-2.7):
             (14 Nov 2026); maneuver.PUBLISH = False holds it off the page again. Off without credentials.
     python tools/orbit.py maneuver-case      # the January 2022 Shijian-21 / BeiDou-2 G2 case, local only
     python tools/orbit.py maneuver-report    # the held report, printed locally
+    python tools/orbit.py spacetrack-catalog # Space-Track SATCAT and DECAY, once a day after 17:00 UTC (local)
+    python tools/orbit.py catalog            # TIC's satellite catalog from GCAT and Space-Track copies (local)
 """
 from __future__ import annotations
 
@@ -47,7 +49,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
 from orbit import (archive, catalog, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
-                   news, rpo, spacetrack, tip)
+                   news, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -811,8 +813,9 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     return 0
 
 
-def catalog_local(raw_dir: Path, out: Path) -> int:
-    """Build the catalog from the newest GCAT copy of each table in data/raw (gzipped, as `collect` keeps them)."""
+def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None) -> int:
+    """Build the catalog from the newest GCAT copy of each table in data/raw (gzipped, as `collect` keeps them) and,
+    when `spacetrack-catalog` has run, the newest Space-Track SATCAT and the DECAY store under `st_dir`."""
     def newest(name: str) -> bytes | None:
         files = sorted((raw_dir / f"gcat-{name}").glob("*"), key=lambda p: p.stat().st_mtime)
         if not files:
@@ -827,13 +830,39 @@ def catalog_local(raw_dir: Path, out: Path) -> int:
     tables = {n: gcat.parse_tsv(bodies[n]) for n in gcat.CATALOGS}
     orgs = gcat.orgs_table(gcat.parse_tsv(bodies["orgs"]))
     stamp = gcat.updated_stamp(bodies["satcat"])
-    doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp)
+    st = stcat.load_local(st_dir or raw_dir.parent)
+    if st:
+        st = {"satcat": st["satcat"], "decay": st["decay"], "read": st["state"]["satcat_read_at"][:10],
+              "read_at": st["state"]["satcat_read_at"]}
+    doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st)
     out.parent.mkdir(parents=True, exist_ok=True)
     raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     out.write_bytes(gzip.compress(raw, 6) if out.name.endswith(".gz") else raw)
     c = doc["counts"]
-    print(f"Catalog from GCAT ({stamp}): {c['numbered']} numbered, {c['unnumbered']} without a number, "
-          f"{c['with_disagreements']} with disagreements; {len(raw) / 1e6:.1f} MB JSON -> {out}")
+    print(f"Catalog from GCAT ({stamp})" + (f" and Space-Track ({st['read_at']})" if st else ", no Space-Track copy")
+          + f": {c['numbered']} numbered, {c['unnumbered']} without a number, "
+          f"{c['with_disagreements']} with disagreements {c['disagreements_by_field']}, {len(doc['swaps'])} name "
+          f"swaps; {len(raw) / 1e6:.1f} MB JSON -> {out}")
+    if c.get("space_track"):
+        print(f"Space-Track: {c['space_track']}")
+    return 0
+
+
+def spacetrack_catalog(data_dir: Path) -> int:
+    """Space-Track SATCAT and DECAY, once a day after 17:00 UTC (orbit/stcat.py). Local for now: no workflow
+    reads it until Tom says so."""
+    cred = spacetrack.credentials(ROOT)
+    if not cred:
+        print("No Space-Track credentials (.env or the environment).")
+        return 1
+    try:
+        got = stcat.pull(data_dir, cred)
+    except spacetrack.NotReady as exc:
+        print(f"Not read: {exc}")
+        return 0
+    s = got["state"]
+    print(f"Space-Track: {s['satcat_rows']} SATCAT rows; DECAY ({s['decay_query']}) {s['decay_rows_read']} messages "
+          f"read, {s['decay_added']} new, {s['decay_held']} held; {got['requests']} requests.")
     return 0
 
 
@@ -859,9 +888,16 @@ def main(argv=None) -> int:
                                         "data/raw; local only, no request (build step 2)")
     cg.add_argument("--raw", default=str(ROOT / "data" / "raw"))
     cg.add_argument("--out", default=str(ROOT / "data" / "catalog" / "catalog.json.gz"))
+    cg.add_argument("--spacetrack", default=str(ROOT / "data"),
+                    help="data folder holding spacetrack-catalog's state and raw replies")
+    sc = sub.add_parser("spacetrack-catalog", help="Space-Track SATCAT and DECAY for the catalog: once a day after "
+                                                   "17:00 UTC, 4 requests; raw replies in data/raw (build step 3)")
+    sc.add_argument("--data", default=str(ROOT / "data"))
     args = ap.parse_args(argv)
+    if args.cmd == "spacetrack-catalog":
+        return spacetrack_catalog(Path(args.data))
     if args.cmd == "catalog":
-        return catalog_local(Path(args.raw), Path(args.out))
+        return catalog_local(Path(args.raw), Path(args.out), Path(args.spacetrack))
     if args.cmd == "geo":
         return geo_pull(args.day, Path(args.out), args.upload)
 
