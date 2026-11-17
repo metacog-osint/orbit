@@ -79,6 +79,15 @@
       "series": [
         "gcat_satcat"
       ]
+    },
+    {
+      "id": "OR-EEI-5",
+      "type": "eei",
+      "parent": "OR-PIR-2",
+      "question": "Which objects has GCAT marked as exploded or collided (status E or C) in the last 30 days, with the date, owner state and parent?",
+      "series": [
+        "gcat_satcat"
+      ]
     }
   ]
 }
