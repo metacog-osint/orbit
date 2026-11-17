@@ -217,13 +217,17 @@ RELEASE = "catalog"
 CATALOG_ASSET = "catalog.json.gz"
 DECAY_ASSET = "spacetrack-decay.json.gz"
 STATE_ASSET = "spacetrack-catalog.json"
+SOURCES_STATE_ASSET = "catalog-sources.json"  # CelesTrak and Wikidata read dates and holds (orbit/catsources.py)
 RELEASE_NOTES = (
     "TIC's satellite catalog (schema tic-catalog/1): one entry per NORAD catalog number, every value with its source, "
     "read date and basis; disagreements between sources listed, never resolved. Built by Orbit (orbit/catalog.py) "
     "once a day after Space-Track's SATCAT update. catalog.json.gz: the catalog. spacetrack-decay.json.gz: every "
     "Space-Track decay message Orbit holds (class decay, kept so the history is never downloaded again). "
-    "spacetrack-catalog.json: the last read's date and counts.\n\n"
-    "Sources: " + "GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0. " + CITATION)
+    "spacetrack-catalog.json: the last read's date and counts. catalog-sources.json: the last CelesTrak and "
+    "Wikidata reads.\n\n"
+    "Sources: " + "GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0. " + CITATION + " Satellite catalog "
+    "records also from CelesTrak SATCAT (T.S. Kelso, celestrak.org), credited; CelesTrak states no licence. Names "
+    "and COSPAR IDs also from Wikidata (CC0), each with its item's Q-id.")
 
 
 def _gh(*args):
@@ -238,7 +242,8 @@ def release_exists(repo: str, gh=_gh) -> bool:
 def release_get(data_dir: Path, repo: str, gh=_gh) -> list[str]:
     """The decay store and state from the release into data/state; returns the names downloaded."""
     got = []
-    for name, rel in ((DECAY_ASSET, DECAY_STORE), (STATE_ASSET, STATE)):
+    for name, rel in ((DECAY_ASSET, DECAY_STORE), (STATE_ASSET, STATE),
+                      (SOURCES_STATE_ASSET, Path("state") / SOURCES_STATE_ASSET)):
         dest = data_dir / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         if gh("release", "download", RELEASE, "-R", repo, "-p", name, "-O", str(dest), "--clobber").returncode == 0:
@@ -253,6 +258,8 @@ def release_put(paths: dict[str, Path], repo: str, gh=_gh) -> None:
                "--notes", RELEASE_NOTES)
         if r.returncode:
             raise RuntimeError(f"release {RELEASE} could not be created: {r.stderr.strip()[:300]}")
+    else:  # keep the notes' source list current as sources are added
+        gh("release", "edit", RELEASE, "-R", repo, "--notes", RELEASE_NOTES)
     import shutil
     import tempfile
     with tempfile.TemporaryDirectory() as tmp:

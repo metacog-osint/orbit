@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (archive, catalog, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
                    news, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -813,9 +813,10 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     return 0
 
 
-def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None) -> int:
+def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir: Path | None = None) -> int:
     """Build the catalog from the newest GCAT copy of each table in data/raw (gzipped, as `collect` keeps them) and,
-    when `spacetrack-catalog` has run, the newest Space-Track SATCAT and the DECAY store under `st_dir`."""
+    when `spacetrack-catalog` has run, the newest Space-Track SATCAT and the DECAY store under `st_dir`, and the last
+    CelesTrak SATCAT and Wikidata reads under `src_dir` (orbit/catsources.py; no request)."""
     def newest(name: str) -> bytes | None:
         files = sorted((raw_dir / f"gcat-{name}").glob("*"), key=lambda p: p.stat().st_mtime)
         if not files:
@@ -834,18 +835,38 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None) -> int:
     if st:
         st = {"satcat": st["satcat"], "decay": st["decay"], "read": st["state"]["satcat_read_at"][:10],
               "read_at": st["state"]["satcat_read_at"]}
-    doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st)
+    more = catsources.load(src_dir or raw_dir.parent)
+    doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st,
+                        celestrak=more[catsources.CT], wikidata=more[catsources.WD])
     out.parent.mkdir(parents=True, exist_ok=True)
     raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     out.write_bytes(gzip.compress(raw, 6) if out.name.endswith(".gz") else raw)
     c = doc["counts"]
-    print(f"Catalog from GCAT ({stamp})" + (f" and Space-Track ({st['read_at']})" if st else ", no Space-Track copy")
-          + f": {c['numbered']} numbered, {c['unnumbered']} without a number, "
+    held = ", ".join(f"{s} ({v['read_at']})" for s, v in more.items() if v) or "no CelesTrak or Wikidata copy"
+    print(f"Catalog from GCAT ({stamp})" + (f", Space-Track ({st['read_at']})" if st else ", no Space-Track copy")
+          + f", {held}: {c['numbered']} numbered, {c['unnumbered']} without a number, "
           f"{c['with_disagreements']} with disagreements {c['disagreements_by_field']}, {len(doc['swaps'])} name "
           f"swaps; {len(raw) / 1e6:.1f} MB JSON -> {out}")
-    if c.get("space_track"):
-        print(f"Space-Track: {c['space_track']}")
+    for k in ("space_track", catsources.CT, catsources.WD):
+        if c.get(k):
+            print(f"{k}: {c[k]}")
     return 0
+
+
+def catalog_sources(data_dir: Path, clear: str | None = None) -> int:
+    """CelesTrak SATCAT (at most daily, once per file update) and Wikidata (weekly), each only when due
+    (orbit/catsources.py). A refusal (any answer but 200) puts the source on hold and is printed for a person."""
+    if clear:
+        print(f"Hold on {clear} cleared." if catsources.clear_hold(data_dir, clear) else f"No hold on {clear}.")
+    notes = catsources.pull(data_dir)
+    bad = False
+    for src, n in notes.items():
+        if n.get("refused"):
+            bad = True
+            print(f"::error::{src} refused: {n['why']}. On hold (catsources.held); a person looks before clearing.")
+        else:
+            print(f"{src}: " + (f"read, {n.get('rows')} rows" if n.get("read") else f"not read: {n['why']}"))
+    return 1 if bad else 0
 
 
 def spacetrack_catalog(data_dir: Path) -> int:
@@ -866,7 +887,7 @@ def spacetrack_catalog(data_dir: Path) -> int:
     return 0
 
 
-def catalog_release(data_dir: Path) -> int:
+def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     """Workflow catalog.yml: the decay store and state from the public release `catalog`, one Space-Track read when
     due, GCAT's catalogs (one request each), the catalog built and uploaded with the store and state. Not due: exit 0
     with a note. The release exists but its decay store will not download: exit 1, nothing read."""
@@ -875,6 +896,9 @@ def catalog_release(data_dir: Path) -> int:
     if held and stcat.DECAY_ASSET not in stcat.release_get(data_dir, repo):
         print(f"::error::release {stcat.RELEASE} exists but {stcat.DECAY_ASSET} did not download; not reading")
         return 1
+    if clear_hold:  # a person cleared it (workflow_dispatch input): saved now, read at the next Space-Track read
+        print(f"Hold on {clear_hold} cleared." if catsources.clear_hold(data_dir, clear_hold)
+              else f"No hold on {clear_hold}.")
     cred = spacetrack.credentials(ROOT)
     if not cred:
         print("No Space-Track credentials.")
@@ -883,10 +907,17 @@ def catalog_release(data_dir: Path) -> int:
         got = stcat.pull(data_dir, cred, history_held=held)
     except spacetrack.NotReady as exc:
         print(f"::notice::Not read: {exc}")
+        if clear_hold:
+            stcat.release_put({stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
         return 0
     s = got["state"]
     print(f"Space-Track: {s['satcat_rows']} SATCAT rows; DECAY ({s['decay_query']}) {s['decay_rows_read']} messages "
           f"read, {s['decay_added']} new, {s['decay_held']} held; {got['requests']} requests.")
+    # CelesTrak SATCAT (at most daily, once per file update) and Wikidata (weekly) are read only in the run that read
+    # Space-Track: the build needs that day's SATCAT reply, which is not kept between runs, so one build a day and
+    # GCAT's tables are fetched once. Their last replies ride the Actions cache (catalog.yml); the read dates and
+    # any hold ride the release. A refusal holds that source and fails the run after the upload, for a person.
+    refused = catalog_sources(data_dir) != 0
     raw = data_dir / "raw"
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
     for name in (*gcat.CATALOGS, "orgs"):
@@ -897,9 +928,11 @@ def catalog_release(data_dir: Path) -> int:
     if catalog_local(raw, out, data_dir):
         return 1
     stcat.release_put({stcat.CATALOG_ASSET: out, stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
-                       stcat.STATE_ASSET: data_dir / stcat.STATE}, repo)
-    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.DECAY_ASSET} and {stcat.STATE_ASSET} to release {stcat.RELEASE}.")
-    return 0
+                       stcat.STATE_ASSET: data_dir / stcat.STATE,
+                       stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
+    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
+          f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
+    return 1 if refused else 0
 
 
 def main(argv=None) -> int:
@@ -931,11 +964,22 @@ def main(argv=None) -> int:
     sc.add_argument("--data", default=str(ROOT / "data"))
     sc.add_argument("--release", action="store_true", help="workflow catalog.yml: store and state from the public "
                                                            "release `catalog`, build, upload (GitHub only)")
+    sc.add_argument("--clear-hold", choices=(catsources.CT, catsources.WD),
+                    help="with --release: clear a source's hold after a person has looked at the refusal")
+    cs = sub.add_parser("catalog-sources", help="CelesTrak SATCAT (daily at most) and Wikidata (weekly) for the "
+                                                "catalog, each only when due; local (build step 4)")
+    cs.add_argument("--data", default=str(ROOT / "data"))
+    cs.add_argument("--clear-hold", choices=(catsources.CT, catsources.WD))
+    cg.add_argument("--sources", default=str(ROOT / "data"),
+                    help="data folder holding catalog-sources' state and last replies")
     args = ap.parse_args(argv)
     if args.cmd == "spacetrack-catalog":
-        return catalog_release(Path(args.data)) if args.release else spacetrack_catalog(Path(args.data))
+        return (catalog_release(Path(args.data), args.clear_hold) if args.release
+                else spacetrack_catalog(Path(args.data)))
+    if args.cmd == "catalog-sources":
+        return catalog_sources(Path(args.data), args.clear_hold)
     if args.cmd == "catalog":
-        return catalog_local(Path(args.raw), Path(args.out), Path(args.spacetrack))
+        return catalog_local(Path(args.raw), Path(args.out), Path(args.spacetrack), Path(args.sources))
     if args.cmd == "geo":
         return geo_pull(args.day, Path(args.out), args.upload)
 

@@ -1,17 +1,30 @@
 name: catalog
-# TIC's satellite catalog (orbit/catalog.py, orbit/stcat.py; build step 3, Tom's yes 17 Nov 2026): one Space-Track
-# read a day (class satcat, class decay; 4 requests), GCAT's catalogs, the catalog built and uploaded with the decay
-# store to this repository's public release `catalog`.
+# TIC's satellite catalog (orbit/catalog.py, orbit/stcat.py, orbit/catsources.py; build steps 3-4, Tom's yes 17 Nov
+# 2026): one Space-Track read a day (class satcat, class decay; 4 requests), and in that same run CelesTrak's SATCAT
+# (a directory check, and the file only when it changed: at most once a day) and Wikidata (one SPARQL query a week),
+# then GCAT's catalogs; the catalog built and uploaded with the decay store to this repository's public release
+# `catalog`.
 #
 # Space-Track's use policy (read 17 Nov 2026): SATCAT "Once per day after 1700 (UTC)"; DECAY once a day, and an
 # object's decay history is stored and never downloaded again. Those rows are SATCAT's and DECAY's own, so GP's hourly
 # rule (and the shared-account gp checks in geo.yml and update.yml) does not apply. `stcat.due` allows one read per
 # UTC date from 17:00 UTC, the state riding the release, so the three starts below make at most one read; GitHub
 # fires this account's schedules hours late, and a start after midnight UTC waits for the next day.
+#
+# CelesTrak's usage policy (updated 16 Nov 2026, read 17 Nov): one download per update, directory queries at most
+# hourly, stop on any answer but 200 and tell a person. A refusal puts that source on hold (state on the release) and
+# fails the run after the upload; once a person has looked, start this workflow by hand with `clear_hold`.
+# CelesTrak's and Wikidata's last replies ride the Actions cache (private); if it is evicted, each is read once more.
 on:
   schedule:
     - cron: "23 17,19,21 * * *"
   workflow_dispatch:
+    inputs:
+      clear_hold:
+        description: "Clear a source's hold (only after a person has looked at the refusal)"
+        type: choice
+        options: ["", "celestrak-satcat", "wikidata"]
+        default: ""
 permissions:
   contents: write
 concurrency:
@@ -26,10 +39,27 @@ jobs:
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Catalog tests
-        run: python -m unittest tests.test_catalog tests.test_stcat
-      - name: Catalog (Space-Track SATCAT and DECAY, GCAT)
+        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources
+      - name: CelesTrak and Wikidata replies from the Actions cache (none on the first run)
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            data/state/celestrak-satcat.csv.gz
+            data/state/wikidata-p377.json.gz
+          key: catalog-sources-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: catalog-sources-
+      - name: Catalog (Space-Track SATCAT and DECAY, CelesTrak SATCAT, Wikidata, GCAT)
         env:
           GH_TOKEN: ${{ github.token }}
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
-        run: python tools/orbit.py spacetrack-catalog --release
+          CLEAR_HOLD: ${{ inputs.clear_hold }}
+        run: python tools/orbit.py spacetrack-catalog --release ${CLEAR_HOLD:+--clear-hold "$CLEAR_HOLD"}
+      - name: Keep CelesTrak's and Wikidata's replies for the next run
+        if: success() || failure()
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            data/state/celestrak-satcat.csv.gz
+            data/state/wikidata-p377.json.gz
+          key: catalog-sources-${{ github.run_id }}-${{ github.run_attempt }}
