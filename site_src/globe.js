@@ -279,3 +279,61 @@ export async function createGlobe(container, model, { onPick }) {
     destroy() { handler.destroy(); widget.destroy(); },
   };
 }
+
+// One object's globe (orbit-2.20, object pages): its path over one orbit centred on now (or a day at GEO), its place
+// now and its ground track, from the one element set Orbit holds for it, drag left out; or, for an object with an
+// open TIP window, its ground track over that window with drag kept and TIP's point. `spec`: { elements, name,
+// window: {from, to, lat, lon} | null }. Returns { ion, resize, destroy } or throws when the set cannot be used.
+export async function createObjectGlobe(container, spec) {
+  const C = await loadCesium();
+  globalThis.CESIUM_WORKERS = undefined;
+  const base = await baseLayer(C, await token());
+  const widget = new C.CesiumWidget(container, {
+    baseLayer: base.layer, terrainProvider: new C.EllipsoidTerrainProvider(), sceneModePicker: false,
+    skyAtmosphere: new C.SkyAtmosphere(), requestRenderMode: true, maximumRenderTimeChange: Infinity,
+  });
+  widget.scene.globe.enableLighting = false;
+  widget.canvas.setAttribute("aria-label", "Globe with " + spec.name + "'s path from the element set named under it.");
+  const col = (name, a = 1) => C.Color.fromCssColorString(css(name) || "#888").withAlpha(a);
+  const E = widget.entities, lonlat = (c) => C.Cartesian3.fromDegrees(c[0], c[1]);
+  const drawn = { orbit: false, window: false };
+  function draw() {
+    E.removeAll();
+    const c = col("--accent"), ink = col("--text");
+    const w = spec.window;
+    if (w) {
+      const g = span(spec.elements, Date.parse(w.from), Date.parse(w.to));
+      if (g) {
+        drawn.window = true;
+        E.add({ polyline: { positions: g.map(lonlat), width: 2, arcType: C.ArcType.GEODESIC, material: c.withAlpha(0.85) } });
+      }
+      if (w.lat != null && w.lon != null) {
+        E.add({ position: C.Cartesian3.fromDegrees(w.lon, w.lat), point: { pixelSize: 10, color: c, outlineColor: ink, outlineWidth: 1.5 },
+          label: { text: "TIP point at the predicted time", font: "12px system-ui, sans-serif", fillColor: ink, showBackground: true,
+            backgroundColor: col("--panel", 0.85), pixelOffset: new C.Cartesian2(0, -16) } });
+      }
+      if (g || w.lat != null) return;
+    }
+    const p = path(spec.elements, new Date());
+    if (!p) return;
+    drawn.orbit = true;
+    drawn.center = p.ground[Math.floor(p.ground.length / 2)];
+    E.add({ polyline: { positions: p.orbit.map((x) => new C.Cartesian3(x[0], x[1], x[2])), width: 1.8, arcType: C.ArcType.NONE,
+      material: c.withAlpha(0.9) } });
+    E.add({ polyline: { positions: p.ground.map(lonlat), width: 1, arcType: C.ArcType.GEODESIC,
+      material: new C.PolylineDashMaterialProperty({ color: c.withAlpha(0.6), dashLength: 8 }) } });
+    if (p.now) {
+      E.add({ position: new C.Cartesian3(p.now[0], p.now[1], p.now[2]), point: { pixelSize: 9, color: c, outlineColor: ink, outlineWidth: 1 },
+        label: { text: spec.name, font: "12px system-ui, sans-serif", fillColor: ink, showBackground: true,
+          backgroundColor: col("--panel", 0.85), pixelOffset: new C.Cartesian2(0, -16) } });
+    }
+  }
+  draw();
+  const w = spec.window;
+  const far = spec.elements && spec.elements.n && spec.elements.n < 2 ? 7.5e7 : 2.4e7;  // GEO and high orbits: further out
+  widget.camera.setView({ destination: w && w.lat != null ? C.Cartesian3.fromDegrees(w.lon, w.lat, 2.2e7)
+    : C.Cartesian3.fromDegrees(drawn.center ? drawn.center[0] : 0, drawn.center ? drawn.center[1] : 20, far) });
+  widget.scene.requestRender();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { draw(); widget.scene.requestRender(); });
+  return { ion: base.ion, drawn, resize: () => { widget.resize(); widget.scene.requestRender(); }, destroy: () => widget.destroy() };
+}

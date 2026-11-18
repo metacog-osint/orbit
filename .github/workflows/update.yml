@@ -79,6 +79,8 @@ jobs:
       # from this repository's public geo-YYYY releases (written by geo.yml; no Space-Track request here). numpy and
       # sgp4 only for this step (tools/requirements-callouts.txt). A failure leaves the page's loading text, never the
       # rest of the deploy.
+      - name: Object pages (the catalog's shards and search index from release catalog; one request)
+        run: python tools/orbit.py object-data
       - name: GEO page data and callouts
         env:
           GH_TOKEN: ${{ github.token }}

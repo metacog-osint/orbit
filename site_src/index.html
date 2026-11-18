@@ -51,6 +51,11 @@
       areas navigational warnings announce, reentries, and changes to the public satellite catalog between Orbit's
       own readings. Everything here is measured or reported by the sources named
       on it; Orbit adds no judgment. <span id="asof"></span></p>
+    <form class="obj-search" role="search" autocomplete="off">
+      <label for="obj-q" class="small muted">Find an object: name from any source, NORAD number, COSPAR ID</label>
+      <input id="obj-q" type="search" placeholder="ISS, Hornet 1, 25544, 1998-067A" spellcheck="false">
+      <ul class="search-results" hidden></ul>
+    </form>
     <div class="lead" id="lead" aria-labelledby="lead-h">
       <h2 id="lead-h">The last 24 hours</h2>
       <ul class="lead-list" id="lead-list" aria-live="polite"></ul>
@@ -307,6 +312,7 @@
     <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
     &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
 </footer>
+<script src="search.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

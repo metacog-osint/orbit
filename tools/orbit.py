@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn, objpage,  # noqa: E402
                    news, oscar, oscarlinks, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -657,6 +657,24 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     return files
 
 
+SHARDS_URL = f"https://github.com/{geo_region.REPO}/releases/download/{stcat.RELEASE}/{objpage.ASSET}"
+
+
+def object_data(site_dir: Path, getter=None) -> int:
+    """Object pages (orbit-2.20): the catalog's shards, search index and rules note from the public release
+    `catalog` (one GitHub request) into site/data/catalog/. A missing or refused archive leaves the folder as it
+    was and returns 0, so the deploy goes ahead; the page then says the catalog is not on the site yet."""
+    try:
+        body, rec = fetch.fetch("tic-catalog-shards", SHARDS_URL, None, "tar.gz", timeout=180, getter=getter)
+        man = objpage.unpack(body, Path(site_dir) / "data", fetched={k: rec[k] for k in ("url", "sha256", "bytes", "fetched_at")})
+    except Exception as exc:  # noqa: BLE001 - the page works without it and says so
+        print(f"::warning::object pages: catalog shards not unpacked ({type(exc).__name__}: {exc})")
+        return 0
+    print(f"Object pages: {man['shards']} shards, {man['objects']:,} objects in the search index, catalog read {man['catalog_read']}, "
+          f"{man['bytes'] / 1e6:.1f} MB unpacked.")
+    return 0
+
+
 def check_all(root: Path = ROOT) -> list[str]:
     errs = registers.check(root / "doctrine")
     regs = registers.ids(root / "doctrine")
@@ -1050,6 +1068,9 @@ def main(argv=None) -> int:
     c.add_argument("--only", nargs="*", choices=sorted(LANES), help="run only these lanes; keep the rest as they were")
     c.add_argument("--force", action="store_true", help="read GCAT even if its files have not changed")
     sub.add_parser("build")
+    od = sub.add_parser("object-data", help="object pages: the catalog's shards and search index from release "
+                                           "`catalog` into site/data/catalog/ (one request; update.yml)")
+    od.add_argument("--site", default=str(ROOT / "site"))
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
                                               "BeiDou-2 G2) or iss (2024 reboosts and the May storm)")
@@ -1134,6 +1155,8 @@ def main(argv=None) -> int:
             return 1
         print_report(rep)
         return 0
+    if args.cmd == "object-data":
+        return object_data(Path(args.site))
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

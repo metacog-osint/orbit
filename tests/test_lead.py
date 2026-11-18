@@ -23,7 +23,8 @@ NOW = datetime(2026, 11, 18, 16, 17, 52, tzinfo=timezone.utc)
 
 
 def text(line):
-    return "".join(p if isinstance(p, str) else "[" + str(next(iter(p.values()))) + "]" for p in line["parts"])
+    return "".join(p if isinstance(p, str) else p["s"] if "s" in p else "[" + str(next(iter(p.values()))) + "]"
+                   for p in line["parts"])
 
 
 def kinds(doc):
@@ -131,7 +132,7 @@ class Lines(unittest.TestCase):
     def test_parts_are_text_times_dates_or_countries(self):
         for x in self.doc["lines"]:
             for p in x["parts"]:
-                self.assertTrue(isinstance(p, str) or set(p) <= {"t", "d", "cc"}, p)
+                self.assertTrue(isinstance(p, str) or set(p) <= {"t", "d", "cc"} or set(p) == {"s", "o"}, p)
             self.assertTrue(x["href"].startswith("#"))
             self.assertTrue(x["source"])
 
