@@ -267,6 +267,12 @@ DISAGREEMENTS = {
     },
 }
 
+# Shown once on every satellite card, above "Names and sources" (Tom, 18 Nov 2026: a general note, no reviewer named).
+CARD_NOTE = ("Names, owners, dates, orbits and status on this card come from several public catalogs and are shown as "
+             "each source gives them. The sources sometimes disagree, and some details are attributed to the satellite "
+             "by a catalog compiler or analyst rather than stated by its operator. Where they differ, TIC lists each "
+             "source's value instead of choosing one. If something looks wrong, ask us.")
+
 SWAPS = ("Name swap: two sources give one payload name to different numbers from the same launch. Both claims show "
          "on both objects and nothing is reassigned; the numbers stay as each source gives them.")
 
@@ -281,7 +287,7 @@ def rules(doc: dict) -> dict:
         srcs.setdefault(s, {**SOURCE_LABELS.get(s, {"label": s, "about": None, "url": None}), "read": None})
     return {"schema": RULES_SCHEMA, "catalog_schema": SCHEMA, "read": doc["read"], "rank": doc["rank"],
             "sources": srcs, "basis": BASIS, "name_fields": NAME_FIELDS, "fields": FIELD_NOTES, "flags": FLAGS,
-            "disagreements": DISAGREEMENTS, "swaps": SWAPS, "record_defaults": RECORD_DEFAULTS,
+            "card_note": CARD_NOTE, "disagreements": DISAGREEMENTS, "swaps": SWAPS, "record_defaults": RECORD_DEFAULTS,
             "shard_rule": SHARD_RULE,
             "stale_after_hours": 36}
 

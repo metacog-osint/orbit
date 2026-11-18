@@ -11,6 +11,8 @@
 # OSCAR read 18 Nov 2026 (space.oscar.wmo.int/api/v1/satellites, 36 pages, 1,062 satellites, 414 operational);
 # candidates from CelesTrak's SATCAT file of 16 Nov 2026 20:34 UTC; names beside them from the TIC name index of
 # 18 Nov 2026 (release `catalog`). Credit: WMO OSCAR/Space, courtesy of the World Meteorological Organization.
+#
+# Reviewed 18 Nov 2026 by a TIC analyst: all 285 accepted, none withdrawn.
 
 - slug: ace
   norad: 24912
@@ -26,6 +28,8 @@
     - "Names: OSCAR 'ACE' (Advanced Composition Explorer); catalog 'ACE', 'Advanced Composition Expl.', 'Advanced Composition Explorer', 'Explorer 71'; equal after normalising: 'ACE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: alos_2
   norad: 39766
@@ -41,6 +45,8 @@
     - "Names: OSCAR 'ALOS-2' (Advanced Land Observing Satellite  - 2); catalog 'ALOS-2', 'ALOS 2', 'Daichi-2', 'Advanced Land Observing Satellite-2'; equal after normalising: 'ALOS-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: alos_4_daichi_4
   norad: 60182
@@ -56,6 +62,8 @@
     - "Names: OSCAR 'ALOS-4 (DAICHI-4)' (Advanced Land Observing Satellite  - 4); catalog 'ALOS-4 (DAICHI-4)', 'ALOS-4', 'Daichi-4', 'Advanced Land Observing Satellite 4'; equal after normalising: 'ALOS-4 (DAICHI-4)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: alsat_1b
   norad: 41785
@@ -71,6 +79,8 @@
     - "Names: OSCAR 'AlSat-1B' (Algeria Satellite - 1B); catalog 'ALSAT-1B', 'ALSAT 1B', 'DMC Alsat-1B', 'AlSat-1B'; equal after normalising: 'ALSAT-1B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: alsat_2b
   norad: 41786
@@ -86,6 +96,8 @@
     - "Names: OSCAR 'AlSat-2B' (Algeria Satellite - 2B); catalog 'ALSAT-2B', 'ALSAT 2B', 'AlSat-2B'; equal after normalising: 'ALSAT-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: amazonia_1
   norad: 47699
@@ -101,6 +113,8 @@
     - "Names: OSCAR 'Amazônia-1' (Amazônia-1); catalog 'AMAZONIA 1', 'Amazonia-1', 'Amazônia 1', 'Amazonia 1'; equal after normalising: 'Amazônia 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: aqua
   norad: 27424
@@ -116,6 +130,8 @@
     - "Names: OSCAR 'Aqua' (Earth Observation System - Aqua); catalog 'AQUA', 'Aqua', 'EOS PM-1', 'NAIF154'; equal after normalising: 'AQUA'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: arase_erg
   norad: 41896
@@ -131,6 +147,8 @@
     - "Names: OSCAR 'Arase (ERG)' (Exploration of energization and Radiation in Geospace); catalog 'ARASE (ERG)', 'Arase', 'ERG', 'SPRINT-B'; equal after normalising: 'ARASE (ERG)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: arctica_m_n1
   norad: 47719
@@ -146,6 +164,8 @@
     - "Names: OSCAR 'Arctica-M N1' (Arctica-M N1); catalog 'ARKTIKA-M 1', 'Arktika-M No. 1', 'Arktika-M 1', 'Arktika-M1'; equal after normalising: 'ARKTIKA-M 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: arctica_m_n2
   norad: 58584
@@ -161,6 +181,8 @@
     - "Names: OSCAR 'Arctica-M N2' (Arctica-M N2); catalog 'ARKTIKA-M 2', 'Arktika-M No. 2'; equal after normalising: 'ARKTIKA-M 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: asnaro_1
   norad: 40298
@@ -176,6 +198,8 @@
     - "Names: OSCAR 'ASNARO-1' (Advanced Satellite with new system ARchitecure for Observation - 1); catalog 'ASNARO', 'ASNARO-1', 'ASNARO 1'; equal after normalising: 'ASNARO-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: asnaro_2
   norad: 43152
@@ -191,6 +215,8 @@
     - "Names: OSCAR 'ASNARO-2' (Advanced Satellite with new system ARchitecure for Observation - 2); catalog 'ASNARO-2', 'ASNARO 2'; equal after normalising: 'ASNARO-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: aso_s_kuafu_1
   norad: 54029
@@ -206,6 +232,8 @@
     - "Names: OSCAR 'ASO-S (Kuafu-1)' (Advanced Space-based Solar Observatory); catalog 'ASO-S', 'Kuafu-1', 'Advanced Space-based Solar Observatory'; equal after normalising: 'Advanced Space-based Solar Observatory'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: aura
   norad: 28376
@@ -221,6 +249,8 @@
     - "Names: OSCAR 'Aura' (Earth Observation System - Aura); catalog 'AURA', 'Aura', 'EOS Chem-1', 'Aura satellite'; equal after normalising: 'AURA'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: biomass
   norad: 63772
@@ -236,6 +266,8 @@
     - "Names: OSCAR 'BIOMASS' (BIOMASS); catalog 'BIOMASS', 'Biomass', 'Earth Explorer 7'; equal after normalising: 'BIOMASS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: carruthers
   norad: 65727
@@ -251,6 +283,8 @@
     - "Names: OSCAR 'Carruthers' (Carruthers Geocorona Observatory); catalog 'CARRUTHERS', 'Carruthers Geocorona Obs.', 'Carruthers', 'Carruthers Geocorona Observatory'; equal after normalising: 'CARRUTHERS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2a
   norad: 32783
@@ -266,6 +300,8 @@
     - "Names: OSCAR 'CartoSat-2A' (CartoSat-2A); catalog 'CARTOSAT-2A', 'CARTOSAT 2A', 'Cartosat 2A', 'Cartosat-2A'; equal after normalising: 'CARTOSAT-2A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2b
   norad: 36795
@@ -281,6 +317,8 @@
     - "Names: OSCAR 'CartoSat-2B' (CartoSat-2B); catalog 'CARTOSAT-2B', 'CARTOSAT 2B', 'Cartosat 2B', 'Cartosat-2B'; equal after normalising: 'CARTOSAT-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2c
   norad: 41599
@@ -296,6 +334,8 @@
     - "Names: OSCAR 'CartoSat-2C' (CartoSat-2C); catalog 'CARTOSAT-2C', 'CARTOSAT 2C', 'Cartosat-2 Series Satellite', 'Cartosat-2C'; equal after normalising: 'CARTOSAT-2C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2d
   norad: 41948
@@ -311,6 +351,8 @@
     - "Names: OSCAR 'CartoSat-2D' (CartoSat-2D); catalog 'CARTOSAT-2D', 'CARTOSAT 2D', 'Cartosat-2 Series Satellite', 'Cartosat-2D'; equal after normalising: 'CARTOSAT-2D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2e
   norad: 42767
@@ -326,6 +368,8 @@
     - "Names: OSCAR 'CartoSat-2E' (CartoSat-2E); catalog 'CARTOSAT-2E', 'CARTOSAT 2E', 'Cartosat-2 Series Satellite', 'Cartosat-2E'; equal after normalising: 'CARTOSAT-2E'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_2f
   norad: 43111
@@ -341,6 +385,8 @@
     - "Names: OSCAR 'CartoSat-2F' (CartoSat-2F); catalog 'CARTOSAT-2F', 'CARTOSAT 2F', 'Cartosat-2 Series Satellite', 'Cartosat-2ER'; equal after normalising: 'CARTOSAT-2F'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cartosat_3
   norad: 44804
@@ -356,6 +402,8 @@
     - "Names: OSCAR 'CartoSat-3' (CartoSat-3); catalog 'CARTOSAT-3', 'CARTOSAT 3', 'Cartosat-3'; equal after normalising: 'CARTOSAT-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cas_500_1
   norad: 47932
@@ -371,6 +419,8 @@
     - "Names: OSCAR 'CAS 500-1' (Compact Advanced Satellite 500-1); catalog 'CAS500-1', 'CAS500 1'; equal after normalising: 'CAS500-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cbers_4
   norad: 40336
@@ -386,6 +436,8 @@
     - "Names: OSCAR 'CBERS-4' (China-Brazil Earth Resources Satellite - 4 (ZY-1 FM4) ); catalog 'CBERS 4', 'CBERS-4', 'Zi Yuan 1-04', 'ZY-1 04'; equal after normalising: 'CBERS 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cfosat
   norad: 43662
@@ -401,6 +453,8 @@
     - "Names: OSCAR 'CFOSAT' (Chinese-French Oceanography Satellite); catalog 'CFOSAT', 'Zhongfa Haiyang Weixing', 'CFOSat', 'China France Oceanography Satellite'; equal after normalising: 'CFOSAT'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: cryosat_2
   norad: 36508
@@ -416,6 +470,8 @@
     - "Names: OSCAR 'CryoSat-2' (CryoSat-2); catalog 'CRYOSAT 2', 'CryoSat-2'; equal after normalising: 'CRYOSAT 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csg_1
   norad: 44873
@@ -431,6 +487,8 @@
     - "Names: OSCAR 'CSG-1' (COSMO-SkyMed Second Generation - 1); catalog 'CSG-1', 'CSG 1', 'COSMO-Skymed Second Gen 1', 'COSMO-SkyMed 2nd Gen 1'; equal after normalising: 'CSG-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csg_2
   norad: 51444
@@ -446,6 +504,8 @@
     - "Names: OSCAR 'CSG-2' (COSMO-SkyMed Second Generation - 2); catalog 'CSG-2', 'CSG FM2', 'COSMO-Skymed Second Gen FM2', 'CSG 2'; equal after normalising: 'CSG-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csg_3
   norad: 67304
@@ -461,6 +521,8 @@
     - "Names: OSCAR 'CSG-3' (COSMO-SkyMed Second Generation - 3); catalog 'CSG-3', 'COSMO-SKYMED-FM3', 'CSG FM3', 'COSMO-Skymed Second Gen FM3'; equal after normalising: 'CSG-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csk_1
   norad: 31598
@@ -476,6 +538,8 @@
     - "Names: OSCAR 'CSK-1' (COSMO-SkyMed - 1); catalog 'COSMO-SKYMED 1', 'SKYMED 1', 'COSMO 1', 'COSMO-Skymed'; equal after normalising: 'COSMO-SKYMED 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csk_2
   norad: 32376
@@ -491,6 +555,8 @@
     - "Names: OSCAR 'CSK-2' (COSMO-SkyMed - 2); catalog 'COSMO-SKYMED 2', 'SKYMED 2', 'COSMO 2', 'COSMO-Skymed 2'; equal after normalising: 'COSMO-SKYMED 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csk_3
   norad: 33412
@@ -506,6 +572,8 @@
     - "Names: OSCAR 'CSK-3' (COSMO-SkyMed - 3); catalog 'COSMO-SKYMED 3', 'SKYMED 3', 'COSMO 3', 'COSMO-Skymed 3'; equal after normalising: 'COSMO-SKYMED 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: csk_4
   norad: 37216
@@ -521,6 +589,8 @@
     - "Names: OSCAR 'CSK-4' (COSMO-SkyMed - 4); catalog 'COSMO-SKYMED 4', 'SKYMED 4', 'COSMO 4', 'COSMO-Skymed 4'; equal after normalising: 'COSMO-SKYMED 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: deimos_2
   norad: 40013
@@ -536,6 +606,8 @@
     - "Names: OSCAR 'Deimos-2' (Deimos-2); catalog 'DEIMOS-2', 'DEIMOS 2', 'Deimos-2', 'GEOSAT-2'; equal after normalising: 'DEIMOS-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: dmsp_f17
   norad: 29522
@@ -551,6 +623,8 @@
     - "Names: OSCAR 'DMSP-F17' (Defense Meteorological Satellite Program - F17); catalog 'DMSP 5D-3 F17 (USA 191)', 'DMSP F-17', 'DMSP Block 5D-3 S-17', 'USA 191'; equal after normalising: 'DMSP F-17'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: dmsp_f18
   norad: 35951
@@ -566,6 +640,8 @@
     - "Names: OSCAR 'DMSP-F18' (Defense Meteorological Satellite Program - F18); catalog 'DMSP 5D-3 F18 (USA 210)', 'DMSP F-18', 'DMSP Block 5D-3 S-18', 'USA 210'; equal after normalising: 'DMSP F-18'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: dq_1
   norad: 52257
@@ -581,6 +657,8 @@
     - "Names: OSCAR 'DQ-1' (DQ-1 also AEMS (Atmospheric Environment Monitoring Satellite) or Daqi-1); catalog 'DAQI-1', 'DAQI 1', 'Daqi Huanjing Jiance Weixing', 'DQ-1'; equal after normalising: 'DQ-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: dscovr
   norad: 40390
@@ -596,6 +674,8 @@
     - "Names: OSCAR 'DSCOVR' (Deep Space Climate Observatory); catalog 'DSCOVR', 'Deep Space Climate Obsy.', 'Deep Space Climate Observatory', 'Triana'; equal after normalising: 'DSCOVR'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: earthcare
   norad: 59908
@@ -611,6 +691,8 @@
     - "Names: OSCAR 'EarthCARE' (Earth Clouds, Aerosol and Radiation Explorer); catalog 'EARTHCARE', 'EarthCARE', 'Earth Clouds, Aerosols and Radiation Explorer', 'Earth Explorer 6'; equal after normalising: 'EARTHCARE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: edrs_c
   norad: 44475
@@ -626,6 +708,8 @@
     - "Names: OSCAR 'EDRS-C' (European Data Relay Satellite - C); catalog 'EDRS-C', 'EDRS C', 'HYLAS 3'; equal after normalising: 'EDRS-C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: egyptsat_a
   norad: 44047
@@ -641,6 +725,8 @@
     - "Names: OSCAR 'EgyptSat-A' (EgyptSat-A); catalog 'EGYPTSAT-A (MISRSAT-A)', 'EGYPTSAT A', 'MisrSat A', 'Egyptsat A No. 2'; equal after normalising: 'EGYPTSAT-A (MISRSAT-A)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: electro_l_n2
   norad: 41105
@@ -656,6 +742,8 @@
     - "Names: OSCAR 'Electro-L N2' (Electro-L Number 2); catalog 'ELEKTRO-L 2', 'Elektro-L No. 2', 'Elektro-L No. 1521', 'Elektro-L No.2'; equal after normalising: 'ELEKTRO-L 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: electro_l_n3
   norad: 44903
@@ -671,6 +759,8 @@
     - "Names: OSCAR 'Electro-L N3' (Electro-L Number 3); catalog 'ELEKTRO-L 3', 'Elektro-L No. 3', 'Elektro-L No. 1522'; equal after normalising: 'ELEKTRO-L 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: electro_l_n4
   norad: 55506
@@ -686,6 +776,8 @@
     - "Names: OSCAR 'Electro-L N4' (Electro-L Number 4); catalog 'ELEKTRO-L 4', 'Elektro-L No. 4', 'Elektro-L No. 4L'; equal after normalising: 'ELEKTRO-L 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: enmap
   norad: 52159
@@ -701,6 +793,8 @@
     - "Names: OSCAR 'EnMAP' (Environmental Mapping and Analysis Programme); catalog 'ENMAP', 'EnMAP'; equal after normalising: 'ENMAP'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: eos_01
   norad: 46905
@@ -716,6 +810,8 @@
     - "Names: OSCAR 'EOS-01' (Earth Observation Satellite - 01); catalog 'RISAT-2BR2', 'EOS-01', 'Earth Observation Satellite-01'; equal after normalising: 'EOS-01'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: eos_04
   norad: 51656
@@ -731,6 +827,8 @@
     - "Names: OSCAR 'EOS-04' (Earth Observation Satellite - 04 (also known as RISAT-1A)); catalog 'EOS-4', 'EOS-04', 'RISAT-1A', 'Earth Observation Satellite-04'; equal after normalising: 'EOS-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: eos_07
   norad: 55562
@@ -746,6 +844,8 @@
     - "Names: OSCAR 'EOS-07' (EOS-07 also known as Microsat-2B); catalog 'EOS-7', 'EOS-07', 'Microsat-2B?', 'Earth Observation Satellite-07'; equal after normalising: 'EOS-7'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: eos_08
   norad: 60454
@@ -761,6 +861,8 @@
     - "Names: OSCAR 'EOS-08' (EOS-08  (also Microsat-2C)); catalog 'EOS-08', 'EOS-8', 'Microsat-2C', 'Earth Observation Satellite-08'; equal after normalising: 'EOS-08'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: falcon_eye_2
   norad: 47226
@@ -776,6 +878,8 @@
     - "Names: OSCAR 'Falcon-Eye 2' (Falcon-Eye 2); catalog 'FALCON EYE 2', 'FalconEye 2', 'Falcon Eye 2', 'FalconEye2'; equal after normalising: 'FALCON EYE 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: formosat_5
   norad: 42920
@@ -791,6 +895,8 @@
     - "Names: OSCAR 'FORMOSAT-5' (FORMOSAT-5); catalog 'FORMOSAT-5', 'FORMOSAT 5'; equal after normalising: 'FORMOSAT-5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_2g
   norad: 40367
@@ -806,6 +912,8 @@
     - "Names: OSCAR 'FY-2G' (Feng-Yun - 2G); catalog 'FENGYUN 2G', 'Feng Yun 2G', 'FY-2 08 xing'; equal after normalising: 'FENGYUN 2G'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_2h
   norad: 43491
@@ -821,6 +929,8 @@
     - "Names: OSCAR 'FY-2H' (Feng-Yun - 2H); catalog 'FENGYUN 2H', 'Feng Yun 2H', 'FY-2 09 xing', 'Fengyun 2H'; equal after normalising: 'FENGYUN 2H'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_3d
   norad: 43010
@@ -836,6 +946,8 @@
     - "Names: OSCAR 'FY-3D' (Feng-Yun 3D); catalog 'FENGYUN 3D', 'Feng Yun 3D', 'FY-3 04 xing', 'Fengyun 3D'; equal after normalising: 'FENGYUN 3D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_3e
   norad: 49008
@@ -851,6 +963,8 @@
     - "Names: OSCAR 'FY-3E' (Feng-Yun 3E); catalog 'FENGYUN 3E', 'Feng Yun 3E', 'FY-3 05 xing', 'Fengyun 3E'; equal after normalising: 'FENGYUN 3E'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_3f
   norad: 57490
@@ -866,6 +980,8 @@
     - "Names: OSCAR 'FY-3F' (Feng-Yun 3F); catalog 'FENGYUN 3F', 'Feng Yun 3F', 'FY-3 06 xing', 'Fengyun-3F'; equal after normalising: 'FENGYUN 3F'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_3g
   norad: 56232
@@ -881,6 +997,8 @@
     - "Names: OSCAR 'FY-3G' (Feng Yun 3G); catalog 'FENGYUN 3G', 'Feng Yun 3G', 'FY-3 07 xing', 'Fengyun-3G'; equal after normalising: 'FENGYUN 3G'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_3h
   norad: 65815
@@ -896,6 +1014,8 @@
     - "Names: OSCAR 'FY-3H' (Feng-Yun 3H); catalog 'FENGYUN 3H', 'OBJECT A', 'Feng Yun 3H', 'FY-3 08 xing'; equal after normalising: 'FENGYUN 3H'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_4a
   norad: 41882
@@ -911,6 +1031,8 @@
     - "Names: OSCAR 'FY-4A' (Feng-Yun - 4A); catalog 'FENGYUN 4A', 'Feng Yun 4A', 'FY-4 01 xing', 'Fengyun 4A'; equal after normalising: 'FENGYUN 4A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: fy_4b
   norad: 48808
@@ -926,6 +1048,8 @@
     - "Names: OSCAR 'FY-4B' (Feng-Yun - 4B); catalog 'FENGYUN 4B', 'Feng Yun 4B', 'FY-4 02 xing', 'Fengyun 4B'; equal after normalising: 'FENGYUN 4B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gcom_c
   norad: 43065
@@ -941,6 +1065,8 @@
     - "Names: OSCAR 'GCOM-C' (Global Change Observation Mission for Climate); catalog 'GCOM-C (SHIKISAI)', 'GCOM-C', 'Shikisai', 'GCOM-C1'; equal after normalising: 'GCOM-C (SHIKISAI)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: geo_kompsat_2a
   norad: 43823
@@ -956,6 +1082,8 @@
     - "Names: OSCAR 'GEO-KOMPSAT-2A' (Geostationary Korea Multi-Purpose Satellite - 2A); catalog 'GEO-KOMPSAT-2A', 'Cheollian 2A', 'Geo-Kompsat-2A', 'Chollian-2A'; equal after normalising: 'GEO-KOMPSAT-2A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: geo_kompsat_2b
   norad: 45246
@@ -971,6 +1099,8 @@
     - "Names: OSCAR 'GEO-KOMPSAT-2B' (Geostationary Korea Multi-Purpose Satellite - 2B); catalog 'GEO-KOMPSAT-2B', 'Cheollian 2B', 'GEO-Kompsat 2B', 'Chollian-2B'; equal after normalising: 'GEO-KOMPSAT-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_1_02
   norad: 43259
@@ -986,6 +1116,8 @@
     - "Names: OSCAR 'GF-1-02' (Gao Fen - 1 - 02); catalog 'GAOFEN-1 02', 'GAOFEN 1-02', 'Gao Fen 1-02', 'Gaofen 1 02 xing'; equal after normalising: 'GAOFEN-1 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_1_03
   norad: 43260
@@ -1001,6 +1133,8 @@
     - "Names: OSCAR 'GF-1-03' (Gao Fen - 1 - 03); catalog 'GAOFEN-1 03', 'GAOFEN 1-03', 'Gao Fen 1-03', 'Gaofen 1 03 xing'; equal after normalising: 'GAOFEN-1 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_1_04
   norad: 43262
@@ -1016,6 +1150,8 @@
     - "Names: OSCAR 'GF-1-04' (Gao Fen - 1 - 04); catalog 'GAOFEN-1 04', 'GAOFEN 1-04', 'Gao Fen 1-04', 'Gaofen 1 04 xing'; equal after normalising: 'GAOFEN-1 04'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_11
   norad: 43585
@@ -1031,6 +1167,8 @@
     - "Names: OSCAR 'GF-11' (Gao Fen - 9); catalog 'GAOFEN-11 01', 'GAOFEN 11', 'Gao Fen 11-01', 'Jianbing-16 01 xing'; equal after normalising: 'GAOFEN 11'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_11_02
   norad: 46396
@@ -1046,6 +1184,8 @@
     - "Names: OSCAR 'GF-11-02' (Gao Fen - 11-02); catalog 'GAOFEN-11 02', 'GAOFEN 11 2', 'Gao Fen 11-02', 'Jianbing-16 02 xing'; equal after normalising: 'GAOFEN-11 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_11_03
   norad: 49492
@@ -1061,6 +1201,8 @@
     - "Names: OSCAR 'GF-11-03' (Gao Fen - 11-03); catalog 'GAOFEN-11 03', 'GAOFEN 11 3', 'Gao Fen 11-03', 'Jianbing-16 03 xing'; equal after normalising: 'GAOFEN-11 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_11_04
   norad: 54818
@@ -1076,6 +1218,8 @@
     - "Names: OSCAR 'GF-11-04' (Gao Fen - 11-04); catalog 'GAOFEN-11 04', 'GAOFEN 11 04', 'Gao Fen 11-04', 'Jianbing-16 04 xing'; equal after normalising: 'GAOFEN-11 04'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_11_05
   norad: 60249
@@ -1091,6 +1235,8 @@
     - "Names: OSCAR 'GF-11-05' (Gao Fen - 11-05); catalog 'GAOFEN-11 05', 'GAOFEN 11-05', 'Gao Fen 11-05', 'Jianbing-16 05 xing'; equal after normalising: 'GAOFEN-11 05'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_12
   norad: 44819
@@ -1106,6 +1252,8 @@
     - "Names: OSCAR 'GF-12' (Gao Fen - 12); catalog 'GAOFEN-12 01', 'GAOFEN 12', 'Gao Fen 12', 'Gaofen 12 01 xing'; equal after normalising: 'GAOFEN 12'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_12_02
   norad: 48079
@@ -1121,6 +1269,8 @@
     - "Names: OSCAR 'GF-12-02' (Gao Fen - 12-02); catalog 'GAOFEN-12 02', 'GAOFEN 12 (02)', 'Gao Fen 12-02', 'Gaofen 12 02 xing'; equal after normalising: 'GAOFEN-12 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_12_03
   norad: 52912
@@ -1136,6 +1286,8 @@
     - "Names: OSCAR 'GF-12-03' (Gao Fen - 12-03); catalog 'GAOFEN-12 03', 'GAOFEN 12 (03)', 'Gao Fen 12-03', 'Gaofen 12 03 xing'; equal after normalising: 'GAOFEN-12 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_12_04
   norad: 57654
@@ -1151,6 +1303,8 @@
     - "Names: OSCAR 'GF-12-04' (Gao Fen - 12-04); catalog 'GAOFEN-12 04', 'GAOFEN 12 04', 'Gao Fen 12-04', 'Gaofen 12 04 xing'; equal after normalising: 'GAOFEN-12 04'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_12_05
   norad: 61571
@@ -1166,6 +1320,8 @@
     - "Names: OSCAR 'GF-12-05' (Gao Fen - 12-05); catalog 'GAOFEN-12 05', 'GAOFEN 12-05', 'Gao Fen 12-05', 'Gaofen 12 05 xing'; equal after normalising: 'GAOFEN-12 05'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_13
   norad: 46610
@@ -1181,6 +1337,8 @@
     - "Names: OSCAR 'GF-13' (Gao Fen - 13); catalog 'GAOFEN-13 01', 'GAOFEN 13', 'Gao Fen 13', 'Gaofen 13'; equal after normalising: 'GAOFEN 13'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_13_02
   norad: 55912
@@ -1196,6 +1354,8 @@
     - "Names: OSCAR 'GF-13-02' (Gao Fen - 13); catalog 'GAOFEN-13 02', 'GAOFEN 13 02', 'Gao Fen 13-02', 'Gaofen 13-02'; equal after normalising: 'GAOFEN-13 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_14
   norad: 47231
@@ -1211,6 +1371,8 @@
     - "Names: OSCAR 'GF-14' (Gao Fen - 14); catalog 'GAOFEN-14 01', 'GAOFEN 14', 'Gao Fen 14', 'Gaofen 14'; equal after normalising: 'GAOFEN 14'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_14_02
   norad: 66175
@@ -1226,6 +1388,8 @@
     - "Names: OSCAR 'GF-14-02' (Gao Fen - 14-02); catalog 'GAOFEN-14 02', 'OBJECT A', 'Gao Fen 14-02', 'Gaofen 14-02'; equal after normalising: 'GAOFEN-14 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_2
   norad: 40118
@@ -1241,6 +1405,8 @@
     - "Names: OSCAR 'GF-2' (Gao Fen - 2); catalog 'GAOFEN-2', 'GAOFEN 2', 'Gao Fen 2', 'Gaofen 2'; equal after normalising: 'GAOFEN-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_3
   norad: 41727
@@ -1256,6 +1422,8 @@
     - "Names: OSCAR 'GF-3' (Gao Fen - 3); catalog 'GAOFEN-3', 'GAOFEN 3', 'Gao Fen 3', 'Gaofen 3'; equal after normalising: 'GAOFEN-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_3_02_or_csar_01
   norad: 49495
@@ -1271,6 +1439,8 @@
     - "Names: OSCAR 'GF-3(02) or CSAR-01' (GF-3(02)); catalog 'GAOFEN-3 02', 'GAOFEN 3 02', 'Gao Fen 3-02', 'Gaofen 3-02'; equal after normalising: 'GAOFEN-3 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_3_03_or_csar_02
   norad: 52200
@@ -1286,6 +1456,8 @@
     - "Names: OSCAR 'GF-3(03) or CSAR-02' (GF-3(03)); catalog 'GAOFEN-3 03', 'GAOFEN 3 03', 'Gao Fen 3-03', 'Gaofen 3-03'; equal after normalising: 'GAOFEN-3 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_4
   norad: 41194
@@ -1301,6 +1473,8 @@
     - "Names: OSCAR 'GF-4' (Gao Fen - 4); catalog 'GAOFEN-4', 'GAOFEN 4', 'Gao Fen 4', 'Gaofen 4'; equal after normalising: 'GAOFEN-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_5_01a
   norad: 54640
@@ -1316,6 +1490,8 @@
     - "Names: OSCAR 'GF-5-01A' (Gao Fen - 5-01A); catalog 'GAOFEN-5 01A', 'GAOFEN 5 01A', 'Gao Fen 5-01A', 'Gaofen 5 01A xing'; equal after normalising: 'GAOFEN-5 01A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_5_02
   norad: 49122
@@ -1331,6 +1507,8 @@
     - "Names: OSCAR 'GF-5-02' (Gao Fen - 5-02); catalog 'GAOFEN-5 02', 'Gao Fen 5-02', 'Gaofen 5 02 xing'; equal after normalising: 'GAOFEN-5 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_6
   norad: 43484
@@ -1346,6 +1524,8 @@
     - "Names: OSCAR 'GF-6' (Gao Fen - 6); catalog 'GAOFEN-6', 'GAOFEN 6', 'Gao Fen 6', 'Gaofen 6'; equal after normalising: 'GAOFEN-6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_7
   norad: 44703
@@ -1361,6 +1541,8 @@
     - "Names: OSCAR 'GF-7' (Gao Fen - 7); catalog 'GAOFEN-7', 'GAOFEN 7', 'Gao Fen 7', 'Gaofen 7'; equal after normalising: 'GAOFEN-7'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_8
   norad: 40701
@@ -1376,6 +1558,8 @@
     - "Names: OSCAR 'GF-8' (Gao Fen - 8); catalog 'GAOFEN-8', 'GAOFEN 8', 'Gao Fen 8', 'Jianbing-13 02 xing?'; equal after normalising: 'GAOFEN-8'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_9
   norad: 40894
@@ -1391,6 +1575,8 @@
     - "Names: OSCAR 'GF-9' (Gao Fen - 9); catalog 'GAOFEN-9 01', 'GAOFEN 9', 'Gao Fen 9', 'Jianbing-15 02 xing'; equal after normalising: 'GAOFEN 9'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_9_02
   norad: 45625
@@ -1406,6 +1592,8 @@
     - "Names: OSCAR 'GF-9-02' (Gao Fen - 9-02); catalog 'GAOFEN-9 02', 'GAOFEN 9 02', 'Gao Fen 9-02', 'Gaofen 9 02 xing'; equal after normalising: 'GAOFEN-9 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_9_03
   norad: 45794
@@ -1421,6 +1609,8 @@
     - "Names: OSCAR 'GF-9-03' (Gao Fen - 9-03); catalog 'GAOFEN-9 03', 'GAOFEN 9 03', 'Gao Fen 9-03', 'Gaofen 9 03 xing'; equal after normalising: 'GAOFEN-9 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_9_04
   norad: 46025
@@ -1436,6 +1626,8 @@
     - "Names: OSCAR 'GF-9-04' (Gao Fen - 9-04); catalog 'GAOFEN-9 04', 'GAOFEN 9 04', 'Gao Fen 9-04', 'Gaofen 9 04 xing'; equal after normalising: 'GAOFEN-9 04'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gf_9_05
   norad: 46232
@@ -1451,6 +1643,8 @@
     - "Names: OSCAR 'GF-9-05' (Gao Fen - 9-05); catalog 'GAOFEN-9 05', 'GAOFEN 9 05', 'Gao Fen 9-05', 'Gaofen 9 05 xing'; equal after normalising: 'GAOFEN-9 05'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ghost_3
   norad: 56958
@@ -1466,6 +1660,8 @@
     - "Names: OSCAR 'GHOSt-3' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-3'; equal after normalising: 'GHOST-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ghost_4
   norad: 59133
@@ -1481,6 +1677,8 @@
     - "Names: OSCAR 'GHOSt-4' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-4'; equal after normalising: 'GHOST-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ghost_5
   norad: 59130
@@ -1496,6 +1694,8 @@
     - "Names: OSCAR 'GHOSt-5' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-5'; equal after normalising: 'GHOST-5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gnomes_4
   norad: 58462
@@ -1511,6 +1711,8 @@
     - "Names: OSCAR 'GNOMES-4' (GNSS Navigation and Occultation Measurement Satellites); catalog 'GNOMES-4'; equal after normalising: 'GNOMES-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gnomes_5
   norad: 60574
@@ -1526,6 +1728,8 @@
     - "Names: OSCAR 'GNOMES-5' (GNSS Navigation and Occultation Measurement Satellites); catalog 'GNOMES-5'; equal after normalising: 'GNOMES-5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: goes_18
   norad: 51850
@@ -1541,6 +1745,8 @@
     - "Names: OSCAR 'GOES-18' (Geostationary Operational Environmental Satellite - 18); catalog 'GOES 18', 'GOES T', 'GOES-18', 'GOES-T'; equal after normalising: 'GOES 18'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: goes_19
   norad: 60133
@@ -1556,6 +1762,8 @@
     - "Names: OSCAR 'GOES-19' (Geostationary Operational Environmental Satellite - 19); catalog 'GOES 19', 'GOES U', 'GOES-19', 'GOES-U'; equal after normalising: 'GOES 19'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gokturk_1a
   norad: 41875
@@ -1571,6 +1779,8 @@
     - "Names: OSCAR 'Göktürk-1A' (Göktürk-1A); catalog 'GOKTURK 1A', 'GOKTURK-1A', 'Gokturk-1', 'Göktürk-1A'; equal after normalising: 'Göktürk-1A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gosat
   norad: 33492
@@ -1586,6 +1796,8 @@
     - "Names: OSCAR 'GOSAT' (Green-house gas Observing Satellite); catalog 'GOSAT (IBUKI)', 'Ibuki', 'GOSAT', 'Greenhouse Gases Observing Satellite'; equal after normalising: 'GOSAT (IBUKI)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gosat_2
   norad: 43672
@@ -1601,6 +1813,8 @@
     - "Names: OSCAR 'GOSAT-2' (Green-house gas Observing Satellite - 2); catalog 'GOSAT 2 (IBUKI 1)', 'GOSAT 2', 'Ibuki 2'; equal after normalising: 'GOSAT 2 (IBUKI 1)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gosat_gw
   norad: 64694
@@ -1616,6 +1830,8 @@
     - "Names: OSCAR 'GOSAT-GW' (Global Observation SATellite for Greenhouse gases and Water cycle); catalog 'GOSAT-GW (IBUKI GW)', 'GOSAT-GW', 'Ibuki-GW'; equal after normalising: 'GOSAT-GW (IBUKI GW)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: gpm_core_observatory
   norad: 39574
@@ -1631,6 +1847,8 @@
     - "Names: OSCAR 'GPM Core Observatory' (Global Precipitation Measurement - Core Observatory); catalog 'GPM-CORE', 'GPM', 'GPM Core', 'Global Precipitation Measurement'; equal after normalising: 'Global Precipitation Measurement Core Observatory'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: himawari_9
   norad: 41836
@@ -1646,6 +1864,8 @@
     - "Names: OSCAR 'Himawari-9' (Himawari-9); catalog 'HIMAWARI-9', 'HIMAWARI 9', 'Himawari-9', 'Himawari 9'; equal after normalising: 'HIMAWARI-9'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hj_2a
   norad: 46478
@@ -1661,6 +1881,8 @@
     - "Names: OSCAR 'HJ-2A' (Huan Jing 2A); catalog 'HJ-2A', 'Huanjing Jianzai 02-01', 'HJ er hao A xing'; equal after normalising: 'HJ-2A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hj_2b
   norad: 46479
@@ -1676,6 +1898,8 @@
     - "Names: OSCAR 'HJ-2B' (Huan Jing 2B); catalog 'HJ-2B', 'Huanjing Jianzai 02-02', 'HJ er hao B xing'; equal after normalising: 'HJ-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hj_2e
   norad: 54035
@@ -1691,6 +1915,8 @@
     - "Names: OSCAR 'HJ-2E' (Huan Jing 2E (also known as S-SAR01)); catalog 'HJ-2E', 'Huanjing Jianzai 02-05', '5m S-SAR 01'; equal after normalising: 'HJ-2E'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hj_2f
   norad: 57519
@@ -1706,6 +1932,8 @@
     - "Names: OSCAR 'HJ-2F' (Huan Jing 2F (also known as S-SAR02)); catalog 'HJ-2F', 'Huanjing Jianzai 02-06', '5m S-SAR 02'; equal after normalising: 'HJ-2F'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hotbird_13f
   norad: 54048
@@ -1721,6 +1949,8 @@
     - "Names: OSCAR 'HOTBIRD 13F' (HOTBIRD 13F); catalog 'EUTELSAT HOTBIRD 13F', 'HOTBIRD 13F', 'EUTELSAT HOT BIRD 13F', 'HotBird 13F'; equal after normalising: 'HOTBIRD 13F'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hotbird_13g
   norad: 54225
@@ -1736,6 +1966,8 @@
     - "Names: OSCAR 'HOTBIRD 13G' (HOTBIRD 13G); catalog 'EUTELSAT HOTBIRD 13G', 'HOTBIRD 13G', 'EUTELSAT HOT BIRD 13G', 'HotBird 13G'; equal after normalising: 'HOTBIRD 13G'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hotsat_2
   norad: 68465
@@ -1751,6 +1983,8 @@
     - "Names: OSCAR 'HOTSAT-2' (HOTSAT-2); catalog 'HOTSAT-2', 'Hotsat-2'; equal after normalising: 'HOTSAT-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hy_1c
   norad: 43609
@@ -1766,6 +2000,8 @@
     - "Names: OSCAR 'HY-1C' (Hai Yang 1C); catalog 'HAIYANG-1C', 'HAIYANG 1C', 'Hai Yang 1-03', 'Hai Yang 01 hao C xing'; equal after normalising: 'HAIYANG-1C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hy_1d
   norad: 45721
@@ -1781,6 +2017,8 @@
     - "Names: OSCAR 'HY-1D' (Hai Yang 1D); catalog 'HAIYANG-1D', 'HAIYANG 1D', 'Hai Yang 1-04', 'Hai Yang 01 hao D xing'; equal after normalising: 'HAIYANG-1D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hy_2b
   norad: 43655
@@ -1796,6 +2034,8 @@
     - "Names: OSCAR 'HY-2B' (Hai Yang 2B); catalog 'HAIYANG-2B', 'HAIYANG 2B', 'Hai Yang 2-02', 'Hai Yang 2 hao 02 xing'; equal after normalising: 'HAIYANG-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hy_2d
   norad: 48621
@@ -1811,6 +2051,8 @@
     - "Names: OSCAR 'HY-2D' (Hai Yang 2D); catalog 'HAIYANG-2D', 'HAIYANG 2D', 'Hai Yang 2-04', 'Hai Yang 2 hao 04 xing'; equal after normalising: 'HAIYANG-2D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hydrognss_1
   norad: 66762
@@ -1826,6 +2068,8 @@
     - "Names: OSCAR 'HydroGNSS-1' (Hydro Global Navigation Satellite System-1); catalog 'HYDROGNSS-1', 'HydroGNSS-1'; equal after normalising: 'HYDROGNSS-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hydrognss_2
   norad: 66763
@@ -1841,6 +2085,8 @@
     - "Names: OSCAR 'HydroGNSS-2' (Hydro Global Navigation Satellite System-2); catalog 'HYDROGNSS-2', 'HydroGNSS-2'; equal after normalising: 'HYDROGNSS-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: hysis
   norad: 43719
@@ -1856,6 +2102,8 @@
     - "Names: OSCAR 'HySIS' (Hyper Spectral Imaging Spectrometer); catalog 'HYSIS', 'HySIS', 'HysIS'; equal after normalising: 'HYSIS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: icesat_2
   norad: 43613
@@ -1871,6 +2119,8 @@
     - "Names: OSCAR 'ICESat-2' (Ice, Cloud and land Elevation Satellite); catalog 'ICESAT-2', 'ICESAT 2', 'ICESat-2', 'Ice, Cloud, and Land Elevation Satellite-2'; equal after normalising: 'ICESAT-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: insat_3dr
   norad: 41752
@@ -1886,6 +2136,8 @@
     - "Names: OSCAR 'INSAT-3DR' (Indian National Satellite - 3D repeat); catalog 'INSAT-3DR', 'INSAT 3DR', 'Insat 3DR'; equal after normalising: 'INSAT-3DR'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: insat_3ds
   norad: 58990
@@ -1901,6 +2153,8 @@
     - "Names: OSCAR 'INSAT-3DS' (Indian National Satellite - 3D second repeat); catalog 'INSAT-3DS', 'INSAT 3DS', 'Insat 3DS'; equal after normalising: 'INSAT-3DS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: iris
   norad: 39197
@@ -1916,6 +2170,8 @@
     - "Names: OSCAR 'IRIS' (Interface Region Imaging Spectrograph); catalog 'IRIS', 'Interface Region Imaging Spectrograph', 'Explorer 94', 'Small Explorer 12'; equal after normalising: 'IRIS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: jason_3
   norad: 41240
@@ -1931,6 +2187,8 @@
     - "Names: OSCAR 'JASON-3' (Joint Altimetry Satellite Oceanography Network - 3); catalog 'JASON-3', 'JASON 3', 'Jason-3', 'JASON3'; equal after normalising: 'JASON-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kanopus_v3
   norad: 43180
@@ -1946,6 +2204,8 @@
     - "Names: OSCAR 'KANOPUS-V3' (KANOPUS-V3); catalog 'KANOPUS-V 3', 'Kanopus-V No. 3', 'Kanopus-V', 'Kanopus-V 3'; equal after normalising: 'KANOPUS-V 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kanopus_v4
   norad: 43181
@@ -1961,6 +2221,8 @@
     - "Names: OSCAR 'KANOPUS-V4' (KANOPUS-V4); catalog 'KANOPUS-V 4', 'Kanopus-V No. 4', 'Kanopus-V', 'Kanopus-V 4'; equal after normalising: 'KANOPUS-V 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kanopus_v5
   norad: 43876
@@ -1976,6 +2238,8 @@
     - "Names: OSCAR 'KANOPUS-V5' (KANOPUS-V5); catalog 'KANOPUS-V 5', 'Kanopus-V No. 5', 'Kanopus-V', 'Kanopus-V 5'; equal after normalising: 'KANOPUS-V 5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kanopus_v6
   norad: 43877
@@ -1991,6 +2255,8 @@
     - "Names: OSCAR 'KANOPUS-V6' (KANOPUS-V6); catalog 'KANOPUS-V 6', 'Kanopus-V No. 6', 'Kanopus-V', 'Kanopus-V 6'; equal after normalising: 'KANOPUS-V 6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kompsat_3
   norad: 38338
@@ -2006,6 +2272,8 @@
     - "Names: OSCAR 'KOMPSAT-3' (Korea Multi-Purpose Satellite - 3); catalog 'ARIRANG-3 (KOMPSAT-3)', 'KOMPSAT 3', 'Arirang-3', 'KOMPSAT-3'; equal after normalising: 'ARIRANG-3 (KOMPSAT-3)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kompsat_3a
   norad: 40536
@@ -2021,6 +2289,8 @@
     - "Names: OSCAR 'KOMPSAT-3A' (Korea Multi-Purpose Satellite - 3A); catalog 'KOMPSAT-3A', 'KOMPSAT 3A', 'Arirang-3A', 'Arirang IIIA'; equal after normalising: 'KOMPSAT-3A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kompsat_5
   norad: 39227
@@ -2036,6 +2306,8 @@
     - "Names: OSCAR 'KOMPSAT-5' (Korea Multi-Purpose Satellite - 5); catalog 'ARIRANG-5 (KOMPSAT-5)', 'KOMPSAT 5', 'Arirang-5', 'KOMPSAT-5'; equal after normalising: 'ARIRANG-5 (KOMPSAT-5)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kondor_fka_1
   norad: 56756
@@ -2051,6 +2323,8 @@
     - "Names: OSCAR 'Kondor-FKA 1' (Kondor-Experimental SAR Spacecraft FKA 1); catalog 'KONDOR-FKA NO. 1', 'KONDOR FKA 1', 'Kondor-FKA No. 1'; equal after normalising: 'KONDOR-FKA NO. 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: kondor_fka_2
   norad: 62138
@@ -2066,6 +2340,8 @@
     - "Names: OSCAR 'Kondor-FKA 2' (Kondor-Experimental SAR Spacecraft FKA 2); catalog 'KONDOR-FKA NO. 2', 'KONDOR FKA 2', 'Kondor-FKA No. 2'; equal after normalising: 'KONDOR-FKA NO. 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: lageos_1
   norad: 8820
@@ -2081,6 +2357,8 @@
     - "Names: OSCAR 'LAGEOS-1' (Laser Geodynamics Satellite - 1); catalog 'LAGEOS 1', 'Lageos', 'LAGEOS-1', 'LAGEOS I'; equal after normalising: 'LAGEOS 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: lageos_2
   norad: 22195
@@ -2096,6 +2374,8 @@
     - "Names: OSCAR 'LAGEOS-2' (Laser Geodynamics Satellite - 2); catalog 'LAGEOS 2', 'Lageos 2', 'LAGEOS-2', 'LAGEOS II'; equal after normalising: 'LAGEOS 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: landsat_8
   norad: 39084
@@ -2111,6 +2391,8 @@
     - "Names: OSCAR 'Landsat-8' (Landsat-8); catalog 'LANDSAT 8', 'Landsat 8', 'Landsat Data Cont. Mission', 'LDCM'; equal after normalising: 'LANDSAT 8'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: landsat_9
   norad: 49260
@@ -2126,6 +2408,8 @@
     - "Names: OSCAR 'Landsat-9' (Landsat-9); catalog 'LANDSAT 9', 'Landsat 9'; equal after normalising: 'LANDSAT 9'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: lares_2
   norad: 53105
@@ -2141,6 +2425,8 @@
     - "Names: OSCAR 'LARES-2' (Laser RElativity Satellite - 2); catalog 'LARES-2', 'LARES 2', 'Laser Relativity Satellite 2'; equal after normalising: 'LARES-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ludi_tance_1_01a
   norad: 51284
@@ -2156,6 +2442,8 @@
     - "Names: OSCAR 'Ludi-Tance 1 01A' (L-band differential interferometric synthetic aperture radar satellite A); catalog 'LUDI TANCE 1-01A (L-SAR 01A)', 'LT-1 01A', 'Ludi Tance 1-01A', 'Ludi Tance 1 01 zu A xing'; equal after normalising: 'LUDI TANCE 1-01A (L-SAR 01A)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ludi_tance_1_01b
   norad: 51822
@@ -2171,6 +2459,8 @@
     - "Names: OSCAR 'Ludi-Tance 1 01B' (L-band differential interferometric synthetic aperture radar satellite A); catalog 'LUDI TANCE 1-01B (L-SAR 01B)', 'LT-1 01B', 'Ludi Tance 1-01B', 'Ludi Tance 1 01 zu B xing'; equal after normalising: 'LUDI TANCE 1-01B (L-SAR 01B)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: ludi_tance_4_01a
   norad: 57624
@@ -2186,6 +2476,8 @@
     - "Names: OSCAR 'Ludi-Tance 4 01A' (L-band differential interferometric synthetic aperture radar satellite 4 01A); catalog 'LUDI TANCE-4 01A', 'Ludi Tance 4A', 'LSAR4-01', 'Ludi Tance-4 01A'; equal after normalising: 'LUDI TANCE-4 01A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: mats
   norad: 54227
@@ -2201,6 +2493,8 @@
     - "Names: OSCAR 'MATS' (Mesospheric Airglow/Aerosol Tomography and Spectroscopy); catalog 'MATS', 'Mesospheric Airglow/Aerosol Tomography and Spectroscopy'; equal after normalising: 'MATS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: meteor_m_n2_3
   norad: 57166
@@ -2216,6 +2510,8 @@
     - "Names: OSCAR 'Meteor-M N2-3' (Meteor-M Number 2-3); catalog 'METEOR-M2 3', 'METEOR M2-3', 'Meteor-M No. 2-3'; equal after normalising: 'METEOR-M2 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: meteor_m_n2_4
   norad: 59051
@@ -2231,6 +2527,8 @@
     - "Names: OSCAR 'Meteor-M N2-4' (Meteor-M Number 2-4); catalog 'METEOR-M2 4', 'METEOR M2-4', 'Meteor-M No. 2-4'; equal after normalising: 'METEOR-M2 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: meteosat_10
   norad: 38552
@@ -2246,6 +2544,8 @@
     - "Names: OSCAR 'Meteosat-10' (Meteosat-10); catalog 'METEOSAT-10 (MSG-3)', 'METEOSAT 10 (MSG 3)', 'Meteosat 10', 'MSG 3'; equal after normalising: 'METEOSAT-10 (MSG-3)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: meteosat_11
   norad: 40732
@@ -2261,6 +2561,8 @@
     - "Names: OSCAR 'Meteosat-11' (Meteosat-11); catalog 'METEOSAT-11 (MSG-4)', 'METEOSAT 11 (MSG 4)', 'Meteosat 11', 'MSG 4'; equal after normalising: 'METEOSAT-11 (MSG-4)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: meteosat_12
   norad: 54743
@@ -2276,6 +2578,8 @@
     - "Names: OSCAR 'Meteosat-12' (Meteosat-12 (formerly MTG-1)); catalog 'METEOSAT-12 (MTG-I1)', 'METEOSAT 12 (MTG I1)', 'Meteosat 12', 'MTG-I1'; equal after normalising: 'METEOSAT-12 (MTG-I1)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: metop_b
   norad: 38771
@@ -2291,6 +2595,8 @@
     - "Names: OSCAR 'Metop-B' (Meteorological operational satellite - B); catalog 'METOP-B', 'METOP B', 'METOP 1', 'MetOp-B'; equal after normalising: 'METOP-B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: metop_c
   norad: 43689
@@ -2306,6 +2612,8 @@
     - "Names: OSCAR 'Metop-C' (Meteorological operational satellite - C); catalog 'METOP-C', 'METOP C', 'MetOp-C', 'Meteorological Operational Satellite-C'; equal after normalising: 'METOP-C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: microcarb
   norad: 64899
@@ -2321,6 +2629,8 @@
     - "Names: OSCAR 'MicroCarb' (MicroCarb); catalog 'MICROCARB', 'CARB', 'MicroCarb'; equal after normalising: 'MICROCARB'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: miman
   norad: 52900
@@ -2336,6 +2646,8 @@
     - "Names: OSCAR 'MIMAN' (Monochrome Imaging for Monitoring Aerosol by Nanosatellite); catalog 'MIMAN', 'CubesatYonsei'; equal after normalising: 'MIMAN'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: mohammed_vi_a
   norad: 43005
@@ -2351,6 +2663,8 @@
     - "Names: OSCAR 'Mohammed VI-A' (Mohammed VI-A); catalog 'MOHAMMED VI-A', 'Mohammed VI-A', 'MN35-13A', 'Mohammed VI - A'; equal after normalising: 'MOHAMMED VI-A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: mohammed_vi_b
   norad: 43717
@@ -2366,6 +2680,8 @@
     - "Names: OSCAR 'Mohammed VI-B' (Mohammed VI-B); catalog 'MOHAMMED VI-B', 'Mohammed VI-B', 'MN35B', 'Mohammed VI - B'; equal after normalising: 'MOHAMMED VI-B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: musat_2
   norad: 59099
@@ -2381,6 +2697,8 @@
     - "Names: OSCAR 'MuSat-2' (MuSat-2); catalog 'MUSAT-2', 'MUSAT2', 'MuSat-2'; equal after normalising: 'MUSAT-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: neonsat_1a
   norad: 67614
@@ -2396,6 +2714,8 @@
     - "Names: OSCAR 'NEONSAT-1A' (NEONSAT-1A); catalog 'NEONSAT-1A', 'Neonsat-1A', 'New-space Earth Observation Satellite 1A'; equal after normalising: 'NEONSAT-1A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: nisar
   norad: 65053
@@ -2411,6 +2731,8 @@
     - "Names: OSCAR 'NISAR' (NASA-ISRO Synthetic Aperture Radar); catalog 'NISAR', 'NASA-ISRO Synthetic Aperture Radar'; equal after normalising: 'NISAR'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: noaa_20
   norad: 43013
@@ -2426,6 +2748,8 @@
     - "Names: OSCAR 'NOAA-20' (National Oceanic and Atmospheric Administration - 20); catalog 'NOAA 20 (JPSS-1)', 'NOAA 20', 'NOAA-20', 'JPSS-1'; equal after normalising: 'NOAA 20 (JPSS-1)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: noaa_21
   norad: 54234
@@ -2441,6 +2765,8 @@
     - "Names: OSCAR 'NOAA-21' (National Oceanic and Atmospheric Administration - 21); catalog 'NOAA 21 (JPSS-2)', 'NOAA 21', 'NOAA-21', 'JPSS-2'; equal after normalising: 'NOAA 21 (JPSS-2)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: novasar_s
   norad: 43619
@@ -2456,6 +2782,8 @@
     - "Names: OSCAR 'NovaSAR-S' (NovaSAR-S); catalog 'NOVASAR 1', 'NovaSAR-S'; equal after normalising: 'NovaSAR-S'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: oco_2
   norad: 40059
@@ -2471,6 +2799,8 @@
     - "Names: OSCAR 'OCO-2' (Orbiting Carbon Observatory - 2); catalog 'OCO 2', 'OCO-2', 'Orbiting Carbon Observatory', 'Orbiting Carbon Observatory 2'; equal after normalising: 'OCO 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: pace
   norad: 58928
@@ -2486,6 +2816,8 @@
     - "Names: OSCAR 'PACE' (Plankton, Aerosol, Cloud, ocean Ecosystem); catalog 'PACE', 'Plankton, Aerosol, Cloud, ocean Ecosystem'; equal after normalising: 'PACE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: parker_solar_probe
   norad: 43592
@@ -2501,6 +2833,8 @@
     - "Names: OSCAR 'Parker Solar Probe' (Parker Solar Probe); catalog 'PARKER SOLAR PROBE', 'Parker Solar Probe', 'PSP', 'NASA Solar Probe'; equal after normalising: 'PARKER SOLAR PROBE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: perusat_1
   norad: 41770
@@ -2516,6 +2850,8 @@
     - "Names: OSCAR 'PeruSat-1' (PeruSat-1); catalog 'PERUSAT 1', 'PeruSat-1', 'Peru Recon', 'PerúSat 1'; equal after normalising: 'PERUSAT 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: pleiades_1a
   norad: 38012
@@ -2531,6 +2867,8 @@
     - "Names: OSCAR 'Pléiades-1A' (Pleiades-1A); catalog 'PLEIADES 1A', 'PLEIADES 1', 'Pleiades 1a', 'Pleiades HR-1'; equal after normalising: 'PLEIADES 1A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: pleiades_1b
   norad: 39019
@@ -2546,6 +2884,8 @@
     - "Names: OSCAR 'Pléiades-1B' (Pleiades-1B); catalog 'PLEIADES 1B', 'Pleiades 1b', 'Pleiades HR-2', 'Pleiades 1B'; equal after normalising: 'PLEIADES 1B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: prefire_1
   norad: 59965
@@ -2561,6 +2901,8 @@
     - "Names: OSCAR 'PREFIRE-1' (Polar Radiant Energy in the Far Infrared Experiment-1); catalog 'PREFIRE-1', 'PREFIRE 1', 'PREFIRE 2', 'Polar Radiant Energy in the Far-Infrared Experiment-2'; equal after normalising: 'PREFIRE-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: prefire_2
   norad: 59881
@@ -2576,6 +2918,8 @@
     - "Names: OSCAR 'PREFIRE-2' (Polar Radiant Energy in the Far Infrared Experiment-2); catalog 'PREFIRE-2', 'PREFIRE 2', 'PREFIRE 1', 'Polar Radiant Energy in the Far-Infrared Experiment-1'; equal after normalising: 'PREFIRE-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: prisma
   norad: 44072
@@ -2591,6 +2935,8 @@
     - "Names: OSCAR 'PRISMA' (PRecursore IperSpettrale della Missione Applicativa); catalog 'PRISMA'; equal after normalising: 'PRISMA'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: proba_1
   norad: 26958
@@ -2606,6 +2952,8 @@
     - "Names: OSCAR 'PROBA-1' (Project for On-Board Autonomy - 1); catalog 'PROBA-1', 'PROBA 1', 'PROBA', 'Project for On-Board Autonomy 1'; equal after normalising: 'PROBA-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: proba_2
   norad: 36037
@@ -2621,6 +2969,8 @@
     - "Names: OSCAR 'PROBA-2' (Project for On-Board Autonomy - 2); catalog 'PROBA-2', 'PROBA 2', 'PROBA2', 'Project for On-Board Autonomy 2'; equal after normalising: 'PROBA-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: proba_3o
   norad: 62258
@@ -2636,6 +2986,8 @@
     - "Names: OSCAR 'PROBA-3O' (PROBA-3 Occulter); catalog 'PROBA-3 OSC', 'PROBA-3 Occulter', 'Occulter Spacecraft'; equal after normalising: 'PROBA-3 Occulter'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: proba_v_cc
   norad: 58025
@@ -2651,6 +3003,8 @@
     - "Names: OSCAR 'PROBA-V-CC' (Project for On-Board Autonomy - Végétation Companion Cubesat); catalog 'PVCC', 'Proba-V Companion Cubesat', 'PROBA-V Companion CubeSat', 'PROBA-V CC'; equal after normalising: 'PROBA-V CC'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_10
   norad: 64055
@@ -2666,6 +3020,8 @@
     - "Names: OSCAR 'QPS-SAR 10' (QPS-SAR 10 (Wadatsumi 1)); catalog 'QPS-SAR-10 (WADATSUMI-I)', 'QPS-SAR-10 WADATSUMI-I', 'Wadatsumi-I', 'QPS-SAR-10'; equal after normalising: 'QPS-SAR-10 (WADATSUMI-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_11
   norad: 64340
@@ -2681,6 +3037,8 @@
     - "Names: OSCAR 'QPS-SAR 11' (QPS-SAR 11 (Yamatsumi 1)); catalog 'QPS-SAR-11 (YAMATSUMI-I)', 'QPS-SAR-11 YAMATSUMI', 'Yamatsumi-I', 'QPS-SAR-11'; equal after normalising: 'QPS-SAR-11 (YAMATSUMI-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_12
   norad: 65116
@@ -2696,6 +3054,8 @@
     - "Names: OSCAR 'QPS-SAR 12' (QPS-SAR 12 (Kushinada 1)); catalog 'QPS-SAR-12 (KUSHINADA-I)', 'QPS-SAR-12 KUSHINADA-I', 'Kushinada-I', 'QPS-SAR-12'; equal after normalising: 'QPS-SAR-12 (KUSHINADA-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_14
   norad: 66316
@@ -2711,6 +3071,8 @@
     - "Names: OSCAR 'QPS-SAR 14' (QPS-SAR 14 (Yachihoko)); catalog 'QPS-SAR-14 (YACHIHOKO-I)', 'QPS-SAR-14 YACHIHOKO-1', 'Yachihoko-I', 'QPS-SAR-14'; equal after normalising: 'QPS-SAR-14 (YACHIHOKO-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_15
   norad: 67228
@@ -2726,6 +3088,8 @@
     - "Names: OSCAR 'QPS-SAR 15' (QPS-SAR 15 (Sukunami 1)); catalog 'QPS-SAR-15 (SUKUNAMI-I)', 'QPS-SAR-15 SUKUNAMI-1', 'Sukunami-I', 'QPS-SAR-15'; equal after normalising: 'QPS-SAR-15 (SUKUNAMI-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_18
   norad: 100401
@@ -2741,6 +3105,8 @@
     - "Names: OSCAR 'QPS-SAR 18' (QPS-SAR 18 (Susanoo 2)); catalog 'QPS-SAR-18 (SUSANOO-II)', 'QPS-SAR-18', 'Susanoo-II', 'Susanoo-2'; equal after normalising: 'QPS-SAR-18 (SUSANOO-II)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_5
   norad: 58578
@@ -2756,6 +3122,8 @@
     - "Names: OSCAR 'QPS-SAR 5' (QPS-SAR 5 (Tsukuyomi 1)); catalog 'QPS-SAR-5 (TSUKUYOMI-I)', 'QPS-SAR-5 TSUKUYOMI-I', 'Tsukuyomi-I', 'QPS-SAR-5'; equal after normalising: 'QPS-SAR-5 (TSUKUYOMI-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_7
   norad: 59447
@@ -2771,6 +3139,8 @@
     - "Names: OSCAR 'QPS-SAR 7' (QPS-SAR 7 (Tsukuyomi 2)); catalog 'QPS-SAR-7 (TSUKUYOMI-II)', 'QPS-SAR-7 TSUKUYOMI-II', 'Tsukuyomi-II', 'QPS-SAR-7'; equal after normalising: 'QPS-SAR-7 (TSUKUYOMI-II)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_8
   norad: 60542
@@ -2786,6 +3156,8 @@
     - "Names: OSCAR 'QPS-SAR 8' (QPS-SAR 8 (Amateru 4)); catalog 'QPS-SAR-8 (AMATERU-IV)', 'QPS-SAR-8 AMATERU-IV', 'Amateru 4', 'QPS-SAR-8'; equal after normalising: 'QPS-SAR-8 (AMATERU-IV)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: qps_sar_9
   norad: 63205
@@ -2801,6 +3173,8 @@
     - "Names: OSCAR 'QPS-SAR 9' (QPS-SAR 9 (Susanoo-1)); catalog 'QPS-SAR-9 (SUSANOO-I)', 'QPS-SAR-9 SUSANOO-I', 'Susanoo-I', 'QPS-SAR-9'; equal after normalising: 'QPS-SAR-9 (SUSANOO-I)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: radarsat_2
   norad: 32382
@@ -2816,6 +3190,8 @@
     - "Names: OSCAR 'RadarSat-2' (RadarSat-2); catalog 'RADARSAT-2', 'RADARSAT 2', 'Radarsat-2'; equal after normalising: 'RADARSAT-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: rasat
   norad: 37791
@@ -2831,6 +3207,8 @@
     - "Names: OSCAR 'RASAT' (Remote Sensing Satellite); catalog 'RASAT', 'Rasat'; equal after normalising: 'RASAT'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: rcm_1
   norad: 44322
@@ -2846,6 +3224,8 @@
     - "Names: OSCAR 'RCM-1' (RadarSat Constellation Mission - 1); catalog 'RCM-1', 'RCM 1', 'Radarsat Constell. Mission', 'RADARSAT Constellation Mission 1'; equal after normalising: 'RCM-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: resourcesat_2
   norad: 37387
@@ -2861,6 +3241,8 @@
     - "Names: OSCAR 'ResourceSat-2' (Satellite for Earth Resources - 2); catalog 'RESOURCESAT-2', 'RESOURCESAT 2', 'Resourcesat-2'; equal after normalising: 'RESOURCESAT-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: resourcesat_2a
   norad: 41877
@@ -2876,6 +3258,8 @@
     - "Names: OSCAR 'ResourceSat-2A' (Satellite for Earth Resources - 2A); catalog 'RESOURCESAT-2A', 'RESOURCESAT 2A', 'Resourcesat-2A'; equal after normalising: 'RESOURCESAT-2A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: resurs_p4
   norad: 59371
@@ -2891,6 +3275,8 @@
     - "Names: OSCAR 'Resurs-P4' (Resurs-P4); catalog 'RESURS-P 4', 'RESURS P4', 'Resurs-P No. 4', 'Resurs-P 47KS No. 4'; equal after normalising: 'RESURS-P 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: resurs_p5
   norad: 62430
@@ -2906,6 +3292,8 @@
     - "Names: OSCAR 'Resurs-P5' (Resurs-P5); catalog 'RESURS-P 5', 'RESURS P5', 'Resurs-P No. 5', 'Resurs-P 47KS No. 5'; equal after normalising: 'RESURS-P 5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: risat_2b
   norad: 44233
@@ -2921,6 +3309,8 @@
     - "Names: OSCAR 'RISAT-2B' (Radar Imaging Satellite - 2B); catalog 'RISAT-2B', 'RISAT 2B', 'RISAT-2B satellite'; equal after normalising: 'RISAT-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: risat_2br1
   norad: 44857
@@ -2936,6 +3326,8 @@
     - "Names: OSCAR 'RISAT-2BR1' (Radar Imaging Satellite - 2BR-1); catalog 'RISAT-2BR1'; equal after normalising: 'RISAT-2BR1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: saocom_1a
   norad: 43641
@@ -2951,6 +3343,8 @@
     - "Names: OSCAR 'SAOCOM-1A' (SAtélite Argentino de Observación COn Microondas - 1A); catalog 'SAOCOM 1A', 'SAOCOM 1-A'; equal after normalising: 'SAOCOM 1A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: saocom_1b
   norad: 46265
@@ -2966,6 +3360,8 @@
     - "Names: OSCAR 'SAOCOM-1B' (SAtélite Argentino de Observación COn Microondas - 1B); catalog 'SAOCOM 1B', 'SAOCOM 1-B'; equal after normalising: 'SAOCOM 1B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: saral
   norad: 39086
@@ -2981,6 +3377,8 @@
     - "Names: OSCAR 'SARAL' (Satellite with ARGOS and AltiKa); catalog 'SARAL', 'S'; equal after normalising: 'SARAL'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: scd_1
   norad: 22490
@@ -2996,6 +3394,8 @@
     - "Names: OSCAR 'SCD-1' (Satélite de Coleta de Dados - 1); catalog 'SCD 1', 'SCD-1', 'Data-Collecting Satellite 1'; equal after normalising: 'SCD 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: scd_2
   norad: 25504
@@ -3011,6 +3411,8 @@
     - "Names: OSCAR 'SCD-2' (Satélite de Coleta de Dados - 2); catalog 'SCD 2', 'SCD-2', 'Data-Collecting Satellite 2'; equal after normalising: 'SCD 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: scisat_1
   norad: 27858
@@ -3026,6 +3428,8 @@
     - "Names: OSCAR 'SCISAT-1' (Scientific Satellite -1); catalog 'SCISAT 1', 'SCISAT-1'; equal after normalising: 'SCISAT 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sdgsat_1
   norad: 49387
@@ -3041,6 +3445,8 @@
     - "Names: OSCAR 'SDGSAT-1' (Sustainable Development Science Satellite 1); catalog 'SDGSAT 1', 'SDGSAT-1', 'Guangmu Diqiui Kexue Weixing', 'Guangmu'; equal after normalising: 'SDGSAT 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sdo
   norad: 36395
@@ -3056,6 +3462,8 @@
     - "Names: OSCAR 'SDO' (Solar Dynamics Observatory); catalog 'SDO', 'Solar Dynamics Observatory', '2010-005A'; equal after normalising: 'SDO'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_1c
   norad: 62261
@@ -3071,6 +3479,8 @@
     - "Names: OSCAR 'Sentinel-1C' (Sentinel-1C); catalog 'SENTINEL-1C', 'SENTINEL 1C', 'Sentinel-1C'; equal after normalising: 'SENTINEL-1C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_1d
   norad: 66315
@@ -3086,6 +3496,8 @@
     - "Names: OSCAR 'Sentinel-1D' (Sentinel-1D); catalog 'SENTINEL-1D', 'Sentinel-1D'; equal after normalising: 'SENTINEL-1D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_2b
   norad: 42063
@@ -3101,6 +3513,8 @@
     - "Names: OSCAR 'Sentinel-2B' (Sentinel-2B); catalog 'SENTINEL-2B', 'SENTINEL 2B', 'Sentinel-2B'; equal after normalising: 'SENTINEL-2B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_2c
   norad: 60989
@@ -3116,6 +3530,8 @@
     - "Names: OSCAR 'Sentinel-2C' (Sentinel-2C); catalog 'SENTINEL-2C', 'Sentinel-2C'; equal after normalising: 'SENTINEL-2C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_3a
   norad: 41335
@@ -3131,6 +3547,8 @@
     - "Names: OSCAR 'Sentinel-3A' (Sentinel-3A); catalog 'SENTINEL-3A', 'SENTINEL 3A', 'Sentinel-3A'; equal after normalising: 'SENTINEL-3A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_3b
   norad: 43437
@@ -3146,6 +3564,8 @@
     - "Names: OSCAR 'Sentinel-3B' (Sentinel-3B); catalog 'SENTINEL-3B', 'SENTINEL 3B', 'Sentinel-3B'; equal after normalising: 'SENTINEL-3B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_5p
   norad: 42969
@@ -3161,6 +3581,8 @@
     - "Names: OSCAR 'Sentinel-5P' (Sentinel-5 precursor); catalog 'SENTINEL-5P', 'SENTINEL 5P', 'Sentinel-5P', 'Sentinel-5 Precursor'; equal after normalising: 'SENTINEL-5P'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_6a
   norad: 46984
@@ -3176,6 +3598,8 @@
     - "Names: OSCAR 'Sentinel-6A' (Sentinel-6A); catalog 'SENTINEL-6A', 'S6 MICHAEL FREILICH', 'Sentinel-6 Michael Freilich', 'Sentinel-6'; equal after normalising: 'SENTINEL-6A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sentinel_6b
   norad: 66514
@@ -3191,6 +3615,8 @@
     - "Names: OSCAR 'Sentinel-6B' (Sentinel-6B); catalog 'SENTINEL-6B', 'Sentinel-6B', 'Jason Continuity of Service B', 'Jason-CS B'; equal after normalising: 'SENTINEL-6B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: skysat_2
   norad: 40072
@@ -3206,6 +3632,8 @@
     - "Names: OSCAR 'SkySat-2' (Sky Satellite - 2); catalog 'SKYSAT-B', 'SKYSAT 2', 'SkySat B', 'SkySat 2'; equal after normalising: 'SKYSAT 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: smap
   norad: 40376
@@ -3221,6 +3649,8 @@
     - "Names: OSCAR 'SMAP' (Soil Moisture Active-Passive); catalog 'SMAP', 'NAIF205', 'Soil Moisture Active Passive'; equal after normalising: 'SMAP'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: smile
   norad: 69123
@@ -3236,6 +3666,8 @@
     - "Names: OSCAR 'SMILE' (Solar wind Magnetosphere Ionosphere Link Explorer); catalog 'SMILE', 'Solar wind Magnetosphere Ionosphere Link Explorer'; equal after normalising: 'SMILE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: smos
   norad: 36036
@@ -3251,6 +3683,8 @@
     - "Names: OSCAR 'SMOS' (Soil Moisture and Ocean Salinity); catalog 'SMOS', 'Soil Moisture and Ocean Salinity'; equal after normalising: 'SMOS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: soho
   norad: 23726
@@ -3266,6 +3700,8 @@
     - "Names: OSCAR 'SOHO' (Solar and Heliospheric Observatory); catalog 'SOHO', 'Solar and Heliospheric Observatory', '1995-065A', '1995-065A SoHO'; equal after normalising: 'SOHO'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: solar_orbiter
   norad: 45167
@@ -3281,6 +3717,8 @@
     - "Names: OSCAR 'Solar Orbiter' (Solar Orbiter); catalog 'SOLAR ORBITER', 'Solar Orbiter', 'SOLO', 'NAIF144'; equal after normalising: 'SOLAR ORBITER'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: solar_1
   norad: 65726
@@ -3296,6 +3734,8 @@
     - "Names: OSCAR 'SOLAR-1' (Space Weather Follow-On at L1); catalog 'SWFO-L1', 'SWFO', 'Space weather Observations at L1 to Advance Readiness – 1', 'SOLAR-1'; equal after normalising: 'SOLAR-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: spot_6
   norad: 38755
@@ -3311,6 +3751,8 @@
     - "Names: OSCAR 'SPOT-6' (Satellite Pour l’Observation de la Terre - 6); catalog 'SPOT 6', 'SPOT-6'; equal after normalising: 'SPOT 6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: spot_7
   norad: 40053
@@ -3326,6 +3768,8 @@
     - "Names: OSCAR 'SPOT-7' (Satellite Pour l’Observation de la Terre - 7); catalog 'SPOT 7', 'Azersky', 'SPOT-7'; equal after normalising: 'SPOT 7'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sstl_s1_1
   norad: 40715
@@ -3341,6 +3785,8 @@
     - "Names: OSCAR 'SSTL-S1 1' (Surrey Satellite Technology Ltd - S1 1); catalog 'DMC3-FM1', 'DMC 3-FM1', 'DMC3-1', 'TripleSat 1'; equal after normalising: 'SSTL-S1 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sstl_s1_2
   norad: 40716
@@ -3356,6 +3802,8 @@
     - "Names: OSCAR 'SSTL-S1 2' (Surrey Satellite Technology Ltd - S1 2); catalog 'DMC3-FM2', 'DMC 3-FM2', 'DMC3-2', 'TripleSat 2'; equal after normalising: 'SSTL-S1 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sstl_s1_3
   norad: 40717
@@ -3371,6 +3819,8 @@
     - "Names: OSCAR 'SSTL-S1 3' (Surrey Satellite Technology Ltd - S1 3); catalog 'DMC3-FM3', 'DMC 3-FM3', 'DMC3-3', 'TripleSat 3'; equal after normalising: 'SSTL-S1 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: sstl_s1_4
   norad: 43618
@@ -3386,6 +3836,8 @@
     - "Names: OSCAR 'SSTL-S1 4' (Surrey Satellite Technology Ltd - S1 4); catalog 'SSTL S1-4', 'S1-4', 'SSTL-S1 4', 'Beijing 2-4'; equal after normalising: 'SSTL S1-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: starlette
   norad: 7646
@@ -3401,6 +3853,8 @@
     - "Names: OSCAR 'STARLETTE' (Satellite de Taille Adaptée avec Réflecteurs Laser pour les Etudes de la Terre); catalog 'STARLETTE', 'Starlette'; equal after normalising: 'STARLETTE'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_1
   norad: 53815
@@ -3416,6 +3870,8 @@
     - "Names: OSCAR 'StriX-1' (StriX-1); catalog 'STRIX-1', 'StriX-1'; equal after normalising: 'STRIX-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_2
   norad: 62406
@@ -3431,6 +3887,8 @@
     - "Names: OSCAR 'StriX-2' (StriX-2); catalog 'STRIX-2', 'STRIX 2', 'StriX-2'; equal after normalising: 'STRIX-2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_3
   norad: 59224
@@ -3446,6 +3904,8 @@
     - "Names: OSCAR 'StriX-3' (StriX-3); catalog 'STRIX-3', 'StriX-3'; equal after normalising: 'STRIX-3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_4
   norad: 60352
@@ -3461,6 +3921,8 @@
     - "Names: OSCAR 'StriX-4' (StriX-4); catalog 'STRIX-4', 'StriX-4'; equal after normalising: 'STRIX-4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_5
   norad: 65971
@@ -3476,6 +3938,8 @@
     - "Names: OSCAR 'StriX-5' (StriX-5); catalog 'STRIX-5', 'StriX-5'; equal after normalising: 'STRIX-5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_6
   norad: 68291
@@ -3491,6 +3955,8 @@
     - "Names: OSCAR 'StriX-6' (StriX-6); catalog 'STRIX-6', 'StriX-6'; equal after normalising: 'STRIX-6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_7
   norad: 69177
@@ -3506,6 +3972,8 @@
     - "Names: OSCAR 'StriX-7' (StriX-7); catalog 'STRIX-7', 'Strix-7'; equal after normalising: 'STRIX-7'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: strix_8
   norad: 69701
@@ -3521,6 +3989,8 @@
     - "Names: OSCAR 'StriX-8' (StriX-8); catalog 'STRIX-8', 'Strix-8'; equal after normalising: 'STRIX-8'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_1_01
   norad: 52320
@@ -3536,6 +4006,8 @@
     - "Names: OSCAR 'SuperView Neo-1 01' (SuperView Neo-1 01); catalog 'SUPERVIEW NEO-1 01', 'Siwei Gaojing 1-01', 'Siwei 1-01', 'SuperView Neo 1-01'; equal after normalising: 'SUPERVIEW NEO-1 01'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_1_02
   norad: 52322
@@ -3551,6 +4023,8 @@
     - "Names: OSCAR 'SuperView Neo-1 02' (SuperView Neo-1 02); catalog 'SUPERVIEW NEO-1 02', 'Siwei Gaojing 1-02', 'Siwei 1-02', 'SuperView Neo 1-02'; equal after normalising: 'SUPERVIEW NEO-1 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_2_01
   norad: 53128
@@ -3566,6 +4040,8 @@
     - "Names: OSCAR 'SuperView Neo-2 01' (SuperView Neo-2 01); catalog 'SUPERVIEW NEO-2 01', 'Siwei Gaojing 2-01', 'Siwei 2-01'; equal after normalising: 'SUPERVIEW NEO-2 01'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_2_02
   norad: 53130
@@ -3581,6 +4057,8 @@
     - "Names: OSCAR 'SuperView Neo-2 02' (SuperView Neo-2 02); catalog 'SUPERVIEW NEO-2 02', 'Siwei Gaojing 2-02', 'Siwei 2-02'; equal after normalising: 'SUPERVIEW NEO-2 02'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_2_03
   norad: 62079
@@ -3596,6 +4074,8 @@
     - "Names: OSCAR 'SuperView Neo-2 03' (SuperView Neo-2 03); catalog 'SUPERVIEW NEO-2 03', 'Siwei Gaojing 2-03', 'Siwei 2-03'; equal after normalising: 'SUPERVIEW NEO-2 03'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_2_04
   norad: 62080
@@ -3611,6 +4091,8 @@
     - "Names: OSCAR 'SuperView Neo-2 04' (SuperView Neo-2 04); catalog 'SUPERVIEW NEO-2 04', 'Siwei Gaojing 2-04', 'Siwei 2-04'; equal after normalising: 'SUPERVIEW NEO-2 04'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: superview_neo_3_01
   norad: 59510
@@ -3626,6 +4108,8 @@
     - "Names: OSCAR 'SuperView Neo-3-01' (SuperView Neo-3-01); catalog 'SUPERVIEW NEO-3 01', 'Siwei Gaojing 3-01', 'Siwei 3-01'; equal after normalising: 'SUPERVIEW NEO-3 01'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: swarm_a
   norad: 39452
@@ -3641,6 +4125,8 @@
     - "Names: OSCAR 'SWARM-A' (The Earth’s Magnetic Field and Environment Explorers - A); catalog 'SWARM A', 'Swarm A', 'Swarm 1', 'Swarm-A'; equal after normalising: 'SWARM A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: swarm_b
   norad: 39451
@@ -3656,6 +4142,8 @@
     - "Names: OSCAR 'SWARM-B' (The Earth’s Magnetic Field and Environment Explorers - B); catalog 'SWARM B', 'Swarm B', 'Swarm 2'; equal after normalising: 'SWARM B'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: swarm_c
   norad: 39453
@@ -3671,6 +4159,8 @@
     - "Names: OSCAR 'SWARM-C' (The Earth’s Magnetic Field and Environment Explorers - C); catalog 'SWARM C', 'Swarm C', 'Swarm 3'; equal after normalising: 'SWARM C'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: swot
   norad: 54754
@@ -3686,6 +4176,8 @@
     - "Names: OSCAR 'SWOT' (Surface Water and Ocean Topography); catalog 'SWOT', 'Surface Water Ocean Topography', 'SWOT mission'; equal after normalising: 'SWOT'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tanager_1
   norad: 60507
@@ -3701,6 +4193,8 @@
     - "Names: OSCAR 'Tanager-1' (Tanager-1); catalog 'TANAGER-1', 'TANAGER-1 4001', 'Tanager 1', 'Tanager 4001'; equal after normalising: 'TANAGER-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tandem_x
   norad: 36605
@@ -3716,6 +4210,8 @@
     - "Names: OSCAR 'TanDEM-X' (TerraSAR-X Add-oN for Digital Elevation Measurement); catalog 'TANDEM-X', 'TANDEM X', 'Tandem-X', 'TDX'; equal after normalising: 'TANDEM-X'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: terra
   norad: 25994
@@ -3731,6 +4227,8 @@
     - "Names: OSCAR 'Terra' (Earth Observation System - Terra); catalog 'TERRA', 'Terra', 'EOS AM-1', 'NAIF142'; equal after normalising: 'TERRA'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: terrasar_x
   norad: 31698
@@ -3746,6 +4244,8 @@
     - "Names: OSCAR 'TerraSAR-X' (TerraSAR-X); catalog 'TERRASAR-X', 'TERRA SAR X', 'TerraSAR-X', 'TSX'; equal after normalising: 'TERRASAR-X'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: themis_a
   norad: 30580
@@ -3761,6 +4261,8 @@
     - "Names: OSCAR 'THEMIS-A' (Time History of Events and Macroscale Interactions during Substorms - A); catalog 'THEMIS A', 'THEMIS P5', 'THEMIS-A', 'Explorer 85'; equal after normalising: 'THEMIS A'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: themis_d
   norad: 30797
@@ -3776,6 +4278,8 @@
     - "Names: OSCAR 'THEMIS-D' (Time History of Events and Macroscale Interactions during Substorms - D); catalog 'THEMIS D', 'THEMIS P3', 'THEMIS-D', 'Explorer 88'; equal after normalising: 'THEMIS D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: themis_e
   norad: 30798
@@ -3791,6 +4295,8 @@
     - "Names: OSCAR 'THEMIS-E' (Time History of Events and Macroscale Interactions during Substorms - E); catalog 'THEMIS E', 'THEMIS P4', 'THEMIS-E', 'Explorer 89'; equal after normalising: 'THEMIS E'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: theos_1
   norad: 33396
@@ -3806,6 +4312,8 @@
     - "Names: OSCAR 'THEOS-1' (Thailand Earth Observation System - 1); catalog 'THEOS', 'Thaichote', 'THEOS-1', 'Thailand Earth Observation System 1'; equal after normalising: 'THEOS-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: timed
   norad: 26998
@@ -3821,6 +4329,8 @@
     - "Names: OSCAR 'TIMED' (Thermosphere, Ionosphere, Mesosphere Energetics and Dynamics mission); catalog 'TIMED', 'Solar Terrestrial Probe 1', 'STP 1', 'Thermosphere Ionosphere Mesosphere Energetics and Dynamics'; equal after normalising: 'TIMED'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s1
   norad: 60479
@@ -3836,6 +4346,8 @@
     - "Names: OSCAR 'Tomorrow-S1' (Tomorrow Microwave Sounder 1); catalog 'TOMORROW-S1', 'Tomorrow-S1'; equal after normalising: 'TOMORROW-S1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s10
   norad: 67398
@@ -3851,6 +4363,8 @@
     - "Names: OSCAR 'Tomorrow-S10' (Tomorrow Microwave Sounder 10); catalog 'TOMORROW-S10', 'Tomorrow-S10'; equal after normalising: 'TOMORROW-S10'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s11
   norad: 67399
@@ -3866,6 +4380,8 @@
     - "Names: OSCAR 'Tomorrow-S11' (Tomorrow Microwave Sounder 11); catalog 'TOMORROW-S11', 'Tomorrow-S11'; equal after normalising: 'TOMORROW-S11'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s2
   norad: 60485
@@ -3881,6 +4397,8 @@
     - "Names: OSCAR 'Tomorrow-S2' (Tomorrow Microwave Sounder 2); catalog 'TOMORROW-S2', 'Tomorrow-S2'; equal after normalising: 'TOMORROW-S2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s3
   norad: 62392
@@ -3896,6 +4414,8 @@
     - "Names: OSCAR 'Tomorrow-S3' (Tomorrow Microwave Sounder 3); catalog 'TOMORROW-S3', 'Tomorrow-S3'; equal after normalising: 'TOMORROW-S3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s4
   norad: 62386
@@ -3911,6 +4431,8 @@
     - "Names: OSCAR 'Tomorrow-S4' (Tomorrow Microwave Sounder 4); catalog 'TOMORROW-S4', 'Tomorrow-S4'; equal after normalising: 'TOMORROW-S4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s5
   norad: 63234
@@ -3926,6 +4448,8 @@
     - "Names: OSCAR 'Tomorrow-S5' (Tomorrow Microwave Sounder 5); catalog 'TOMORROW-S5', 'Tomorrow-S5'; equal after normalising: 'TOMORROW-S5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s6
   norad: 63225
@@ -3941,6 +4465,8 @@
     - "Names: OSCAR 'Tomorrow-S6' (Tomorrow Microwave Sounder 6); catalog 'TOMORROW-S6', 'Tomorrow-S6'; equal after normalising: 'TOMORROW-S6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s7
   norad: 63631
@@ -3956,6 +4482,8 @@
     - "Names: OSCAR 'Tomorrow-S7' (Tomorrow Microwave Sounder 7); catalog 'TOMORROW-S7', 'Tomorrow-S7'; equal after normalising: 'TOMORROW-S7'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s8
   norad: 66308
@@ -3971,6 +4499,8 @@
     - "Names: OSCAR 'Tomorrow-S8' (Tomorrow Microwave Sounder 8); catalog 'TOMORROW-S8', 'Tomorrow-S8'; equal after normalising: 'TOMORROW-S8'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: tomorrow_s9
   norad: 66309
@@ -3986,6 +4516,8 @@
     - "Names: OSCAR 'Tomorrow-S9' (Tomorrow Microwave Sounder 9); catalog 'TOMORROW-S9', 'Tomorrow-S9'; equal after normalising: 'TOMORROW-S9'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: triton
   norad: 58017
@@ -4001,6 +4533,8 @@
     - "Names: OSCAR 'TRITON ' (TRITON also (FORMOSAT-7R)); catalog 'FORMOSAT-7R (TRITON)', 'FORMOSAT-7R/TRITON', 'FORMOSAT-7R', 'TRITON'; equal after normalising: 'FORMOSAT-7R (TRITON)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: vens
   norad: 42901
@@ -4016,6 +4550,8 @@
     - "Names: OSCAR 'VENµS' (Vegetation and Environment monitoring on a New Micro-Satellite); catalog 'VENUS', 'Venmus', 'Venus', 'VENµS'; equal after normalising: 'VENµS'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: wind
   norad: 23333
@@ -4031,6 +4567,8 @@
     - "Names: OSCAR 'WIND' (WIND); catalog 'WIND', 'Wind', 'IPL', 'GGS/Wind'; equal after normalising: 'WIND'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_1
   norad: 59625
@@ -4046,6 +4584,8 @@
     - "Names: OSCAR 'WorldView Legion-1' (WorldView Legion-1); catalog 'LEGION 1', 'WorldView Legion 1', 'Legion 1'; equal after normalising: 'WorldView Legion 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_2
   norad: 59626
@@ -4061,6 +4601,8 @@
     - "Names: OSCAR 'WorldView Legion-2' (WorldView Legion-2); catalog 'LEGION 2', 'WorldView Legion 2', 'Legion 2'; equal after normalising: 'WorldView Legion 2'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_3
   norad: 60452
@@ -4076,6 +4618,8 @@
     - "Names: OSCAR 'WorldView Legion-3' (WorldView Legion-3); catalog 'LEGION 3', 'WorldView Legion 3', 'Legion 3'; equal after normalising: 'WorldView Legion 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_4
   norad: 60453
@@ -4091,6 +4635,8 @@
     - "Names: OSCAR 'WorldView Legion-4' (WorldView Legion-4); catalog 'LEGION 4', 'WorldView Legion 4', 'Legion 4'; equal after normalising: 'WorldView Legion 4'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_5
   norad: 62900
@@ -4106,6 +4652,8 @@
     - "Names: OSCAR 'WorldView Legion-5' (WorldView Legion-5); catalog 'LEGION 5', 'WorldView Legion 5', 'Legion 5'; equal after normalising: 'WorldView Legion 5'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_legion_6
   norad: 62901
@@ -4121,6 +4669,8 @@
     - "Names: OSCAR 'WorldView Legion-6' (WorldView Legion-6); catalog 'LEGION 6', 'WorldView Legion 6', 'Legion 6'; equal after normalising: 'WorldView Legion 6'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_1
   norad: 32060
@@ -4136,6 +4686,8 @@
     - "Names: OSCAR 'WorldView-1' (WorldView-1); catalog 'WORLDVIEW-1 (WV-1)', 'WORLDVIEW 1', 'WorldView-1', 'WV1'; equal after normalising: 'WORLDVIEW-1 (WV-1)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: worldview_3
   norad: 40115
@@ -4151,6 +4703,8 @@
     - "Names: OSCAR 'WorldView-3' (WorldView-3); catalog 'WORLDVIEW-3 (WV-3)', 'WORLDVIEW 3', 'WorldView-3', 'WV3'; equal after normalising: 'WORLDVIEW-3 (WV-3)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: wsf_m1
   norad: 59481
@@ -4166,6 +4720,8 @@
     - "Names: OSCAR 'WSF-M1' (Weather System Follow-on Microwave); catalog 'WSF-M', 'WSF-M SV1', 'Weather System Follow-on Microwave 1', 'WSF-M 1'; equal after normalising: 'WSF-M 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: xcube_1
   norad: 62400
@@ -4181,6 +4737,8 @@
     - "Names: OSCAR 'XCUBE-1' (XCUBE-1); catalog 'XCUBE-1'; equal after normalising: 'XCUBE-1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: xmm_newton
   norad: 25989
@@ -4196,6 +4754,8 @@
     - "Names: OSCAR 'XMM-Newton' (X-ray Multi-Mirror Mission Observatory - Newton); catalog 'XMM-NEWTON', 'XMM', 'XMM-Newton', 'High Throughput X-ray Spectroscopy Mission'; equal after normalising: 'XMM-NEWTON'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: yam_8
   norad: 63254
@@ -4211,6 +4771,8 @@
     - "Names: OSCAR 'YAM-8' (Yet Another Mission-8); catalog 'YAM-8', 'Yet Another Mission 8'; equal after normalising: 'YAM-8'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: yunhai_1
   norad: 41857
@@ -4226,6 +4788,8 @@
     - "Names: OSCAR 'Yunhai-1' (Yunhai-1); catalog 'YUNHAI-1 01', 'YUNHAI 1', 'Yunhai 1-01', 'Yunhai-1 01 xing'; equal after normalising: 'YUNHAI 1'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: yunhai_3
   norad: 54235
@@ -4241,6 +4805,8 @@
     - "Names: OSCAR 'Yunhai-3' (Yunhai-3); catalog 'YUNHAI-3 01', 'YUNHAI 3', 'Yunhai-3', 'Yunhai-3 01'; equal after normalising: 'YUNHAI 3'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: zy_1_2d
   norad: 44528
@@ -4256,6 +4822,8 @@
     - "Names: OSCAR 'ZY-1-2D' (Zi Yuan 1-2D); catalog 'ZY-1 02D', 'Zi Yuan 1-02D', 'Ziyuan 1-02D'; equal after normalising: 'ZY-1 02D'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: zy_3_02
   norad: 41556
@@ -4271,6 +4839,8 @@
     - "Names: OSCAR 'ZY-3-02' (Zi Yuan - 3-02); catalog 'ZIYUAN 3-02 (ZY 3-02)', 'ZY 3 2', 'Zi Yuan 3-02', 'ZY-3 02'; equal after normalising: 'ZIYUAN 3-02 (ZY 3-02)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
 
 - slug: zy_3_03
   norad: 45939
@@ -4286,3 +4856,5 @@
     - "Names: OSCAR 'ZY-3-03' (Zi Yuan - 3-03); catalog 'ZIYUAN 3-03 (ZY 3-03)', 'ZINYUAN-3', 'Zi Yuan 3-03', 'ZY-3 03'; equal after normalising: 'ZIYUAN 3-03 (ZY 3-03)'"
   proposed_by: oscar-propose
   proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18

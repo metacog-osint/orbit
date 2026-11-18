@@ -188,6 +188,12 @@ class Rules(unittest.TestCase):
         self.assertEqual(self.note["rank"], list(catalog.RANK))
         self.assertIn("swf-rpo", s)  # ranked though not read by the build; the page can still label alias citations
 
+    def test_card_note_is_general(self):
+        n = self.note["card_note"]
+        self.assertIn("sometimes disagree", n)
+        self.assertIn("ask us", n)
+        self.assertNotIn("review", n.lower())  # no reviewer and no review method on the site
+
 
 if __name__ == "__main__":
     unittest.main()
