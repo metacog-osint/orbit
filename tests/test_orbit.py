@@ -729,8 +729,17 @@ class Registers(unittest.TestCase):
         self.assertIsNone(f["geometry"])
         self.assertIn("exploded (broke up in orbit)", p["title"])
         self.assertIn("not a reentry", p["summary"])
+        self.assertTrue(p["visual"]["url"].endswith("/#breakups"))
         regs = registers.ids(ROOT / "doctrine")
         self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
+
+    def test_the_page_has_the_breakups_card_the_feed_links_to(self):
+        html = (ROOT / "site_src" / "index.html").read_text(encoding="utf-8")
+        js = (ROOT / "site_src" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="breakups"', html)
+        self.assertIn('href="#breakups"', html)
+        self.assertIn('id="breakup-table"', html)
+        self.assertIn("breakupTable();", js)
 
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
