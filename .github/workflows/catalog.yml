@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Catalog tests
-        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources
+        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards
       - name: CelesTrak and Wikidata replies from the Actions cache (none on the first run)
         uses: actions/cache/restore@v6
         with:

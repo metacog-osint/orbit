@@ -45,8 +45,8 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
   dispatched at :45 (:55 at 01/05/09/13/17/21 UTC), own cron `45 * * * *`.
 - `geo.yml`: GEO region at 03:15 and 15:15 UTC by tic-dispatch, own cron :17 (skips if today's file is under an hour
   old); releases `geo-YYYY`. `geo-import.yml`: one-off copy of Noisefloor's history.
-- `catalog.yml`: cron 17:23, 19:23, 21:23 UTC; release `catalog` (`catalog.json.gz`, `catalog-names.json.gz`,
-  `spacetrack-decay.json.gz`, state files). Not in tic-dispatch.
+- `catalog.yml`: cron 17:23, 19:23, 21:23 UTC, also started by the hub's tic-dispatch (17:30 UTC on 18 Nov);
+  release `catalog` (its assets: `doctrine/catalog.md`).
 - State (`data/snapshot.json`, `data/state/`) lives in the private Actions cache, or every run is a first run.
   Release-held stores (decay store, ledger) are never rebuilt from scratch: a release that holds a file the job cannot
   download stops the job.
@@ -95,7 +95,7 @@ is launch pads only; ground tracks go only on the 3D globe; manoeuvres, reentrie
 - **Japan Coast Guard NAVAREA XI: not read** (robots.txt disallows `/TUHO/`; Tom, 14 Nov). `navwarn.JCG_READ = False`.
 - **ITU**: TIES is closed to TIC; never use a government-affiliated TIES account. BR IFIC zips only after written
   permission from ITU's legal office. **CSIS**: all rights reserved, not used.
-- **Catalog**: every value is {value, source, ref, read, basis}; NORAD keys from satcat/satcat100k only (auxcat's
+- **Catalog**: every value is {value, source, ref, read, basis} (the file leaves out defaults, `catshards`); NORAD keys from satcat/satcat100k only (auxcat's
   Satcat cell is not a claim); operator codes and TBD/UNKN never compared; alias `swap` entries refused until built.
   WMO OSCAR joins only through hand-reviewed link entries (no NORAD or COSPAR id in its API).
 

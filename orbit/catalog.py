@@ -38,7 +38,23 @@ ST = stcat.SOURCE
 CT = catsources.CT
 WD = catsources.WD
 FIELDS = ("intldes", "launch_tag", "launch_date", "names", "owner", "state", "status", "ops_status", "decayed",
-          "decay_date")
+          "decay_date", "orbit")
+
+
+def _num(text) -> float | None:
+    """A number as the source writes it, or None for blanks, '-' and GCAT's 'Inf' (gcat._float)."""
+    return gcat._float(str(text or ""))
+
+
+def gcat_orbit(r: dict) -> dict | None:
+    """GCAT's orbit as GCAT states it (build step 6): perigee and apogee (km), inclination (degrees), the date of its
+    elements (ODate) and its orbit class (OpOrbit). GCAT's 0 / 0 / 0 before elements exist, and '-' where none
+    apply, give no record (gcat.orbit_of's rule); values are kept as written, not rounded."""
+    if gcat.orbit_of(r)["inc"] is None:
+        return None
+    return {"perigee_km": _num(r.get("Perigee")), "apogee_km": _num(r.get("Apogee")), "inc_deg": _num(r.get("Inc")),
+            "elements_date": gcat.vague_date(r.get("ODate", ""))["date"],
+            "op_orbit": (r.get("OpOrbit") or "").strip() or None}
 
 
 def rec(value, source: str, read: str, basis: str = "attributed", ref: str | None = None, **extra) -> dict:
@@ -123,6 +139,7 @@ def from_gcat(tables: dict[str, list[dict]], orgs: dict, read: str) -> tuple[dic
                 "status": [rec(status, GCAT, read, "attributed", ref=jcat)],
                 "decayed": [rec(status in gcat.GONE, GCAT, read, "attributed", ref=jcat, date=ddate)],
                 "decay_date": [rec(ddate, GCAT, read, "attributed", ref=jcat)] if ddate else [],
+                "orbit": [rec(o, GCAT, read, "attributed", ref=jcat)] if (o := gcat_orbit(r)) else [],
                 "gcat_catalog": cat,
             }
             if norad and cat in gcat.US_CATALOGS:
@@ -254,6 +271,20 @@ def _norad(cell) -> str | None:
 CT_TYPES = {"PAY": "payload", "R/B": "rocket stage", "DEB": "debris"}
 
 
+def ct_orbit(row: dict) -> dict | None:
+    """CelesTrak SATCAT's orbit as CelesTrak states it (build step 6): perigee and apogee (km), inclination
+    (degrees), period (minutes), and CelesTrak's ORBIT_CENTER and ORBIT_TYPE codes, all as written in its file (codes
+    kept, not decoded here: celestrak.org/satcat/satcat-format.php); no epoch is given, so the file's time (sources)
+    dates it. No numbers, no record."""
+    o = {"perigee_km": _num(row.get("PERIGEE")), "apogee_km": _num(row.get("APOGEE")),
+         "inc_deg": _num(row.get("INCLINATION")), "period_min": _num(row.get("PERIOD"))}
+    if all(v is None for v in o.values()):
+        return None
+    o["orbit_center"] = (row.get("ORBIT_CENTER") or "").strip() or None
+    o["orbit_type"] = (row.get("ORBIT_TYPE") or "").strip() or None
+    return o
+
+
 def add_celestrak(numbered: dict, rows: list[dict], read: str) -> dict:
     """CelesTrak SATCAT rows (CSV; celestrak.org/satcat/satcat-format.php) as records. OBJECT_NAME is kept as given:
     CelesTrak puts alternate names in brackets ("USA 257 (CLIO)") and object kinds in square brackets."""
@@ -289,6 +320,9 @@ def add_celestrak(numbered: dict, rows: list[dict], read: str) -> dict:
         e["decayed"].append(rec(bool(ddate) or ops == "D", CT, read, "attributed", ref=key, date=ddate))
         if ddate:
             e["decay_date"].append(rec(ddate, CT, read, "attributed", ref=key, field="DECAY_DATE"))
+        o = ct_orbit(row)
+        if o:
+            e["orbit"].append(rec(o, CT, read, "attributed", ref=key))
     for e in numbered.values():
         finish(e)
     counts["not_in_celestrak"] = sum(1 for k in numbered if k not in seen)
