@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn,  # noqa: E402
                    news, oscar, oscarlinks, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -873,8 +873,15 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
     doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st,
                         celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries)
     out.parent.mkdir(parents=True, exist_ok=True)
-    raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    # Written in compact form (catshards, schema tic-catalog/2: default read, ref and basis left out; build step 6),
+    # with the object page's shards, search index and rules note beside it.
+    full_mb = len(json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")) / 1e6
+    cdoc = catshards.compact(doc)
+    raw = json.dumps(cdoc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     out.write_bytes(gzip.compress(raw, 6) if out.name.endswith(".gz") else raw)
+    assets = catshards.bundle(doc, cdoc)
+    for name, body in assets.items():
+        (out.parent / name).write_bytes(body)
     idx = catalog.names_index(doc, {aliases.key_of(e) for e in entries if "program" not in e})
     idx_raw = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     (out.parent / stcat.NAMES_ASSET).write_bytes(gzip.compress(idx_raw, 9))
@@ -883,8 +890,9 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
     print(f"Catalog from GCAT ({stamp})" + (f", Space-Track ({st['read_at']})" if st else ", no Space-Track copy")
           + f", {held}: {c['numbered']} numbered, {c['unnumbered']} without a number, "
           f"{c['with_disagreements']} with disagreements {c['disagreements_by_field']}, {len(doc['swaps'])} name "
-          f"swaps; {len(raw) / 1e6:.1f} MB JSON -> {out}; name index {len(idx['objects'])} objects, "
-          f"{len(idx_raw) / 1e6:.1f} MB JSON -> {out.parent / stcat.NAMES_ASSET}")
+          f"swaps; {len(raw) / 1e6:.1f} MB JSON ({full_mb:.1f} MB with every record in full) -> {out}; name index "
+          f"{len(idx['objects'])} objects, {len(idx_raw) / 1e6:.1f} MB JSON -> {out.parent / stcat.NAMES_ASSET}; "
+          + ", ".join(f"{n} {len(b) / 1e6:.2f} MB" for n, b in assets.items()))
     for k in ("space_track", catsources.CT, catsources.WD, aliases.SOURCE):
         if c.get(k):
             print(f"{k}: {c[k]}")
@@ -1024,10 +1032,13 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     if catalog_local(raw, out, data_dir):
         return 1
     stcat.release_put({stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
+                       **{n: out.parent / n for n in (catshards.SHARDS_ASSET, catshards.SEARCH_ASSET,
+                                                      catshards.RULES_ASSET)},
                        stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
                        stcat.STATE_ASSET: data_dir / stcat.STATE,
                        stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
-    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
+    print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {catshards.SHARDS_ASSET}, {catshards.SEARCH_ASSET}, "
+          f"{catshards.RULES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
           f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
     return 1 if refused else 0
 

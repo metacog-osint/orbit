@@ -220,9 +220,13 @@ STATE_ASSET = "spacetrack-catalog.json"
 NAMES_ASSET = "catalog-names.json.gz"  # the name index Orbit's rpo lane matches on (catalog.names_index)
 SOURCES_STATE_ASSET = "catalog-sources.json"  # CelesTrak and Wikidata read dates and holds (orbit/catsources.py)
 RELEASE_NOTES = (
-    "TIC's satellite catalog (schema tic-catalog/1): one entry per NORAD catalog number, every value with its source, "
+    "TIC's satellite catalog (schema tic-catalog/2): one entry per NORAD catalog number, every value with its source, "
     "read date and basis; disagreements between sources listed, never resolved. Built by Orbit (orbit/catalog.py) "
-    "once a day after Space-Track's SATCAT update. catalog.json.gz: the catalog. spacetrack-decay.json.gz: every "
+    "once a day after Space-Track's SATCAT update. catalog.json.gz: the catalog (a record leaves out its read date, "
+    "ref and basis where they are the defaults its record_defaults block states). catalog-names.json.gz: the name "
+    "index Orbit's RPO lane matches on. catalog-shards.tar.gz: the catalog in shards for Orbit's object page, with "
+    "the search index and the rules note. catalog-search.json.gz: every object's names, COSPAR ID, type and status "
+    "for search. catalog-rules.json: what each source, field, basis and flag means. spacetrack-decay.json.gz: every "
     "Space-Track decay message Orbit holds (class decay, kept so the history is never downloaded again). "
     "spacetrack-catalog.json: the last read's date and counts. catalog-sources.json: the last CelesTrak and "
     "Wikidata reads.\n\n"

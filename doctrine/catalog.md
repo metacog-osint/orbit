@@ -106,3 +106,28 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   Read 18 Nov: 1,062 satellites, 414 operational; drafted 285, left 129 for a person (hosted instruments,
   constellation entries, operator names the catalogs lack, OSCAR values that do not fit). Never query CelesTrak for
   this: use catalog-sources' stored file. Tests `tests/test_oscar.py` (17); 247 pass. Details: design note section 10.
+- **Step 6, data for the object page (18 Nov 2026, Tom's pick; branch `feat/catalog-step6`, worktree
+  `_worktrees\orbit-catalog-step6`, from origin/main `aabfa10`):** `orbit/catshards.py`; no page code (the split
+  agreed with the object-page session: the catalog supplies data and rules, Orbit's page draws them).
+  - **Compact file, schema `tic-catalog/2`:** a record leaves out `read` when it equals its source's read in
+    `sources`, `ref` when it is the object's own key in that source (GCAT: `jcat`; Space-Track, CelesTrak: the NORAD
+    number) and `basis` when `attributed`; `record_defaults` in the file says so and `catshards.expand_entry` puts
+    them back exactly (a test checks every fixture object, and the live 18 Nov file round-trips with 0 mismatches).
+    `catalog.build` still returns full records; `catalog_local` writes the compact form.
+  - **Orbit records** (field `orbit`, never compared, not in FLAGGED): GCAT's Perigee, Apogee, Inc as written, ODate as
+    `elements_date`, OpOrbit; CelesTrak's PERIGEE, APOGEE, INCLINATION, PERIOD, ORBIT_CENTER, ORBIT_TYPE (codes kept,
+    not decoded). GCAT's elements can be old (S25544 is dated 1998-12-20).
+  - **Release assets added** (uploaded by `catalog_release` with the rest; code only, no workflow change):
+    `catalog-shards.tar.gz` (one download; unpacks to `catalog/`: `n<NORAD//1000>.json`, `j<JCAT letter><number//1000>.json`,
+    each `tic-catalog-shard/1` with the sources block, rank, record defaults and the swaps touching its objects, plus
+    `search.json` and `rules.json`), `catalog-search.json.gz` (`tic-catalog-search/1`: every object as [key, name,
+    other names, COSPAR ID, type code, gone]), `catalog-rules.json` (`tic-catalog-rules/1`: source labels and
+    citations, basis wording, name fields, field notes, flags, disagreement and swap explanations, the shard rule).
+    Bundles are byte-identical for the same catalog (gzip mtime 0).
+  - **Sizes, local build** from the stored copies (GCAT 15 Nov, Space-Track, CelesTrak and Wikidata 17 Nov):
+    241.3 MB JSON with every record in full (orbit records included), 147.7 MB compact, 7.8 MB gzipped (the live
+    18 Nov file without orbit records: 210.1 MB, 11.2 MB gzipped); 117 shards (73 numbered, 44 unnumbered), largest
+    2.1 MB, 154 MB unpacked, 8.6 MB as the tar; search index 84,160 rows, 6.1 MB JSON, 1.11 MB gzipped (under the
+    page's 2 MB line, so one file); rules note 8 KB. Counts unchanged (2,686 with disagreements, 109 name swaps).
+  - Tests `tests/test_catshards.py` (16, on the step 4 fixtures plus GCAT's auxcat and tmpcat rows and the real
+    alias file); 300 tests pass, check PASS. `catalog.yml`'s test step runs them (Tom's yes, 18 Nov 2026).
