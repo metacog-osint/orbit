@@ -48,8 +48,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, oscar, oscarlinks, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
-                   news, rpo, spacetrack, stcat, tip)
+from orbit import (aliases, archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn,  # noqa: E402
+                   news, oscar, oscarlinks, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -540,7 +540,9 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
 
     The archive lives in data/state/ (the Actions cache). When that copy is missing, the published copy is read
     back from Orbit's own site (one request) and merged, so a lost cache entry does not start the archive over.
-    A failed read of the published copy starts from what is local and says so."""
+    A failed read of the published copy starts from what is local and says so. From orbit-2.17 it also sets
+    snap['tip_check']: the archive's TIP messages against TIP's and GCAT's reentry times (tip.check). From
+    orbit-2.18 it sets snap['lead'] (orbit/lead.py) and keeps the day's last lead in the archive."""
     path = data_dir / ARCHIVE
     local = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
     note = None
@@ -551,9 +553,15 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
         except Exception as exc:  # noqa: BLE001 - a first run, or the site unreachable: start locally
             note = f"no local or published copy read ({type(exc).__name__}); started here"
     doc = archive.record(local, snap)
+    at = datetime.fromisoformat(snap["generated_at"].replace("Z", "+00:00"))
+    msgs = archive.tip_messages(doc)
+    snap["tip_check"] = tip.check(msgs, snap.get("reentries") or [], at,
+                                  (_read_index(data_dir) or {}).get("objects") or {}) if msgs else {}
+    snap["lead"] = lead.build(snap, doc)
+    archive.keep_lead(doc, snap["lead"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
-    out = archive.summary(doc, datetime.fromisoformat(snap["generated_at"].replace("Z", "+00:00")).date())
+    out = archive.summary(doc, at.date())
     if note:
         out["note"] = note
     return out

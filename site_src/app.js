@@ -136,6 +136,35 @@
     document.getElementById("method").textContent = snap.method_version || "";
   }
 
+  function leadCard() {  // orbit/lead.py (orbit-2.18): what changed in the last 24 hours, each line to its card
+    var ul = document.getElementById("lead-list");
+    if (!ul) return;
+    ul.textContent = "";
+    var L = snap.lead || {};
+    var h = document.getElementById("lead-h");
+    if (!L.at) {
+      ul.appendChild(el("li", "muted", "Not built yet: the lead appears with Orbit's next run."));
+      return;
+    }
+    if (h) h.textContent = "The last 24 hours, to " + fmt(L.at);
+    if (L.nothing_new) ul.appendChild(el("li", "", "Nothing new in the last 24 hours from the sources read on this run."));
+    (L.lines || []).forEach(function (x) {
+      var li = el("li");
+      (x.parts || []).forEach(function (p) {
+        if (typeof p === "string") li.appendChild(document.createTextNode(p));
+        else if (p.t) li.appendChild(document.createTextNode(fmt(p.t)));
+        else if (p.d) li.appendChild(document.createTextNode(dayOnly(p.d)));
+        else if (p.cc) li.appendChild(document.createTextNode(countryName(p.cc)));
+      });
+      li.appendChild(document.createTextNode(" "));
+      var a = el("a", "", "Details");
+      a.href = x.href || "#";
+      li.appendChild(a);
+      if (x.source) li.appendChild(el("span", "src", " · " + x.source));
+      ul.appendChild(li);
+    });
+  }
+
   function launchTable() {
     var box = document.getElementById("launch-table");
     var since7 = daysAgo(7);
@@ -1253,6 +1282,65 @@
     fold(box, rows, 10, "objects", "decay");
   }
 
+  function mins(m) {  // a signed difference in minutes, in the largest unit that reads well
+    var a = Math.abs(m), s = m < 0 ? "−" : "+";
+    if (a < 120) return s + a + " min";
+    if (a < 2880) return s + (a / 60).toFixed(1).replace(/\.0$/, "") + " h";
+    return s + (a / 1440).toFixed(1).replace(/\.0$/, "") + " days";
+  }
+  function tipCheckCard() {  // tip.check from the daily archive (orbit-2.17)
+    var box = document.getElementById("tipcheck-body");
+    if (!box) return;
+    var c = (snap && snap.tip_check) || {};
+    var objs = c.objects || [];
+    if (!objs.length) {
+      return empty(box, c.kept_since ? "No object with a TIP message has come down in the last " + c.days + " days." :
+        "Not built yet: the check starts with the first run that keeps TIP messages in Orbit's archive.");
+    }
+    box.textContent = "";
+    var byNorad = {};
+    objs.forEach(function (x) { byNorad[x.norad] = x; });
+    var parts = [c.with_after + (c.with_after === 1 ? " object has" : " objects have") + " TIP's message after the reentry; " +
+      c.inside + " of them came down inside the last prediction's window"];
+    if (c.with_after) parts.push("GCAT gives the same minute as that message for " + c.gcat_same_minute);
+    if (c.no_after) parts.push(c.no_after + " without a message after the reentry yet (last prediction shown)");
+    if (c.gcat_not_yet) parts.push(c.gcat_not_yet + " not dated by GCAT yet");
+    var p = el("p", "small", parts.join("; ") + ". TIP messages kept since " + fmt(c.kept_since) + ".");
+    box.appendChild(p);
+    if ((c.gcat_day_or_more || []).length) {
+      box.appendChild(el("p", "small", "GCAT's time differs from TIP's by a day or more for " + c.gcat_day_or_more.map(function (n) {
+        var x = byNorad[n] || {};
+        return (x.name || "object") + " (" + n + "): GCAT " + fmt((x.gcat || {}).time) + ", TIP " +
+          fmt(((x.after || x.predicted) || {}).decay_epoch);
+      }).join("; ") + ". Shown as each gives it; Orbit does not say which is right."));
+    }
+    var rows = objs.map(function (x) {
+      var tr = el("tr"), pr = x.predicted || {}, af = x.after, g = x.gcat;
+      cell(tr, af ? fmt(af.decay_epoch) : el("span", "muted", "no message after it yet"));
+      var who = el("div", "", x.name || "Not in GCAT's index");
+      who.appendChild(el("div", "pl", String(x.norad)));
+      cell(tr, who);
+      var lp = el("div", "", pr.decay_epoch ? fmt(pr.decay_epoch) + " ±" + mins(pr.window_min || 0).slice(1) : "none kept");
+      if (pr.msg_epoch) lp.appendChild(el("div", "pl", "issued " + fmt(pr.msg_epoch) + (x.lead_h != null ? ", " + x.lead_h +
+        " h before the reentry" : "")));
+      cell(tr, lp);
+      cell(tr, x.offset_min == null ? "" : mins(x.offset_min) + (x.inside ? ", inside the window" : ", outside the window"));
+      var gc;
+      if (!g) gc = el("span", "muted", "not dated yet");
+      else {
+        gc = el("div", "", g.time ? fmt(g.time) : dayOnly(g.date));
+        var d = g.minus_tip_min, note = [];
+        if (g.uncertain) note.push("GCAT marks it uncertain");
+        if (d != null) note.push(d === 0 ? "same minute as TIP" : mins(d) + " from TIP's " + (af ? "time after the reentry" : "last prediction"));
+        if (note.length) gc.appendChild(el("div", "pl", note.join("; ")));
+      }
+      cell(tr, gc);
+      return tr;
+    });
+    box.appendChild(table(["TIP after the reentry", "Object", "Last prediction", "Offset", "GCAT"], rows));
+    fold(box, rows, 10, "objects", "tipcheck");
+  }
+
   function catalogBody() {
     var box = document.getElementById("catalog-body");
     box.textContent = "";
@@ -1467,7 +1555,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); catalogBody(); lanes();
+    tiles(); leadCard(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); tipCheckCard(); catalogBody(); lanes();
     startMap();
     viewControls();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }

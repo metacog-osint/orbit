@@ -17,6 +17,7 @@
   <div class="wrap top-row">
     <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
     <nav class="top-nav">
+      <a href="geo.html">GEO belt</a>
       <a href="data/feed.geojson">Feed (contract v2)</a>
       <a href="data/snapshot.json">Snapshot</a>
       <span id="time-settings"></span>
@@ -50,6 +51,30 @@
       areas navigational warnings announce, reentries, and changes to the public satellite catalog between Orbit's
       own readings. Everything here is measured or reported by the sources named
       on it; Orbit adds no judgment. <span id="asof"></span></p>
+    <div class="lead" id="lead" aria-labelledby="lead-h">
+      <h2 id="lead-h">The last 24 hours</h2>
+      <ul class="lead-list" id="lead-list" aria-live="polite"></ul>
+      <details class="terms small">
+        <summary>New to this? The terms used here</summary>
+        <dl>
+          <dt>TIP</dt><dd>Tracking and Impact Prediction: United States Space Command's reentry predictions for objects
+            about to come down, published on Space-Track.org. Each gives a predicted time and a window; after the
+            reentry, a last message gives the time it came down.</dd>
+          <dt>Window</dt><dd>The span either side of a predicted reentry time. Inside it the object can come down
+            anywhere along its path, which may circle the Earth several times.</dd>
+          <dt>GCAT</dt><dd>Jonathan McDowell's General Catalog of Artificial Space Objects, the public catalog Orbit
+            reads for objects, owners, reentry and breakup dates.</dd>
+          <dt>Orbit change</dt><dd>A change in a satellite's orbit, usually from an engine burn, that Orbit finds by
+            comparing successive element sets (the published numbers that describe an orbit at one moment). Orbit
+            lists only changes above set sizes, in metres per second, for the satellites it watches.</dd>
+          <dt>LEO, GEO</dt><dd>Low Earth orbit, below about 2,000 km. Geostationary orbit, about 35,786 km above the
+            equator, where a satellite keeps pace with the Earth's turn and stays over one longitude.</dd>
+          <dt>Breakup</dt><dd>An object that came apart in orbit, or collided with another, as GCAT records it.</dd>
+          <dt>Debris, rocket stage</dt><dd>Pieces left in orbit by launches and breakups, and the spent upper stages
+            of rockets, catalogued alongside working satellites.</dd>
+        </dl>
+      </details>
+    </div>
     <div class="tiles" id="tiles" aria-live="polite"></div>
     <p class="legend small muted" aria-label="Country colours">
       <span><span class="sw g-us"></span>United States</span>
@@ -187,6 +212,13 @@
         reentry itself later. Names and owners are GCAT's where GCAT lists the object.</p>
     </div>
     <div class="tbl-wrap" id="decay-body"></div>
+    <h3 id="tipcheck-h">TIP against the reentry</h3>
+    <p class="muted small">For each object that came down in the last 30 days: USSPACECOM's last prediction before the
+      reentry, set against the time TIP itself gives after it (the message issued after the reentry, with a 1-minute
+      window), and GCAT's reentry time beside both. GCAT often takes its time from that same TIP message, so a match is
+      not an independent check. Where TIP has no message after the reentry yet, the last prediction is shown alone.
+      Observations of USSPACECOM's and GCAT's records, not a rating of either.</p>
+    <div class="tbl-wrap" id="tipcheck-body"></div>
   </section>
 
   <section class="card" id="baseline" aria-labelledby="base-h">
