@@ -391,6 +391,29 @@ Tom's yes).
    `geo/satellite.js`. geo.html's import map is the one inline script; its sha256 is in `_headers`' script-src
    (`tests/test_geo_page.py` holds it). The CSP has no `'unsafe-inline'` for styles, so the globe's markup carries
    `data-css` and one MutationObserver applies it through the CSSOM.
+5. **Belt board (18 Nov 2026; step 5, Tom: "Port to Orbit first"):** `tools/geo_belt.py`, called by `geo_page.py
+   build` into `globe.json`'s `belt`, drawn in the page's "Belt board" section. It carries what Noisefloor's CelesTrak
+   board (`tools/geo.py`) showed and step 4 did not move, so nothing is lost when Noisefloor's copy retires. Scope:
+   CelesTrak's active GEO group (the day file's `active`), as Noisefloor's board, with Orbit's Space-Track sets.
+   Class by drift (0.1 deg a day) and inclination (1 deg); close pairs of different owner codes within 100 km at the
+   build time by SGP4 from each newest set (one owner code counted, not listed, unless a listed role); orbit changes
+   by Orbit's rule (as C5 above) on every active object, ending in the last 7 days, labelled with Noisefloor's kinds
+   from the drift and inclination of the sets either side (station-keeping folded; an inclination change of 0.02 deg
+   or more on an inclined orbit is its own kind). Objects with under 10 pairs of sets are listed apart with their
+   last two sets, not judged. About 10 s of the build (563 objects). Standard library tests (`test_geo_belt.py`,
+   positions injected).
+   **Checked against Noisefloor's live board, 18 Nov 2026 19:43Z (Noisefloor) and 19:48Z (Orbit):** same 563
+   objects and the same classes (362 station-kept, 176 inclined, 25 drifting); close pairs of different owners 17
+   of 18 shared, at the same distances; the other one each side differs only by owner code, not position: the
+   day file (Space-Track) lists GALAXY 32 and GALAXY 36 as US where CelesTrak's catalogue says ITSO, so Orbit lists
+   GALAXY 32 with INTELSAT 40E (28 km) and counts VIASAT 3-F1 with GALAXY 36 (51 km) as one owner; Noisefloor the
+   reverse. Same-owner pairs 79 vs 78. Changes other than station-keeping: the same 7 objects (SIRIUS FM-6, TJS-24, HYLAS 2,
+   IPSTAR 1, USA 149, QZS-2, BEIDOU 3 IGSO-3); Orbit adds EUTE 16A (0.90 m/s, mostly cross-track). Noisefloor's
+   other three: IRNSS-1E (its change ends 11 Nov 17:06Z, 3 hours before the 7-day window), and USA 324 and USA
+   325, which have 3 and 2 public sets since 19 Oct, too few for Orbit's rule; they are in the "not judged" list
+   with their last two sets (USA 324's drift 0.68 to 0.02 deg a day east between 22 Oct and 15 Nov). Routine
+   station-keeping: Orbit 284 against Noisefloor's 135; Orbit's rule marks smaller changes between consecutive sets
+   than fixed thresholds on daily snapshots.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):

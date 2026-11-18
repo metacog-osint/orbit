@@ -68,6 +68,10 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
 5. **Noisefloor's Space tab:** points to Orbit's GEO page once it is live and checked; Sun outages stays as the
    tab's own page. Then `geo.py`, the GEO steps in `daily.yml` and the old page retire, and the hub's and COP's
    descriptions of both programs are updated.
+   **Planned 18 Nov 2026** (file by file, in the suite's notes). The plan found that `geo.py`'s board
+   (belt-wide manoeuvres, today's close pairs, the drifting count) never moved; **Tom: "Port to Orbit first"** (18 Nov 2026). Built the same day: the page's "Belt board"
+   (`tools/geo_belt.py`; `method.md`, "The GEO page", item 5, with the check against Noisefloor's live board).
+   Noisefloor's side waits on the board being live.
 
 ## Open questions for Tom
 1. **3D:** port Noisefloor's three.js globe as is (built and checked), or rebuild it in Cesium as part of Orbit's
