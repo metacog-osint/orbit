@@ -540,7 +540,8 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
 
     The archive lives in data/state/ (the Actions cache). When that copy is missing, the published copy is read
     back from Orbit's own site (one request) and merged, so a lost cache entry does not start the archive over.
-    A failed read of the published copy starts from what is local and says so."""
+    A failed read of the published copy starts from what is local and says so. From orbit-2.17 it also sets
+    snap['tip_check']: the archive's TIP messages against TIP's and GCAT's reentry times (tip.check)."""
     path = data_dir / ARCHIVE
     local = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
     note = None
@@ -553,9 +554,13 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
     doc = archive.record(local, snap)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
-    out = archive.summary(doc, datetime.fromisoformat(snap["generated_at"].replace("Z", "+00:00")).date())
+    at = datetime.fromisoformat(snap["generated_at"].replace("Z", "+00:00"))
+    out = archive.summary(doc, at.date())
     if note:
         out["note"] = note
+    msgs = archive.tip_messages(doc)
+    snap["tip_check"] = tip.check(msgs, snap.get("reentries") or [], at,
+                                  (_read_index(data_dir) or {}).get("objects") or {}) if msgs else {}
     return out
 
 

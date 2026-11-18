@@ -9,7 +9,10 @@ in Orbit's own readings, so Orbit keeps them day by day and gives them baselines
             memorandum date, so a day read from stale memoranda says so;
   catalog   each new GCAT reading's changes (objects added, late additions, removals, owner changes, newly
             numbered), keyed by GCAT's own file stamp: GCAT keeps no date of cataloging, so a reading's
-            changes are dated by the day Orbit read them.
+            changes are dated by the day Orbit read them;
+  tip       from orbit-2.17, Space-Track's TIP messages (USSPACECOM's reentry predictions), each once, on the day
+            a run first saw it: Space-Track's reply covers only 5 days and GCAT dates a reentry days later, so the
+            check of a prediction against the reentry (tip.check) reads them from here.
 
 Every day also records how many runs it had and each lane's statuses, so a missed day or a failed lane is never
 read as a count of zero. Only what the page already publishes goes in: listed changes, never the private watch
@@ -26,6 +29,7 @@ from datetime import date, timedelta
 SCHEMA = "orbit-archive/1"
 PUBLIC_URL = "https://orbit.theintelligence.company/data/archive.json"
 MAX_DAYS = 800      # a little over two years, the GCAT baselines' span
+TIP_DEDUP_DAYS = 10  # a TIP message already kept in the last 10 days is not kept again (the reply covers 5)
 BASELINE_DAYS = 90  # decision 8: baselines from Orbit's own counts after 90 days
 
 
@@ -103,10 +107,25 @@ def record(doc: dict | None, snap: dict) -> dict:
                             | {"owner_changes": len(cc.get("owner_changes") or []),
                                "late_launches": len(cc.get("late_groups") or []), "read_at": stamp})
 
+    dc = snap.get("decay") or {}
+    if _fresh(snap, "decay") and dc.get("all_messages"):
+        since = str(date.fromisoformat(day) - timedelta(days=TIP_DEDUP_DAYS))
+        kept = {tuple(m[:5]) for k, v in doc["days"].items() if since <= k <= day for m in v.get("tip") or []}
+        new = [list(m[:5]) for m in dc["all_messages"] if tuple(m[:5]) not in kept]
+        if new:
+            d.setdefault("tip", []).extend(new)
+            doc["tip_attribution"] = dc.get("attribution")
+
     for old in sorted(doc["days"])[:-MAX_DAYS]:
         del doc["days"][old]
     doc["updated_at"] = stamp
     return doc
+
+
+def tip_messages(doc: dict | None) -> list[list]:
+    """Every TIP message kept, oldest day first: [norad, msg_epoch, decay_epoch, window_min, id]."""
+    days = (doc or {}).get("days") or {}
+    return [m for k in sorted(days) for m in days[k].get("tip") or []]
 
 
 def merge(local: dict | None, published: dict | None) -> dict:
@@ -125,6 +144,9 @@ def merge(local: dict | None, published: dict | None) -> dict:
     stamps = [x.get("updated_at") for x in (local, published) if x and x.get("updated_at")]
     if stamps:
         out["updated_at"] = max(stamps)
+    for src in (published, local):
+        if src and src.get("tip_attribution"):
+            out["tip_attribution"] = src["tip_attribution"]
     return out
 
 
@@ -144,6 +166,7 @@ def summary(doc: dict | None, today: date) -> dict:
         "maneuver_days": count("maneuver"), "navwarn_days": count("navwarn"), "catalog_readings": sum(
             len(doc["days"][d].get("catalog") or {}) for d in days),
         "navwarn_stale_memo_days": stale_memo,
+        "tip_messages": sum(len(doc["days"][d].get("tip") or []) for d in days),
         "listed_changes": len({k for d in days for k in ((doc["days"][d].get("maneuver") or {}).get("listed") or {})}),
         "warning_areas": len({k for d in days for k in ((doc["days"][d].get("navwarn") or {}).get("areas") or {})}),
         "baseline_from": str(first + timedelta(days=BASELINE_DAYS)),

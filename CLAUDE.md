@@ -242,6 +242,14 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   may have no track until the next run. 149 tests pass; `span()` checked in Node on Starlink 5046's real set (line
   within about 100 km of TIP's point).
 
+- **TIP against the reentry (`orbit-2.17`, 18 Nov 2026, Tom's "Yes, build it"; built in a clone on C:,
+  `[local path]`, branch `feat/tip-vs-gcat`, because D: was crawling):** `tip.compact`
+  and `decay.all_messages`; archive key `tip` (each message once, `archive.tip_messages`) and summary
+  `tip_messages`; `tip.check` into snapshot block `tip_check` from `_archive_run`; page `#tipcheck-body` under the
+  Predicted reentries card ("TIP against the reentry"). Rules in `doctrine/method.md`, "Predicted reentries" item 7.
+  Tests `tests/test_tip_check.py` (16, on the 17 Nov TIP fixture and `tests/fixtures/gcat_reentries_20261118.json`).
+  The first live run keeps the 5 days its reply holds, so the card starts with reentries from about 13 Nov.
+
 ## TIC satellite catalog (build steps 1-4 live 17 Nov 2026, published on release `catalog`; step 5 on a branch)
 Design and Tom's answers: `[local path]` (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
