@@ -319,6 +319,45 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
     return {"type": "Feature", "geometry": None, "properties": props}
 
 
+# Each item's first source id and the collect lane that reads it. A lane that fails keeps its last good copy in the
+# feed (from_previous), so readers need to know which source was really read on this run.
+SOURCE_LANES = {"gcat-mcdowell": "catalog", "ll2-thespacedevs": "upcoming", "space-track": "maneuver"}
+
+
+def source_health(snap: dict) -> dict:
+    """The feed's per-source `health` block (the doctrine kit's form, as Headwind's and Blackout's): one entry per
+    source id the items carry, from the snapshot's lane records. A source counts as read when last_ok equals
+    checked_at and the state is up: its lane was fetched, or GCAT said its files had not changed (as
+    archive._fresh). A failed lane (its items are the last good copy), an unconfigured one (off), one not run this
+    time, or one carried from an earlier run (--only) is not read, so COP's ledger neither ends its items nor counts
+    the kept copies as sightings (15 Nov 2026). States are the kit's health_state words (vocab/enums.json, feed
+    contract revision 2.1): up, failing, never (off or never fetched), stale (fetched on an earlier run only)."""
+    lanes = snap.get("lanes") or {}
+    out = {}
+    for src, lane in SOURCE_LANES.items():
+        rec = lanes.get(lane)
+        if not isinstance(rec, dict):
+            continue  # a held or absent lane carries no items
+        status = rec.get("status")
+        read = status in ("ok", "unchanged") and not rec.get("from_previous")
+        checked = ({"ok": rec.get("fetched_at"), "unchanged": rec.get("checked_at")}.get(status) if read else
+                   {"off": rec.get("checked_at"), "failed": rec.get("failed_at")}.get(status)) or snap["generated_at"]
+        if read:
+            state = "up"
+        elif status == "failed":
+            state = "failing"
+        else:
+            state = "stale" if rec.get("fetched_at") and status != "off" else "never"
+        detail = status or "unknown"
+        if rec.get("from_previous"):
+            detail += ", last good copy kept"
+        if rec.get("error") or rec.get("reason"):
+            detail += f": {(rec.get('error') or rec.get('reason'))[:200]}"
+        out[src] = {"state": state, "last_ok": checked if read else rec.get("fetched_at"), "checked_at": checked,
+                    "lane": lane, "detail": detail}
+    return out
+
+
 def build_feed(snap: dict) -> dict:
     generated = snap["generated_at"]
     now = _dt(generated)
@@ -372,5 +411,6 @@ def build_feed(snap: dict) -> dict:
         "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat) "
                        "and Launch Library 2 (The Space Devs)" + credit,
         "language_key": LANGUAGE_KEY,
+        "health": source_health(snap),
         "features": features,
     }
