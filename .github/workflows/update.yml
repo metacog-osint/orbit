@@ -75,6 +75,21 @@ jobs:
           # the globe's public Cesium ion token (read-only, restricted to Orbit's hosts), written to data/cesium.json
           CESIUM_ION_TOKEN: ${{ vars.CESIUM_ION_TOKEN }}
         run: python tools/orbit.py build
+      # The GEO page (geo.html; step 4 of doctrine/geo-move-plan.md, 18 Nov 2026): the globe's data and the callouts,
+      # from this repository's public geo-YYYY releases (written by geo.yml; no Space-Track request here). numpy and
+      # sgp4 only for this step (tools/requirements-callouts.txt). A failure leaves the page's loading text, never the
+      # rest of the deploy.
+      - name: GEO page data and callouts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pip install --quiet -r tools/requirements-callouts.txt || { echo "::warning::GEO page skipped: pip install failed"; exit 0; }
+          dir="$RUNNER_TEMP/geo"; mkdir -p "$dir"; year=$(date -u +%Y)
+          for tag in "geo-$((year - 1))" "geo-$year"; do
+            gh release download "$tag" -R "$GITHUB_REPOSITORY" -p "*.geo-region.json" -p "geo-elements-*.json.gz" -D "$dir" --clobber 2>/dev/null || echo "no release $tag"
+          done
+          python tools/geo_page.py build "$dir" site --snapshot data/snapshot.json || echo "::warning::GEO page data skipped; the page shows its loading text"
+          python tools/geo_callouts.py publish --data "$dir" --out site/data/geo/callouts.json || echo "::warning::GEO callouts skipped; the globe shows none"
       - name: Feed check
         run: python tools/orbit.py check
       - name: Keep this run's state for the next run

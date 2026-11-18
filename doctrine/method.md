@@ -343,7 +343,7 @@ signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit
 `tools/geo_callouts.py`, moved from Noisefloor (`35328c0`) with its pre-registered rules C1-C8, thresholds, cases
 and scoring unchanged (`docs/validation/geo-callouts.md`, `geo-callouts-cases.json`, `site_src/geo_roles.json`
 copied unchanged). Run at build time only, with numpy and sgp4 pinned in `tools/requirements-callouts.txt`; the
-collector and live lanes stay standard library. Nothing is published yet (step 4).
+collector and live lanes stay standard library. Published on the GEO page from step 4 (below).
 1. **Same results:** on the same input (Noisefloor's parquet of 27 Oct) Noisefloor's script and the port write
    byte-identical files (11,009 callouts). On Orbit's own element history the port matches Noisefloor's held run of
    31 Oct (8 Jul-30 Oct): 11,022 of 11,023 callouts identical, none missing either side; one C2 distance differs
@@ -364,6 +364,33 @@ collector and live lanes stay standard library. Nothing is published yet (step 4
    object with under 10 set pairs is not judged (USA 324 moved +0.66 deg/day over a 24-day gap and was not
    marked). C5 stays in the script as the scored v1 record; the page (step 4) uses Orbit's rule for listed-role
    orbit changes.
+
+## The GEO page (18 Nov 2026; step 4 of `geo-move-plan.md`)
+`geo.html`, moved from Noisefloor's /geo page (globe, belt strip, look angles, sun and shadow, relative motion,
+closest objects, beams, footprint files, callouts). Page only: nothing new in the feed (callout feed items wait on
+Tom's yes).
+1. **Data** (`tools/geo_page.py`, at build time in the update run): the newest `<day>.geo-region.json` on the
+   `geo-YYYY` releases for the objects and the "Active" colour (CelesTrak's active GEO group from the same
+   `geo.yml` run, where Noisefloor read its own CelesTrak snapshot), the monthly element files for the tracks
+   (SGP4 per element set until the next, as Noisefloor's `geo_globe.py`), 30 days of the day files' events, and
+   `site_src/geo_roles.json`. No request to Space-Track or CelesTrak.
+2. **RPO pairs (Tom, 17 Nov 2026, "Add RPO pairs"):** every row of SWF's RPO sheet (lane `rpo`, the snapshot's
+   names matched to catalogue numbers) whose chaser and target are both near GEO in today's list, one line per
+   chaser-target pair between today's positions. Rows with one end near GEO are counted, not drawn. SWF's date and
+   mission text are shown as SWF gives them; today's positions say nothing about how close the two were then.
+3. **Callouts:** `geo_callouts.py publish`, the last 14 days of C1-C8 by the frozen v1 rules, except C5 (Tom, 17
+   Nov 2026): listed-role orbit changes are Orbit's rule (`orbit/maneuver.detect` on every set held, 8 robust
+   deviations, 0.25 m/s floor at GEO, 10 pairs minimum), listed under C5's id with the change in m/s, its main
+   term and, for a pair 48 h or more apart, the gap. Objects with under 10 pairs are listed as not judged.
+   First local run (18 Nov 2026, release of 18 Nov 11:55Z): 1,395 callouts 4-17 Nov (C1 378, C2 1,001, C3 2, C4 2,
+   C5 6, C6 1, C8 5); C5's six are MEV-1 (inclination 0.03 to 0.54 deg between 5 and 15 Nov; 10.4 and 26.3 m/s
+   across gaps) and MEV-2 (0.34-0.75 m/s); USA 324 and 325 not judged. Noisefloor's live file of the same span had
+   709 (no C3, C4 or C5); not investigated, since that page retires at step 5 and the port matched the held run.
+4. **Self-hosted libraries:** three.js 0.185.0 (`vendor/three/`, `three.module.min.js`, `three.core.min.js`,
+   `OrbitControls.js`, MIT; npm tarball sha256 5f52a93f...433d) and Orbit's satellite.js 7.1.0 through
+   `geo/satellite.js`. geo.html's import map is the one inline script; its sha256 is in `_headers`' script-src
+   (`tests/test_geo_page.py` holds it). The CSP has no `'unsafe-inline'` for styles, so the globe's markup carries
+   `data-css` and one MutationObserver applies it through the CSSOM.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):

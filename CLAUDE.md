@@ -228,7 +228,21 @@ belt is Orbit's; Noisefloor keeps signals, sun outages and space weather. Rules 
 - Proof and the one input change (catalogue from every day file) in `doctrine/method.md` "GEO callouts": the port
   matches Noisefloor's held run 11,022 of 11,023 and its `score-v1.json` exactly.
 - **GEO orbit changes use Orbit's rule, not C5 (Tom, 17 Nov 2026).** C5 stays in the script as the scored v1
-  record. Not built: a workflow that runs the callouts, the page and feed items (step 4).
+  record. Published on the GEO page (step 4, below); no feed items.
+
+## The GEO page (18 Nov 2026; step 4 of `doctrine/geo-move-plan.md`, Tom's "Fix Noisefloor, then build")
+Branch `feat/geo-page`, worktree `_worktrees\orbit-geo-page`. Rules in `doctrine/method.md` ("The GEO page").
+- `site_src/geo.html` (linked from the home page's top bar) with `site_src/geo/` (globe.js and geo.css from
+  Noisefloor's /geo, sunoutage.js copied, Natural Earth land and places, CelesTrak owner names, the satellite.js
+  shim) and three.js 0.185.0 in `site_src/vendor/three/`. The import map's sha256 is in `_headers`; change one,
+  change both (`tests/test_geo_page.py`). No inline style attributes (the CSP has none): globe.js writes `data-css`.
+- Data at build time, in the update run's step "GEO page data and callouts" (pip installs
+  `tools/requirements-callouts.txt`; downloads the `geo-YYYY` releases, last year's too): `tools/geo_page.py build
+  DIR site --snapshot data/snapshot.json` writes `site/data/geo/globe.json` (objects, roles, 30 days of events, SWF
+  RPO pairs) and `tracks-<N>d.json`; `tools/geo_callouts.py publish` writes `callouts.json` with C5 by Orbit's rule.
+  A failure leaves the page's loading text, never the deploy. Both are gitignored under `data/`.
+- Locally: copy a snapshot to `data/snapshot.json`, `python tools/orbit.py build`, download the release to a
+  folder, run both commands into `site`, then `python tools/serve.py`.
 
 ## Predicted reentries (16-17 Nov 2026, `orbit-2.13`; Tom's "let's get all three items done", about 9:15 PM CST 16 Nov)
 Built on branch `feat/rpo-globe-tip` (worktree `_worktrees\orbit-rpo-tip`); **live with `665c9ad`** (Tom's "Ship
