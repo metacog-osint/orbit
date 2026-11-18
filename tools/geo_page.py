@@ -201,6 +201,21 @@ def rpo_pairs(snapshot, objs):
             "read_at": rpo.get("read_at"), "pairs": pairs, "one_end_only": one_end}
 
 
+def belt(region, active, elsets, now):
+    """The belt board (tools/geo_belt.py) for CelesTrak's active objects, or {"error": ...} so a failure there never
+    takes the globe down."""
+    if not active:
+        return {"error": "no active list in the day file (CelesTrak not read)"}
+    import geo_belt
+    cols = region["object_cols"]
+    objs = [o for o in (dict(zip(cols, row)) for row in region["objects"]) if o["norad"] in active]
+    try:
+        return geo_belt.build(objs, elsets, {k: v["role"] for k, v in roles().items()}, now.replace(tzinfo=timezone.utc))
+    except Exception as e:  # noqa: BLE001: reported on the page and in the log
+        print(f"geo page: belt board skipped: {e!r}")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def build(release, site, now=None, snapshot=None):
     now = (now or datetime.now(timezone.utc)).replace(tzinfo=None, second=0, microsecond=0)
     region = newest(glob.glob(os.path.join(release, "*.geo-region.json")), lambda d: "objects" in d)
@@ -239,7 +254,8 @@ def build(release, site, now=None, snapshot=None):
            "elements_fetched_utc": region.get("fetched_utc"), "active_from": region.get("day") if active else None,
            "source": CITE, "definitions": region.get("definitions"), "counts": region.get("counts"),
            "cols": OBJ_COLS, "objects": objs, "tracks": meta, "roles": roles(),
-           "region": region_events(release, region["day"]), "rpo": rpo_pairs(snapshot, objs)}
+           "region": region_events(release, region["day"]), "rpo": rpo_pairs(snapshot, objs),
+           "belt": belt(region, active, elsets, now)}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
     return doc
@@ -265,6 +281,11 @@ def main():
     sizes = {k: os.path.getsize(os.path.join(site, "data", "geo", v["file"])) // 1024 for k, v in d["tracks"].items()}
     print(f"geo page: {len(d['objects'])} objects; tracks KB by window (days): {sizes}; "
           f"{len(d['region']['events'])} events in {EVENT_DAYS} days; {len(d['rpo']['pairs'])} RPO pairs")
+    b = d.get("belt") or {}
+    if "error" not in b:
+        print(f"belt board: {b['objects']} active objects {b['counts']}; {b['close_other_owner_count']} close pairs of "
+              f"different owners ({b['close_same_owner_count']} of one owner); orbit changes {b['change_counts']} "
+              f"({len(b['not_judged'])} objects not judged)")
 
 
 if __name__ == "__main__":

@@ -31,6 +31,7 @@
 <nav class="secbar" aria-label="On this page">
   <div class="wrap secbar-row">
     <a href="#globe">Globe</a>
+    <a href="#belt">Belt board</a>
     <a href="#rpo">RPO pairs</a>
     <a href="#region">Arrivals and departures</a>
     <a href="#roles">Listed roles</a>
@@ -91,6 +92,22 @@
   <p id="g-status" class="small">Loading the globe…</p>
 </section>
 
+<section class="card" id="belt" aria-labelledby="belt-h">
+  <div class="card-head">
+    <h2 id="belt-h">Belt board</h2>
+    <p class="muted small">The satellites CelesTrak lists as active near GEO: which sit within 100 km of a satellite
+      of another owner now, which changed orbit in the last 7 days, and which are drifting. Proximity and orbit
+      changes only, never intent. Moved here from Noisefloor's GEO board on 18 Nov 2026.</p>
+  </div>
+  <p id="geo-belt-status" class="small">Loading…</p>
+  <h3 id="belt-close">Within 100 km of another owner's satellite</h3>
+  <div id="geo-close"><p class="small">Loading…</p></div>
+  <h3 id="belt-changes">Orbit changes in the last 7 days</h3>
+  <div id="geo-changes"><p class="small">Loading…</p></div>
+  <h3 id="belt-drift">Drifting</h3>
+  <div id="geo-drift"><p class="small">Loading…</p></div>
+</section>
+
 <section class="card" id="rpo" aria-labelledby="rpo-h">
   <div class="card-head">
     <h2 id="rpo-h">RPO pairs near GEO</h2>
@@ -132,6 +149,7 @@
   <li><strong>Globe.</strong> Every object near GEO, placed with satellite.js (SGP4, the standard model for public orbital elements) in the Earth-fixed frame, so a satellite holding its slot hangs still over its longitude. Tracks show what the published elements said at each time: each element set is propagated only until the next one, so manoeuvres show where they happened. The dashed line is the next 48 hours predicted from the latest elements, which a manoeuvre would break. The line-of-sight circle is where the satellite stands above the chosen elevation: geometry, not a beam footprint. A <strong>hypothetical beam</strong> (in the panel, for one selected satellite) is a model: a circular main lobe whose gain falls as −3(ψ/ψ½)² dB with the angle ψ from boresight (the form ITU-R S.1528 gives after ITU-R S.672), with a beamwidth of about 70λ/D degrees for a dish of diameter D at wavelength λ. It shows where a beam of that size could reach; it is not the satellite's real coverage. <strong>Published footprints</strong> aren't drawn: operators' coverage maps and collections such as SatBeams don't allow redistribution. A <strong>footprint file</strong> you hold (KML or GeoJSON) can be drawn on the globe: it is read in your browser and never uploaded.</li>
   <li><strong>Globe tools.</strong> <strong>Look from</strong> a city or any point: each satellite's elevation, bearing and range from there (WGS84, sea level), and for a satellite holding its longitude, the next sun-outage seasons, worked out as on Noisefloor's <a href="https://noisefloor.theintelligence.company/sun">Sun outages</a> page (sun outages stay in Noisefloor, which owns signals). <strong>Sun and the Earth's shadow</strong> draws the sun's direction and the day–night line (a low-precision solar ephemeris, about 0.01°), and in red the part of the belt inside the Earth's shadow, modelled as a cylinder one Earth radius wide. <strong>Relative motion</strong> (select two) gives their separation over the history window and the next 48 hours. <strong>Closest objects over time</strong> (select one) finds the five objects of any owner or type that come nearest in the same span. Each comes with a CSV. All of it uses the same positions as the globe, so it carries the same error of tens of kilometres; an inclined satellite swings north and south each day, so its separation from a neighbour can change by hundreds of kilometres within hours.</li>
   <li><strong>RPO pairs and arrivals.</strong> The switch draws, in red, a line between the chaser and the target of each pair in Secure World Foundation's sheet whose two satellites are both near GEO today, and rings in blue every object with an arrival or departure in the last 30 days. Names in the sheet are SWF's, matched to catalogue numbers by Orbit's RPO lane (TIC's satellite catalog, GCAT, or a reviewed alias). The sheet records activities from 2005 on; a pair drawn far apart today may have been close then.</li>
+  <li><strong>Belt board.</strong> The satellites in CelesTrak's active GEO group, each placed by SGP4 from its newest Space-Track element set. A satellite is drifting when it moves 0.1° a day or more along the belt; otherwise it is station-kept below 1° of inclination and inclined at or above it. Close pairs are two satellites of different owner codes within 100 km of each other at the time shown; pairs that share an owner code are counted, not listed (the code is often a country, and operators place their own satellites together on purpose), unless one has a listed role. Orbit changes use Orbit's rule, the same as its orbit-change lane: a change is marked when it is at least 8 robust deviations above the satellite's own usual change between element sets and at least 0.25 m/s, with at least 10 pairs of sets to set that usual change. Each is labelled from the drift and inclination before and after: station-keeping when the satellite holds its longitude on both sides, otherwise started drifting, stopped drifting, drift rate changed, or an inclination change of 0.02° or more on an inclined orbit. A satellite with too few public element sets is listed apart with its last two sets, not judged. Noisefloor's board, which this replaces, compared daily CelesTrak snapshots with fixed thresholds; the comparison of the two on 18 Nov 2026 is in <a href="https://github.com/metacog-osint/orbit/blob/main/doctrine/method.md">method.md</a>.</li>
   <li><strong>Callouts.</strong> Automatic highlights of behaviour worth a look, from the last 14 days: C1 close to another owner's satellite (under 100 km on some hour of a day), C2 approaching (three daily falls, ending under 200 km), C3 parked beside another owner (stopped after a manoeuvre within 0.5° of a station-kept satellite of another owner), C4 heading for an occupied slot, C5 an orbit change by an object with a listed role, C6 arrived in the protected zone, C7 retired to the graveyard, C8 went quiet. Each rule was frozen in writing with a list of published cases before it was run, then scored on four months of history and seven older cases (<a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/geo-callouts.md">the validation file</a>). C3 to C7 show by default; C1, C2 and C8 stay off unless you switch them on. <strong>C5 uses Orbit's orbit-change rule</strong> (from 17 Nov 2026): a change between two element sets counts when it stands 8 robust deviations above the object's own noise and is at least 0.25 m/s at GEO. On the same history it found 6 of the 6 published cases C5 was scored on (C5 itself found 5); most of C5's extra marks were station-keeping, a drifting object and natural inclination drift. An object with fewer than 10 pairs of element sets is not judged, so a rarely published object's move can be missed.</li>
   <li><strong>Owners</strong> are CelesTrak's codes: CIS is Russia and the former Soviet states, PRC China, ITSO Intelsat, EUTE Eutelsat, SES SES.</li>
 </ul>

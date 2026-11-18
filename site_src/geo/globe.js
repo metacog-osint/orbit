@@ -1316,6 +1316,63 @@ function main() {
       return "<tr><td>" + (o ? pick([+k], o.name) : esc(k) + ' <span class="small muted">(not near GEO today)</span>') + "</td><td>" + esc(r.role) + "</td><td>" + esc(r.basis) + "</td><td>" +
         (r.sources || []).map((x) => '<a href="' + esc(x[1]) + '">' + esc(x[0]) + "</a>").join(", ") + "</td></tr>";
     })) : "<p>None.</p>";
+    beltTables(g.belt);
+  }
+  // ---------------------------------------------------------------- belt board (tools/geo_belt.py; from Noisefloor's board, step 5)
+  const ROLE_WORD = { inspection: "inspection-capable", servicing: "servicing" };
+  const roleTag = (r) => (r ? ' <span class="small muted">(' + esc(ROLE_WORD[r] || r) + ")</span>" : "");
+  const KIND_WORD = { "started drifting": "Started drifting", "stopped drifting": "Stopped drifting", "drift rate changed": "Drift rate changed",
+                      "inclined orbit changed": "Inclination changed on an inclined orbit" };
+  const TERM_WORD = { "in-track": "mostly along the orbit", "cross-track": "mostly across the orbit", eccentricity: "mostly in the orbit's shape" };
+  const rateTxt = (x) => { const v = Math.abs(x); return v.toFixed(v < 0.1 ? 3 : 2) + "° a day " + (x < 0 ? "west" : "east"); };
+  const incTxt = (x) => x.toFixed(x < 1 ? 3 : 2) + "°";
+  function spanCell(a, b) {
+    const d = (s) => s.slice(0, 10), da = +a.slice(8, 10), db = +b.slice(8, 10), ma = MON[+a.slice(5, 7) - 1], mb = MON[+b.slice(5, 7) - 1];
+    const txt = d(a) === d(b) ? dayTxt(d(b)) : a.slice(0, 7) === b.slice(0, 7) ? da + "–" + db + " " + mb + " " + b.slice(0, 4)
+      : a.slice(0, 4) === b.slice(0, 4) ? da + " " + ma + " – " + db + " " + mb + " " + b.slice(0, 4) : dayTxt(d(a)) + " – " + dayTxt(d(b));
+    return '<td title="Element sets of ' + esc(utcTxt(epochMs(a), true)) + " and " + esc(utcTxt(epochMs(b), true)) + '">' + esc(txt) + "</td>";
+  }
+  function moved(c) {
+    const out = [];
+    if (Math.abs(c.drift[1] - c.drift[0]) >= 0.0005) out.push("drift " + rateTxt(c.drift[0]) + " → " + rateTxt(c.drift[1]));
+    if (Math.abs(c.inc[1] - c.inc[0]) >= 0.0005) out.push("inclination " + incTxt(c.inc[0]) + " → " + incTxt(c.inc[1]));
+    return out;
+  }
+  function beltTables(b) {
+    if (!$("geo-belt-status")) return;
+    if (!b || b.error) {
+      $("geo-belt-status").textContent = "The belt board was not built in the last update" + (b && b.error ? " (" + b.error + ")" : "") + ".";
+      ["geo-close", "geo-changes", "geo-drift"].forEach((id) => { $(id).textContent = ""; });
+      return;
+    }
+    const c = b.counts;
+    $("geo-belt-status").innerHTML = "<strong>" + fmtN(b.objects) + "</strong> active satellites at " + esc(bothTxt(epochMs(b.at_utc.replace("Z", "")), true)) + ": " +
+      fmtN(c["station-kept"]) + " station-kept, " + fmtN(c.inclined) + " inclined, " + fmtN(c.drifting) + " drifting.";
+    const pairs = b.close_other_owner || [];
+    $("geo-close").innerHTML = (pairs.length ? table(["Apart", "Satellite", "Owner", "Near", "Owner", "Longitude", "What the roles say", ""], pairs.map((p) =>
+      '<tr><td class="num">' + fmtN(p.km) + " km</td><td>" + pick([p.a[0]], p.a[1]) + roleTag(p.a[3]) + "</td><td>" + esc(p.a[2] || "") + "</td><td>" + pick([p.b[0]], p.b[1]) + roleTag(p.b[3]) +
+      "</td><td>" + esc(p.b[2] || "") + '</td><td class="num">' + lonTxt(p.lon) + "</td><td>" + esc(p.kind) + (p.age_days > 3 ? " (elements " + Math.round(p.age_days) + " days old)" : "") +
+      "</td><td>" + pick([p.a[0], p.b[0]], "Both on the globe") + "</td></tr>")) : "<p>None within 100 km.</p>") +
+      '<p class="small">' + (b.close_other_owner_count > pairs.length ? "The closest " + fmtN(pairs.length) + " of " + fmtN(b.close_other_owner_count) + " are listed. " : "") +
+      fmtN(b.close_same_owner_count) + " more pairs within 100 km share an owner code and are not listed. Public elements place a satellite to within tens of kilometres, so a few kilometres apart does not mean touching.</p>";
+    const ch = b.changes || [], rare = ch.filter((x) => x.kind !== "station-keeping"), keep = ch.filter((x) => x.kind === "station-keeping");
+    const head = ["Between", "Satellite", "Owner", "Longitude", "What changed"];
+    const rows = (list, kind) => list.map((x) => "<tr>" + spanCell(x.between[0], x.between[1]) + "<td>" + pick([x.norad], x.name) + roleTag(x.role) + "</td><td>" + esc(x.owner || "") +
+      '</td><td class="num">' + (x.lon == null ? "–" : lonTxt(x.lon)) + "</td><td>" + (kind ? "<strong>" + esc(KIND_WORD[x.kind] || x.kind) + ".</strong> " : "") +
+      esc(x.dv_ms.toFixed(2) + " m/s, " + (TERM_WORD[x.dominant] || x.dominant)) + (moved(x).length ? "; " + esc(moved(x).join("; ")) : "") +
+      (x.gap_h ? '. <span class="small muted">Measured across ' + Math.round(x.gap_h) + " hours without a public set; it happened somewhere inside.</span>" : ".") + "</td></tr>");
+    const n = b.change_counts || {}, routine = n["station-keeping"] || 0, nj = b.not_judged || [];
+    $("geo-changes").innerHTML = (rare.length ? table(head, rows(rare, true)) : "<p>None other than station-keeping.</p>") +
+      (keep.length ? '<details class="globe-more"><summary>Routine station-keeping (' + fmtN(routine) + (routine > keep.length ? ", the newest " + fmtN(keep.length) + " listed" : "") + ")</summary>" + table(head, rows(keep, false)) + "</details>" : "") +
+      (nj.length ? '<details class="globe-more"><summary>Not judged: too few public element sets (' + fmtN(nj.length) + ")</summary>" +
+        table(["Satellite", "Owner", "Sets held", "Last two sets", "Drift", "Inclination"], nj.map((u) => "<tr><td>" + pick([u.norad], u.name) + roleTag(u.role) + "</td><td>" + esc(u.owner || "") +
+          '</td><td class="num">' + fmtN(u.sets) + "</td>" + (u.between ? spanCell(u.between[0], u.between[1]) + "<td>" + esc(rateTxt(u.drift[0]) + " → " + rateTxt(u.drift[1])) + "</td><td>" +
+          esc(incTxt(u.inc[0]) + " → " + incTxt(u.inc[1])) + "</td>" : "<td>–</td><td>–</td><td>–</td>") + "</tr>")) +
+        '<p class="small">Under 10 pairs of sets is too few to know this satellite\u2019s usual change between sets, so its last two sets are shown as they are, with no judgment.</p></details>' : "") +
+      '<p class="small">Changes that ended in the last ' + (b.method ? b.method.change_days : 7) + " days, by Orbit's rule (see How to read this page).</p>";
+    const dr = b.drifting || [];
+    $("geo-drift").innerHTML = dr.length ? table(["Satellite", "Owner", "Longitude", "Drift"], dr.map((d) => "<tr><td>" + pick([d.norad], d.name) + roleTag(d.role) + "</td><td>" + esc(d.owner || "") +
+      '</td><td class="num">' + (d.lon == null ? "–" : lonTxt(d.lon)) + '</td><td class="num">' + esc(rateTxt(d.drift)) + "</td></tr>")) : "<p>None.</p>";
   }
   document.addEventListener("click", (e) => {
     const b = e.target.closest("button[data-pick]");
@@ -1334,7 +1391,7 @@ function main() {
   if (S.place) { $("g-place").value = S.place.name || S.place.lat.toFixed(3) + ", " + S.place.lon.toFixed(3); $("g-noplace").hidden = false; }
   filtersUI();
   fetch("data/geo/globe.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((g) => {
-    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
+    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles", "geo-belt-status", "geo-close", "geo-changes", "geo-drift"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
     const board = { roles: g.roles || {}, region: g.region || {}, rpo: g.rpo || {} };
     S.globe = g; S.board = board; S.owners = g.owners || {}; S.cite = g.source;
     const cols = g.cols, roleIds = new Set(Object.keys((board || {}).roles || {}).map(Number));
