@@ -479,5 +479,19 @@ snapshot and the daily archive, no request, at the end of each run (`_archive_ru
    changes; largest group 5 pieces of debris from 2026-051), and 87 reentries in 30 days, fewer than in any 30-day
    stretch of the two years before (103-272). The two listed orbit changes, first listed 16 Nov, are not new.
 
+## Per-source health in the feed (`orbit-2.19`, 18 Nov 2026)
+A lane that fails keeps its last good copy in the feed, so a reader can't tell a kept item from a fresh one by the
+item alone. The feed carries the doctrine kit's per-source `health` block (the form Headwind, Blackout and Elements
+use), one entry per source id the items name, from the snapshot's lane records (`feed.source_health`):
+`gcat-mcdowell` from `catalog`, `ll2-thespacedevs` from `upcoming`, `space-track` from `maneuver`.
+1. **Read on this run** (`state: up`, `last_ok` equal to `checked_at`): the lane was fetched, or GCAT said its files
+   had not changed, and it was not carried from an earlier run (the archive's `_fresh` rule). Otherwise, in the kit's
+   `health_state` words (feed contract revision 2.1): a failed lane is `failing` with its error; one fetched only on
+   an earlier run (not run, or carried by `collect --only`) is `stale`; one never fetched or unconfigured (`off`) is
+   `never`. The lane's own status stays in `detail`, and a kept copy adds "last good copy kept". A lane absent from
+   the snapshot gets no entry.
+2. **Why:** COP's ledger reads it, so a kept item neither ends nor counts as seen again (source-level sightings,
+   built 15 Nov 2026, landed 18 Nov). A new source id on the items needs its line in `SOURCE_LANES`.
+
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
