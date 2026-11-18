@@ -32,6 +32,7 @@
     <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
     <a href="#ledger">Ledger</a>
     <a href="#reentries">Reentries <b data-n="reentries"></b></a>
+    <a href="#breakups">Breakups <b data-n="breakups"></b></a>
     <a href="#decay">Predicted reentries <b data-n="decay"></b></a>
     <a href="#catalog">Catalog</a>
     <a href="#baseline">Two-year baseline</a>
@@ -157,6 +158,17 @@
       <div id="catalog-body"></div>
     </section>
   </div>
+
+  <section class="card" id="breakups" aria-labelledby="bu-h">
+    <div class="card-head">
+      <h2 id="bu-h">Breakups and collisions, last 30 days</h2>
+      <p class="muted small">Objects GCAT marks exploded (E, broken up in orbit) or collided (C), with a date in the
+        last 30 days. They left the catalog as one object without reentering, so they are kept apart from reentries.
+        Pieces from them can later show as new catalog entries from an old launch (under Catalog changes). Dates are
+        often approximate (marked ~). Orbit reports what GCAT records and does not say why an object broke up.</p>
+    </div>
+    <div class="tbl-wrap" id="breakup-table"></div>
+  </section>
 
   <section class="card" id="decay" aria-labelledby="decay-h">
     <div class="card-head">

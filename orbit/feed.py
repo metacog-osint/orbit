@@ -216,7 +216,7 @@ def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
         "precision_class": "none",
         "measures": {"status": b.get("status"), "breakup_date": b["breakup_date"],
                      "uncertain": bool(b.get("breakup_uncertain"))},
-        "visual": {"type": "table", "url": f"{SITE}/"},   # no breakups card on the page yet
+        "visual": {"type": "table", "url": f"{SITE}/#breakups"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}

@@ -1170,6 +1170,30 @@
     if (other) box.appendChild(el("p", "muted small", "Also " + other + " rocket stages, components and debris."));
   }
 
+  var BROKE = { E: "Exploded", C: "Collided" };
+  function breakupTable() {  // GCAT statuses E and C, last 30 days (gcat.recent_breakups, orbit-2.14)
+    var box = document.getElementById("breakup-table");
+    var since30 = daysAgo(30);
+    var rows = (snap.breakups || []).filter(function (x) { return x.breakup_date >= since30; });
+    var n = document.querySelector('.secbar b[data-n="breakups"]');
+    if (n) n.textContent = String(rows.length);
+    if (!rows.length) return empty(box, "No object GCAT marks exploded or collided has a date in the last 30 days.");
+    var trs = rows.map(function (x) {
+      var tr = el("tr");
+      tr.id = "breakup-" + x.jcat;
+      cell(tr, dayOnly(x.breakup_date) + (x.breakup_uncertain ? " ~" : ""));
+      cell(tr, x.name);
+      cell(tr, x.type);
+      cell(tr, BROKE[x.status] || x.status);
+      cell(tr, mark(x.country, x.state));
+      cell(tr, x.launch_tag || "", "muted");
+      cell(tr, x.norad || x.jcat, "muted");
+      return tr;
+    });
+    box.textContent = "";
+    box.appendChild(table(["Date", "Object", "Type", "GCAT status", "Owner", "Launch", "Number"], trs));
+  }
+
   var KIND = { P: "payload", R: "rocket stage", C: "component", D: "debris", S: "suborbital" };
   function decayCard() {  // Space-Track TIP messages (orbit/tip.py, orbit-2.13)
     var box = document.getElementById("decay-body");
@@ -1443,7 +1467,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); decayCard(); catalogBody(); lanes();
+    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); catalogBody(); lanes();
     startMap();
     viewControls();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
