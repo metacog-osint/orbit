@@ -63,9 +63,31 @@ class Block(unittest.TestCase):
     def test_off_not_run_and_absent_lanes(self):
         h = feed.source_health(snap(maneuver={"status": "off", "reason": "no credentials", "checked_at": NOW},
                                     upcoming={"status": "not run"}))
-        self.assertEqual((h["space-track"]["state"], h["ll2-thespacedevs"]["state"]), ("off", "not run"))
+        self.assertEqual((h["space-track"]["state"], h["ll2-thespacedevs"]["state"]), ("never", "never"))
+        self.assertEqual((h["space-track"]["detail"], h["ll2-thespacedevs"]["detail"]),
+                         ("off: no credentials", "not run"))
         self.assertNotIn("gcat-mcdowell", h, "a lane with no record carries no items, so it has no entry")
         self.assertEqual(history.lanes_ok(h), set())
+
+    def test_a_lane_carried_from_an_earlier_run_is_not_read(self):
+        # collect --only keeps the other lanes' records with from_previous: an old ok must not read as this run's.
+        h = feed.source_health(snap(upcoming={"status": "ok", "fetched_at": "2026-11-15T12:00:00Z",
+                                              "from_previous": True}))
+        up = h["ll2-thespacedevs"]
+        self.assertEqual((up["state"], up["last_ok"], up["checked_at"]), ("stale", "2026-11-15T12:00:00Z", NOW))
+        self.assertEqual(history.lanes_ok(h), set())
+
+    def test_every_state_is_a_kit_health_state(self):
+        # vocab/enums.json health_state (feed contract revision 2.1, 18 Nov 2026)
+        kit = {"fresh", "late", "stale", "failing", "never", "up"}
+        h = feed.source_health(snap(
+            catalog={"status": "unchanged", "checked_at": NOW},
+            upcoming={"status": "failed", "failed_at": NOW, "fetched_at": "2026-11-15T12:00:00Z", "from_previous": True},
+            maneuver={"status": "off", "reason": "no credentials", "checked_at": NOW}))
+        self.assertTrue({v["state"] for v in h.values()} <= kit, h)
+        for status in ("not run", None, "something new"):
+            h = feed.source_health(snap(catalog={"status": status}))
+            self.assertIn(h["gcat-mcdowell"]["state"], kit, status)
 
 
 class Collected(unittest.TestCase):
