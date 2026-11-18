@@ -12,7 +12,8 @@ in Orbit's own readings, so Orbit keeps them day by day and gives them baselines
             changes are dated by the day Orbit read them;
   tip       from orbit-2.17, Space-Track's TIP messages (USSPACECOM's reentry predictions), each once, on the day
             a run first saw it: Space-Track's reply covers only 5 days and GCAT dates a reentry days later, so the
-            check of a prediction against the reentry (tip.check) reads them from here.
+            check of a prediction against the reentry (tip.check) reads them from here;
+  lead      from orbit-2.18, the day's last daily lead (orbit/lead.py), so each day's lead can be cited.
 
 Every day also records how many runs it had and each lane's statuses, so a missed day or a failed lane is never
 read as a count of zero. Only what the page already publishes goes in: listed changes, never the private watch
@@ -119,6 +120,14 @@ def record(doc: dict | None, snap: dict) -> dict:
     for old in sorted(doc["days"])[:-MAX_DAYS]:
         del doc["days"][old]
     doc["updated_at"] = stamp
+    return doc
+
+
+def keep_lead(doc: dict, lead: dict) -> dict:
+    """Keep the run's daily lead (orbit/lead.py) on its UTC day; the day's last run's lead stands (orbit-2.18)."""
+    day = (lead.get("at") or "")[:10]
+    if len(day) == 10 and day in doc.get("days", {}):
+        doc["days"][day]["lead"] = lead
     return doc
 
 

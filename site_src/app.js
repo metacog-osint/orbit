@@ -136,6 +136,35 @@
     document.getElementById("method").textContent = snap.method_version || "";
   }
 
+  function leadCard() {  // orbit/lead.py (orbit-2.18): what changed in the last 24 hours, each line to its card
+    var ul = document.getElementById("lead-list");
+    if (!ul) return;
+    ul.textContent = "";
+    var L = snap.lead || {};
+    var h = document.getElementById("lead-h");
+    if (!L.at) {
+      ul.appendChild(el("li", "muted", "Not built yet: the lead appears with Orbit's next run."));
+      return;
+    }
+    if (h) h.textContent = "The last 24 hours, to " + fmt(L.at);
+    if (L.nothing_new) ul.appendChild(el("li", "", "Nothing new in the last 24 hours from the sources read on this run."));
+    (L.lines || []).forEach(function (x) {
+      var li = el("li");
+      (x.parts || []).forEach(function (p) {
+        if (typeof p === "string") li.appendChild(document.createTextNode(p));
+        else if (p.t) li.appendChild(document.createTextNode(fmt(p.t)));
+        else if (p.d) li.appendChild(document.createTextNode(dayOnly(p.d)));
+        else if (p.cc) li.appendChild(document.createTextNode(countryName(p.cc)));
+      });
+      li.appendChild(document.createTextNode(" "));
+      var a = el("a", "", "Details");
+      a.href = x.href || "#";
+      li.appendChild(a);
+      if (x.source) li.appendChild(el("span", "src", " · " + x.source));
+      ul.appendChild(li);
+    });
+  }
+
   function launchTable() {
     var box = document.getElementById("launch-table");
     var since7 = daysAgo(7);
@@ -1526,7 +1555,7 @@
 
   function render() {
     if (!snap) return;
-    tiles(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); tipCheckCard(); catalogBody(); lanes();
+    tiles(); leadCard(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); tipCheckCard(); catalogBody(); lanes();
     startMap();
     viewControls();
     if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }

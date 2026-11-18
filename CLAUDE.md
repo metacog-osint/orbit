@@ -3,6 +3,15 @@
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and satellite catalog changes. Observations only: no probabilities, no warnings.
 
+**State, 18 Nov 2026, about 11:30 AM CST: live with `ace3b57` (method `orbit-2.17`, TIP against the reentry),
+pushed on Tom's "Ship it"; update run 44345546106 passed in 1m1s.** Shipped in this stretch: `14c1579` orbit-2.15
+(reentry tracks on the globe, checked live 18 Nov in headless Edge: 4 tracks, Starlink 4334 drawn), another
+session's `0d497dc` orbit-2.16 (catalog step 5) and `691f677` (breakups card), and `ace3b57`. GCAT republished
+18 Nov 01:44 GMT, so payload `inc` is live (23 of 24 launches). Next on branch `feat/daily-lead` (built in a clone on
+C:, `C:\Users\PSRA User 4\work\orbit-tip-gcat`, because D: was slow): `orbit-2.18`, the daily lead. Plan for the
+site: `D:\Projects\_ideas\orbit-useful-engaging-2026-11-18.md` (daily lead, then a page per object with search,
+then owner and constellation views).
+
 **State, 16 Nov 2026, about 9:40 PM CST: live with `665c9ad` (method `orbit-2.13`, predicted reentries), pushed
 on Tom's "Ship it"; update run 44011432924 passed in 1m35s.** Live read 03:38 UTC 17 Nov: lane `decay` ok, 66 TIP
 messages in 5 days, 7 open windows (all Starlink, GCAT-named). Next on branch `feat/rpo-globe-tip`, not yet pushed:
@@ -249,6 +258,12 @@ it", run 44011432924). Rules in `doctrine/method.md` ("Predicted reentries").
   Predicted reentries card ("TIP against the reentry"). Rules in `doctrine/method.md`, "Predicted reentries" item 7.
   Tests `tests/test_tip_check.py` (16, on the 17 Nov TIP fixture and `tests/fixtures/gcat_reentries_20261118.json`).
   The first live run keeps the 5 days its reply holds, so the card starts with reentries from about 13 Nov.
+
+## Daily lead (18 Nov 2026, `orbit-2.18`; Tom's "begin with the daily lead first")
+`orbit/lead.py` builds snapshot block `lead` at the end of each run (`_archive_run`, after `tip_check`); the day's
+last lead is kept in the archive (`archive.keep_lead`). Page: "The last 24 hours" in the hero, under the lede, with a
+"New to this?" list of terms (`leadCard`, `#lead`). Rules in `doctrine/method.md`, "Daily lead". Tests
+`tests/test_lead.py` (15). No request and no new source.
 
 ## TIC satellite catalog (build steps 1-4 live 17 Nov 2026, published on release `catalog`; step 5 on a branch)
 Design and Tom's answers: `D:\Projects\_ideas\sat-catalog-design-2026-11.md` (section 9). Branch `feat/sat-catalog`,

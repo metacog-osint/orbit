@@ -423,5 +423,34 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    17:37 UTC, GCAT's 17 Nov 2026 17:37 UTC, exactly 7 days apart. Shown as each gives it. Observations of the two
    records, not a rating of either.
 
+## Daily lead (`orbit-2.18`, 18 Nov 2026)
+Tom, 18 Nov 2026 about 10:30 AM CST: "capture all of those ideas and the plan, then begin with the daily lead
+first"; readers are "mostly people with some amount of elevated knowledge but there will be people new to this topic
+as well". Plan: `D:\Projects\_ideas\orbit-useful-engaging-2026-11-18.md`. Built by `orbit/lead.py` from the
+snapshot and the daily archive, no request, at the end of each run (`_archive_run`, after the TIP check).
+1. **Lines, in this order, each only when it has something:** objects TIP predicts to reenter in the next 24 hours
+   (USSPACECOM's high-interest flags first); objects TIP's messages after the reentry, issued in the last 24 hours,
+   put down, with the offset from the last prediction (item 7 of "Predicted reentries"); orbit changes first listed
+   in the last 24 hours (first day in the archive's `maneuver.listed`; without an archive, every listed change is
+   new); GCAT breakups dated in the last 7 days (GCAT dates them late, so the line says 7 days); GCAT's new copy when
+   its satcat stamp is under 24 hours old (new entries, late ones, changed, owner changes, the largest late group);
+   orbital launches of the last 24 hours (until launches move to Launch); and the last 30 days against the two
+   years before, only where a count falls outside every earlier 30-day window (`gcat._position`'s above or below).
+   Names: at most 3 per line, then "and N more".
+2. **No silence read as news:** GCAT's satcat stamp over 36 hours old gets its own line naming the copy's time and
+   age; a TIP, orbit-change or GCAT lane not read on the run (failed or carried) is named in a last line. When no
+   line but those has anything, the page says "Nothing new in the last 24 hours from the sources read on this run".
+3. **Form:** each line is text with times, dates and country codes kept apart (`parts`), so the page writes times in
+   the viewer's zone and countries by name; a link to its card; and its source. Observations only, in the words the
+   cards use. The page puts a "New to this?" list of the terms the lines use (TIP, window, GCAT, orbit change, LEO and
+   GEO, breakup, debris and rocket stage) under the lead.
+4. **Kept:** snapshot block `lead`; the day's last lead in the daily archive (`days.<date>.lead`,
+   `archive.keep_lead`), published with it at `/data/archive.json`, so each day's lead can be cited.
+5. Checked on the live snapshot and archive of 18 Nov 2026 16:17 UTC: one object due in the next 24 hours (Starlink
+   4334), two down by TIP's messages after the reentry (Starlink 4405, 21 min earlier than predicted; Starlink 1423,
+   54 min earlier, both inside the window), GCAT's copy of 01:44 UTC (10 new entries, all late; 40 changed; 9 owner
+   changes; largest group 5 pieces of debris from 2026-051), and 87 reentries in 30 days, fewer than in any 30-day
+   stretch of the two years before (103-272). The two listed orbit changes, first listed 16 Nov, are not new.
+
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
