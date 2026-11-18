@@ -58,6 +58,13 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
 4. **The page in Orbit:** the globe and belt strip as Orbit's GEO page, three.js and satellite.js self-hosted like
    MapLibre (Orbit's CSP has no CDN scripts). Feed items for callouts only with Tom's yes, held from joins by
    COP's gate like orbit changes.
+   **Decided 17 Nov 2026 (Tom, "Add RPO pairs"):** the page draws SWF's RPO chasers beside their targets, from the
+   element sets on Orbit's public `geo-2026` release (no new source or request). **Built 18 Nov 2026** (branch
+   `feat/geo-page`): `geo.html`, `tools/geo_page.py`, `site_src/geo/`, three.js 0.185.0 in `vendor/three/`, the
+   update run's step "GEO page data and callouts" (installs `tools/requirements-callouts.txt`, reads the
+   `geo-YYYY` releases), C5's place taken by Orbit's rule in `geo_callouts.py publish`; `method.md`, "The GEO
+   page". Noisefloor's CelesTrak board (`geo.py`: close pairs, manoeuvres, drifting) did not move; the globe's
+   "Board findings" became RPO pairs and arrivals. No callout feed items.
 5. **Noisefloor's Space tab:** points to Orbit's GEO page once it is live and checked; Sun outages stays as the
    tab's own page. Then `geo.py`, the GEO steps in `daily.yml` and the old page retire, and the hub's and COP's
    descriptions of both programs are updated.

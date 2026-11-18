@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEO belt · Orbit · The Intelligence Company</title>
+<meta name="description" content="Every object in and near the geostationary belt on a globe, from public orbital data: where each one is, where it has been, arrivals and departures, callouts, and Secure World Foundation's rendezvous and proximity pairs. Proximity and behaviour, never intent.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="geo/geo.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<script src="tic-time.js"></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+<script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/","satellite.js":"./geo/satellite.js"}}</script>
+<script defer src="geo/sunoutage.js"></script>
+<script type="module" src="geo/globe.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <a href="./">Orbit home</a>
+      <a href="data/geo/globe.json">GEO data</a>
+      <a href="data/geo/callouts.json">Callouts</a>
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+</header>
+
+<nav class="secbar" aria-label="On this page">
+  <div class="wrap secbar-row">
+    <a href="#globe">Globe</a>
+    <a href="#rpo">RPO pairs</a>
+    <a href="#region">Arrivals and departures</a>
+    <a href="#roles">Listed roles</a>
+    <a href="#howto">How to read this page</a>
+  </div>
+</nav>
+
+<main class="wrap geo-page">
+<div class="page-head">
+  <div>
+    <h1>GEO belt</h1>
+    <p class="page-sub">Every object in and near the geostationary belt, on a globe, from public orbital data: where each one is, where it has been, which arrived or left, which sit beside a satellite of another owner and which changed orbit. Positions are good to tens of kilometres; it shows proximity and behaviour, never intent.</p>
+  </div>
+  <a class="howto-link" href="#howto">How to read this page ↓</a>
+</div>
+
+<section id="globe" class="globe" aria-label="Globe of every object near GEO">
+  <div class="globe-bar">
+    <div class="globe-search"><input id="g-q" type="search" placeholder="Search: name, number, owner, country, role" aria-label="Search objects" autocomplete="off"><ul id="g-results" class="globe-results" hidden></ul></div>
+    <details class="globe-filters"><summary>Filters</summary><div id="g-filters"></div></details>
+    <label>Colour <select id="g-color"><option value="region">Where</option><option value="type">Type</option><option value="active">Active</option><option value="owner">Owner</option></select></label>
+    <label>Tracks <select id="g-trails"><option value="off">Off</option><option value="sel">Selected</option><option value="all">All shown</option></select></label>
+    <label>History <select id="g-win"><option value="1">1 day</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label>
+    <label>Line of sight <select id="g-fp"><option value="">Off</option><option value="0">0° elevation</option><option value="5">5° elevation</option><option value="10">10° elevation</option></select></label>
+    <label class="globe-file" title="A KML or GeoJSON footprint you hold, such as an operator's coverage file. It is drawn in your browser and never uploaded.">Footprint file <input id="g-file" type="file" accept=".kml,.geojson,.json,application/vnd.google-earth.kml+xml,application/geo+json" multiple></label>
+    <span id="g-files" class="small"></span><span id="g-filenote" class="small" role="status"></span>
+  </div>
+  <div class="globe-bar">
+    <label>Look from <input id="g-place" list="g-places" placeholder="City, or latitude, longitude" autocomplete="off" size="24"></label>
+    <datalist id="g-places"></datalist>
+    <button id="g-pick" type="button" class="linkish">Click the Earth</button>
+    <button id="g-noplace" type="button" class="linkish" hidden>Clear place</button>
+    <span id="g-placenote" class="small" role="status"></span>
+    <label><input id="g-sun" type="checkbox"> Sun and the Earth's shadow</label>
+    <label><input id="g-over" type="checkbox"> RPO pairs and arrivals</label>
+    <details class="globe-filters"><summary>Callouts</summary><div id="g-callouts"><p class="small">Loading…</p></div></details>
+  </div>
+  <div class="globe-main">
+    <div class="globe-view" id="g-view">
+      <canvas id="g-canvas" role="img" aria-label="Globe with every object near GEO; the tables below hold the same data"></canvas>
+      <div id="g-labels" class="globe-labels" aria-hidden="true"></div>
+      <div id="g-tip" class="globe-tip" hidden></div>
+      <div id="g-box" class="globe-box" hidden></div>
+      <div id="g-legend" class="globe-legend"></div>
+    </div>
+    <aside class="globe-panel" id="g-panel" aria-live="polite"><p class="small">Loading…</p></aside>
+  </div>
+  <div class="globe-time">
+    <button id="g-play" type="button">Play</button>
+    <input id="g-t" type="range" min="-10080" max="2880" step="60" value="0" aria-label="Time: the past from recorded elements, the next 48 hours predicted">
+    <button id="g-now" type="button">Now</button>
+    <span id="g-tlabel" class="small"></span>
+  </div>
+  <div class="globe-strip-head small"><strong>The belt, flat</strong> · scroll to zoom, drag to pan, click to select
+    <label>Up the side <select id="g-sy"><option value="alt">Height above or below GEO</option><option value="lat">Latitude</option></select></label>
+    <button id="g-sreset" type="button" class="linkish">Reset zoom</button></div>
+  <canvas id="g-strip" class="globe-strip" role="img" aria-label="The belt unrolled by longitude"></canvas>
+  <p id="g-status" class="small">Loading the globe…</p>
+</section>
+
+<section class="card" id="rpo" aria-labelledby="rpo-h">
+  <div class="card-head">
+    <h2 id="rpo-h">RPO pairs near GEO</h2>
+    <p class="muted small">Rendezvous and proximity operations from Secure World Foundation's sheet (the same rows as
+      Orbit's RPO history), where both the chaser and the target are near GEO in today's list. The globe draws each
+      pair as a red line between today's positions. SWF records a past or ongoing activity; today's positions say
+      nothing about how close the two were then.</p>
+  </div>
+  <div id="geo-rpo"><p class="small">Loading…</p></div>
+</section>
+
+<section class="card" id="region" aria-labelledby="region-h">
+  <div class="card-head">
+    <h2 id="region-h">Arrivals and departures</h2>
+    <p class="muted small">Everything Space-Track lists near GEO, including inactive satellites, rocket bodies and
+      debris: who entered or left the protected zone, what was newly catalogued, and which satellites went quiet, over
+      the last 30 days.</p>
+  </div>
+  <p id="geo-region-counts" class="small">Loading…</p>
+  <div id="geo-region"></div>
+</section>
+
+<section class="card" id="roles" aria-labelledby="roles-h">
+  <div class="card-head">
+    <h2 id="roles-h">Listed roles</h2>
+    <p class="muted small">Only objects whose role published reporting supports are labelled, each with its source. An
+      unlabelled object has no listed role, which says nothing about what it is.</p>
+  </div>
+  <div id="geo-roles"><p class="small">Loading…</p></div>
+</section>
+
+<section id="howto" class="howto card" aria-labelledby="howto-h">
+<h2 id="howto-h">How to read this page</h2>
+<p><strong>Read this first.</strong> Public elements place a satellite at GEO only to within tens of kilometres, so no separation under about 50 km is claimed, and two objects may be farther apart or closer than shown. Operators also place satellites close together on purpose, including across companies by agreement, and a servicing vehicle docked to its client shows as 0 km. A short list of satellites with a published inspection or servicing role is labelled, with sources; every other object is shown as having no listed role. Everything here describes behaviour, never intent.</p>
+<h3 id="method">Method</h3>
+<ul>
+  <li><strong>Data.</strong> Orbit's GEO region (<a href="https://github.com/metacog-osint/orbit/blob/main/orbit/geo_region.py">orbit/geo_region.py</a>): one Space-Track GP query twice a day for every object with a mean motion of 0.9 to 1.1 revolutions a day and an eccentricity under 0.3, with every element set kept, and CelesTrak's active GEO group for the "Active" colour. Files on Orbit's public <a href="https://github.com/metacog-osint/orbit/releases/tag/geo-2026">geo-2026</a> release. The history from July to mid-November 2026 was copied from Noisefloor, which ran this page until 18 Nov 2026.</li>
+  <li><strong>Region.</strong> The protected zone is the IADC geosynchronous protected region: perigee and apogee within 200 km of 35,786 km altitude, and inclination 15° or less. The graveyard is everything above it. Each day's list is compared with the day before: newly catalogued (launched within the last year), back in the public catalogue, entered the zone, raised to the graveyard, lowered below the zone, left the zone, dropped out of the list, and, for payloads in the zone, no new public elements for over 7 days. A satellite missing from public data hasn't necessarily stopped working: some are simply not published.</li>
+  <li><strong>Globe.</strong> Every object near GEO, placed with satellite.js (SGP4, the standard model for public orbital elements) in the Earth-fixed frame, so a satellite holding its slot hangs still over its longitude. Tracks show what the published elements said at each time: each element set is propagated only until the next one, so manoeuvres show where they happened. The dashed line is the next 48 hours predicted from the latest elements, which a manoeuvre would break. The line-of-sight circle is where the satellite stands above the chosen elevation: geometry, not a beam footprint. A <strong>hypothetical beam</strong> (in the panel, for one selected satellite) is a model: a circular main lobe whose gain falls as −3(ψ/ψ½)² dB with the angle ψ from boresight (the form ITU-R S.1528 gives after ITU-R S.672), with a beamwidth of about 70λ/D degrees for a dish of diameter D at wavelength λ. It shows where a beam of that size could reach; it is not the satellite's real coverage. <strong>Published footprints</strong> aren't drawn: operators' coverage maps and collections such as SatBeams don't allow redistribution. A <strong>footprint file</strong> you hold (KML or GeoJSON) can be drawn on the globe: it is read in your browser and never uploaded.</li>
+  <li><strong>Globe tools.</strong> <strong>Look from</strong> a city or any point: each satellite's elevation, bearing and range from there (WGS84, sea level), and for a satellite holding its longitude, the next sun-outage seasons, worked out as on Noisefloor's <a href="https://noisefloor.theintelligence.company/sun">Sun outages</a> page (sun outages stay in Noisefloor, which owns signals). <strong>Sun and the Earth's shadow</strong> draws the sun's direction and the day–night line (a low-precision solar ephemeris, about 0.01°), and in red the part of the belt inside the Earth's shadow, modelled as a cylinder one Earth radius wide. <strong>Relative motion</strong> (select two) gives their separation over the history window and the next 48 hours. <strong>Closest objects over time</strong> (select one) finds the five objects of any owner or type that come nearest in the same span. Each comes with a CSV. All of it uses the same positions as the globe, so it carries the same error of tens of kilometres; an inclined satellite swings north and south each day, so its separation from a neighbour can change by hundreds of kilometres within hours.</li>
+  <li><strong>RPO pairs and arrivals.</strong> The switch draws, in red, a line between the chaser and the target of each pair in Secure World Foundation's sheet whose two satellites are both near GEO today, and rings in blue every object with an arrival or departure in the last 30 days. Names in the sheet are SWF's, matched to catalogue numbers by Orbit's RPO lane (TIC's satellite catalog, GCAT, or a reviewed alias). The sheet records activities from 2005 on; a pair drawn far apart today may have been close then.</li>
+  <li><strong>Callouts.</strong> Automatic highlights of behaviour worth a look, from the last 14 days: C1 close to another owner's satellite (under 100 km on some hour of a day), C2 approaching (three daily falls, ending under 200 km), C3 parked beside another owner (stopped after a manoeuvre within 0.5° of a station-kept satellite of another owner), C4 heading for an occupied slot, C5 an orbit change by an object with a listed role, C6 arrived in the protected zone, C7 retired to the graveyard, C8 went quiet. Each rule was frozen in writing with a list of published cases before it was run, then scored on four months of history and seven older cases (<a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/geo-callouts.md">the validation file</a>). C3 to C7 show by default; C1, C2 and C8 stay off unless you switch them on. <strong>C5 uses Orbit's orbit-change rule</strong> (from 17 Nov 2026): a change between two element sets counts when it stands 8 robust deviations above the object's own noise and is at least 0.25 m/s at GEO. On the same history it found 6 of the 6 published cases C5 was scored on (C5 itself found 5); most of C5's extra marks were station-keeping, a drifting object and natural inclination drift. An object with fewer than 10 pairs of element sets is not judged, so a rarely published object's move can be missed.</li>
+  <li><strong>Owners</strong> are CelesTrak's codes: CIS is Russia and the former Soviet states, PRC China, ITSO Intelsat, EUTE Eutelsat, SES SES.</li>
+</ul>
+<p class="small">Orbital data: USSPACECOM (space-track.org), basic SSA data, redistributed with citation; active list from <a href="https://celestrak.org/">CelesTrak</a>. RPO pairs: Secure World Foundation, Global Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>, <a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>), CC BY-NC 4.0. Libraries: three.js 0.185.0 (<a href="vendor/three/LICENSE">MIT</a>) and satellite.js 7.1.0 (<a href="vendor/satellite.js/LICENSE.md">MIT</a>), self-hosted; coastlines and places from Natural Earth (public domain). Code: <a href="https://github.com/metacog-osint/orbit/blob/main/tools/geo_page.py">tools/geo_page.py</a>, <a href="https://github.com/metacog-osint/orbit/blob/main/tools/geo_callouts.py">tools/geo_callouts.py</a>.</p>
+</section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit, The Intelligence Company. Element sets: Space-Track.org, United States Space Command (USSPACECOM), 18th
+    Space Defense Squadron, redistributed under USSPACECOM's blanket approval for basic SSA data. Orbit-change analysis:
+    The Intelligence Company, not reviewed or endorsed by USSPACECOM. Not for operational use. Publicly available
+    information only.</p>
+</footer>
+</body>
+</html>

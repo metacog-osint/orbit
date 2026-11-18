@@ -22,9 +22,10 @@ monthly geo-elements-YYYY-MM.json.gz files (written by orbit/geo_region.py; Nois
 read when present); load_static reads every day file (newest entry per object), not only the newest; and `pull`
 stops with a message (every v1 case's history is held; it is not yet wired to Orbit's Space-Track client).
 GEO orbit changes: Tom chose Orbit's rule (orbit/maneuver.py) over C5 on 17 Nov 2026 (doctrine/method.md, "GEO
-callouts"); C5 stays here, unchanged, as the scored v1 record until step 4 publishes callouts. numpy and sgp4 are needed here only, pinned at build
-time for the callouts (decided 16 Nov 2026) in tools/requirements-callouts.txt; Orbit's collector and live lanes
-stay standard library.
+callouts"). C5 stays in `run` and `score`, unchanged, as the scored v1 record; `publish` (step 4, the GEO page)
+lists listed-role orbit changes by Orbit's rule instead, under the same id so the page's switch keeps working.
+numpy and sgp4 are needed here only, pinned at build time for the callouts (decided 16 Nov 2026) in
+tools/requirements-callouts.txt; Orbit's collector and live lanes stay standard library.
 """
 import argparse
 import bisect
@@ -556,33 +557,71 @@ RULES = {
     "C2": ("Approaching", False, "found 1 of 4 published cases; about 500 new a week"),
     "C3": ("Parked beside another owner", True, "found 4 of 5 published cases; about 2 a week"),
     "C4": ("Heading for an occupied slot", True, "found 2 of 4 published cases; about 1 a week"),
-    "C5": ("Listed-role object changed orbit", True, "found 5 of 6 published cases; about 3 a week"),
+    "C5": ("Listed-role object changed orbit", True, "by Orbit's orbit-change rule (8 robust deviations of the "
+           "object's own noise, 0.25 m/s floor), which found 6 of 6 of C5's published cases on the same history; an "
+           "object with fewer than 10 pairs of element sets is not judged"),
     "C6": ("Arrived in the protected zone", True, "found 4 of 4 published cases; about 1 a week"),
     "C7": ("Retired to the graveyard", True, "found 3 of 4 published cases; under 1 a week"),
     "C8": ("Went quiet", False, "missed its one published case; about 1 a week"),
 }
 
 
+def orbit_rule_changes(elements, static, roles, start, end):
+    """Listed-role orbit changes by Orbit's rule (orbit/maneuver.py, the same detector as Orbit's orbit-change lane):
+    every element set held up to the end of `end` sets each object's own noise; changes ending from `start` on are
+    listed. Returns (callouts in publish's C5 shape, [[norad, name, note]] for the objects not judged)."""
+    sys.path.insert(0, ROOT)
+    from orbit import maneuver as M
+    now = datetime.strptime(end, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1)
+    window = (now - datetime.strptime(start, "%Y-%m-%d").replace(tzinfo=timezone.utc)).days
+    out, unjudged = [], []
+    for k, role in sorted(roles.items()):
+        rows = [r for r in elements.get(k, []) if parse_epoch(r["epoch"]) < now]
+        info = static.get(k, {})
+        sets = [[M._iso(parse_epoch(r["epoch"])), float(r["n"]), float(r["e"]), float(r["i"]), float(r["raan"]),
+                 float(r["argp"]), float(r["M"]), ""] for r in rows]
+        det = M.detect({"sets": sets}, now, window_days=window)
+        if not det["events"] and det.get("note") and "baseline" in det["note"]:
+            unjudged.append([k, info.get("name"), det["note"]])
+        for e in det["events"]:
+            c = {"rule": "C5", "day": e["from"][:10], "a": [k, info.get("name"), info.get("owner")], "role": role,
+                 "between": [e["from"][:16], e["to"][:16]], "dv_ms": e["dv_ms"], "dominant": e["dominant"], "z": e["z"]}
+            if e["to"][:10] != e["from"][:10]:
+                c["end"] = e["to"][:10]
+            if e.get("geo"):
+                c["lon"] = e["geo"]["lon_after"]
+            if e.get("gap"):                     # measured across 48 h or more without a public set: somewhere inside
+                c["gap_h"] = e["gap"]["hours"]
+            out.append(c)
+    return out, unjudged
+
+
 def publish(data, days, out, show_days=14):
-    """The last `show_days` of callouts (computed over `days`, so the look-back rules have history) for the globe."""
+    """The last `show_days` of callouts (computed over `days`, so the look-back rules have history) for the globe.
+    Listed-role orbit changes (C5's place) are Orbit's rule, not C5 (Tom, 17 Nov 2026)."""
     end = (datetime.now(timezone.utc) - timedelta(days=1)).date()
     start = end - timedelta(days=days - 1)
     first_shown = (end - timedelta(days=show_days - 1)).isoformat()
-    doc = run(load_elements(data), load_static(data), load_roles(), start.isoformat(), end.isoformat(),
+    elements, static, roles = load_elements(data), load_static(data), load_roles()
+    doc = run(elements, static, roles, start.isoformat(), end.isoformat(),
               events=load_events(data, start.isoformat(), end.isoformat()))
+    changes, unjudged = orbit_rule_changes(elements, static, roles, start.isoformat(), end.isoformat())
+    doc["callouts"] = sorted([c for c in doc["callouts"] if c["rule"] != "C5"] + changes,
+                             key=lambda c: (c["day"], c["rule"], c["a"][0]))
     keep = []
     for c in doc["callouts"]:
-        if c["day"] < first_shown and not (c["rule"] == "C1" and c.get("end", c["day"]) >= first_shown):
+        if c["day"] < first_shown and not (c["rule"] in ("C1", "C5") and c.get("end", c["day"]) >= first_shown):
             continue
         k = {"r": c["rule"], "d": c["day"], "a": c["a"]}
         for f in ("b", "end", "min_km", "km", "from_km", "deg", "days", "drift", "lon", "role", "kind", "between",
-                  "drift_change", "inc_change", "lon_off_deg", "standing"):
+                  "drift_change", "inc_change", "lon_off_deg", "standing", "dv_ms", "dominant", "z", "gap_h"):
             if f in c and c[f] is not None and c[f] is not False:      # keep zeros (0 == False in Python)
                 k[f] = c[f]
         keep.append(k)
     pub = {"version": VERSION, "built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "start": first_shown,
            "end": end.isoformat(), "source": CITE, "rules_doc": "docs/validation/geo-callouts.md",
-           "rules": [{"id": r, "name": n, "default_on": on, "score": sc} for r, (n, on, sc) in RULES.items()], "callouts": keep}
+           "rules": [{"id": r, "name": n, "default_on": on, "score": sc} for r, (n, on, sc) in RULES.items()],
+           "c5_rule": "orbit/maneuver.py", "c5_not_judged": unjudged, "callouts": keep}
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8", newline="\n") as f:
         json.dump(pub, f, ensure_ascii=False, separators=(",", ":"))

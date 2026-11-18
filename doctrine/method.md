@@ -343,7 +343,7 @@ signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit
 `tools/geo_callouts.py`, moved from Noisefloor (`35328c0`) with its pre-registered rules C1-C8, thresholds, cases
 and scoring unchanged (`docs/validation/geo-callouts.md`, `geo-callouts-cases.json`, `site_src/geo_roles.json`
 copied unchanged). Run at build time only, with numpy and sgp4 pinned in `tools/requirements-callouts.txt`; the
-collector and live lanes stay standard library. Nothing is published yet (step 4).
+collector and live lanes stay standard library. Published on the GEO page from step 4 (below).
 1. **Same results:** on the same input (Noisefloor's parquet of 27 Oct) Noisefloor's script and the port write
    byte-identical files (11,009 callouts). On Orbit's own element history the port matches Noisefloor's held run of
    31 Oct (8 Jul-30 Oct): 11,022 of 11,023 callouts identical, none missing either side; one C2 distance differs
@@ -364,6 +364,33 @@ collector and live lanes stay standard library. Nothing is published yet (step 4
    object with under 10 set pairs is not judged (USA 324 moved +0.66 deg/day over a 24-day gap and was not
    marked). C5 stays in the script as the scored v1 record; the page (step 4) uses Orbit's rule for listed-role
    orbit changes.
+
+## The GEO page (18 Nov 2026; step 4 of `geo-move-plan.md`)
+`geo.html`, moved from Noisefloor's /geo page (globe, belt strip, look angles, sun and shadow, relative motion,
+closest objects, beams, footprint files, callouts). Page only: nothing new in the feed (callout feed items wait on
+Tom's yes).
+1. **Data** (`tools/geo_page.py`, at build time in the update run): the newest `<day>.geo-region.json` on the
+   `geo-YYYY` releases for the objects and the "Active" colour (CelesTrak's active GEO group from the same
+   `geo.yml` run, where Noisefloor read its own CelesTrak snapshot), the monthly element files for the tracks
+   (SGP4 per element set until the next, as Noisefloor's `geo_globe.py`), 30 days of the day files' events, and
+   `site_src/geo_roles.json`. No request to Space-Track or CelesTrak.
+2. **RPO pairs (Tom, 17 Nov 2026, "Add RPO pairs"):** every row of SWF's RPO sheet (lane `rpo`, the snapshot's
+   names matched to catalogue numbers) whose chaser and target are both near GEO in today's list, one line per
+   chaser-target pair between today's positions. Rows with one end near GEO are counted, not drawn. SWF's date and
+   mission text are shown as SWF gives them; today's positions say nothing about how close the two were then.
+3. **Callouts:** `geo_callouts.py publish`, the last 14 days of C1-C8 by the frozen v1 rules, except C5 (Tom, 17
+   Nov 2026): listed-role orbit changes are Orbit's rule (`orbit/maneuver.detect` on every set held, 8 robust
+   deviations, 0.25 m/s floor at GEO, 10 pairs minimum), listed under C5's id with the change in m/s, its main
+   term and, for a pair 48 h or more apart, the gap. Objects with under 10 pairs are listed as not judged.
+   First local run (18 Nov 2026, release of 18 Nov 11:55Z): 1,395 callouts 4-17 Nov (C1 378, C2 1,001, C3 2, C4 2,
+   C5 6, C6 1, C8 5); C5's six are MEV-1 (inclination 0.03 to 0.54 deg between 5 and 15 Nov; 10.4 and 26.3 m/s
+   across gaps) and MEV-2 (0.34-0.75 m/s); USA 324 and 325 not judged. Noisefloor's live file of the same span had
+   709 (no C3, C4 or C5); not investigated, since that page retires at step 5 and the port matched the held run.
+4. **Self-hosted libraries:** three.js 0.185.0 (`vendor/three/`, `three.module.min.js`, `three.core.min.js`,
+   `OrbitControls.js`, MIT; npm tarball sha256 5f52a93f...433d) and Orbit's satellite.js 7.1.0 through
+   `geo/satellite.js`. geo.html's import map is the one inline script; its sha256 is in `_headers`' script-src
+   (`tests/test_geo_page.py` holds it). The CSP has no `'unsafe-inline'` for styles, so the globe's markup carries
+   `data-css` and one MutationObserver applies it through the CSSOM.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
@@ -399,6 +426,58 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    the dot. Checked 17 Nov 2026 on Starlink 5046 (53892, TIP 08:59 UTC +-60 min) with CelesTrak's set of 16 Nov
    22:56 UTC: the line passes within about 100 km of TIP's point (one point a minute limits it) and reaches it about
    3 minutes before TIP's time; with drag left out, 130 km. A drawing for orientation, not a prediction of Orbit's.
+7. **TIP against the reentry (`orbit-2.17`, Tom's "Yes, build it", 18 Nov 2026 about 9:40 AM CST).** Space-Track's
+   reply covers 5 days and GCAT dated these reentries about 3 days later, so the TIP lane now hands every message of
+   the reply on (`decay.all_messages`: NORAD number, message time, predicted time, window, message id) and Orbit's
+   daily archive keeps each one once, on the day a run first saw it (`tip`, deduplicated over 10 days; carried or
+   failed lanes add nothing). Each run then builds snapshot block `tip_check` (`tip.check`) for objects that came
+   down in the last 30 days:
+   - **TIP's time after the reentry:** the newest message issued after the time it gives, with a 1-minute window.
+     In the 17 Nov reply every object that had come down had one, issued 2-8 hours after the time it gives. A message
+     issued late with a wider window (10-60 minutes seen, e.g. 45755 at plus or minus 39) stays a prediction: GCAT
+     marks those times uncertain and rounds them (01:00 for TIP's 00:48).
+   - **Last prediction:** the newest message issued before that time. `offset_min` is TIP's time after the reentry
+     minus the predicted time (positive: later than predicted), `inside` whether it falls within the window,
+     `lead_h` the hours from the message to the reentry.
+   - **GCAT:** GCAT's reentry time against TIP's time after the reentry (or, without one, the last prediction), with
+     GCAT's own uncertain mark. GCAT often takes its time from that same TIP message, so a match is not an
+     independent check; differences of a day or more are named on the card, each source as given, without saying
+     which is right.
+   Checked on the 17 Nov TIP fixture against GCAT's copy of 18 Nov 01:44 GMT: 20 objects with TIP's time after the
+   reentry; 17 came down inside the last prediction's window (outside: 45223 +79 min against +-60, 61642 -131 min
+   against +-60, 58706 2.3 days early against +-15 h, its last prediction issued 12 h before); GCAT gives the same
+   minute for 18 of the 19 it has dated. **Starlink 30221 (57418):** TIP's time after the reentry is 10 Nov 2026
+   17:37 UTC, GCAT's 17 Nov 2026 17:37 UTC, exactly 7 days apart. Shown as each gives it. Observations of the two
+   records, not a rating of either.
+
+## Daily lead (`orbit-2.18`, 18 Nov 2026)
+Tom, 18 Nov 2026 about 10:30 AM CST: "capture all of those ideas and the plan, then begin with the daily lead
+first"; readers are "mostly people with some amount of elevated knowledge but there will be people new to this topic
+as well". Plan: `[local path]`. Built by `orbit/lead.py` from the
+snapshot and the daily archive, no request, at the end of each run (`_archive_run`, after the TIP check).
+1. **Lines, in this order, each only when it has something:** objects TIP predicts to reenter in the next 24 hours
+   (USSPACECOM's high-interest flags first); objects TIP's messages after the reentry, issued in the last 24 hours,
+   put down, with the offset from the last prediction (item 7 of "Predicted reentries"); orbit changes first listed
+   in the last 24 hours (first day in the archive's `maneuver.listed`; without an archive, every listed change is
+   new); GCAT breakups dated in the last 7 days (GCAT dates them late, so the line says 7 days); GCAT's new copy when
+   its satcat stamp is under 24 hours old (new entries, late ones, changed, owner changes, the largest late group);
+   orbital launches of the last 24 hours (until launches move to Launch); and the last 30 days against the two
+   years before, only where a count falls outside every earlier 30-day window (`gcat._position`'s above or below).
+   Names: at most 3 per line, then "and N more".
+2. **No silence read as news:** GCAT's satcat stamp over 36 hours old gets its own line naming the copy's time and
+   age; a TIP, orbit-change or GCAT lane not read on the run (failed or carried) is named in a last line. When no
+   line but those has anything, the page says "Nothing new in the last 24 hours from the sources read on this run".
+3. **Form:** each line is text with times, dates and country codes kept apart (`parts`), so the page writes times in
+   the viewer's zone and countries by name; a link to its card; and its source. Observations only, in the words the
+   cards use. The page puts a "New to this?" list of the terms the lines use (TIP, window, GCAT, orbit change, LEO and
+   GEO, breakup, debris and rocket stage) under the lead.
+4. **Kept:** snapshot block `lead`; the day's last lead in the daily archive (`days.<date>.lead`,
+   `archive.keep_lead`), published with it at `/data/archive.json`, so each day's lead can be cited.
+5. Checked on the live snapshot and archive of 18 Nov 2026 16:17 UTC: one object due in the next 24 hours (Starlink
+   4334), two down by TIP's messages after the reentry (Starlink 4405, 21 min earlier than predicted; Starlink 1423,
+   54 min earlier, both inside the window), GCAT's copy of 01:44 UTC (10 new entries, all late; 40 changed; 9 owner
+   changes; largest group 5 pieces of debris from 2026-051), and 87 reentries in 30 days, fewer than in any 30-day
+   stretch of the two years before (103-272). The two listed orbit changes, first listed 16 Nov, are not new.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
