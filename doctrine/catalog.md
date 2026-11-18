@@ -131,3 +131,6 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
     page's 2 MB line, so one file); rules note 8 KB. Counts unchanged (2,686 with disagreements, 109 name swaps).
   - Tests `tests/test_catshards.py` (16, on the step 4 fixtures plus GCAT's auxcat and tmpcat rows and the real
     alias file); 300 tests pass, check PASS. `catalog.yml`'s test step runs them (Tom's yes, 18 Nov 2026).
+- **OSCAR links reviewed (18 Nov 2026; branch `feat/catalog-oscar-review`):** all 285 drafted entries accepted by a
+  TIC analyst, none withdrawn; each has `reviewed_by: "tic-analyst"` and `reviewed`. The review record is kept
+  privately. Nothing joins yet: the join code and OSCAR's weekly read in `catalog.yml` are not built.

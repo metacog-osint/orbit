@@ -156,10 +156,12 @@ class Links(unittest.TestCase):
     def load(self, text):
         return oscarlinks.validate(aliases.parse(text))
 
-    def test_real_file_reads_and_nothing_is_reviewed_yet(self):
+    def test_real_file_reads_and_the_first_review_is_in(self):
+        # Reviewed 18 Nov 2026: all 285 accepted, none withdrawn. The public file names a role, not a person.
         live = oscarlinks.load()
-        self.assertGreater(len(live), 200)
-        self.assertEqual(oscarlinks.reviewed(live), [])  # 18 Nov 2026: every entry waits for a person
+        self.assertEqual(len(live), 285)
+        self.assertEqual(len(oscarlinks.reviewed(live)), 285)
+        self.assertTrue(all(e["reviewed_by"] == "tic-analyst" and e["reviewed"] == "2026-11-18" for e in live))
         self.assertTrue(all(e["proposed_by"] == "oscar-propose" for e in live))
 
     def test_only_reviewed_entries_join(self):
