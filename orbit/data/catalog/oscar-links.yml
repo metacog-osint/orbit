@@ -1,0 +1,4288 @@
+# TIC satellite catalog: WMO OSCAR/Space slug-to-NORAD links (Tom, 17 Nov 2026; design note
+# D:/Projects/_ideas/sat-catalog-design-2026-11.md, section 9 answer 8). Read by orbit/oscarlinks.py.
+#
+# OSCAR gives no NORAD number and no COSPAR ID. Each entry links one OSCAR satellite (its slug) to the object it is
+# (`norad`), the objects it stands for (`members`), or the object that carries it (`relation: hosted`), with the
+# evidence. `tools/orbit.py oscar-propose --draft` proposes entries from launch date and orbit only; the names in the
+# evidence are for the reviewer. ONLY ENTRIES WITH `reviewed_by` AND `reviewed` JOIN THE CATALOG: a person adds both
+# after checking the entry by diff. Never edit an entry to change its number: add `withdrawn: <date>` and `reason`,
+# and add a new entry.
+#
+# OSCAR read 18 Nov 2026 (space.oscar.wmo.int/api/v1/satellites, 36 pages, 1,062 satellites, 414 operational);
+# candidates from CelesTrak's SATCAT file of 16 Nov 2026 20:34 UTC; names beside them from the TIC name index of
+# 18 Nov 2026 (release `catalog`). Credit: WMO OSCAR/Space, courtesy of the World Meteorological Organization.
+
+- slug: ace
+  norad: 24912
+  relation: same
+  proposal: single-fit
+  oscar_id: 454
+  acronym: "ACE"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Aug 1997; CelesTrak launches 1997-045A on 1997-08-25, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre EL1 (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'ACE' (Advanced Composition Explorer); catalog 'ACE', 'Advanced Composition Expl.', 'Advanced Composition Explorer', 'Explorer 71'; equal after normalising: 'ACE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: alos_2
+  norad: 39766
+  relation: same
+  proposal: one-of-n
+  oscar_id: 6
+  acronym: "ALOS-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 May 2014; CelesTrak launches 2014-029A on 2014-05-24, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 630 x 632 km, 97.92 deg"
+    - "Payloads launched in the date window: 9; ruled out by orbit: 4; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'ALOS-2' (Advanced Land Observing Satellite  - 2); catalog 'ALOS-2', 'ALOS 2', 'Daichi-2', 'Advanced Land Observing Satellite-2'; equal after normalising: 'ALOS-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: alos_4_daichi_4
+  norad: 60182
+  relation: same
+  proposal: single-fit
+  oscar_id: 751
+  acronym: "ALOS-4 (DAICHI-4)"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Jul 2024; CelesTrak launches 2024-123A on 2024-07-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 628 km; CelesTrak 630 x 632 km, 97.92 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'ALOS-4 (DAICHI-4)' (Advanced Land Observing Satellite  - 4); catalog 'ALOS-4 (DAICHI-4)', 'ALOS-4', 'Daichi-4', 'Advanced Land Observing Satellite 4'; equal after normalising: 'ALOS-4 (DAICHI-4)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: alsat_1b
+  norad: 41785
+  relation: same
+  proposal: one-of-n
+  oscar_id: 708
+  acronym: "AlSat-1B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Sep 2016; CelesTrak launches 2016-059C on 2016-09-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 690 km; CelesTrak 646 x 661 km, 97.78 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 1; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'AlSat-1B' (Algeria Satellite - 1B); catalog 'ALSAT-1B', 'ALSAT 1B', 'DMC Alsat-1B', 'AlSat-1B'; equal after normalising: 'ALSAT-1B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: alsat_2b
+  norad: 41786
+  relation: same
+  proposal: one-of-n
+  oscar_id: 10
+  acronym: "AlSat-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Sep 2016; CelesTrak launches 2016-059D on 2016-09-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 680 km; CelesTrak 656 x 659 km, 97.97 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 1; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'AlSat-2B' (Algeria Satellite - 2B); catalog 'ALSAT-2B', 'ALSAT 2B', 'AlSat-2B'; equal after normalising: 'ALSAT-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: amazonia_1
+  norad: 47699
+  relation: same
+  proposal: single-fit
+  oscar_id: 11
+  acronym: "Amazônia-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Feb 2021; CelesTrak launches 2021-015A on 2021-02-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 752 km; CelesTrak 753 x 759 km, 98.44 deg"
+    - "Payloads launched in the date window: 21; ruled out by orbit: 20; left: 1"
+    - "Names: OSCAR 'Amazônia-1' (Amazônia-1); catalog 'AMAZONIA 1', 'Amazonia-1', 'Amazônia 1', 'Amazonia 1'; equal after normalising: 'Amazônia 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: aqua
+  norad: 27424
+  relation: same
+  proposal: one-of-n
+  oscar_id: 79
+  acronym: "Aqua"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 May 2002; CelesTrak launches 2002-022A on 2002-05-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 685 x 687 km, 98.45 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Aqua' (Earth Observation System - Aqua); catalog 'AQUA', 'Aqua', 'EOS PM-1', 'NAIF154'; equal after normalising: 'AQUA'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: arase_erg
+  norad: 41896
+  relation: same
+  proposal: one-of-n
+  oscar_id: 715
+  acronym: "Arase (ERG)"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Dec 2016; CelesTrak launches 2016-080A on 2016-12-20, the same day"
+    - "OSCAR orbit Cross-magnetosphere orbit, 3000 km; CelesTrak 393 x 31783 km, 31.92 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 4; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Arase (ERG)' (Exploration of energization and Radiation in Geospace); catalog 'ARASE (ERG)', 'Arase', 'ERG', 'SPRINT-B'; equal after normalising: 'ARASE (ERG)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: arctica_m_n1
+  norad: 47719
+  relation: same
+  proposal: single-fit
+  oscar_id: 465
+  acronym: "Arctica-M N1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Feb 2021; CelesTrak launches 2021-016A on 2021-02-28, the same day"
+    - "OSCAR orbit Molniya orbit; CelesTrak 688 x 39665 km, 63.30 deg"
+    - "Payloads launched in the date window: 21; ruled out by orbit: 20; left: 1"
+    - "Names: OSCAR 'Arctica-M N1' (Arctica-M N1); catalog 'ARKTIKA-M 1', 'Arktika-M No. 1', 'Arktika-M 1', 'Arktika-M1'; equal after normalising: 'ARKTIKA-M 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: arctica_m_n2
+  norad: 58584
+  relation: same
+  proposal: single-fit
+  oscar_id: 466
+  acronym: "Arctica-M N2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Dec 2023; CelesTrak launches 2023-198A on 2023-12-16, the same day"
+    - "OSCAR orbit Molniya orbit; CelesTrak 1850 x 38509 km, 63.21 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'Arctica-M N2' (Arctica-M N2); catalog 'ARKTIKA-M 2', 'Arktika-M No. 2'; equal after normalising: 'ARKTIKA-M 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: asnaro_1
+  norad: 40298
+  relation: same
+  proposal: single-fit
+  oscar_id: 467
+  acronym: "ASNARO-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Nov 2014; CelesTrak launches 2014-070A on 2014-11-06, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 504 km; CelesTrak 504 x 509 km, 97.33 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 4; left: 1"
+    - "Names: OSCAR 'ASNARO-1' (Advanced Satellite with new system ARchitecure for Observation - 1); catalog 'ASNARO', 'ASNARO-1', 'ASNARO 1'; equal after normalising: 'ASNARO-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: asnaro_2
+  norad: 43152
+  relation: same
+  proposal: single-fit
+  oscar_id: 468
+  acronym: "ASNARO-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Jan 2018; CelesTrak launches 2018-007A on 2018-01-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 497 x 500 km, 97.40 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'ASNARO-2' (Advanced Satellite with new system ARchitecure for Observation - 2); catalog 'ASNARO-2', 'ASNARO 2'; equal after normalising: 'ASNARO-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: aso_s_kuafu_1
+  norad: 54029
+  relation: same
+  proposal: one-of-n
+  oscar_id: 972
+  acronym: "ASO-S (Kuafu-1)"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Oct 2022; CelesTrak launches 2022-129A on 2022-10-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 744 km; CelesTrak 709 x 729 km, 98.28 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 4; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'ASO-S (Kuafu-1)' (Advanced Space-based Solar Observatory); catalog 'ASO-S', 'Kuafu-1', 'Advanced Space-based Solar Observatory'; equal after normalising: 'Advanced Space-based Solar Observatory'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: aura
+  norad: 28376
+  relation: same
+  proposal: single-fit
+  oscar_id: 80
+  acronym: "Aura"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Jul 2004; CelesTrak launches 2004-026A on 2004-07-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 687 x 689 km, 98.36 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Aura' (Earth Observation System - Aura); catalog 'AURA', 'Aura', 'EOS Chem-1', 'Aura satellite'; equal after normalising: 'AURA'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: biomass
+  norad: 63772
+  relation: same
+  proposal: single-fit
+  oscar_id: 508
+  acronym: "BIOMASS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Apr 2025; CelesTrak launches 2025-090A on 2025-04-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 660 km; CelesTrak 668 x 670 km, 98.07 deg"
+    - "Payloads launched in the date window: 111; ruled out by orbit: 110; left: 1"
+    - "Names: OSCAR 'BIOMASS' (BIOMASS); catalog 'BIOMASS', 'Biomass', 'Earth Explorer 7'; equal after normalising: 'BIOMASS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: carruthers
+  norad: 65727
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1144
+  acronym: "Carruthers"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Sep 2025; CelesTrak launches 2025-215C on 2025-09-24, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre SU (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 70; ruled out by orbit: 67; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Carruthers' (Carruthers Geocorona Observatory); catalog 'CARRUTHERS', 'Carruthers Geocorona Obs.', 'Carruthers', 'Carruthers Geocorona Observatory'; equal after normalising: 'CARRUTHERS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2a
+  norad: 32783
+  relation: same
+  proposal: one-of-n
+  oscar_id: 22
+  acronym: "CartoSat-2A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Apr 2008; CelesTrak launches 2008-021A on 2008-04-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 623 x 639 km, 97.74 deg"
+    - "Payloads launched in the date window: 11; ruled out by orbit: 4; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2A' (CartoSat-2A); catalog 'CARTOSAT-2A', 'CARTOSAT 2A', 'Cartosat 2A', 'Cartosat-2A'; equal after normalising: 'CARTOSAT-2A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2b
+  norad: 36795
+  relation: same
+  proposal: one-of-n
+  oscar_id: 23
+  acronym: "CartoSat-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Jul 2010; CelesTrak launches 2010-035A on 2010-07-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 625 x 642 km, 97.98 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 0; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2B' (CartoSat-2B); catalog 'CARTOSAT-2B', 'CARTOSAT 2B', 'Cartosat 2B', 'Cartosat-2B'; equal after normalising: 'CARTOSAT-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2c
+  norad: 41599
+  relation: same
+  proposal: one-of-n
+  oscar_id: 593
+  acronym: "CartoSat-2C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Jun 2016; CelesTrak launches 2016-040A on 2016-06-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 505 km; CelesTrak 502 x 514 km, 97.43 deg"
+    - "Payloads launched in the date window: 21; ruled out by orbit: 15; left: 6; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2C' (CartoSat-2C); catalog 'CARTOSAT-2C', 'CARTOSAT 2C', 'Cartosat-2 Series Satellite', 'Cartosat-2C'; equal after normalising: 'CARTOSAT-2C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2d
+  norad: 41948
+  relation: same
+  proposal: one-of-n
+  oscar_id: 594
+  acronym: "CartoSat-2D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Feb 2017; CelesTrak launches 2017-008A on 2017-02-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 515 km; CelesTrak 504 x 512 km, 97.49 deg"
+    - "Payloads launched in the date window: 106; ruled out by orbit: 95; left: 11; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2D' (CartoSat-2D); catalog 'CARTOSAT-2D', 'CARTOSAT 2D', 'Cartosat-2 Series Satellite', 'Cartosat-2D'; equal after normalising: 'CARTOSAT-2D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2e
+  norad: 42767
+  relation: same
+  proposal: one-of-n
+  oscar_id: 660
+  acronym: "CartoSat-2E"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 23 Jun 2017; CelesTrak launches 2017-036C on 2017-06-23, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 505 km; CelesTrak 505 x 511 km, 97.47 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 31; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2E' (CartoSat-2E); catalog 'CARTOSAT-2E', 'CARTOSAT 2E', 'Cartosat-2 Series Satellite', 'Cartosat-2E'; equal after normalising: 'CARTOSAT-2E'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_2f
+  norad: 43111
+  relation: same
+  proposal: one-of-n
+  oscar_id: 738
+  acronym: "CartoSat-2F"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Jan 2018; CelesTrak launches 2018-004A on 2018-01-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 505 km; CelesTrak 506 x 510 km, 97.46 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 31; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-2F' (CartoSat-2F); catalog 'CARTOSAT-2F', 'CARTOSAT 2F', 'Cartosat-2 Series Satellite', 'Cartosat-2ER'; equal after normalising: 'CARTOSAT-2F'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cartosat_3
+  norad: 44804
+  relation: same
+  proposal: one-of-n
+  oscar_id: 24
+  acronym: "CartoSat-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Nov 2019; CelesTrak launches 2019-081A on 2019-11-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 450 km; CelesTrak 500 x 516 km, 97.41 deg"
+    - "Payloads launched in the date window: 17; ruled out by orbit: 3; left: 14; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CartoSat-3' (CartoSat-3); catalog 'CARTOSAT-3', 'CARTOSAT 3', 'Cartosat-3'; equal after normalising: 'CARTOSAT-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cas_500_1
+  norad: 47932
+  relation: same
+  proposal: one-of-n
+  oscar_id: 812
+  acronym: "CAS 500-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Mar 2021; CelesTrak launches 2021-022A on 2021-03-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 528 km; CelesTrak 501 x 510 km, 97.37 deg"
+    - "Payloads launched in the date window: 42; ruled out by orbit: 32; left: 10; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CAS 500-1' (Compact Advanced Satellite 500-1); catalog 'CAS500-1', 'CAS500 1'; equal after normalising: 'CAS500-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cbers_4
+  norad: 40336
+  relation: same
+  proposal: single-fit
+  oscar_id: 29
+  acronym: "CBERS-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Dec 2014; CelesTrak launches 2014-079A on 2014-12-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 778 km; CelesTrak 773 x 774 km, 98.33 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'CBERS-4' (China-Brazil Earth Resources Satellite - 4 (ZY-1 FM4) ); catalog 'CBERS 4', 'CBERS-4', 'Zi Yuan 1-04', 'ZY-1 04'; equal after normalising: 'CBERS 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cfosat
+  norad: 43662
+  relation: same
+  proposal: one-of-n
+  oscar_id: 545
+  acronym: "CFOSAT"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Oct 2018; CelesTrak launches 2018-083A on 2018-10-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 516 x 518 km, 97.37 deg"
+    - "Payloads launched in the date window: 10; ruled out by orbit: 2; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CFOSAT' (Chinese-French Oceanography Satellite); catalog 'CFOSAT', 'Zhongfa Haiyang Weixing', 'CFOSat', 'China France Oceanography Satellite'; equal after normalising: 'CFOSAT'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: cryosat_2
+  norad: 36508
+  relation: same
+  proposal: single-fit
+  oscar_id: 39
+  acronym: "CryoSat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Apr 2010; CelesTrak launches 2010-013A on 2010-04-08, the same day"
+    - "OSCAR orbit Drifting orbit, 717 km; CelesTrak 718 x 721 km, 92.02 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'CryoSat-2' (CryoSat-2); catalog 'CRYOSAT 2', 'CryoSat-2'; equal after normalising: 'CRYOSAT 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csg_1
+  norad: 44873
+  relation: same
+  proposal: one-of-n
+  oscar_id: 40
+  acronym: "CSG-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Dec 2019; CelesTrak launches 2019-092A on 2019-12-18, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 619 km; CelesTrak 622 x 624 km, 97.89 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 5; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CSG-1' (COSMO-SkyMed Second Generation - 1); catalog 'CSG-1', 'CSG 1', 'COSMO-Skymed Second Gen 1', 'COSMO-SkyMed 2nd Gen 1'; equal after normalising: 'CSG-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csg_2
+  norad: 51444
+  relation: same
+  proposal: single-fit
+  oscar_id: 41
+  acronym: "CSG-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Jan 2022; CelesTrak launches 2022-008A on 2022-01-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 619 km; CelesTrak 622 x 623 km, 97.89 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'CSG-2' (COSMO-SkyMed Second Generation - 2); catalog 'CSG-2', 'CSG FM2', 'COSMO-Skymed Second Gen FM2', 'CSG 2'; equal after normalising: 'CSG-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csg_3
+  norad: 67304
+  relation: same
+  proposal: single-fit
+  oscar_id: 940
+  acronym: "CSG-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 03 Jan 2026; CelesTrak launches 2026-001A on 2026-01-03, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 619 km; CelesTrak 621 x 624 km, 97.89 deg"
+    - "Payloads launched in the date window: 30; ruled out by orbit: 29; left: 1"
+    - "Names: OSCAR 'CSG-3' (COSMO-SkyMed Second Generation - 3); catalog 'CSG-3', 'COSMO-SKYMED-FM3', 'CSG FM3', 'COSMO-Skymed Second Gen FM3'; equal after normalising: 'CSG-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csk_1
+  norad: 31598
+  relation: same
+  proposal: single-fit
+  oscar_id: 42
+  acronym: "CSK-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Jun 2007; CelesTrak launches 2007-023A on 2007-06-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 573 x 575 km, 97.88 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'CSK-1' (COSMO-SkyMed - 1); catalog 'COSMO-SKYMED 1', 'SKYMED 1', 'COSMO 1', 'COSMO-Skymed'; equal after normalising: 'COSMO-SKYMED 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csk_2
+  norad: 32376
+  relation: same
+  proposal: single-fit
+  oscar_id: 43
+  acronym: "CSK-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Dec 2007; CelesTrak launches 2007-059A on 2007-12-09, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 622 x 624 km, 97.89 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'CSK-2' (COSMO-SkyMed - 2); catalog 'COSMO-SKYMED 2', 'SKYMED 2', 'COSMO 2', 'COSMO-Skymed 2'; equal after normalising: 'COSMO-SKYMED 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csk_3
+  norad: 33412
+  relation: same
+  proposal: one-of-n
+  oscar_id: 44
+  acronym: "CSK-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Oct 2008; CelesTrak launches 2008-054A on 2008-10-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 531 x 555 km, 97.80 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'CSK-3' (COSMO-SkyMed - 3); catalog 'COSMO-SKYMED 3', 'SKYMED 3', 'COSMO 3', 'COSMO-Skymed 3'; equal after normalising: 'COSMO-SKYMED 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: csk_4
+  norad: 37216
+  relation: same
+  proposal: single-fit
+  oscar_id: 45
+  acronym: "CSK-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Nov 2010; CelesTrak launches 2010-060A on 2010-11-06, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 622 x 623 km, 97.89 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'CSK-4' (COSMO-SkyMed - 4); catalog 'COSMO-SKYMED 4', 'SKYMED 4', 'COSMO 4', 'COSMO-Skymed 4'; equal after normalising: 'COSMO-SKYMED 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: deimos_2
+  norad: 40013
+  relation: same
+  proposal: one-of-n
+  oscar_id: 629
+  acronym: "Deimos-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 19 Jun 2014; CelesTrak launches 2014-033D on 2014-06-19, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 620 km; CelesTrak 584 x 586 km, 97.56 deg"
+    - "Payloads launched in the date window: 37; ruled out by orbit: 12; left: 25; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Deimos-2' (Deimos-2); catalog 'DEIMOS-2', 'DEIMOS 2', 'Deimos-2', 'GEOSAT-2'; equal after normalising: 'DEIMOS-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: dmsp_f17
+  norad: 29522
+  relation: same
+  proposal: single-fit
+  oscar_id: 64
+  acronym: "DMSP-F17"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Nov 2006; CelesTrak launches 2006-050A on 2006-11-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 848 km; CelesTrak 835 x 849 km, 98.74 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'DMSP-F17' (Defense Meteorological Satellite Program - F17); catalog 'DMSP 5D-3 F17 (USA 191)', 'DMSP F-17', 'DMSP Block 5D-3 S-17', 'USA 191'; equal after normalising: 'DMSP F-17'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: dmsp_f18
+  norad: 35951
+  relation: same
+  proposal: single-fit
+  oscar_id: 65
+  acronym: "DMSP-F18"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Oct 2009; CelesTrak launches 2009-057A on 2009-10-18, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 850 km; CelesTrak 835 x 850 km, 98.92 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'DMSP-F18' (Defense Meteorological Satellite Program - F18); catalog 'DMSP 5D-3 F18 (USA 210)', 'DMSP F-18', 'DMSP Block 5D-3 S-18', 'USA 210'; equal after normalising: 'DMSP F-18'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: dq_1
+  norad: 52257
+  relation: same
+  proposal: single-fit
+  oscar_id: 937
+  acronym: "DQ-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Apr 2022; CelesTrak launches 2022-039A on 2022-04-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 697 x 704 km, 98.16 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'DQ-1' (DQ-1 also AEMS (Atmospheric Environment Monitoring Satellite) or Daqi-1); catalog 'DAQI-1', 'DAQI 1', 'Daqi Huanjing Jiance Weixing', 'DQ-1'; equal after normalising: 'DQ-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: dscovr
+  norad: 40390
+  relation: same
+  proposal: single-fit
+  oscar_id: 525
+  acronym: "DSCOVR"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Feb 2015; CelesTrak launches 2015-007A on 2015-02-11, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre EL1 (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'DSCOVR' (Deep Space Climate Observatory); catalog 'DSCOVR', 'Deep Space Climate Obsy.', 'Deep Space Climate Observatory', 'Triana'; equal after normalising: 'DSCOVR'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: earthcare
+  norad: 59908
+  relation: same
+  proposal: single-fit
+  oscar_id: 71
+  acronym: "EarthCARE"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 May 2024; CelesTrak launches 2024-101A on 2024-05-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 394 km; CelesTrak 394 x 398 km, 97.01 deg"
+    - "Payloads launched in the date window: 28; ruled out by orbit: 27; left: 1"
+    - "Names: OSCAR 'EarthCARE' (Earth Clouds, Aerosol and Radiation Explorer); catalog 'EARTHCARE', 'EarthCARE', 'Earth Clouds, Aerosols and Radiation Explorer', 'Earth Explorer 6'; equal after normalising: 'EARTHCARE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: edrs_c
+  norad: 44475
+  relation: same
+  proposal: one-of-n
+  oscar_id: 931
+  acronym: "EDRS-C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Aug 2019; CelesTrak launches 2019-049A on 2019-08-06, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 142.5 deg E; CelesTrak 35782 x 35792 km, 0.06 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 0; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'EDRS-C' (European Data Relay Satellite - C); catalog 'EDRS-C', 'EDRS C', 'HYLAS 3'; equal after normalising: 'EDRS-C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: egyptsat_a
+  norad: 44047
+  relation: same
+  proposal: single-fit
+  oscar_id: 768
+  acronym: "EgyptSat-A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Feb 2019; CelesTrak launches 2019-008A on 2019-02-21, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 668 km; CelesTrak 652 x 655 km, 98.01 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'EgyptSat-A' (EgyptSat-A); catalog 'EGYPTSAT-A (MISRSAT-A)', 'EGYPTSAT A', 'MisrSat A', 'Egyptsat A No. 2'; equal after normalising: 'EGYPTSAT-A (MISRSAT-A)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: electro_l_n2
+  norad: 41105
+  relation: same
+  proposal: single-fit
+  oscar_id: 74
+  acronym: "Electro-L N2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Dec 2015; CelesTrak launches 2015-074A on 2015-12-11, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, -14.5 deg E; CelesTrak 35774 x 35798 km, 7.07 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Electro-L N2' (Electro-L Number 2); catalog 'ELEKTRO-L 2', 'Elektro-L No. 2', 'Elektro-L No. 1521', 'Elektro-L No.2'; equal after normalising: 'ELEKTRO-L 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: electro_l_n3
+  norad: 44903
+  relation: same
+  proposal: single-fit
+  oscar_id: 474
+  acronym: "Electro-L N3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Dec 2019; CelesTrak launches 2019-095A on 2019-12-24, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 76 deg E; CelesTrak 35776 x 35797 km, 0.06 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Electro-L N3' (Electro-L Number 3); catalog 'ELEKTRO-L 3', 'Elektro-L No. 3', 'Elektro-L No. 1522'; equal after normalising: 'ELEKTRO-L 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: electro_l_n4
+  norad: 55506
+  relation: same
+  proposal: single-fit
+  oscar_id: 613
+  acronym: "Electro-L N4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Feb 2023; CelesTrak launches 2023-016A on 2023-02-05, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 165.8 deg E; CelesTrak 35779 x 35794 km, 0.01 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Electro-L N4' (Electro-L Number 4); catalog 'ELEKTRO-L 4', 'Elektro-L No. 4', 'Elektro-L No. 4L'; equal after normalising: 'ELEKTRO-L 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: enmap
+  norad: 52159
+  relation: same
+  proposal: one-of-n
+  oscar_id: 77
+  acronym: "EnMAP"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Apr 2022; CelesTrak launches 2022-033C on 2022-04-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 653 km; CelesTrak 644 x 646 km, 97.98 deg"
+    - "Payloads launched in the date window: 40; ruled out by orbit: 35; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'EnMAP' (Environmental Mapping and Analysis Programme); catalog 'ENMAP', 'EnMAP'; equal after normalising: 'ENMAP'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: eos_01
+  norad: 46905
+  relation: same
+  proposal: one-of-n
+  oscar_id: 805
+  acronym: "EOS-01"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Nov 2020; CelesTrak launches 2020-081A on 2020-11-07, the same day"
+    - "OSCAR orbit Drifting orbit, 555 km; CelesTrak 552 x 574 km, 36.90 deg"
+    - "Payloads launched in the date window: 24; ruled out by orbit: 16; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'EOS-01' (Earth Observation Satellite - 01); catalog 'RISAT-2BR2', 'EOS-01', 'Earth Observation Satellite-01'; equal after normalising: 'EOS-01'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: eos_04
+  norad: 51656
+  relation: same
+  proposal: single-fit
+  oscar_id: 604
+  acronym: "EOS-04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 14 Feb 2022; CelesTrak launches 2022-013A on 2022-02-14, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 529 km; CelesTrak 527 x 529 km, 97.51 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'EOS-04' (Earth Observation Satellite - 04 (also known as RISAT-1A)); catalog 'EOS-4', 'EOS-04', 'RISAT-1A', 'Earth Observation Satellite-04'; equal after normalising: 'EOS-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: eos_07
+  norad: 55562
+  relation: same
+  proposal: one-of-n
+  oscar_id: 996
+  acronym: "EOS-07"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Feb 2023; CelesTrak launches 2023-019A on 2023-02-10, the same day"
+    - "OSCAR orbit Drifting orbit, 450 km; CelesTrak 186 x 189 km, 37.17 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 0; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'EOS-07' (EOS-07 also known as Microsat-2B); catalog 'EOS-7', 'EOS-07', 'Microsat-2B?', 'Earth Observation Satellite-07'; equal after normalising: 'EOS-7'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: eos_08
+  norad: 60454
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1070
+  acronym: "EOS-08"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-147A on 2024-08-16, the same day"
+    - "OSCAR orbit Drifting orbit, 475 km; CelesTrak 383 x 387 km, 37.38 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 8; left: 119; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'EOS-08' (EOS-08  (also Microsat-2C)); catalog 'EOS-08', 'EOS-8', 'Microsat-2C', 'Earth Observation Satellite-08'; equal after normalising: 'EOS-08'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: falcon_eye_2
+  norad: 47226
+  relation: same
+  proposal: single-fit
+  oscar_id: 781
+  acronym: "Falcon-Eye 2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Dec 2020; CelesTrak launches 2020-090A on 2020-12-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 610 km; CelesTrak 613 x 615 km, 97.84 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 5; left: 1"
+    - "Names: OSCAR 'Falcon-Eye 2' (Falcon-Eye 2); catalog 'FALCON EYE 2', 'FalconEye 2', 'Falcon Eye 2', 'FalconEye2'; equal after normalising: 'FALCON EYE 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: formosat_5
+  norad: 42920
+  relation: same
+  proposal: single-fit
+  oscar_id: 734
+  acronym: "FORMOSAT-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Aug 2017; CelesTrak launches 2017-049A on 2017-08-24, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 720 km; CelesTrak 715 x 730 km, 98.21 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'FORMOSAT-5' (FORMOSAT-5); catalog 'FORMOSAT-5', 'FORMOSAT 5'; equal after normalising: 'FORMOSAT-5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_2g
+  norad: 40367
+  relation: same
+  proposal: single-fit
+  oscar_id: 111
+  acronym: "FY-2G"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Dec 2014; CelesTrak launches 2014-090A on 2014-12-31, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 99.2 deg E; CelesTrak 35774 x 35801 km, 6.02 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'FY-2G' (Feng-Yun - 2G); catalog 'FENGYUN 2G', 'Feng Yun 2G', 'FY-2 08 xing'; equal after normalising: 'FENGYUN 2G'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_2h
+  norad: 43491
+  relation: same
+  proposal: one-of-n
+  oscar_id: 112
+  acronym: "FY-2H"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Jun 2018; CelesTrak launches 2018-050A on 2018-06-05, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 79 deg E; CelesTrak 35775 x 35795 km, 3.42 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 1; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'FY-2H' (Feng-Yun - 2H); catalog 'FENGYUN 2H', 'Feng Yun 2H', 'FY-2 09 xing', 'Fengyun 2H'; equal after normalising: 'FENGYUN 2H'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_3d
+  norad: 43010
+  relation: same
+  proposal: one-of-n
+  oscar_id: 116
+  acronym: "FY-3D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 14 Nov 2017; CelesTrak launches 2017-072A on 2017-11-14, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 836 km; CelesTrak 825 x 827 km, 99.03 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'FY-3D' (Feng-Yun 3D); catalog 'FENGYUN 3D', 'Feng Yun 3D', 'FY-3 04 xing', 'Fengyun 3D'; equal after normalising: 'FENGYUN 3D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_3e
+  norad: 49008
+  relation: same
+  proposal: one-of-n
+  oscar_id: 117
+  acronym: "FY-3E"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Jul 2021; CelesTrak launches 2021-062A on 2021-07-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 836 km; CelesTrak 824 x 827 km, 98.76 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 4; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'FY-3E' (Feng-Yun 3E); catalog 'FENGYUN 3E', 'Feng Yun 3E', 'FY-3 05 xing', 'Fengyun 3E'; equal after normalising: 'FENGYUN 3E'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_3f
+  norad: 57490
+  relation: same
+  proposal: single-fit
+  oscar_id: 119
+  acronym: "FY-3F"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 03 Aug 2023; CelesTrak launches 2023-111A on 2023-08-03, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 836 km; CelesTrak 825 x 826 km, 98.67 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'FY-3F' (Feng-Yun 3F); catalog 'FENGYUN 3F', 'Feng Yun 3F', 'FY-3 06 xing', 'Fengyun-3F'; equal after normalising: 'FENGYUN 3F'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_3g
+  norad: 56232
+  relation: same
+  proposal: one-of-n
+  oscar_id: 520
+  acronym: "FY-3G"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Apr 2023; CelesTrak launches 2023-055A on 2023-04-16, the same day"
+    - "OSCAR orbit Drifting orbit, 407 km; CelesTrak 399 x 411 km, 49.99 deg"
+    - "Payloads launched in the date window: 49; ruled out by orbit: 1; left: 48; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'FY-3G' (Feng Yun 3G); catalog 'FENGYUN 3G', 'Feng Yun 3G', 'FY-3 07 xing', 'Fengyun-3G'; equal after normalising: 'FENGYUN 3G'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_3h
+  norad: 65815
+  relation: same
+  proposal: single-fit
+  oscar_id: 118
+  acronym: "FY-3H"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Sep 2025; CelesTrak launches 2025-219A on 2025-09-26, a day earlier"
+    - "OSCAR orbit Sunsynchronous orbit, 836 km; CelesTrak 825 x 826 km, 98.69 deg"
+    - "Payloads launched in the date window: 30; ruled out by orbit: 29; left: 1"
+    - "Names: OSCAR 'FY-3H' (Feng-Yun 3H); catalog 'FENGYUN 3H', 'OBJECT A', 'Feng Yun 3H', 'FY-3 08 xing'; equal after normalising: 'FENGYUN 3H'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_4a
+  norad: 41882
+  relation: same
+  proposal: single-fit
+  oscar_id: 120
+  acronym: "FY-4A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Dec 2016; CelesTrak launches 2016-077A on 2016-12-10, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 123.5 deg E; CelesTrak 35748 x 35820 km, 2.70 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'FY-4A' (Feng-Yun - 4A); catalog 'FENGYUN 4A', 'Feng Yun 4A', 'FY-4 01 xing', 'Fengyun 4A'; equal after normalising: 'FENGYUN 4A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: fy_4b
+  norad: 48808
+  relation: same
+  proposal: single-fit
+  oscar_id: 121
+  acronym: "FY-4B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Jun 2021; CelesTrak launches 2021-047A on 2021-06-02, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 105 deg E; CelesTrak 35745 x 35827 km, 0.53 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'FY-4B' (Feng-Yun - 4B); catalog 'FENGYUN 4B', 'Feng Yun 4B', 'FY-4 02 xing', 'Fengyun 4B'; equal after normalising: 'FENGYUN 4B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gcom_c
+  norad: 43065
+  relation: same
+  proposal: single-fit
+  oscar_id: 127
+  acronym: "GCOM-C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 23 Dec 2017; CelesTrak launches 2017-082A on 2017-12-23, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 798 km; CelesTrak 800 x 802 km, 98.61 deg"
+    - "Payloads launched in the date window: 13; ruled out by orbit: 12; left: 1"
+    - "Names: OSCAR 'GCOM-C' (Global Change Observation Mission for Climate); catalog 'GCOM-C (SHIKISAI)', 'GCOM-C', 'Shikisai', 'GCOM-C1'; equal after normalising: 'GCOM-C (SHIKISAI)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: geo_kompsat_2a
+  norad: 43823
+  relation: same
+  proposal: one-of-n
+  oscar_id: 34
+  acronym: "GEO-KOMPSAT-2A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Dec 2018; CelesTrak launches 2018-100A on 2018-12-04, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 128.2 deg E; CelesTrak 35783 x 35790 km, 0.05 deg"
+    - "Payloads launched in the date window: 68; ruled out by orbit: 66; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GEO-KOMPSAT-2A' (Geostationary Korea Multi-Purpose Satellite - 2A); catalog 'GEO-KOMPSAT-2A', 'Cheollian 2A', 'Geo-Kompsat-2A', 'Chollian-2A'; equal after normalising: 'GEO-KOMPSAT-2A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: geo_kompsat_2b
+  norad: 45246
+  relation: same
+  proposal: one-of-n
+  oscar_id: 35
+  acronym: "GEO-KOMPSAT-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Feb 2020; CelesTrak launches 2020-013B on 2020-02-18, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 128.2 deg E; CelesTrak 35778 x 35796 km, 0.01 deg"
+    - "Payloads launched in the date window: 66; ruled out by orbit: 64; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GEO-KOMPSAT-2B' (Geostationary Korea Multi-Purpose Satellite - 2B); catalog 'GEO-KOMPSAT-2B', 'Cheollian 2B', 'GEO-Kompsat 2B', 'Chollian-2B'; equal after normalising: 'GEO-KOMPSAT-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_1_02
+  norad: 43259
+  relation: same
+  proposal: one-of-n
+  oscar_id: 741
+  acronym: "GF-1-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Mar 2018; CelesTrak launches 2018-031A on 2018-03-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 639 x 642 km, 98.03 deg"
+    - "Payloads launched in the date window: 13; ruled out by orbit: 10; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-1-02' (Gao Fen - 1 - 02); catalog 'GAOFEN-1 02', 'GAOFEN 1-02', 'Gao Fen 1-02', 'Gaofen 1 02 xing'; equal after normalising: 'GAOFEN-1 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_1_03
+  norad: 43260
+  relation: same
+  proposal: one-of-n
+  oscar_id: 742
+  acronym: "GF-1-03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Mar 2018; CelesTrak launches 2018-031B on 2018-03-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 639 x 642 km, 98.03 deg"
+    - "Payloads launched in the date window: 13; ruled out by orbit: 10; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-1-03' (Gao Fen - 1 - 03); catalog 'GAOFEN-1 03', 'GAOFEN 1-03', 'Gao Fen 1-03', 'Gaofen 1 03 xing'; equal after normalising: 'GAOFEN-1 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_1_04
+  norad: 43262
+  relation: same
+  proposal: one-of-n
+  oscar_id: 743
+  acronym: "GF-1-04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Mar 2018; CelesTrak launches 2018-031D on 2018-03-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 640 x 641 km, 98.03 deg"
+    - "Payloads launched in the date window: 13; ruled out by orbit: 10; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-1-04' (Gao Fen - 1 - 04); catalog 'GAOFEN-1 04', 'GAOFEN 1-04', 'Gao Fen 1-04', 'Gaofen 1 04 xing'; equal after normalising: 'GAOFEN-1 04'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_11
+  norad: 43585
+  relation: same
+  proposal: single-fit
+  oscar_id: 765
+  acronym: "GF-11"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Jul 2018; CelesTrak launches 2018-063A on 2018-07-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 412 km; CelesTrak 385 x 392 km, 97.11 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-11' (Gao Fen - 9); catalog 'GAOFEN-11 01', 'GAOFEN 11', 'Gao Fen 11-01', 'Jianbing-16 01 xing'; equal after normalising: 'GAOFEN 11'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_11_02
+  norad: 46396
+  relation: same
+  proposal: single-fit
+  oscar_id: 879
+  acronym: "GF-11-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Sep 2020; CelesTrak launches 2020-064A on 2020-09-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 415 km; CelesTrak 480 x 510 km, 97.53 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-11-02' (Gao Fen - 11-02); catalog 'GAOFEN-11 02', 'GAOFEN 11 2', 'Gao Fen 11-02', 'Jianbing-16 02 xing'; equal after normalising: 'GAOFEN-11 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_11_03
+  norad: 49492
+  relation: same
+  proposal: single-fit
+  oscar_id: 902
+  acronym: "GF-11-03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Nov 2021; CelesTrak launches 2021-107A on 2021-11-20, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 450 km; CelesTrak 492 x 497 km, 97.19 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GF-11-03' (Gao Fen - 11-03); catalog 'GAOFEN-11 03', 'GAOFEN 11 3', 'Gao Fen 11-03', 'Jianbing-16 03 xing'; equal after normalising: 'GAOFEN-11 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_11_04
+  norad: 54818
+  relation: same
+  proposal: single-fit
+  oscar_id: 981
+  acronym: "GF-11-04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Dec 2022; CelesTrak launches 2022-176A on 2022-12-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 450 km; CelesTrak 491 x 501 km, 97.44 deg"
+    - "Payloads launched in the date window: 55; ruled out by orbit: 54; left: 1"
+    - "Names: OSCAR 'GF-11-04' (Gao Fen - 11-04); catalog 'GAOFEN-11 04', 'GAOFEN 11 04', 'Gao Fen 11-04', 'Jianbing-16 04 xing'; equal after normalising: 'GAOFEN-11 04'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_11_05
+  norad: 60249
+  relation: same
+  proposal: single-fit
+  oscar_id: 1068
+  acronym: "GF-11-05"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 19 Jul 2024; CelesTrak launches 2024-130A on 2024-07-19, the same day"
+    - "OSCAR orbit Sunsynchronous orbit; CelesTrak 492 x 497 km, 97.39 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-11-05' (Gao Fen - 11-05); catalog 'GAOFEN-11 05', 'GAOFEN 11-05', 'Gao Fen 11-05', 'Jianbing-16 05 xing'; equal after normalising: 'GAOFEN-11 05'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_12
+  norad: 44819
+  relation: same
+  proposal: one-of-n
+  oscar_id: 808
+  acronym: "GF-12"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Nov 2019; CelesTrak launches 2019-082A on 2019-11-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 627 x 628 km, 97.81 deg"
+    - "Payloads launched in the date window: 17; ruled out by orbit: 15; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-12' (Gao Fen - 12); catalog 'GAOFEN-12 01', 'GAOFEN 12', 'Gao Fen 12', 'Gaofen 12 01 xing'; equal after normalising: 'GAOFEN 12'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_12_02
+  norad: 48079
+  relation: same
+  proposal: single-fit
+  oscar_id: 892
+  acronym: "GF-12-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Mar 2021; CelesTrak launches 2021-026A on 2021-03-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 624 x 632 km, 98.00 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-12-02' (Gao Fen - 12-02); catalog 'GAOFEN-12 02', 'GAOFEN 12 (02)', 'Gao Fen 12-02', 'Gaofen 12 02 xing'; equal after normalising: 'GAOFEN-12 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_12_03
+  norad: 52912
+  relation: same
+  proposal: single-fit
+  oscar_id: 956
+  acronym: "GF-12-03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Jun 2022; CelesTrak launches 2022-069A on 2022-06-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 627 x 632 km, 97.80 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GF-12-03' (Gao Fen - 12-03); catalog 'GAOFEN-12 03', 'GAOFEN 12 (03)', 'Gao Fen 12-03', 'Gaofen 12 03 xing'; equal after normalising: 'GAOFEN-12 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_12_04
+  norad: 57654
+  relation: same
+  proposal: single-fit
+  oscar_id: 1017
+  acronym: "GF-12-04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Aug 2023; CelesTrak launches 2023-123A on 2023-08-20, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 628 x 631 km, 97.91 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-12-04' (Gao Fen - 12-04); catalog 'GAOFEN-12 04', 'GAOFEN 12 04', 'Gao Fen 12-04', 'Gaofen 12 04 xing'; equal after normalising: 'GAOFEN-12 04'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_12_05
+  norad: 61571
+  relation: same
+  proposal: single-fit
+  oscar_id: 1087
+  acronym: "GF-12-05"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Oct 2024; CelesTrak launches 2024-186A on 2024-10-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 635 km; CelesTrak 625 x 627 km, 97.91 deg"
+    - "Payloads launched in the date window: 63; ruled out by orbit: 62; left: 1"
+    - "Names: OSCAR 'GF-12-05' (Gao Fen - 12-05); catalog 'GAOFEN-12 05', 'GAOFEN 12-05', 'Gao Fen 12-05', 'Gaofen 12 05 xing'; equal after normalising: 'GAOFEN-12 05'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_13
+  norad: 46610
+  relation: same
+  proposal: single-fit
+  oscar_id: 884
+  acronym: "GF-13"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Oct 2020; CelesTrak launches 2020-071A on 2020-10-11, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 118 deg E; CelesTrak 35570 x 36003 km, 0.29 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-13' (Gao Fen - 13); catalog 'GAOFEN-13 01', 'GAOFEN 13', 'Gao Fen 13', 'Gaofen 13'; equal after normalising: 'GAOFEN 13'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_13_02
+  norad: 55912
+  relation: same
+  proposal: one-of-n
+  oscar_id: 986
+  acronym: "GF-13-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Mar 2023; CelesTrak launches 2023-036A on 2023-03-17, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 117.9 deg E; CelesTrak 35768 x 35806 km, 1.06 deg"
+    - "Payloads launched in the date window: 57; ruled out by orbit: 54; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-13-02' (Gao Fen - 13); catalog 'GAOFEN-13 02', 'GAOFEN 13 02', 'Gao Fen 13-02', 'Gaofen 13-02'; equal after normalising: 'GAOFEN-13 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_14
+  norad: 47231
+  relation: same
+  proposal: single-fit
+  oscar_id: 885
+  acronym: "GF-14"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Dec 2020; CelesTrak launches 2020-092A on 2020-12-06, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 488 km; CelesTrak 485 x 493 km, 97.46 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GF-14' (Gao Fen - 14); catalog 'GAOFEN-14 01', 'GAOFEN 14', 'Gao Fen 14', 'Gaofen 14'; equal after normalising: 'GAOFEN 14'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_14_02
+  norad: 66175
+  relation: same
+  proposal: single-fit
+  oscar_id: 1150
+  acronym: "GF-14-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Oct 2025; CelesTrak launches 2025-242A on 2025-10-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 488 km; CelesTrak 483 x 493 km, 97.40 deg"
+    - "Payloads launched in the date window: 59; ruled out by orbit: 58; left: 1"
+    - "Names: OSCAR 'GF-14-02' (Gao Fen - 14-02); catalog 'GAOFEN-14 02', 'OBJECT A', 'Gao Fen 14-02', 'Gaofen 14-02'; equal after normalising: 'GAOFEN-14 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_2
+  norad: 40118
+  relation: same
+  proposal: one-of-n
+  oscar_id: 589
+  acronym: "GF-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 19 Aug 2014; CelesTrak launches 2014-049A on 2014-08-19, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 631 km; CelesTrak 620 x 632 km, 97.99 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-2' (Gao Fen - 2); catalog 'GAOFEN-2', 'GAOFEN 2', 'Gao Fen 2', 'Gaofen 2'; equal after normalising: 'GAOFEN-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_3
+  norad: 41727
+  relation: same
+  proposal: single-fit
+  oscar_id: 607
+  acronym: "GF-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Aug 2016; CelesTrak launches 2016-049A on 2016-08-09, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 758 km; CelesTrak 750 x 752 km, 98.40 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-3' (Gao Fen - 3); catalog 'GAOFEN-3', 'GAOFEN 3', 'Gao Fen 3', 'Gaofen 3'; equal after normalising: 'GAOFEN-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_3_02_or_csar_01
+  norad: 49495
+  relation: same
+  proposal: single-fit
+  oscar_id: 920
+  acronym: "GF-3(02) or CSAR-01"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Nov 2021; CelesTrak launches 2021-109A on 2021-11-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 740 km; CelesTrak 750 x 752 km, 98.41 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-3(02) or CSAR-01' (GF-3(02)); catalog 'GAOFEN-3 02', 'GAOFEN 3 02', 'Gao Fen 3-02', 'Gaofen 3-02'; equal after normalising: 'GAOFEN-3 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_3_03_or_csar_02
+  norad: 52200
+  relation: same
+  proposal: single-fit
+  oscar_id: 936
+  acronym: "GF-3(03) or CSAR-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Apr 2022; CelesTrak launches 2022-035A on 2022-04-06, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 740 km; CelesTrak 750 x 752 km, 98.41 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GF-3(03) or CSAR-02' (GF-3(03)); catalog 'GAOFEN-3 03', 'GAOFEN 3 03', 'Gao Fen 3-03', 'Gaofen 3-03'; equal after normalising: 'GAOFEN-3 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_4
+  norad: 41194
+  relation: same
+  proposal: single-fit
+  oscar_id: 608
+  acronym: "GF-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Dec 2015; CelesTrak launches 2015-083A on 2015-12-28, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 106 deg E; CelesTrak 35777 x 35798 km, 0.74 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-4' (Gao Fen - 4); catalog 'GAOFEN-4', 'GAOFEN 4', 'Gao Fen 4', 'Gaofen 4'; equal after normalising: 'GAOFEN-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_5_01a
+  norad: 54640
+  relation: same
+  proposal: one-of-n
+  oscar_id: 980
+  acronym: "GF-5-01A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Dec 2022; CelesTrak launches 2022-165A on 2022-12-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 700 x 701 km, 98.25 deg"
+    - "Payloads launched in the date window: 57; ruled out by orbit: 48; left: 9; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-5-01A' (Gao Fen - 5-01A); catalog 'GAOFEN-5 01A', 'GAOFEN 5 01A', 'Gao Fen 5-01A', 'Gaofen 5 01A xing'; equal after normalising: 'GAOFEN-5 01A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_5_02
+  norad: 49122
+  relation: same
+  proposal: single-fit
+  oscar_id: 910
+  acronym: "GF-5-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Sep 2021; CelesTrak launches 2021-079A on 2021-09-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 700 x 701 km, 98.25 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-5-02' (Gao Fen - 5-02); catalog 'GAOFEN-5 02', 'Gao Fen 5-02', 'Gaofen 5 02 xing'; equal after normalising: 'GAOFEN-5 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_6
+  norad: 43484
+  relation: same
+  proposal: one-of-n
+  oscar_id: 746
+  acronym: "GF-6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Jun 2018; CelesTrak launches 2018-048A on 2018-06-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 632 x 649 km, 98.08 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GF-6' (Gao Fen - 6); catalog 'GAOFEN-6', 'GAOFEN 6', 'Gao Fen 6', 'Gaofen 6'; equal after normalising: 'GAOFEN-6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_7
+  norad: 44703
+  relation: same
+  proposal: single-fit
+  oscar_id: 775
+  acronym: "GF-7"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 03 Nov 2019; CelesTrak launches 2019-072A on 2019-11-03, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 492 x 513 km, 97.55 deg"
+    - "Payloads launched in the date window: 20; ruled out by orbit: 19; left: 1"
+    - "Names: OSCAR 'GF-7' (Gao Fen - 7); catalog 'GAOFEN-7', 'GAOFEN 7', 'Gao Fen 7', 'Gaofen 7'; equal after normalising: 'GAOFEN-7'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_8
+  norad: 40701
+  relation: same
+  proposal: single-fit
+  oscar_id: 667
+  acronym: "GF-8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Jun 2015; CelesTrak launches 2015-030A on 2015-06-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 475 km; CelesTrak 407 x 417 km, 97.68 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'GF-8' (Gao Fen - 8); catalog 'GAOFEN-8', 'GAOFEN 8', 'Gao Fen 8', 'Jianbing-13 02 xing?'; equal after normalising: 'GAOFEN-8'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_9
+  norad: 40894
+  relation: same
+  proposal: single-fit
+  oscar_id: 696
+  acronym: "GF-9"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 14 Sep 2015; CelesTrak launches 2015-047A on 2015-09-14, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 600 x 639 km, 97.61 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GF-9' (Gao Fen - 9); catalog 'GAOFEN-9 01', 'GAOFEN 9', 'Gao Fen 9', 'Jianbing-15 02 xing'; equal after normalising: 'GAOFEN 9'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_9_02
+  norad: 45625
+  relation: same
+  proposal: single-fit
+  oscar_id: 833
+  acronym: "GF-9-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 May 2020; CelesTrak launches 2020-034B on 2020-05-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 476 x 491 km, 97.59 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'GF-9-02' (Gao Fen - 9-02); catalog 'GAOFEN-9 02', 'GAOFEN 9 02', 'Gao Fen 9-02', 'Gaofen 9 02 xing'; equal after normalising: 'GAOFEN-9 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_9_03
+  norad: 45794
+  relation: same
+  proposal: single-fit
+  oscar_id: 834
+  acronym: "GF-9-03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Jun 2020; CelesTrak launches 2020-039A on 2020-06-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 455 x 468 km, 97.56 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'GF-9-03' (Gao Fen - 9-03); catalog 'GAOFEN-9 03', 'GAOFEN 9 03', 'Gao Fen 9-03', 'Gaofen 9 03 xing'; equal after normalising: 'GAOFEN-9 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_9_04
+  norad: 46025
+  relation: same
+  proposal: single-fit
+  oscar_id: 869
+  acronym: "GF-9-04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Aug 2020; CelesTrak launches 2020-054A on 2020-08-06, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 439 x 450 km, 97.23 deg"
+    - "Payloads launched in the date window: 61; ruled out by orbit: 60; left: 1"
+    - "Names: OSCAR 'GF-9-04' (Gao Fen - 9-04); catalog 'GAOFEN-9 04', 'GAOFEN 9 04', 'Gao Fen 9-04', 'Gaofen 9 04 xing'; equal after normalising: 'GAOFEN-9 04'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gf_9_05
+  norad: 46232
+  relation: same
+  proposal: single-fit
+  oscar_id: 877
+  acronym: "GF-9-05"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 23 Aug 2020; CelesTrak launches 2020-058A on 2020-08-23, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 640 km; CelesTrak 459 x 467 km, 97.19 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'GF-9-05' (Gao Fen - 9-05); catalog 'GAOFEN-9 05', 'GAOFEN 9 05', 'Gao Fen 9-05', 'Gaofen 9 05 xing'; equal after normalising: 'GAOFEN-9 05'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ghost_3
+  norad: 56958
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1004
+  acronym: "GHOSt-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Jun 2023; CelesTrak launches 2023-084AC on 2023-06-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 525 km; CelesTrak 402 x 412 km, 97.64 deg"
+    - "Payloads launched in the date window: 121; ruled out by orbit: 101; left: 20; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GHOSt-3' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-3'; equal after normalising: 'GHOST-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ghost_4
+  norad: 59133
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1052
+  acronym: "GHOSt-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Mar 2024; CelesTrak launches 2024-043AM on 2024-03-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 525 km; CelesTrak 419 x 430 km, 97.58 deg"
+    - "Payloads launched in the date window: 75; ruled out by orbit: 39; left: 36; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GHOSt-4' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-4'; equal after normalising: 'GHOST-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ghost_5
+  norad: 59130
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1054
+  acronym: "GHOSt-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Mar 2024; CelesTrak launches 2024-043AJ on 2024-03-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 525 km; CelesTrak 421 x 431 km, 97.58 deg"
+    - "Payloads launched in the date window: 75; ruled out by orbit: 39; left: 36; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GHOSt-5' (Global Hyperspectral Observation Satellite 3); catalog 'GHOST-5'; equal after normalising: 'GHOST-5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gnomes_4
+  norad: 58462
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1042
+  acronym: "GNOMES-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Dec 2023; CelesTrak launches 2023-185A on 2023-12-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 645 km; CelesTrak 570 x 585 km, 97.46 deg"
+    - "Payloads launched in the date window: 19; ruled out by orbit: 10; left: 9; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GNOMES-4' (GNSS Navigation and Occultation Measurement Satellites); catalog 'GNOMES-4'; equal after normalising: 'GNOMES-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gnomes_5
+  norad: 60574
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1073
+  acronym: "GNOMES-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-149DL on 2024-08-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 645 km; CelesTrak 555 x 566 km, 97.70 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 40; left: 87; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GNOMES-5' (GNSS Navigation and Occultation Measurement Satellites); catalog 'GNOMES-5'; equal after normalising: 'GNOMES-5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: goes_18
+  norad: 51850
+  relation: same
+  proposal: single-fit
+  oscar_id: 665
+  acronym: "GOES-18"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Mar 2022; CelesTrak launches 2022-021A on 2022-03-01, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, -137 deg E; CelesTrak 35786 x 35788 km, 0.01 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'GOES-18' (Geostationary Operational Environmental Satellite - 18); catalog 'GOES 18', 'GOES T', 'GOES-18', 'GOES-T'; equal after normalising: 'GOES 18'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: goes_19
+  norad: 60133
+  relation: same
+  proposal: single-fit
+  oscar_id: 666
+  acronym: "GOES-19"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Jun 2024; CelesTrak launches 2024-119A on 2024-06-25, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, -75.2 deg E; CelesTrak 35783 x 35789 km, 0.02 deg"
+    - "Payloads launched in the date window: 21; ruled out by orbit: 20; left: 1"
+    - "Names: OSCAR 'GOES-19' (Geostationary Operational Environmental Satellite - 19); catalog 'GOES 19', 'GOES U', 'GOES-19', 'GOES-U'; equal after normalising: 'GOES 19'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gokturk_1a
+  norad: 41875
+  relation: same
+  proposal: single-fit
+  oscar_id: 714
+  acronym: "Göktürk-1A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Dec 2016; CelesTrak launches 2016-073A on 2016-12-05, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 700 km; CelesTrak 683 x 685 km, 98.15 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Göktürk-1A' (Göktürk-1A); catalog 'GOKTURK 1A', 'GOKTURK-1A', 'Gokturk-1', 'Göktürk-1A'; equal after normalising: 'Göktürk-1A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gosat
+  norad: 33492
+  relation: same
+  proposal: one-of-n
+  oscar_id: 154
+  acronym: "GOSAT"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 23 Jan 2009; CelesTrak launches 2009-002A on 2009-01-23, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 666 km; CelesTrak 668 x 670 km, 98.10 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 1; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GOSAT' (Green-house gas Observing Satellite); catalog 'GOSAT (IBUKI)', 'Ibuki', 'GOSAT', 'Greenhouse Gases Observing Satellite'; equal after normalising: 'GOSAT (IBUKI)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gosat_2
+  norad: 43672
+  relation: same
+  proposal: one-of-n
+  oscar_id: 606
+  acronym: "GOSAT-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Oct 2018; CelesTrak launches 2018-084B on 2018-10-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 613 km; CelesTrak 615 x 617 km, 97.89 deg"
+    - "Payloads launched in the date window: 10; ruled out by orbit: 2; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GOSAT-2' (Green-house gas Observing Satellite - 2); catalog 'GOSAT 2 (IBUKI 1)', 'GOSAT 2', 'Ibuki 2'; equal after normalising: 'GOSAT 2 (IBUKI 1)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gosat_gw
+  norad: 64694
+  relation: same
+  proposal: one-of-n
+  oscar_id: 752
+  acronym: "GOSAT-GW"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Jun 2025; CelesTrak launches 2025-141A on 2025-06-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 666 km; CelesTrak 668 x 670 km, 98.07 deg"
+    - "Payloads launched in the date window: 55; ruled out by orbit: 53; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GOSAT-GW' (Global Observation SATellite for Greenhouse gases and Water cycle); catalog 'GOSAT-GW (IBUKI GW)', 'GOSAT-GW', 'Ibuki-GW'; equal after normalising: 'GOSAT-GW (IBUKI GW)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: gpm_core_observatory
+  norad: 39574
+  relation: same
+  proposal: one-of-n
+  oscar_id: 156
+  acronym: "GPM Core Observatory"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Feb 2014; CelesTrak launches 2014-009C on 2014-02-27, the same day"
+    - "OSCAR orbit Drifting orbit, 433 km; CelesTrak 424 x 440 km, 64.97 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 0; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'GPM Core Observatory' (Global Precipitation Measurement - Core Observatory); catalog 'GPM-CORE', 'GPM', 'GPM Core', 'Global Precipitation Measurement'; equal after normalising: 'Global Precipitation Measurement Core Observatory'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: himawari_9
+  norad: 41836
+  relation: same
+  proposal: one-of-n
+  oscar_id: 671
+  acronym: "Himawari-9"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Nov 2016; CelesTrak launches 2016-064A on 2016-11-02, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 140.7 deg E; CelesTrak 35783 x 35790 km, 0.02 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Himawari-9' (Himawari-9); catalog 'HIMAWARI-9', 'HIMAWARI 9', 'Himawari-9', 'Himawari 9'; equal after normalising: 'HIMAWARI-9'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hj_2a
+  norad: 46478
+  relation: same
+  proposal: one-of-n
+  oscar_id: 880
+  acronym: "HJ-2A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Sep 2020; CelesTrak launches 2020-067A on 2020-09-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 637 x 643 km, 97.87 deg"
+    - "Payloads launched in the date window: 24; ruled out by orbit: 13; left: 11; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'HJ-2A' (Huan Jing 2A); catalog 'HJ-2A', 'Huanjing Jianzai 02-01', 'HJ er hao A xing'; equal after normalising: 'HJ-2A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hj_2b
+  norad: 46479
+  relation: same
+  proposal: one-of-n
+  oscar_id: 882
+  acronym: "HJ-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Sep 2020; CelesTrak launches 2020-067B on 2020-09-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 639 x 641 km, 97.88 deg"
+    - "Payloads launched in the date window: 24; ruled out by orbit: 13; left: 11; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'HJ-2B' (Huan Jing 2B); catalog 'HJ-2B', 'Huanjing Jianzai 02-02', 'HJ er hao B xing'; equal after normalising: 'HJ-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hj_2e
+  norad: 54035
+  relation: same
+  proposal: single-fit
+  oscar_id: 973
+  acronym: "HJ-2E"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Oct 2022; CelesTrak launches 2022-132A on 2022-10-12, a day earlier"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 500 x 507 km, 97.38 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 4; left: 1"
+    - "Names: OSCAR 'HJ-2E' (Huan Jing 2E (also known as S-SAR01)); catalog 'HJ-2E', 'Huanjing Jianzai 02-05', '5m S-SAR 01'; equal after normalising: 'HJ-2E'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hj_2f
+  norad: 57519
+  relation: same
+  proposal: single-fit
+  oscar_id: 974
+  acronym: "HJ-2F"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Aug 2023; CelesTrak launches 2023-116A on 2023-08-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 506 km; CelesTrak 498 x 509 km, 97.39 deg"
+    - "Payloads launched in the date window: 39; ruled out by orbit: 38; left: 1"
+    - "Names: OSCAR 'HJ-2F' (Huan Jing 2F (also known as S-SAR02)); catalog 'HJ-2F', 'Huanjing Jianzai 02-06', '5m S-SAR 02'; equal after normalising: 'HJ-2F'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hotbird_13f
+  norad: 54048
+  relation: same
+  proposal: single-fit
+  oscar_id: 1098
+  acronym: "HOTBIRD 13F"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Oct 2022; CelesTrak launches 2022-134A on 2022-10-15, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 13 deg E; CelesTrak 35778 x 35795 km, 0.06 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 4; left: 1"
+    - "Names: OSCAR 'HOTBIRD 13F' (HOTBIRD 13F); catalog 'EUTELSAT HOTBIRD 13F', 'HOTBIRD 13F', 'EUTELSAT HOT BIRD 13F', 'HotBird 13F'; equal after normalising: 'HOTBIRD 13F'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hotbird_13g
+  norad: 54225
+  relation: same
+  proposal: single-fit
+  oscar_id: 1099
+  acronym: "HOTBIRD 13G"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 03 Nov 2022; CelesTrak launches 2022-146A on 2022-11-03, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 13 deg E; CelesTrak 35778 x 35795 km, 0.05 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'HOTBIRD 13G' (HOTBIRD 13G); catalog 'EUTELSAT HOTBIRD 13G', 'HOTBIRD 13G', 'EUTELSAT HOT BIRD 13G', 'HotBird 13G'; equal after normalising: 'HOTBIRD 13G'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hotsat_2
+  norad: 68465
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1175
+  acronym: "HOTSAT-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Mar 2026; CelesTrak launches 2026-067BB on 2026-03-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 512 km; CelesTrak 510 x 512 km, 97.48 deg"
+    - "Payloads launched in the date window: 129; ruled out by orbit: 32; left: 97; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'HOTSAT-2' (HOTSAT-2); catalog 'HOTSAT-2', 'Hotsat-2'; equal after normalising: 'HOTSAT-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hy_1c
+  norad: 43609
+  relation: same
+  proposal: single-fit
+  oscar_id: 174
+  acronym: "HY-1C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Sep 2018; CelesTrak launches 2018-068A on 2018-09-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 785 km; CelesTrak 770 x 786 km, 98.50 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'HY-1C' (Hai Yang 1C); catalog 'HAIYANG-1C', 'HAIYANG 1C', 'Hai Yang 1-03', 'Hai Yang 01 hao C xing'; equal after normalising: 'HAIYANG-1C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hy_1d
+  norad: 45721
+  relation: same
+  proposal: single-fit
+  oscar_id: 175
+  acronym: "HY-1D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Jun 2020; CelesTrak launches 2020-036A on 2020-06-10, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 798 km; CelesTrak 775 x 781 km, 98.47 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'HY-1D' (Hai Yang 1D); catalog 'HAIYANG-1D', 'HAIYANG 1D', 'Hai Yang 1-04', 'Hai Yang 01 hao D xing'; equal after normalising: 'HAIYANG-1D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hy_2b
+  norad: 43655
+  relation: same
+  proposal: single-fit
+  oscar_id: 555
+  acronym: "HY-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Oct 2018; CelesTrak launches 2018-081A on 2018-10-24, a day earlier"
+    - "OSCAR orbit Sunsynchronous orbit, 973 km; CelesTrak 966 x 967 km, 99.33 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'HY-2B' (Hai Yang 2B); catalog 'HAIYANG-2B', 'HAIYANG 2B', 'Hai Yang 2-02', 'Hai Yang 2 hao 02 xing'; equal after normalising: 'HAIYANG-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hy_2d
+  norad: 48621
+  relation: same
+  proposal: single-fit
+  oscar_id: 557
+  acronym: "HY-2D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 19 May 2021; CelesTrak launches 2021-043A on 2021-05-19, the same day"
+    - "OSCAR orbit Drifting orbit, 973 km; CelesTrak 945 x 959 km, 66.00 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'HY-2D' (Hai Yang 2D); catalog 'HAIYANG-2D', 'HAIYANG 2D', 'Hai Yang 2-04', 'Hai Yang 2 hao 04 xing'; equal after normalising: 'HAIYANG-2D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hydrognss_1
+  norad: 66762
+  relation: same
+  proposal: one-of-n
+  oscar_id: 999
+  acronym: "HydroGNSS-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Nov 2025; CelesTrak launches 2025-276DA on 2025-11-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 550 km; CelesTrak 523 x 536 km, 97.40 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 1; left: 126; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'HydroGNSS-1' (Hydro Global Navigation Satellite System-1); catalog 'HYDROGNSS-1', 'HydroGNSS-1'; equal after normalising: 'HYDROGNSS-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hydrognss_2
+  norad: 66763
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1000
+  acronym: "HydroGNSS-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Nov 2025; CelesTrak launches 2025-276DB on 2025-11-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 550 km; CelesTrak 522 x 537 km, 97.40 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 1; left: 126; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'HydroGNSS-2' (Hydro Global Navigation Satellite System-2); catalog 'HYDROGNSS-2', 'HydroGNSS-2'; equal after normalising: 'HYDROGNSS-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: hysis
+  norad: 43719
+  relation: same
+  proposal: single-fit
+  oscar_id: 769
+  acronym: "HySIS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Nov 2018; CelesTrak launches 2018-096A on 2018-11-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 633 x 635 km, 97.97 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 34; left: 1"
+    - "Names: OSCAR 'HySIS' (Hyper Spectral Imaging Spectrometer); catalog 'HYSIS', 'HySIS', 'HysIS'; equal after normalising: 'HYSIS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: icesat_2
+  norad: 43613
+  relation: same
+  proposal: one-of-n
+  oscar_id: 178
+  acronym: "ICESat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Sep 2018; CelesTrak launches 2018-070A on 2018-09-15, the same day"
+    - "OSCAR orbit Drifting orbit, 475 km; CelesTrak 480 x 482 km, 91.99 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 3; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'ICESat-2' (Ice, Cloud and land Elevation Satellite); catalog 'ICESAT-2', 'ICESAT 2', 'ICESat-2', 'Ice, Cloud, and Land Elevation Satellite-2'; equal after normalising: 'ICESAT-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: insat_3dr
+  norad: 41752
+  relation: same
+  proposal: single-fit
+  oscar_id: 194
+  acronym: "INSAT-3DR"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Sep 2016; CelesTrak launches 2016-054A on 2016-09-08, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 74 deg E; CelesTrak 35731 x 35842 km, 0.10 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'INSAT-3DR' (Indian National Satellite - 3D repeat); catalog 'INSAT-3DR', 'INSAT 3DR', 'Insat 3DR'; equal after normalising: 'INSAT-3DR'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: insat_3ds
+  norad: 58990
+  relation: same
+  proposal: single-fit
+  oscar_id: 603
+  acronym: "INSAT-3DS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Feb 2024; CelesTrak launches 2024-033A on 2024-02-17, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 82 deg E; CelesTrak 35782 x 35791 km, 0.06 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 4; left: 1"
+    - "Names: OSCAR 'INSAT-3DS' (Indian National Satellite - 3D second repeat); catalog 'INSAT-3DS', 'INSAT 3DS', 'Insat 3DS'; equal after normalising: 'INSAT-3DS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: iris
+  norad: 39197
+  relation: same
+  proposal: single-fit
+  oscar_id: 572
+  acronym: "IRIS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 28 Jun 2013; CelesTrak launches 2013-033A on 2013-06-28, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 649 km; CelesTrak 593 x 627 km, 97.92 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'IRIS' (Interface Region Imaging Spectrograph); catalog 'IRIS', 'Interface Region Imaging Spectrograph', 'Explorer 94', 'Small Explorer 12'; equal after normalising: 'IRIS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: jason_3
+  norad: 41240
+  relation: same
+  proposal: single-fit
+  oscar_id: 206
+  acronym: "JASON-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Jan 2016; CelesTrak launches 2016-002A on 2016-01-17, the same day"
+    - "OSCAR orbit Drifting orbit, 1336 km; CelesTrak 1305 x 1317 km, 66.04 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'JASON-3' (Joint Altimetry Satellite Oceanography Network - 3); catalog 'JASON-3', 'JASON 3', 'Jason-3', 'JASON3'; equal after normalising: 'JASON-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kanopus_v3
+  norad: 43180
+  relation: same
+  proposal: one-of-n
+  oscar_id: 730
+  acronym: "KANOPUS-V3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Feb 2018; CelesTrak launches 2018-014A on 2018-02-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 497 x 499 km, 97.35 deg"
+    - "Payloads launched in the date window: 18; ruled out by orbit: 8; left: 10; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KANOPUS-V3' (KANOPUS-V3); catalog 'KANOPUS-V 3', 'Kanopus-V No. 3', 'Kanopus-V', 'Kanopus-V 3'; equal after normalising: 'KANOPUS-V 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kanopus_v4
+  norad: 43181
+  relation: same
+  proposal: one-of-n
+  oscar_id: 732
+  acronym: "KANOPUS-V4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Feb 2018; CelesTrak launches 2018-014B on 2018-02-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 497 x 499 km, 97.35 deg"
+    - "Payloads launched in the date window: 18; ruled out by orbit: 8; left: 10; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KANOPUS-V4' (KANOPUS-V4); catalog 'KANOPUS-V 4', 'Kanopus-V No. 4', 'Kanopus-V', 'Kanopus-V 4'; equal after normalising: 'KANOPUS-V 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kanopus_v5
+  norad: 43876
+  relation: same
+  proposal: one-of-n
+  oscar_id: 770
+  acronym: "KANOPUS-V5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Dec 2018; CelesTrak launches 2018-111A on 2018-12-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 497 x 499 km, 97.35 deg"
+    - "Payloads launched in the date window: 29; ruled out by orbit: 22; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KANOPUS-V5' (KANOPUS-V5); catalog 'KANOPUS-V 5', 'Kanopus-V No. 5', 'Kanopus-V', 'Kanopus-V 5'; equal after normalising: 'KANOPUS-V 5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kanopus_v6
+  norad: 43877
+  relation: same
+  proposal: one-of-n
+  oscar_id: 771
+  acronym: "KANOPUS-V6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Dec 2018; CelesTrak launches 2018-111B on 2018-12-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 454 x 456 km, 97.37 deg"
+    - "Payloads launched in the date window: 29; ruled out by orbit: 22; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KANOPUS-V6' (KANOPUS-V6); catalog 'KANOPUS-V 6', 'Kanopus-V No. 6', 'Kanopus-V', 'Kanopus-V 6'; equal after normalising: 'KANOPUS-V 6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kompsat_3
+  norad: 38338
+  relation: same
+  proposal: one-of-n
+  oscar_id: 215
+  acronym: "KOMPSAT-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 May 2012; CelesTrak launches 2012-025B on 2012-05-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 675 km; CelesTrak 682 x 690 km, 98.14 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 2; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KOMPSAT-3' (Korea Multi-Purpose Satellite - 3); catalog 'ARIRANG-3 (KOMPSAT-3)', 'KOMPSAT 3', 'Arirang-3', 'KOMPSAT-3'; equal after normalising: 'ARIRANG-3 (KOMPSAT-3)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kompsat_3a
+  norad: 40536
+  relation: same
+  proposal: one-of-n
+  oscar_id: 481
+  acronym: "KOMPSAT-3A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Mar 2015; CelesTrak launches 2015-014A on 2015-03-25, a day earlier"
+    - "OSCAR orbit Sunsynchronous orbit, 528 km; CelesTrak 352 x 412 km, 97.69 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 4; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'KOMPSAT-3A' (Korea Multi-Purpose Satellite - 3A); catalog 'KOMPSAT-3A', 'KOMPSAT 3A', 'Arirang-3A', 'Arirang IIIA'; equal after normalising: 'KOMPSAT-3A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kompsat_5
+  norad: 39227
+  relation: same
+  proposal: single-fit
+  oscar_id: 216
+  acronym: "KOMPSAT-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Aug 2013; CelesTrak launches 2013-042A on 2013-08-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 550 km; CelesTrak 551 x 555 km, 97.62 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'KOMPSAT-5' (Korea Multi-Purpose Satellite - 5); catalog 'ARIRANG-5 (KOMPSAT-5)', 'KOMPSAT 5', 'Arirang-5', 'KOMPSAT-5'; equal after normalising: 'ARIRANG-5 (KOMPSAT-5)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kondor_fka_1
+  norad: 56756
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1006
+  acronym: "Kondor-FKA 1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 May 2023; CelesTrak launches 2023-074A on 2023-05-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 505 x 508 km, 97.44 deg"
+    - "Payloads launched in the date window: 11; ruled out by orbit: 4; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Kondor-FKA 1' (Kondor-Experimental SAR Spacecraft FKA 1); catalog 'KONDOR-FKA NO. 1', 'KONDOR FKA 1', 'Kondor-FKA No. 1'; equal after normalising: 'KONDOR-FKA NO. 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: kondor_fka_2
+  norad: 62138
+  relation: same
+  proposal: single-fit
+  oscar_id: 1007
+  acronym: "Kondor-FKA 2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Nov 2024; CelesTrak launches 2024-223A on 2024-11-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 505 x 508 km, 97.43 deg"
+    - "Payloads launched in the date window: 49; ruled out by orbit: 48; left: 1"
+    - "Names: OSCAR 'Kondor-FKA 2' (Kondor-Experimental SAR Spacecraft FKA 2); catalog 'KONDOR-FKA NO. 2', 'KONDOR FKA 2', 'Kondor-FKA No. 2'; equal after normalising: 'KONDOR-FKA NO. 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: lageos_1
+  norad: 8820
+  relation: same
+  proposal: single-fit
+  oscar_id: 217
+  acronym: "LAGEOS-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 May 1976; CelesTrak launches 1976-039A on 1976-05-04, the same day"
+    - "OSCAR orbit Drifting orbit, 5900 km; CelesTrak 5838 x 5948 km, 109.83 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'LAGEOS-1' (Laser Geodynamics Satellite - 1); catalog 'LAGEOS 1', 'Lageos', 'LAGEOS-1', 'LAGEOS I'; equal after normalising: 'LAGEOS 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: lageos_2
+  norad: 22195
+  relation: same
+  proposal: single-fit
+  oscar_id: 218
+  acronym: "LAGEOS-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Oct 1992; CelesTrak launches 1992-070B on 1992-10-22, the same day"
+    - "OSCAR orbit Drifting orbit, 5780 km; CelesTrak 5616 x 5952 km, 52.64 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'LAGEOS-2' (Laser Geodynamics Satellite - 2); catalog 'LAGEOS 2', 'Lageos 2', 'LAGEOS-2', 'LAGEOS II'; equal after normalising: 'LAGEOS 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: landsat_8
+  norad: 39084
+  relation: same
+  proposal: single-fit
+  oscar_id: 227
+  acronym: "Landsat-8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Feb 2013; CelesTrak launches 2013-008A on 2013-02-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 702 x 703 km, 98.21 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'Landsat-8' (Landsat-8); catalog 'LANDSAT 8', 'Landsat 8', 'Landsat Data Cont. Mission', 'LDCM'; equal after normalising: 'LANDSAT 8'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: landsat_9
+  norad: 49260
+  relation: same
+  proposal: one-of-n
+  oscar_id: 724
+  acronym: "Landsat-9"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Sep 2021; CelesTrak launches 2021-088A on 2021-09-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 702 x 703 km, 98.21 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 2; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Landsat-9' (Landsat-9); catalog 'LANDSAT 9', 'Landsat 9'; equal after normalising: 'LANDSAT 9'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: lares_2
+  norad: 53105
+  relation: same
+  proposal: one-of-n
+  oscar_id: 809
+  acronym: "LARES-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Jul 2022; CelesTrak launches 2022-080A on 2022-07-13, the same day"
+    - "OSCAR orbit Drifting orbit, 5899 km; CelesTrak 5882 x 5896 km, 70.14 deg"
+    - "Payloads launched in the date window: 10; ruled out by orbit: 2; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'LARES-2' (Laser RElativity Satellite - 2); catalog 'LARES-2', 'LARES 2', 'Laser Relativity Satellite 2'; equal after normalising: 'LARES-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ludi_tance_1_01a
+  norad: 51284
+  relation: same
+  proposal: single-fit
+  oscar_id: 959
+  acronym: "Ludi-Tance 1 01A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Jan 2022; CelesTrak launches 2022-007A on 2022-01-25, a day earlier"
+    - "OSCAR orbit Sunsynchronous orbit, 600 km; CelesTrak 602 x 604 km, 97.81 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Ludi-Tance 1 01A' (L-band differential interferometric synthetic aperture radar satellite A); catalog 'LUDI TANCE 1-01A (L-SAR 01A)', 'LT-1 01A', 'Ludi Tance 1-01A', 'Ludi Tance 1 01 zu A xing'; equal after normalising: 'LUDI TANCE 1-01A (L-SAR 01A)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ludi_tance_1_01b
+  norad: 51822
+  relation: same
+  proposal: one-of-n
+  oscar_id: 960
+  acronym: "Ludi-Tance 1 01B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Feb 2022; CelesTrak launches 2022-018A on 2022-02-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 600 km; CelesTrak 602 x 604 km, 97.81 deg"
+    - "Payloads launched in the date window: 74; ruled out by orbit: 70; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Ludi-Tance 1 01B' (L-band differential interferometric synthetic aperture radar satellite A); catalog 'LUDI TANCE 1-01B (L-SAR 01B)', 'LT-1 01B', 'Ludi Tance 1-01B', 'Ludi Tance 1 01 zu B xing'; equal after normalising: 'LUDI TANCE 1-01B (L-SAR 01B)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: ludi_tance_4_01a
+  norad: 57624
+  relation: same
+  proposal: single-fit
+  oscar_id: 1016
+  acronym: "Ludi-Tance 4 01A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Aug 2023; CelesTrak launches 2023-120A on 2023-08-12, the same day"
+    - "OSCAR orbit Geosynchronous orbit, 36000 km, 89.5 deg E; CelesTrak 35763 x 35809 km, 15.01 deg"
+    - "Payloads launched in the date window: 23; ruled out by orbit: 22; left: 1"
+    - "Names: OSCAR 'Ludi-Tance 4 01A' (L-band differential interferometric synthetic aperture radar satellite 4 01A); catalog 'LUDI TANCE-4 01A', 'Ludi Tance 4A', 'LSAR4-01', 'Ludi Tance-4 01A'; equal after normalising: 'LUDI TANCE-4 01A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: mats
+  norad: 54227
+  relation: same
+  proposal: single-fit
+  oscar_id: 764
+  acronym: "MATS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Nov 2022; CelesTrak launches 2022-147A on 2022-11-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 585 km; CelesTrak 539 x 558 km, 97.69 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'MATS' (Mesospheric Airglow/Aerosol Tomography and Spectroscopy); catalog 'MATS', 'Mesospheric Airglow/Aerosol Tomography and Spectroscopy'; equal after normalising: 'MATS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: meteor_m_n2_3
+  norad: 57166
+  relation: same
+  proposal: one-of-n
+  oscar_id: 615
+  acronym: "Meteor-M N2-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 27 Jun 2023; CelesTrak launches 2023-091A on 2023-06-27, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 820 km; CelesTrak 808 x 815 km, 98.59 deg"
+    - "Payloads launched in the date window: 43; ruled out by orbit: 39; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Meteor-M N2-3' (Meteor-M Number 2-3); catalog 'METEOR-M2 3', 'METEOR M2-3', 'Meteor-M No. 2-3'; equal after normalising: 'METEOR-M2 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: meteor_m_n2_4
+  norad: 59051
+  relation: same
+  proposal: one-of-n
+  oscar_id: 616
+  acronym: "Meteor-M N2-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Feb 2024; CelesTrak launches 2024-039A on 2024-02-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 821 km; CelesTrak 811 x 823 km, 98.72 deg"
+    - "Payloads launched in the date window: 44; ruled out by orbit: 39; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Meteor-M N2-4' (Meteor-M Number 2-4); catalog 'METEOR-M2 4', 'METEOR M2-4', 'Meteor-M No. 2-4'; equal after normalising: 'METEOR-M2 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: meteosat_10
+  norad: 38552
+  relation: same
+  proposal: one-of-n
+  oscar_id: 304
+  acronym: "Meteosat-10"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Jul 2012; CelesTrak launches 2012-035B on 2012-07-05, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 0 deg E; CelesTrak 35780 x 35792 km, 5.03 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Meteosat-10' (Meteosat-10); catalog 'METEOSAT-10 (MSG-3)', 'METEOSAT 10 (MSG 3)', 'Meteosat 10', 'MSG 3'; equal after normalising: 'METEOSAT-10 (MSG-3)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: meteosat_11
+  norad: 40732
+  relation: same
+  proposal: one-of-n
+  oscar_id: 305
+  acronym: "Meteosat-11"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Jul 2015; CelesTrak launches 2015-034A on 2015-07-15, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, 9.5 deg E; CelesTrak 35782 x 35788 km, 3.58 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 1; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Meteosat-11' (Meteosat-11); catalog 'METEOSAT-11 (MSG-4)', 'METEOSAT 11 (MSG 4)', 'Meteosat 11', 'MSG 4'; equal after normalising: 'METEOSAT-11 (MSG-4)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: meteosat_12
+  norad: 54743
+  relation: same
+  proposal: one-of-n
+  oscar_id: 289
+  acronym: "Meteosat-12"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Dec 2022; CelesTrak launches 2022-170C on 2022-12-13, the same day"
+    - "OSCAR orbit Geostationary orbit, 35786 km, -0.3 deg E; CelesTrak 35773 x 35801 km, 0.76 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 5; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Meteosat-12' (Meteosat-12 (formerly MTG-1)); catalog 'METEOSAT-12 (MTG-I1)', 'METEOSAT 12 (MTG I1)', 'Meteosat 12', 'MTG-I1'; equal after normalising: 'METEOSAT-12 (MTG-I1)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: metop_b
+  norad: 38771
+  relation: same
+  proposal: single-fit
+  oscar_id: 307
+  acronym: "Metop-B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Sep 2012; CelesTrak launches 2012-049A on 2012-09-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 830 km; CelesTrak 819 x 821 km, 98.63 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'Metop-B' (Meteorological operational satellite - B); catalog 'METOP-B', 'METOP B', 'METOP 1', 'MetOp-B'; equal after normalising: 'METOP-B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: metop_c
+  norad: 43689
+  relation: same
+  proposal: single-fit
+  oscar_id: 308
+  acronym: "Metop-C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Nov 2018; CelesTrak launches 2018-087A on 2018-11-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 827 km; CelesTrak 819 x 822 km, 98.72 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Metop-C' (Meteorological operational satellite - C); catalog 'METOP-C', 'METOP C', 'MetOp-C', 'Meteorological Operational Satellite-C'; equal after normalising: 'METOP-C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: microcarb
+  norad: 64899
+  relation: same
+  proposal: one-of-n
+  oscar_id: 825
+  acronym: "MicroCarb"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Jul 2025; CelesTrak launches 2025-156A on 2025-07-26, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 650 km; CelesTrak 639 x 665 km, 98.00 deg"
+    - "Payloads launched in the date window: 82; ruled out by orbit: 33; left: 49; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'MicroCarb' (MicroCarb); catalog 'MICROCARB', 'CARB', 'MicroCarb'; equal after normalising: 'MICROCARB'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: miman
+  norad: 52900
+  relation: same
+  proposal: one-of-n
+  oscar_id: 954
+  acronym: "MIMAN"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Jun 2022; CelesTrak launches 2022-065G on 2022-06-21, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 710 km; CelesTrak 682 x 691 km, 98.25 deg"
+    - "Payloads launched in the date window: 10; ruled out by orbit: 3; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'MIMAN' (Monochrome Imaging for Monitoring Aerosol by Nanosatellite); catalog 'MIMAN', 'CubesatYonsei'; equal after normalising: 'MIMAN'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: mohammed_vi_a
+  norad: 43005
+  relation: same
+  proposal: single-fit
+  oscar_id: 736
+  acronym: "Mohammed VI-A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Nov 2017; CelesTrak launches 2017-070A on 2017-11-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 620 km; CelesTrak 638 x 639 km, 97.94 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Mohammed VI-A' (Mohammed VI-A); catalog 'MOHAMMED VI-A', 'Mohammed VI-A', 'MN35-13A', 'Mohammed VI - A'; equal after normalising: 'MOHAMMED VI-A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: mohammed_vi_b
+  norad: 43717
+  relation: same
+  proposal: single-fit
+  oscar_id: 737
+  acronym: "Mohammed VI-B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Nov 2018; CelesTrak launches 2018-095A on 2018-11-21, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 620 km; CelesTrak 638 x 639 km, 97.96 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Mohammed VI-B' (Mohammed VI-B); catalog 'MOHAMMED VI-B', 'Mohammed VI-B', 'MN35B', 'Mohammed VI - B'; equal after normalising: 'MOHAMMED VI-B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: musat_2
+  norad: 59099
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1058
+  acronym: "MuSat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Mar 2024; CelesTrak launches 2024-043B on 2024-03-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 622 km; CelesTrak 530 x 540 km, 97.88 deg"
+    - "Payloads launched in the date window: 75; ruled out by orbit: 41; left: 34; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'MuSat-2' (MuSat-2); catalog 'MUSAT-2', 'MUSAT2', 'MuSat-2'; equal after normalising: 'MUSAT-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: neonsat_1a
+  norad: 67614
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1188
+  acronym: "NEONSAT-1A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Jan 2026; CelesTrak launches 2026-019A on 2026-01-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 543 km; CelesTrak 529 x 548 km, 97.44 deg"
+    - "Payloads launched in the date window: 56; ruled out by orbit: 29; left: 27; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'NEONSAT-1A' (NEONSAT-1A); catalog 'NEONSAT-1A', 'Neonsat-1A', 'New-space Earth Observation Satellite 1A'; equal after normalising: 'NEONSAT-1A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: nisar
+  norad: 65053
+  relation: same
+  proposal: one-of-n
+  oscar_id: 639
+  acronym: "NISAR"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Jul 2025; CelesTrak launches 2025-163A on 2025-07-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 747 km; CelesTrak 749 x 751 km, 98.41 deg"
+    - "Payloads launched in the date window: 61; ruled out by orbit: 41; left: 20; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'NISAR' (NASA-ISRO Synthetic Aperture Radar); catalog 'NISAR', 'NASA-ISRO Synthetic Aperture Radar'; equal after normalising: 'NISAR'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: noaa_20
+  norad: 43013
+  relation: same
+  proposal: one-of-n
+  oscar_id: 208
+  acronym: "NOAA-20"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Nov 2017; CelesTrak launches 2017-073A on 2017-11-18, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 824 km; CelesTrak 826 x 828 km, 98.79 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 4; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'NOAA-20' (National Oceanic and Atmospheric Administration - 20); catalog 'NOAA 20 (JPSS-1)', 'NOAA 20', 'NOAA-20', 'JPSS-1'; equal after normalising: 'NOAA 20 (JPSS-1)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: noaa_21
+  norad: 54234
+  relation: same
+  proposal: one-of-n
+  oscar_id: 209
+  acronym: "NOAA-21"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Nov 2022; CelesTrak launches 2022-150A on 2022-11-10, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 824 km; CelesTrak 825 x 829 km, 98.72 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'NOAA-21' (National Oceanic and Atmospheric Administration - 21); catalog 'NOAA 21 (JPSS-2)', 'NOAA 21', 'NOAA-21', 'JPSS-2'; equal after normalising: 'NOAA 21 (JPSS-2)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: novasar_s
+  norad: 43619
+  relation: same
+  proposal: one-of-n
+  oscar_id: 767
+  acronym: "NovaSAR-S"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Sep 2018; CelesTrak launches 2018-071B on 2018-09-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 580 km; CelesTrak 577 x 579 km, 97.48 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 5; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'NovaSAR-S' (NovaSAR-S); catalog 'NOVASAR 1', 'NovaSAR-S'; equal after normalising: 'NovaSAR-S'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: oco_2
+  norad: 40059
+  relation: same
+  proposal: single-fit
+  oscar_id: 347
+  acronym: "OCO-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Jul 2014; CelesTrak launches 2014-035A on 2014-07-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 702 x 703 km, 98.22 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'OCO-2' (Orbiting Carbon Observatory - 2); catalog 'OCO 2', 'OCO-2', 'Orbiting Carbon Observatory', 'Orbiting Carbon Observatory 2'; equal after normalising: 'OCO 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: pace
+  norad: 58928
+  relation: same
+  proposal: single-fit
+  oscar_id: 358
+  acronym: "PACE"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Feb 2024; CelesTrak launches 2024-025A on 2024-02-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 676 km; CelesTrak 673 x 677 km, 98.10 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'PACE' (Plankton, Aerosol, Cloud, ocean Ecosystem); catalog 'PACE', 'Plankton, Aerosol, Cloud, ocean Ecosystem'; equal after normalising: 'PACE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: parker_solar_probe
+  norad: 43592
+  relation: same
+  proposal: single-fit
+  oscar_id: 577
+  acronym: "Parker Solar Probe"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Aug 2018; CelesTrak launches 2018-065A on 2018-08-12, the same day"
+    - "OSCAR orbit Solar orbit; CelesTrak orbit centre SU (OSCAR sun: SU)"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Parker Solar Probe' (Parker Solar Probe); catalog 'PARKER SOLAR PROBE', 'Parker Solar Probe', 'PSP', 'NASA Solar Probe'; equal after normalising: 'PARKER SOLAR PROBE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: perusat_1
+  norad: 41770
+  relation: same
+  proposal: one-of-n
+  oscar_id: 707
+  acronym: "PeruSat-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Sep 2016; CelesTrak launches 2016-058A on 2016-09-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 697 x 699 km, 98.19 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 3; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'PeruSat-1' (PeruSat-1); catalog 'PERUSAT 1', 'PeruSat-1', 'Peru Recon', 'PerúSat 1'; equal after normalising: 'PERUSAT 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: pleiades_1a
+  norad: 38012
+  relation: same
+  proposal: one-of-n
+  oscar_id: 361
+  acronym: "Pléiades-1A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Dec 2011; CelesTrak launches 2011-076F on 2011-12-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 705 km; CelesTrak 697 x 699 km, 98.18 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 0; left: 6; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Pléiades-1A' (Pleiades-1A); catalog 'PLEIADES 1A', 'PLEIADES 1', 'Pleiades 1a', 'Pleiades HR-1'; equal after normalising: 'PLEIADES 1A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: pleiades_1b
+  norad: 39019
+  relation: same
+  proposal: single-fit
+  oscar_id: 362
+  acronym: "Pléiades-1B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Dec 2012; CelesTrak launches 2012-068A on 2012-12-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 694 km; CelesTrak 697 x 699 km, 98.18 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'Pléiades-1B' (Pleiades-1B); catalog 'PLEIADES 1B', 'Pleiades 1b', 'Pleiades HR-2', 'Pleiades 1B'; equal after normalising: 'PLEIADES 1B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: prefire_1
+  norad: 59965
+  relation: same
+  proposal: one-of-n
+  oscar_id: 875
+  acronym: "PREFIRE-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Jun 2024; CelesTrak launches 2024-108A on 2024-06-05, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 490 km; CelesTrak 483 x 499 km, 97.55 deg"
+    - "Payloads launched in the date window: 26; ruled out by orbit: 21; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'PREFIRE-1' (Polar Radiant Energy in the Far Infrared Experiment-1); catalog 'PREFIRE-1', 'PREFIRE 1', 'PREFIRE 2', 'Polar Radiant Energy in the Far-Infrared Experiment-2'; equal after normalising: 'PREFIRE-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: prefire_2
+  norad: 59881
+  relation: same
+  proposal: single-fit
+  oscar_id: 1063
+  acronym: "PREFIRE-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 May 2024; CelesTrak launches 2024-099A on 2024-05-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 491 x 509 km, 97.39 deg"
+    - "Payloads launched in the date window: 24; ruled out by orbit: 23; left: 1"
+    - "Names: OSCAR 'PREFIRE-2' (Polar Radiant Energy in the Far Infrared Experiment-2); catalog 'PREFIRE-2', 'PREFIRE 2', 'PREFIRE 1', 'Polar Radiant Energy in the Far-Infrared Experiment-1'; equal after normalising: 'PREFIRE-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: prisma
+  norad: 44072
+  relation: same
+  proposal: single-fit
+  oscar_id: 363
+  acronym: "PRISMA"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Mar 2019; CelesTrak launches 2019-015A on 2019-03-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 615 km; CelesTrak 617 x 619 km, 97.87 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'PRISMA' (PRecursore IperSpettrale della Missione Applicativa); catalog 'PRISMA'; equal after normalising: 'PRISMA'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: proba_1
+  norad: 26958
+  relation: same
+  proposal: single-fit
+  oscar_id: 364
+  acronym: "PROBA-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Oct 2001; CelesTrak launches 2001-049B on 2001-10-22, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 615 km; CelesTrak 505 x 579 km, 97.96 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'PROBA-1' (Project for On-Board Autonomy - 1); catalog 'PROBA-1', 'PROBA 1', 'PROBA', 'Project for On-Board Autonomy 1'; equal after normalising: 'PROBA-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: proba_2
+  norad: 36037
+  relation: same
+  proposal: one-of-n
+  oscar_id: 490
+  acronym: "PROBA-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Nov 2009; CelesTrak launches 2009-059B on 2009-11-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 730 km; CelesTrak 700 x 719 km, 98.25 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'PROBA-2' (Project for On-Board Autonomy - 2); catalog 'PROBA-2', 'PROBA 2', 'PROBA2', 'Project for On-Board Autonomy 2'; equal after normalising: 'PROBA-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: proba_3o
+  norad: 62258
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1047
+  acronym: "PROBA-3O"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Dec 2024; CelesTrak launches 2024-233C on 2024-12-05, the same day"
+    - "OSCAR orbit Molniya orbit; CelesTrak 1036 x 60171 km, 59.86 deg"
+    - "Payloads launched in the date window: 70; ruled out by orbit: 68; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'PROBA-3O' (PROBA-3 Occulter); catalog 'PROBA-3 OSC', 'PROBA-3 Occulter', 'Occulter Spacecraft'; equal after normalising: 'PROBA-3 Occulter'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: proba_v_cc
+  norad: 58025
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1021
+  acronym: "PROBA-V-CC"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Oct 2023; CelesTrak launches 2023-155K on 2023-10-09, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 574 km; CelesTrak 511 x 516 km, 97.56 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 21; left: 10; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'PROBA-V-CC' (Project for On-Board Autonomy - Végétation Companion Cubesat); catalog 'PVCC', 'Proba-V Companion Cubesat', 'PROBA-V Companion CubeSat', 'PROBA-V CC'; equal after normalising: 'PROBA-V CC'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_10
+  norad: 64055
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1137
+  acronym: "QPS-SAR 10"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 May 2025; CelesTrak launches 2025-104A on 2025-05-17, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 547 x 569 km, 42.00 deg"
+    - "Payloads launched in the date window: 33; ruled out by orbit: 0; left: 33; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 10' (QPS-SAR 10 (Wadatsumi 1)); catalog 'QPS-SAR-10 (WADATSUMI-I)', 'QPS-SAR-10 WADATSUMI-I', 'Wadatsumi-I', 'QPS-SAR-10'; equal after normalising: 'QPS-SAR-10 (WADATSUMI-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_11
+  norad: 64340
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1138
+  acronym: "QPS-SAR 11"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Jun 2025; CelesTrak launches 2025-125A on 2025-06-11, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 552 x 565 km, 42.01 deg"
+    - "Payloads launched in the date window: 24; ruled out by orbit: 1; left: 23; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 11' (QPS-SAR 11 (Yamatsumi 1)); catalog 'QPS-SAR-11 (YAMATSUMI-I)', 'QPS-SAR-11 YAMATSUMI', 'Yamatsumi-I', 'QPS-SAR-11'; equal after normalising: 'QPS-SAR-11 (YAMATSUMI-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_12
+  norad: 65116
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1140
+  acronym: "QPS-SAR 12"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Aug 2025; CelesTrak launches 2025-169A on 2025-08-05, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 555 x 566 km, 42.01 deg"
+    - "Payloads launched in the date window: 38; ruled out by orbit: 10; left: 28; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 12' (QPS-SAR 12 (Kushinada 1)); catalog 'QPS-SAR-12 (KUSHINADA-I)', 'QPS-SAR-12 KUSHINADA-I', 'Kushinada-I', 'QPS-SAR-12'; equal after normalising: 'QPS-SAR-12 (KUSHINADA-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_14
+  norad: 66316
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1151
+  acronym: "QPS-SAR 14"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Nov 2025; CelesTrak launches 2025-252A on 2025-11-05, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 563 x 568 km, 42.00 deg"
+    - "Payloads launched in the date window: 59; ruled out by orbit: 0; left: 59; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 14' (QPS-SAR 14 (Yachihoko)); catalog 'QPS-SAR-14 (YACHIHOKO-I)', 'QPS-SAR-14 YACHIHOKO-1', 'Yachihoko-I', 'QPS-SAR-14'; equal after normalising: 'QPS-SAR-14 (YACHIHOKO-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_15
+  norad: 67228
+  relation: same
+  proposal: single-fit
+  oscar_id: 1157
+  acronym: "QPS-SAR 15"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Dec 2025; CelesTrak launches 2025-307A on 2025-12-21, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 558 x 575 km, 42.00 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'QPS-SAR 15' (QPS-SAR 15 (Sukunami 1)); catalog 'QPS-SAR-15 (SUKUNAMI-I)', 'QPS-SAR-15 SUKUNAMI-1', 'Sukunami-I', 'QPS-SAR-15'; equal after normalising: 'QPS-SAR-15 (SUKUNAMI-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_18
+  norad: 100401
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1182
+  acronym: "QPS-SAR 18"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Aug 2026; CelesTrak launches 2026-191A on 2026-08-20, the same day"
+    - "OSCAR orbit Drifting orbit, 575 km; CelesTrak 570 x 580 km, 42.01 deg"
+    - "Payloads launched in the date window: 54; ruled out by orbit: 0; left: 54; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 18' (QPS-SAR 18 (Susanoo 2)); catalog 'QPS-SAR-18 (SUSANOO-II)', 'QPS-SAR-18', 'Susanoo-II', 'Susanoo-2'; equal after normalising: 'QPS-SAR-18 (SUSANOO-II)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_5
+  norad: 58578
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1132
+  acronym: "QPS-SAR 5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Dec 2023; CelesTrak launches 2023-196A on 2023-12-15, the same day"
+    - "OSCAR orbit Drifting orbit, 580 km; CelesTrak 468 x 509 km, 42.00 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 2; left: 4; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 5' (QPS-SAR 5 (Tsukuyomi 1)); catalog 'QPS-SAR-5 (TSUKUYOMI-I)', 'QPS-SAR-5 TSUKUYOMI-I', 'Tsukuyomi-I', 'QPS-SAR-5'; equal after normalising: 'QPS-SAR-5 (TSUKUYOMI-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_7
+  norad: 59447
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1134
+  acronym: "QPS-SAR 7"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Apr 2024; CelesTrak launches 2024-066F on 2024-04-07, a day earlier"
+    - "OSCAR orbit Drifting orbit, 590 km; CelesTrak 534 x 535 km, 45.60 deg"
+    - "Payloads launched in the date window: 33; ruled out by orbit: 3; left: 30; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 7' (QPS-SAR 7 (Tsukuyomi 2)); catalog 'QPS-SAR-7 (TSUKUYOMI-II)', 'QPS-SAR-7 TSUKUYOMI-II', 'Tsukuyomi-II', 'QPS-SAR-7'; equal after normalising: 'QPS-SAR-7 (TSUKUYOMI-II)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_8
+  norad: 60542
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1135
+  acronym: "QPS-SAR 8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-149CC on 2024-08-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 550 km; CelesTrak 549 x 552 km, 97.66 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 39; left: 88; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 8' (QPS-SAR 8 (Amateru 4)); catalog 'QPS-SAR-8 (AMATERU-IV)', 'QPS-SAR-8 AMATERU-IV', 'Amateru 4', 'QPS-SAR-8'; equal after normalising: 'QPS-SAR-8 (AMATERU-IV)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: qps_sar_9
+  norad: 63205
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1136
+  acronym: "QPS-SAR 9"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Mar 2025; CelesTrak launches 2025-050A on 2025-03-15, the same day"
+    - "OSCAR orbit Drifting orbit, 573 km; CelesTrak 550 x 557 km, 42.02 deg"
+    - "Payloads launched in the date window: 95; ruled out by orbit: 11; left: 84; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'QPS-SAR 9' (QPS-SAR 9 (Susanoo-1)); catalog 'QPS-SAR-9 (SUSANOO-I)', 'QPS-SAR-9 SUSANOO-I', 'Susanoo-I', 'QPS-SAR-9'; equal after normalising: 'QPS-SAR-9 (SUSANOO-I)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: radarsat_2
+  norad: 32382
+  relation: same
+  proposal: single-fit
+  oscar_id: 367
+  acronym: "RadarSat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 14 Dec 2007; CelesTrak launches 2007-061A on 2007-12-14, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 798 km; CelesTrak 791 x 793 km, 98.58 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'RadarSat-2' (RadarSat-2); catalog 'RADARSAT-2', 'RADARSAT 2', 'Radarsat-2'; equal after normalising: 'RADARSAT-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: rasat
+  norad: 37791
+  relation: same
+  proposal: one-of-n
+  oscar_id: 369
+  acronym: "RASAT"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Aug 2011; CelesTrak launches 2011-044D on 2011-08-17, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 690 km; CelesTrak 651 x 682 km, 98.05 deg"
+    - "Payloads launched in the date window: 9; ruled out by orbit: 1; left: 8; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'RASAT' (Remote Sensing Satellite); catalog 'RASAT', 'Rasat'; equal after normalising: 'RASAT'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: rcm_1
+  norad: 44322
+  relation: same
+  proposal: one-of-n
+  oscar_id: 370
+  acronym: "RCM-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Jun 2019; CelesTrak launches 2019-033A on 2019-06-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 592 km; CelesTrak 589 x 591 km, 97.76 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'RCM-1' (RadarSat Constellation Mission - 1); catalog 'RCM-1', 'RCM 1', 'Radarsat Constell. Mission', 'RADARSAT Constellation Mission 1'; equal after normalising: 'RCM-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: resourcesat_2
+  norad: 37387
+  relation: same
+  proposal: one-of-n
+  oscar_id: 374
+  acronym: "ResourceSat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Apr 2011; CelesTrak launches 2011-015A on 2011-04-20, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 817 km; CelesTrak 812 x 828 km, 98.75 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'ResourceSat-2' (Satellite for Earth Resources - 2); catalog 'RESOURCESAT-2', 'RESOURCESAT 2', 'Resourcesat-2'; equal after normalising: 'RESOURCESAT-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: resourcesat_2a
+  norad: 41877
+  relation: same
+  proposal: single-fit
+  oscar_id: 602
+  acronym: "ResourceSat-2A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Dec 2016; CelesTrak launches 2016-074A on 2016-12-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 817 km; CelesTrak 818 x 822 km, 98.74 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'ResourceSat-2A' (Satellite for Earth Resources - 2A); catalog 'RESOURCESAT-2A', 'RESOURCESAT 2A', 'Resourcesat-2A'; equal after normalising: 'RESOURCESAT-2A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: resurs_p4
+  norad: 59371
+  relation: same
+  proposal: single-fit
+  oscar_id: 786
+  acronym: "Resurs-P4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Mar 2024; CelesTrak launches 2024-061A on 2024-03-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 477 km; CelesTrak 469 x 472 km, 97.29 deg"
+    - "Payloads launched in the date window: 25; ruled out by orbit: 24; left: 1"
+    - "Names: OSCAR 'Resurs-P4' (Resurs-P4); catalog 'RESURS-P 4', 'RESURS P4', 'Resurs-P No. 4', 'Resurs-P 47KS No. 4'; equal after normalising: 'RESURS-P 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: resurs_p5
+  norad: 62430
+  relation: same
+  proposal: single-fit
+  oscar_id: 787
+  acronym: "Resurs-P5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Dec 2024; CelesTrak launches 2024-250A on 2024-12-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 477 km; CelesTrak 468 x 472 km, 97.28 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Resurs-P5' (Resurs-P5); catalog 'RESURS-P 5', 'RESURS P5', 'Resurs-P No. 5', 'Resurs-P 47KS No. 5'; equal after normalising: 'RESURS-P 5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: risat_2b
+  norad: 44233
+  relation: same
+  proposal: single-fit
+  oscar_id: 778
+  acronym: "RISAT-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 May 2019; CelesTrak launches 2019-028A on 2019-05-22, the same day"
+    - "OSCAR orbit Drifting orbit, 555 km; CelesTrak 558 x 568 km, 37.00 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'RISAT-2B' (Radar Imaging Satellite - 2B); catalog 'RISAT-2B', 'RISAT 2B', 'RISAT-2B satellite'; equal after normalising: 'RISAT-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: risat_2br1
+  norad: 44857
+  relation: same
+  proposal: one-of-n
+  oscar_id: 783
+  acronym: "RISAT-2BR1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Dec 2019; CelesTrak launches 2019-089F on 2019-12-11, the same day"
+    - "OSCAR orbit Drifting orbit, 555 km; CelesTrak 555 x 572 km, 36.96 deg"
+    - "Payloads launched in the date window: 12; ruled out by orbit: 9; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'RISAT-2BR1' (Radar Imaging Satellite - 2BR-1); catalog 'RISAT-2BR1'; equal after normalising: 'RISAT-2BR1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: saocom_1a
+  norad: 43641
+  relation: same
+  proposal: one-of-n
+  oscar_id: 386
+  acronym: "SAOCOM-1A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Oct 2018; CelesTrak launches 2018-076A on 2018-10-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 620 km; CelesTrak 622 x 623 km, 97.89 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SAOCOM-1A' (SAtélite Argentino de Observación COn Microondas - 1A); catalog 'SAOCOM 1A', 'SAOCOM 1-A'; equal after normalising: 'SAOCOM 1A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: saocom_1b
+  norad: 46265
+  relation: same
+  proposal: one-of-n
+  oscar_id: 387
+  acronym: "SAOCOM-1B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Aug 2020; CelesTrak launches 2020-059A on 2020-08-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 620 km; CelesTrak 622 x 623 km, 97.89 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 3; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SAOCOM-1B' (SAtélite Argentino de Observación COn Microondas - 1B); catalog 'SAOCOM 1B', 'SAOCOM 1-B'; equal after normalising: 'SAOCOM 1B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: saral
+  norad: 39086
+  relation: same
+  proposal: one-of-n
+  oscar_id: 390
+  acronym: "SARAL"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Feb 2013; CelesTrak launches 2013-009A on 2013-02-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 800 km; CelesTrak 781 x 783 km, 98.55 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 0; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SARAL' (Satellite with ARGOS and AltiKa); catalog 'SARAL', 'S'; equal after normalising: 'SARAL'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: scd_1
+  norad: 22490
+  relation: same
+  proposal: one-of-n
+  oscar_id: 391
+  acronym: "SCD-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Feb 1993; CelesTrak launches 1993-009B on 1993-02-09, the same day"
+    - "OSCAR orbit Drifting orbit, 750 km; CelesTrak 709 x 768 km, 24.97 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SCD-1' (Satélite de Coleta de Dados - 1); catalog 'SCD 1', 'SCD-1', 'Data-Collecting Satellite 1'; equal after normalising: 'SCD 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: scd_2
+  norad: 25504
+  relation: same
+  proposal: single-fit
+  oscar_id: 392
+  acronym: "SCD-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Oct 1998; CelesTrak launches 1998-060A on 1998-10-23, a day later"
+    - "OSCAR orbit Drifting orbit, 750 km; CelesTrak 728 x 752 km, 24.99 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'SCD-2' (Satélite de Coleta de Dados - 2); catalog 'SCD 2', 'SCD-2', 'Data-Collecting Satellite 2'; equal after normalising: 'SCD 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: scisat_1
+  norad: 27858
+  relation: same
+  proposal: single-fit
+  oscar_id: 393
+  acronym: "SCISAT-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Aug 2003; CelesTrak launches 2003-036A on 2003-08-13, the same day"
+    - "OSCAR orbit Drifting orbit, 650 km; CelesTrak 618 x 630 km, 73.93 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'SCISAT-1' (Scientific Satellite -1); catalog 'SCISAT 1', 'SCISAT-1'; equal after normalising: 'SCISAT 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sdgsat_1
+  norad: 49387
+  relation: same
+  proposal: single-fit
+  oscar_id: 1011
+  acronym: "SDGSAT-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Nov 2021; CelesTrak launches 2021-100A on 2021-11-05, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 505 km; CelesTrak 499 x 514 km, 97.24 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'SDGSAT-1' (Sustainable Development Science Satellite 1); catalog 'SDGSAT 1', 'SDGSAT-1', 'Guangmu Diqiui Kexue Weixing', 'Guangmu'; equal after normalising: 'SDGSAT 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sdo
+  norad: 36395
+  relation: same
+  proposal: one-of-n
+  oscar_id: 457
+  acronym: "SDO"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Feb 2010; CelesTrak launches 2010-005A on 2010-02-11, the same day"
+    - "OSCAR orbit Geosynchronous orbit, 35756 km, -105 deg E; CelesTrak 35782 x 35791 km, 34.97 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SDO' (Solar Dynamics Observatory); catalog 'SDO', 'Solar Dynamics Observatory', '2010-005A'; equal after normalising: 'SDO'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_1c
+  norad: 62261
+  relation: same
+  proposal: single-fit
+  oscar_id: 754
+  acronym: "Sentinel-1C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 05 Dec 2024; CelesTrak launches 2024-235A on 2024-12-05, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 693 km; CelesTrak 695 x 697 km, 98.18 deg"
+    - "Payloads launched in the date window: 70; ruled out by orbit: 69; left: 1"
+    - "Names: OSCAR 'Sentinel-1C' (Sentinel-1C); catalog 'SENTINEL-1C', 'SENTINEL 1C', 'Sentinel-1C'; equal after normalising: 'SENTINEL-1C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_1d
+  norad: 66315
+  relation: same
+  proposal: single-fit
+  oscar_id: 755
+  acronym: "Sentinel-1D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Nov 2025; CelesTrak launches 2025-251A on 2025-11-04, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 693 km; CelesTrak 695 x 697 km, 98.18 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'Sentinel-1D' (Sentinel-1D); catalog 'SENTINEL-1D', 'Sentinel-1D'; equal after normalising: 'SENTINEL-1D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_2b
+  norad: 42063
+  relation: same
+  proposal: single-fit
+  oscar_id: 399
+  acronym: "Sentinel-2B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Mar 2017; CelesTrak launches 2017-013A on 2017-03-07, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 786 km; CelesTrak 788 x 790 km, 98.57 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Sentinel-2B' (Sentinel-2B); catalog 'SENTINEL-2B', 'SENTINEL 2B', 'Sentinel-2B'; equal after normalising: 'SENTINEL-2B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_2c
+  norad: 60989
+  relation: same
+  proposal: single-fit
+  oscar_id: 756
+  acronym: "Sentinel-2C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Sep 2024; CelesTrak launches 2024-157A on 2024-09-05, a day later"
+    - "OSCAR orbit Sunsynchronous orbit, 786 km; CelesTrak 788 x 790 km, 98.57 deg"
+    - "Payloads launched in the date window: 38; ruled out by orbit: 37; left: 1"
+    - "Names: OSCAR 'Sentinel-2C' (Sentinel-2C); catalog 'SENTINEL-2C', 'Sentinel-2C'; equal after normalising: 'SENTINEL-2C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_3a
+  norad: 41335
+  relation: same
+  proposal: single-fit
+  oscar_id: 400
+  acronym: "Sentinel-3A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Feb 2016; CelesTrak launches 2016-011A on 2016-02-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 814 km; CelesTrak 802 x 804 km, 98.63 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 4; left: 1"
+    - "Names: OSCAR 'Sentinel-3A' (Sentinel-3A); catalog 'SENTINEL-3A', 'SENTINEL 3A', 'Sentinel-3A'; equal after normalising: 'SENTINEL-3A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_3b
+  norad: 43437
+  relation: same
+  proposal: single-fit
+  oscar_id: 802
+  acronym: "Sentinel-3B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Apr 2018; CelesTrak launches 2018-039A on 2018-04-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 814 km; CelesTrak 802 x 803 km, 98.63 deg"
+    - "Payloads launched in the date window: 6; ruled out by orbit: 5; left: 1"
+    - "Names: OSCAR 'Sentinel-3B' (Sentinel-3B); catalog 'SENTINEL-3B', 'SENTINEL 3B', 'Sentinel-3B'; equal after normalising: 'SENTINEL-3B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_5p
+  norad: 42969
+  relation: same
+  proposal: single-fit
+  oscar_id: 402
+  acronym: "Sentinel-5P"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Oct 2017; CelesTrak launches 2017-064A on 2017-10-13, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 824 km; CelesTrak 826 x 828 km, 98.81 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'Sentinel-5P' (Sentinel-5 precursor); catalog 'SENTINEL-5P', 'SENTINEL 5P', 'Sentinel-5P', 'Sentinel-5 Precursor'; equal after normalising: 'SENTINEL-5P'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_6a
+  norad: 46984
+  relation: same
+  proposal: single-fit
+  oscar_id: 479
+  acronym: "Sentinel-6A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Nov 2020; CelesTrak launches 2020-086A on 2020-11-21, the same day"
+    - "OSCAR orbit Drifting orbit, 1336 km; CelesTrak 1332 x 1344 km, 66.04 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 30; left: 1"
+    - "Names: OSCAR 'Sentinel-6A' (Sentinel-6A); catalog 'SENTINEL-6A', 'S6 MICHAEL FREILICH', 'Sentinel-6 Michael Freilich', 'Sentinel-6'; equal after normalising: 'SENTINEL-6A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sentinel_6b
+  norad: 66514
+  relation: same
+  proposal: single-fit
+  oscar_id: 480
+  acronym: "Sentinel-6B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Nov 2025; CelesTrak launches 2025-264A on 2025-11-17, the same day"
+    - "OSCAR orbit Drifting orbit, 1336 km; CelesTrak 1332 x 1344 km, 66.04 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Sentinel-6B' (Sentinel-6B); catalog 'SENTINEL-6B', 'Sentinel-6B', 'Jason Continuity of Service B', 'Jason-CS B'; equal after normalising: 'SENTINEL-6B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: skysat_2
+  norad: 40072
+  relation: same
+  proposal: one-of-n
+  oscar_id: 631
+  acronym: "SkySat-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 08 Jul 2014; CelesTrak launches 2014-037D on 2014-07-08, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 600 km; CelesTrak 599 x 608 km, 98.41 deg"
+    - "Payloads launched in the date window: 8; ruled out by orbit: 1; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SkySat-2' (Sky Satellite - 2); catalog 'SKYSAT-B', 'SKYSAT 2', 'SkySat B', 'SkySat 2'; equal after normalising: 'SKYSAT 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: smap
+  norad: 40376
+  relation: same
+  proposal: one-of-n
+  oscar_id: 406
+  acronym: "SMAP"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 31 Jan 2015; CelesTrak launches 2015-003A on 2015-01-31, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 685 km; CelesTrak 681 x 683 km, 98.13 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 5; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SMAP' (Soil Moisture Active-Passive); catalog 'SMAP', 'NAIF205', 'Soil Moisture Active Passive'; equal after normalising: 'SMAP'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: smile
+  norad: 69123
+  relation: same
+  proposal: single-fit
+  oscar_id: 1155
+  acronym: "SMILE"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 19 May 2026; CelesTrak launches 2026-109A on 2026-05-19, the same day"
+    - "OSCAR orbit Cross-magnetosphere orbit; CelesTrak 7217 x 118774 km, 69.95 deg"
+    - "Payloads launched in the date window: 25; ruled out by orbit: 24; left: 1"
+    - "Names: OSCAR 'SMILE' (Solar wind Magnetosphere Ionosphere Link Explorer); catalog 'SMILE', 'Solar wind Magnetosphere Ionosphere Link Explorer'; equal after normalising: 'SMILE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: smos
+  norad: 36036
+  relation: same
+  proposal: one-of-n
+  oscar_id: 408
+  acronym: "SMOS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Nov 2009; CelesTrak launches 2009-059A on 2009-11-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 755 km; CelesTrak 759 x 760 km, 98.44 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SMOS' (Soil Moisture and Ocean Salinity); catalog 'SMOS', 'Soil Moisture and Ocean Salinity'; equal after normalising: 'SMOS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: soho
+  norad: 23726
+  relation: same
+  proposal: single-fit
+  oscar_id: 458
+  acronym: "SOHO"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Dec 1995; CelesTrak launches 1995-065A on 1995-12-02, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre EL1 (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'SOHO' (Solar and Heliospheric Observatory); catalog 'SOHO', 'Solar and Heliospheric Observatory', '1995-065A', '1995-065A SoHO'; equal after normalising: 'SOHO'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: solar_orbiter
+  norad: 45167
+  relation: same
+  proposal: single-fit
+  oscar_id: 548
+  acronym: "Solar Orbiter"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Feb 2020; CelesTrak launches 2020-010A on 2020-02-10, the same day"
+    - "OSCAR orbit Solar orbit; CelesTrak orbit centre SU (OSCAR sun: SU)"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'Solar Orbiter' (Solar Orbiter); catalog 'SOLAR ORBITER', 'Solar Orbiter', 'SOLO', 'NAIF144'; equal after normalising: 'SOLAR ORBITER'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: solar_1
+  norad: 65726
+  relation: same
+  proposal: one-of-n
+  oscar_id: 784
+  acronym: "SOLAR-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Sep 2025; CelesTrak launches 2025-215B on 2025-09-24, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre SU (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 70; ruled out by orbit: 67; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SOLAR-1' (Space Weather Follow-On at L1); catalog 'SWFO-L1', 'SWFO', 'Space weather Observations at L1 to Advance Readiness – 1', 'SOLAR-1'; equal after normalising: 'SOLAR-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: spot_6
+  norad: 38755
+  relation: same
+  proposal: one-of-n
+  oscar_id: 417
+  acronym: "SPOT-6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Sep 2012; CelesTrak launches 2012-047A on 2012-09-09, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 695 km; CelesTrak 697 x 699 km, 98.19 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SPOT-6' (Satellite Pour l’Observation de la Terre - 6); catalog 'SPOT 6', 'SPOT-6'; equal after normalising: 'SPOT 6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: spot_7
+  norad: 40053
+  relation: same
+  proposal: one-of-n
+  oscar_id: 418
+  acronym: "SPOT-7"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 Jun 2014; CelesTrak launches 2014-034A on 2014-06-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 695 km; CelesTrak 689 x 691 km, 98.04 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 0; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SPOT-7' (Satellite Pour l’Observation de la Terre - 7); catalog 'SPOT 7', 'Azersky', 'SPOT-7'; equal after normalising: 'SPOT 7'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sstl_s1_1
+  norad: 40715
+  relation: same
+  proposal: one-of-n
+  oscar_id: 668
+  acronym: "SSTL-S1 1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Jul 2015; CelesTrak launches 2015-032A on 2015-07-10, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 608 x 614 km, 97.62 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 0; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SSTL-S1 1' (Surrey Satellite Technology Ltd - S1 1); catalog 'DMC3-FM1', 'DMC 3-FM1', 'DMC3-1', 'TripleSat 1'; equal after normalising: 'SSTL-S1 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sstl_s1_2
+  norad: 40716
+  relation: same
+  proposal: one-of-n
+  oscar_id: 669
+  acronym: "SSTL-S1 2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Jul 2015; CelesTrak launches 2015-032B on 2015-07-10, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 608 x 614 km, 97.63 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 0; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SSTL-S1 2' (Surrey Satellite Technology Ltd - S1 2); catalog 'DMC3-FM2', 'DMC 3-FM2', 'DMC3-2', 'TripleSat 2'; equal after normalising: 'SSTL-S1 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sstl_s1_3
+  norad: 40717
+  relation: same
+  proposal: one-of-n
+  oscar_id: 670
+  acronym: "SSTL-S1 3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Jul 2015; CelesTrak launches 2015-032C on 2015-07-10, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 608 x 613 km, 97.63 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 0; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SSTL-S1 3' (Surrey Satellite Technology Ltd - S1 3); catalog 'DMC3-FM3', 'DMC 3-FM3', 'DMC3-3', 'TripleSat 3'; equal after normalising: 'SSTL-S1 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: sstl_s1_4
+  norad: 43618
+  relation: same
+  proposal: one-of-n
+  oscar_id: 766
+  acronym: "SSTL-S1 4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Sep 2018; CelesTrak launches 2018-071A on 2018-09-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 630 km; CelesTrak 559 x 578 km, 97.47 deg"
+    - "Payloads launched in the date window: 7; ruled out by orbit: 5; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SSTL-S1 4' (Surrey Satellite Technology Ltd - S1 4); catalog 'SSTL S1-4', 'S1-4', 'SSTL-S1 4', 'Beijing 2-4'; equal after normalising: 'SSTL S1-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: starlette
+  norad: 7646
+  relation: same
+  proposal: one-of-n
+  oscar_id: 419
+  acronym: "STARLETTE"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 06 Feb 1975; CelesTrak launches 1975-010A on 1975-02-06, the same day"
+    - "OSCAR orbit Drifting orbit, 812 km; CelesTrak 805 x 1106 km, 49.82 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 2; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'STARLETTE' (Satellite de Taille Adaptée avec Réflecteurs Laser pour les Etudes de la Terre); catalog 'STARLETTE', 'Starlette'; equal after normalising: 'STARLETTE'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_1
+  norad: 53815
+  relation: same
+  proposal: single-fit
+  oscar_id: 964
+  acronym: "StriX-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Sep 2022; CelesTrak launches 2022-113A on 2022-09-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 574 km; CelesTrak 423 x 429 km, 97.43 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'StriX-1' (StriX-1); catalog 'STRIX-1', 'StriX-1'; equal after normalising: 'STRIX-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_2
+  norad: 62406
+  relation: same
+  proposal: single-fit
+  oscar_id: 1094
+  acronym: "StriX-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Dec 2024; CelesTrak launches 2024-248A on 2024-12-21, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 570 km; CelesTrak 525 x 546 km, 97.65 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 30; left: 1"
+    - "Names: OSCAR 'StriX-2' (StriX-2); catalog 'STRIX-2', 'STRIX 2', 'StriX-2'; equal after normalising: 'STRIX-2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_3
+  norad: 59224
+  relation: same
+  proposal: single-fit
+  oscar_id: 1056
+  acronym: "StriX-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Mar 2024; CelesTrak launches 2024-047A on 2024-03-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 580 km; CelesTrak 494 x 509 km, 97.68 deg"
+    - "Payloads launched in the date window: 26; ruled out by orbit: 25; left: 1"
+    - "Names: OSCAR 'StriX-3' (StriX-3); catalog 'STRIX-3', 'StriX-3'; equal after normalising: 'STRIX-3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_4
+  norad: 60352
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1069
+  acronym: "StriX-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Aug 2024; CelesTrak launches 2024-137A on 2024-08-02, the same day"
+    - "OSCAR orbit Drifting orbit, 545 km; CelesTrak 441 x 466 km, 43.01 deg"
+    - "Payloads launched in the date window: 25; ruled out by orbit: 2; left: 23; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'StriX-4' (StriX-4); catalog 'STRIX-4', 'StriX-4'; equal after normalising: 'STRIX-4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_5
+  norad: 65971
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1148
+  acronym: "StriX-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 14 Oct 2025; CelesTrak launches 2025-229A on 2025-10-14, the same day"
+    - "OSCAR orbit Drifting orbit, 583 km; CelesTrak 525 x 575 km, 41.93 deg"
+    - "Payloads launched in the date window: 47; ruled out by orbit: 21; left: 26; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'StriX-5' (StriX-5); catalog 'STRIX-5', 'StriX-5'; equal after normalising: 'STRIX-5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_6
+  norad: 68291
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1093
+  acronym: "StriX-6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 20 Mar 2026; CelesTrak launches 2026-056A on 2026-03-20, the same day"
+    - "OSCAR orbit Drifting orbit, 545 km; CelesTrak 549 x 571 km, 50.28 deg"
+    - "Payloads launched in the date window: 55; ruled out by orbit: 0; left: 55; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'StriX-6' (StriX-6); catalog 'STRIX-6', 'StriX-6'; equal after normalising: 'STRIX-6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_7
+  norad: 69177
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1171
+  acronym: "StriX-7"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 May 2026; CelesTrak launches 2026-112A on 2026-05-22, the same day"
+    - "OSCAR orbit Drifting orbit, 545 km; CelesTrak 542 x 577 km, 44.91 deg"
+    - "Payloads launched in the date window: 30; ruled out by orbit: 0; left: 30; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'StriX-7' (StriX-7); catalog 'STRIX-7', 'Strix-7'; equal after normalising: 'STRIX-7'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: strix_8
+  norad: 69701
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1174
+  acronym: "StriX-8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 26 Jun 2026; CelesTrak launches 2026-146A on 2026-06-26, the same day"
+    - "OSCAR orbit Drifting orbit, 545 km; CelesTrak 547 x 554 km, 41.99 deg"
+    - "Payloads launched in the date window: 25; ruled out by orbit: 0; left: 25; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'StriX-8' (StriX-8); catalog 'STRIX-8', 'Strix-8'; equal after normalising: 'STRIX-8'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_1_01
+  norad: 52320
+  relation: same
+  proposal: one-of-n
+  oscar_id: 938
+  acronym: "SuperView Neo-1 01"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Apr 2022; CelesTrak launches 2022-043A on 2022-04-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 511 x 515 km, 97.33 deg"
+    - "Payloads launched in the date window: 61; ruled out by orbit: 59; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-1 01' (SuperView Neo-1 01); catalog 'SUPERVIEW NEO-1 01', 'Siwei Gaojing 1-01', 'Siwei 1-01', 'SuperView Neo 1-01'; equal after normalising: 'SUPERVIEW NEO-1 01'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_1_02
+  norad: 52322
+  relation: same
+  proposal: one-of-n
+  oscar_id: 939
+  acronym: "SuperView Neo-1 02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 29 Apr 2022; CelesTrak launches 2022-043C on 2022-04-29, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 511 x 515 km, 97.32 deg"
+    - "Payloads launched in the date window: 61; ruled out by orbit: 59; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-1 02' (SuperView Neo-1 02); catalog 'SUPERVIEW NEO-1 02', 'Siwei Gaojing 1-02', 'Siwei 1-02', 'SuperView Neo 1-02'; equal after normalising: 'SUPERVIEW NEO-1 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_2_01
+  norad: 53128
+  relation: same
+  proposal: one-of-n
+  oscar_id: 962
+  acronym: "SuperView Neo-2 01"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Jul 2022; CelesTrak launches 2022-082A on 2022-07-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 491 x 494 km, 97.39 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 1; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-2 01' (SuperView Neo-2 01); catalog 'SUPERVIEW NEO-2 01', 'Siwei Gaojing 2-01', 'Siwei 2-01'; equal after normalising: 'SUPERVIEW NEO-2 01'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_2_02
+  norad: 53130
+  relation: same
+  proposal: one-of-n
+  oscar_id: 963
+  acronym: "SuperView Neo-2 02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Jul 2022; CelesTrak launches 2022-082C on 2022-07-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 491 x 494 km, 97.39 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 1; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-2 02' (SuperView Neo-2 02); catalog 'SUPERVIEW NEO-2 02', 'Siwei Gaojing 2-02', 'Siwei 2-02'; equal after normalising: 'SUPERVIEW NEO-2 02'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_2_03
+  norad: 62079
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1091
+  acronym: "SuperView Neo-2 03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Nov 2024; CelesTrak launches 2024-218B on 2024-11-24, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 506 x 508 km, 97.44 deg"
+    - "Payloads launched in the date window: 50; ruled out by orbit: 43; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-2 03' (SuperView Neo-2 03); catalog 'SUPERVIEW NEO-2 03', 'Siwei Gaojing 2-03', 'Siwei 2-03'; equal after normalising: 'SUPERVIEW NEO-2 03'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_2_04
+  norad: 62080
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1092
+  acronym: "SuperView Neo-2 04"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 24 Nov 2024; CelesTrak launches 2024-218C on 2024-11-24, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 495 km; CelesTrak 506 x 508 km, 97.44 deg"
+    - "Payloads launched in the date window: 50; ruled out by orbit: 43; left: 7; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SuperView Neo-2 04' (SuperView Neo-2 04); catalog 'SUPERVIEW NEO-2 04', 'Siwei Gaojing 2-04', 'Siwei 2-04'; equal after normalising: 'SUPERVIEW NEO-2 04'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: superview_neo_3_01
+  norad: 59510
+  relation: same
+  proposal: single-fit
+  oscar_id: 1059
+  acronym: "SuperView Neo-3-01"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Apr 2024; CelesTrak launches 2024-072A on 2024-04-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 500 km; CelesTrak 497 x 497 km, 97.40 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'SuperView Neo-3-01' (SuperView Neo-3-01); catalog 'SUPERVIEW NEO-3 01', 'Siwei Gaojing 3-01', 'Siwei 3-01'; equal after normalising: 'SUPERVIEW NEO-3 01'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: swarm_a
+  norad: 39452
+  relation: same
+  proposal: one-of-n
+  oscar_id: 658
+  acronym: "SWARM-A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Nov 2013; CelesTrak launches 2013-067B on 2013-11-22, the same day"
+    - "OSCAR orbit Drifting orbit, 460 km; CelesTrak 409 x 413 km, 87.33 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 0; left: 35; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SWARM-A' (The Earth’s Magnetic Field and Environment Explorers - A); catalog 'SWARM A', 'Swarm A', 'Swarm 1', 'Swarm-A'; equal after normalising: 'SWARM A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: swarm_b
+  norad: 39451
+  relation: same
+  proposal: one-of-n
+  oscar_id: 423
+  acronym: "SWARM-B"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Nov 2013; CelesTrak launches 2013-067A on 2013-11-22, the same day"
+    - "OSCAR orbit Drifting orbit, 530 km; CelesTrak 476 x 480 km, 87.74 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 6; left: 29; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SWARM-B' (The Earth’s Magnetic Field and Environment Explorers - B); catalog 'SWARM B', 'Swarm B', 'Swarm 2'; equal after normalising: 'SWARM B'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: swarm_c
+  norad: 39453
+  relation: same
+  proposal: one-of-n
+  oscar_id: 422
+  acronym: "SWARM-C"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Nov 2013; CelesTrak launches 2013-067C on 2013-11-22, the same day"
+    - "OSCAR orbit Drifting orbit, 460 km; CelesTrak 409 x 413 km, 87.33 deg"
+    - "Payloads launched in the date window: 35; ruled out by orbit: 0; left: 35; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'SWARM-C' (The Earth’s Magnetic Field and Environment Explorers - C); catalog 'SWARM C', 'Swarm C', 'Swarm 3'; equal after normalising: 'SWARM C'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: swot
+  norad: 54754
+  relation: same
+  proposal: single-fit
+  oscar_id: 424
+  acronym: "SWOT"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Dec 2022; CelesTrak launches 2022-173A on 2022-12-16, the same day"
+    - "OSCAR orbit Drifting orbit, 891 km; CelesTrak 893 x 894 km, 77.61 deg"
+    - "Payloads launched in the date window: 58; ruled out by orbit: 57; left: 1"
+    - "Names: OSCAR 'SWOT' (Surface Water and Ocean Topography); catalog 'SWOT', 'Surface Water Ocean Topography', 'SWOT mission'; equal after normalising: 'SWOT'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tanager_1
+  norad: 60507
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1018
+  acronym: "Tanager-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-149AR on 2024-08-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 520 km; CelesTrak 430 x 432 km, 97.23 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 38; left: 89; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tanager-1' (Tanager-1); catalog 'TANAGER-1', 'TANAGER-1 4001', 'Tanager 1', 'Tanager 4001'; equal after normalising: 'TANAGER-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tandem_x
+  norad: 36605
+  relation: same
+  proposal: single-fit
+  oscar_id: 426
+  acronym: "TanDEM-X"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Jun 2010; CelesTrak launches 2010-030A on 2010-06-21, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 515 km; CelesTrak 507 x 510 km, 97.45 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'TanDEM-X' (TerraSAR-X Add-oN for Digital Elevation Measurement); catalog 'TANDEM-X', 'TANDEM X', 'Tandem-X', 'TDX'; equal after normalising: 'TANDEM-X'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: terra
+  norad: 25994
+  relation: same
+  proposal: single-fit
+  oscar_id: 81
+  acronym: "Terra"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Dec 1999; CelesTrak launches 1999-068A on 1999-12-18, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 690 km; CelesTrak 687 x 692 km, 97.93 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'Terra' (Earth Observation System - Terra); catalog 'TERRA', 'Terra', 'EOS AM-1', 'NAIF142'; equal after normalising: 'TERRA'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: terrasar_x
+  norad: 31698
+  relation: same
+  proposal: single-fit
+  oscar_id: 427
+  acronym: "TerraSAR-X"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Jun 2007; CelesTrak launches 2007-026A on 2007-06-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 515 km; CelesTrak 507 x 510 km, 97.45 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'TerraSAR-X' (TerraSAR-X); catalog 'TERRASAR-X', 'TERRA SAR X', 'TerraSAR-X', 'TSX'; equal after normalising: 'TERRASAR-X'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: themis_a
+  norad: 30580
+  relation: same
+  proposal: one-of-n
+  oscar_id: 819
+  acronym: "THEMIS-A"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Feb 2007; CelesTrak launches 2007-004A on 2007-02-17, the same day"
+    - "OSCAR orbit Cross-magnetosphere orbit; CelesTrak 1362 x 77988 km, 9.70 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 2; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'THEMIS-A' (Time History of Events and Macroscale Interactions during Substorms - A); catalog 'THEMIS A', 'THEMIS P5', 'THEMIS-A', 'Explorer 85'; equal after normalising: 'THEMIS A'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: themis_d
+  norad: 30797
+  relation: same
+  proposal: one-of-n
+  oscar_id: 460
+  acronym: "THEMIS-D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Feb 2007; CelesTrak launches 2007-004D on 2007-02-17, the same day"
+    - "OSCAR orbit Cross-magnetosphere orbit; CelesTrak 1478 x 77872 km, 8.42 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 2; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'THEMIS-D' (Time History of Events and Macroscale Interactions during Substorms - D); catalog 'THEMIS D', 'THEMIS P3', 'THEMIS-D', 'Explorer 88'; equal after normalising: 'THEMIS D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: themis_e
+  norad: 30798
+  relation: same
+  proposal: one-of-n
+  oscar_id: 820
+  acronym: "THEMIS-E"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 17 Feb 2007; CelesTrak launches 2007-004E on 2007-02-17, the same day"
+    - "OSCAR orbit Cross-magnetosphere orbit; CelesTrak 968 x 78386 km, 7.36 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 2; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'THEMIS-E' (Time History of Events and Macroscale Interactions during Substorms - E); catalog 'THEMIS E', 'THEMIS P4', 'THEMIS-E', 'Explorer 89'; equal after normalising: 'THEMIS E'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: theos_1
+  norad: 33396
+  relation: same
+  proposal: single-fit
+  oscar_id: 429
+  acronym: "THEOS-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Oct 2008; CelesTrak launches 2008-049A on 2008-10-01, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 822 km; CelesTrak 824 x 826 km, 98.54 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'THEOS-1' (Thailand Earth Observation System - 1); catalog 'THEOS', 'Thaichote', 'THEOS-1', 'Thailand Earth Observation System 1'; equal after normalising: 'THEOS-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: timed
+  norad: 26998
+  relation: same
+  proposal: single-fit
+  oscar_id: 430
+  acronym: "TIMED"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 07 Dec 2001; CelesTrak launches 2001-055B on 2001-12-07, the same day"
+    - "OSCAR orbit Drifting orbit, 625 km; CelesTrak 580 x 581 km, 74.07 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'TIMED' (Thermosphere, Ionosphere, Mesosphere Energetics and Dynamics mission); catalog 'TIMED', 'Solar Terrestrial Probe 1', 'STP 1', 'Thermosphere Ionosphere Mesosphere Energetics and Dynamics'; equal after normalising: 'TIMED'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s1
+  norad: 60479
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1074
+  acronym: "Tomorrow-S1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-149M on 2024-08-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 487 km; CelesTrak 459 x 464 km, 97.36 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 27; left: 100; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S1' (Tomorrow Microwave Sounder 1); catalog 'TOMORROW-S1', 'Tomorrow-S1'; equal after normalising: 'TOMORROW-S1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s10
+  norad: 67398
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1110
+  acronym: "Tomorrow-S10"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Jan 2026; CelesTrak launches 2026-004AM on 2026-01-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 499 x 509 km, 97.47 deg"
+    - "Payloads launched in the date window: 69; ruled out by orbit: 29; left: 40; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S10' (Tomorrow Microwave Sounder 10); catalog 'TOMORROW-S10', 'Tomorrow-S10'; equal after normalising: 'TOMORROW-S10'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s11
+  norad: 67399
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1158
+  acronym: "Tomorrow-S11"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Jan 2026; CelesTrak launches 2026-004AN on 2026-01-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 510 km; CelesTrak 499 x 509 km, 97.46 deg"
+    - "Payloads launched in the date window: 69; ruled out by orbit: 29; left: 40; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S11' (Tomorrow Microwave Sounder 11); catalog 'TOMORROW-S11', 'Tomorrow-S11'; equal after normalising: 'TOMORROW-S11'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s2
+  norad: 60485
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1077
+  acronym: "Tomorrow-S2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 16 Aug 2024; CelesTrak launches 2024-149T on 2024-08-16, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 487 km; CelesTrak 459 x 464 km, 97.37 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 27; left: 100; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S2' (Tomorrow Microwave Sounder 2); catalog 'TOMORROW-S2', 'Tomorrow-S2'; equal after normalising: 'TOMORROW-S2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s3
+  norad: 62392
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1095
+  acronym: "Tomorrow-S3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Dec 2024; CelesTrak launches 2024-247R on 2024-12-21, the same day"
+    - "OSCAR orbit Drifting orbit, 495 km; CelesTrak 472 x 475 km, 45.00 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 5; left: 26; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S3' (Tomorrow Microwave Sounder 3); catalog 'TOMORROW-S3', 'Tomorrow-S3'; equal after normalising: 'TOMORROW-S3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s4
+  norad: 62386
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1096
+  acronym: "Tomorrow-S4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Dec 2024; CelesTrak launches 2024-247K on 2024-12-21, the same day"
+    - "OSCAR orbit Drifting orbit, 495 km; CelesTrak 470 x 477 km, 44.98 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 5; left: 26; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S4' (Tomorrow Microwave Sounder 4); catalog 'TOMORROW-S4', 'Tomorrow-S4'; equal after normalising: 'TOMORROW-S4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s5
+  norad: 63234
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1105
+  acronym: "Tomorrow-S5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Mar 2025; CelesTrak launches 2025-052AA on 2025-03-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 514 km; CelesTrak 491 x 499 km, 97.38 deg"
+    - "Payloads launched in the date window: 95; ruled out by orbit: 31; left: 64; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S5' (Tomorrow Microwave Sounder 5); catalog 'TOMORROW-S5', 'Tomorrow-S5'; equal after normalising: 'TOMORROW-S5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s6
+  norad: 63225
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1106
+  acronym: "Tomorrow-S6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Mar 2025; CelesTrak launches 2025-052R on 2025-03-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 514 km; CelesTrak 492 x 498 km, 97.38 deg"
+    - "Payloads launched in the date window: 95; ruled out by orbit: 31; left: 64; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S6' (Tomorrow Microwave Sounder 6); catalog 'TOMORROW-S6', 'Tomorrow-S6'; equal after normalising: 'TOMORROW-S6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s7
+  norad: 63631
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1107
+  acronym: "Tomorrow-S7"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 22 Apr 2025; CelesTrak launches 2025-081B on 2025-04-22, the same day"
+    - "OSCAR orbit Drifting orbit, 577 km; CelesTrak 565 x 568 km, 45.39 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S7' (Tomorrow Microwave Sounder 7); catalog 'TOMORROW-S7', 'Tomorrow-S7'; equal after normalising: 'TOMORROW-S7'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s8
+  norad: 66308
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1108
+  acronym: "Tomorrow-S8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Nov 2025; CelesTrak launches 2025-248R on 2025-11-02, the same day"
+    - "OSCAR orbit Drifting orbit, 517 km; CelesTrak 498 x 503 km, 45.40 deg"
+    - "Payloads launched in the date window: 20; ruled out by orbit: 2; left: 18; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S8' (Tomorrow Microwave Sounder 8); catalog 'TOMORROW-S8', 'Tomorrow-S8'; equal after normalising: 'TOMORROW-S8'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: tomorrow_s9
+  norad: 66309
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1109
+  acronym: "Tomorrow-S9"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Nov 2025; CelesTrak launches 2025-248S on 2025-11-02, the same day"
+    - "OSCAR orbit Drifting orbit, 517 km; CelesTrak 498 x 503 km, 45.40 deg"
+    - "Payloads launched in the date window: 20; ruled out by orbit: 2; left: 18; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Tomorrow-S9' (Tomorrow Microwave Sounder 9); catalog 'TOMORROW-S9', 'Tomorrow-S9'; equal after normalising: 'TOMORROW-S9'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: triton
+  norad: 58017
+  relation: same
+  proposal: one-of-n
+  oscar_id: 451
+  acronym: "TRITON "
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 09 Oct 2023; CelesTrak launches 2023-155B on 2023-10-09, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 628 km; CelesTrak 593 x 605 km, 97.83 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 21; left: 10; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'TRITON ' (TRITON also (FORMOSAT-7R)); catalog 'FORMOSAT-7R (TRITON)', 'FORMOSAT-7R/TRITON', 'FORMOSAT-7R', 'TRITON'; equal after normalising: 'FORMOSAT-7R (TRITON)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: vens
+  norad: 42901
+  relation: same
+  proposal: one-of-n
+  oscar_id: 449
+  acronym: "VENµS"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 Aug 2017; CelesTrak launches 2017-044B on 2017-08-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 720 km; CelesTrak 515 x 520 km, 97.26 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 0; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'VENµS' (Vegetation and Environment monitoring on a New Micro-Satellite); catalog 'VENUS', 'Venmus', 'Venus', 'VENµS'; equal after normalising: 'VENµS'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: wind
+  norad: 23333
+  relation: same
+  proposal: single-fit
+  oscar_id: 488
+  acronym: "WIND"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 01 Nov 1994; CelesTrak launches 1994-071A on 1994-11-01, the same day"
+    - "OSCAR orbit Lagrange libration point 1; CelesTrak orbit centre EL1 (OSCAR l1: EL1 or SU)"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'WIND' (WIND); catalog 'WIND', 'Wind', 'IPL', 'GGS/Wind'; equal after normalising: 'WIND'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_1
+  norad: 59625
+  relation: same
+  proposal: one-of-n
+  oscar_id: 976
+  acronym: "WorldView Legion-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 May 2024; CelesTrak launches 2024-081A on 2024-05-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 524 km; CelesTrak 511 x 520 km, 97.49 deg"
+    - "Payloads launched in the date window: 27; ruled out by orbit: 25; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-1' (WorldView Legion-1); catalog 'LEGION 1', 'WorldView Legion 1', 'Legion 1'; equal after normalising: 'WorldView Legion 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_2
+  norad: 59626
+  relation: same
+  proposal: one-of-n
+  oscar_id: 977
+  acronym: "WorldView Legion-2"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 02 May 2024; CelesTrak launches 2024-081B on 2024-05-02, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 540 km; CelesTrak 510 x 521 km, 97.49 deg"
+    - "Payloads launched in the date window: 27; ruled out by orbit: 25; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-2' (WorldView Legion-2); catalog 'LEGION 2', 'WorldView Legion 2', 'Legion 2'; equal after normalising: 'WorldView Legion 2'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_3
+  norad: 60452
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1071
+  acronym: "WorldView Legion-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Aug 2024; CelesTrak launches 2024-146A on 2024-08-15, the same day"
+    - "OSCAR orbit Drifting orbit, 540 km; CelesTrak 515 x 524 km, 45.00 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 26; left: 101; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-3' (WorldView Legion-3); catalog 'LEGION 3', 'WorldView Legion 3', 'Legion 3'; equal after normalising: 'WorldView Legion 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_4
+  norad: 60453
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1072
+  acronym: "WorldView Legion-4"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Aug 2024; CelesTrak launches 2024-146B on 2024-08-15, the same day"
+    - "OSCAR orbit Drifting orbit, 528 km; CelesTrak 515 x 524 km, 45.00 deg"
+    - "Payloads launched in the date window: 127; ruled out by orbit: 26; left: 101; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-4' (WorldView Legion-4); catalog 'LEGION 4', 'WorldView Legion 4', 'Legion 4'; equal after normalising: 'WorldView Legion 4'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_5
+  norad: 62900
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1103
+  acronym: "WorldView Legion-5"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Feb 2025; CelesTrak launches 2025-025A on 2025-02-04, the same day"
+    - "OSCAR orbit Drifting orbit, 710 km; CelesTrak 512 x 526 km, 45.00 deg"
+    - "Payloads launched in the date window: 27; ruled out by orbit: 13; left: 14; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-5' (WorldView Legion-5); catalog 'LEGION 5', 'WorldView Legion 5', 'Legion 5'; equal after normalising: 'WorldView Legion 5'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_legion_6
+  norad: 62901
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1104
+  acronym: "WorldView Legion-6"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 04 Feb 2025; CelesTrak launches 2025-025B on 2025-02-04, the same day"
+    - "OSCAR orbit Drifting orbit, 455 km; CelesTrak 512 x 527 km, 45.00 deg"
+    - "Payloads launched in the date window: 27; ruled out by orbit: 0; left: 27; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'WorldView Legion-6' (WorldView Legion-6); catalog 'LEGION 6', 'WorldView Legion 6', 'Legion 6'; equal after normalising: 'WorldView Legion 6'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_1
+  norad: 32060
+  relation: same
+  proposal: single-fit
+  oscar_id: 498
+  acronym: "WorldView-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 18 Sep 2007; CelesTrak launches 2007-041A on 2007-09-18, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 499 km; CelesTrak 490 x 495 km, 97.39 deg"
+    - "Payloads launched in the date window: 2; ruled out by orbit: 1; left: 1"
+    - "Names: OSCAR 'WorldView-1' (WorldView-1); catalog 'WORLDVIEW-1 (WV-1)', 'WORLDVIEW 1', 'WorldView-1', 'WV1'; equal after normalising: 'WORLDVIEW-1 (WV-1)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: worldview_3
+  norad: 40115
+  relation: same
+  proposal: single-fit
+  oscar_id: 500
+  acronym: "WorldView-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 13 Aug 2014; CelesTrak launches 2014-048A on 2014-08-13, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 770 km; CelesTrak 611 x 614 km, 97.84 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'WorldView-3' (WorldView-3); catalog 'WORLDVIEW-3 (WV-3)', 'WORLDVIEW 3', 'WorldView-3', 'WV3'; equal after normalising: 'WORLDVIEW-3 (WV-3)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: wsf_m1
+  norad: 59481
+  relation: same
+  proposal: single-fit
+  oscar_id: 953
+  acronym: "WSF-M1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Apr 2024; CelesTrak launches 2024-070A on 2024-04-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 854 km; CelesTrak 820 x 826 km, 98.72 deg"
+    - "Payloads launched in the date window: 26; ruled out by orbit: 25; left: 1"
+    - "Names: OSCAR 'WSF-M1' (Weather System Follow-on Microwave); catalog 'WSF-M', 'WSF-M SV1', 'Weather System Follow-on Microwave 1', 'WSF-M 1'; equal after normalising: 'WSF-M 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: xcube_1
+  norad: 62400
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1141
+  acronym: "XCUBE-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 21 Dec 2024; CelesTrak launches 2024-247Z on 2024-12-21, the same day"
+    - "OSCAR orbit Drifting orbit, 508 km; CelesTrak 470 x 472 km, 45.00 deg"
+    - "Payloads launched in the date window: 31; ruled out by orbit: 5; left: 26; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'XCUBE-1' (XCUBE-1); catalog 'XCUBE-1'; equal after normalising: 'XCUBE-1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: xmm_newton
+  norad: 25989
+  relation: same
+  proposal: single-fit
+  oscar_id: 709
+  acronym: "XMM-Newton"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 10 Dec 1999; CelesTrak launches 1999-066A on 1999-12-10, the same day"
+    - "OSCAR orbit Drifting orbit, 40000 km; CelesTrak 29504 x 91621 km, 63.70 deg"
+    - "Payloads launched in the date window: 1; ruled out by orbit: 0; left: 1"
+    - "Names: OSCAR 'XMM-Newton' (X-ray Multi-Mirror Mission Observatory - Newton); catalog 'XMM-NEWTON', 'XMM', 'XMM-Newton', 'High Throughput X-ray Spectroscopy Mission'; equal after normalising: 'XMM-NEWTON'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: yam_8
+  norad: 63254
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1170
+  acronym: "YAM-8"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 15 Mar 2025; CelesTrak launches 2025-052AW on 2025-03-15, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 540 km; CelesTrak 542 x 544 km, 97.68 deg"
+    - "Payloads launched in the date window: 95; ruled out by orbit: 35; left: 60; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'YAM-8' (Yet Another Mission-8); catalog 'YAM-8', 'Yet Another Mission 8'; equal after normalising: 'YAM-8'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: yunhai_1
+  norad: 41857
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1062
+  acronym: "Yunhai-1"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Nov 2016; CelesTrak launches 2016-068A on 2016-11-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 780 km; CelesTrak 782 x 785 km, 98.58 deg"
+    - "Payloads launched in the date window: 9; ruled out by orbit: 4; left: 5; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Yunhai-1' (Yunhai-1); catalog 'YUNHAI-1 01', 'YUNHAI 1', 'Yunhai 1-01', 'Yunhai-1 01 xing'; equal after normalising: 'YUNHAI 1'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: yunhai_3
+  norad: 54235
+  relation: same
+  proposal: one-of-n
+  oscar_id: 1061
+  acronym: "Yunhai-3"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 11 Nov 2022; CelesTrak launches 2022-151A on 2022-11-11, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 870 km; CelesTrak 847 x 849 km, 98.82 deg"
+    - "Payloads launched in the date window: 5; ruled out by orbit: 3; left: 2; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'Yunhai-3' (Yunhai-3); catalog 'YUNHAI-3 01', 'YUNHAI 3', 'Yunhai-3', 'Yunhai-3 01'; equal after normalising: 'YUNHAI 3'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: zy_1_2d
+  norad: 44528
+  relation: same
+  proposal: one-of-n
+  oscar_id: 790
+  acronym: "ZY-1-2D"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 12 Sep 2019; CelesTrak launches 2019-059A on 2019-09-12, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 781 km; CelesTrak 772 x 776 km, 98.65 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 0; left: 3; names equal to OSCAR's: 1"
+    - "Names: OSCAR 'ZY-1-2D' (Zi Yuan 1-2D); catalog 'ZY-1 02D', 'Zi Yuan 1-02D', 'Ziyuan 1-02D'; equal after normalising: 'ZY-1 02D'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: zy_3_02
+  norad: 41556
+  relation: same
+  proposal: single-fit
+  oscar_id: 677
+  acronym: "ZY-3-02"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 30 May 2016; CelesTrak launches 2016-033A on 2016-05-30, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 506 km; CelesTrak 492 x 512 km, 97.37 deg"
+    - "Payloads launched in the date window: 4; ruled out by orbit: 3; left: 1"
+    - "Names: OSCAR 'ZY-3-02' (Zi Yuan - 3-02); catalog 'ZIYUAN 3-02 (ZY 3-02)', 'ZY 3 2', 'Zi Yuan 3-02', 'ZY-3 02'; equal after normalising: 'ZIYUAN 3-02 (ZY 3-02)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+
+- slug: zy_3_03
+  norad: 45939
+  relation: same
+  proposal: single-fit
+  oscar_id: 863
+  acronym: "ZY-3-03"
+  read: 2026-11-18
+  evidence:
+    - "OSCAR launch date 25 Jul 2020; CelesTrak launches 2020-051A on 2020-07-25, the same day"
+    - "OSCAR orbit Sunsynchronous orbit, 506 km; CelesTrak 497 x 507 km, 97.52 deg"
+    - "Payloads launched in the date window: 3; ruled out by orbit: 2; left: 1"
+    - "Names: OSCAR 'ZY-3-03' (Zi Yuan - 3-03); catalog 'ZIYUAN 3-03 (ZY 3-03)', 'ZINYUAN-3', 'Zi Yuan 3-03', 'ZY-3 03'; equal after normalising: 'ZIYUAN 3-03 (ZY 3-03)'"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
