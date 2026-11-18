@@ -516,5 +516,47 @@ use), one entry per source id the items name, from the snapshot's lane records (
 2. **Why:** COP's ledger reads it, so a kept item neither ends nor counts as seen again (source-level sightings,
    built 15 Nov 2026, landed 18 Nov). A new source id on the items needs its line in `SOURCE_LANES`.
 
+## Object pages (`orbit-2.20`, 18 Nov 2026)
+Tom, 18 Nov 2026: "Yes, build it" (design `[local path]`, globe option A). Split
+agreed the same day with the catalog session: the TIC satellite catalog (build step 6) supplies the data and the rules
+note, Orbit draws the page.
+1. **Address:** `object.html?n=<NORAD number>`, or `?j=<GCAT JCAT id>` for an object without one (GCAT's `S` ids are
+   read as NORAD numbers). Keys only; names never move a page.
+2. **Data:** the update run downloads `catalog-shards.tar.gz` from release `catalog` once (`tools/orbit.py
+   object-data`, `orbit/objpage.py`) and unpacks it into `site/data/catalog/` (shards, `search.json`, `rules.json`,
+   and Orbit's manifest `index.json`). Only the expected file names are written; anything else refuses the whole
+   archive and the last copy stays. A missing archive does not stop the deploy; the page says the catalog is not on
+   the site.
+3. **Search** (`search.js`, on the main page and every object page): loads the index on first use; exact NORAD
+   number or JCAT id, then COSPAR ID (a whole launch, "1998-067", lists its pieces in letter order, numbered ones
+   first), then names from every source (exact, starting with, a word starting with, containing; payloads and
+   objects in orbit first).
+4. **The page:** header (each source's status, owner, state and launch date, side by side, with the source named);
+   each source's orbit as it states it, never merged (GCAT with its elements' date, CelesTrak with its file's
+   time) and the regime it reads as; the globe; what Orbit holds; names and sources; citations. Dates the sources
+   give as days are written with their year and never moved to another time zone. A note when the catalog on the
+   site is older than the rules note's `stale_after_hours` (36).
+5. **Globe (option A):** drawn only from an element set Orbit already holds: a TIP object's set (its ground track over
+   an open window, drag kept, with TIP's point), a listed orbit change's newest set, or a new launch's CelesTrak set;
+   the newest by epoch, named with its source and epoch. Loaded only on request. Otherwise a to-scale drawing of the
+   orbit's size, shape and tilt from the best-ranked source's perigee, apogee and inclination, saying the plane's
+   orientation and the object's position are not known from these. No new request. The watch list's other sets
+   are never drawn.
+6. **What Orbit holds:** TIP messages kept in the daily archive and this run's reply, TIP's check against the
+   reentry, GCAT's reentry, listed orbit changes (with the disclaimer's short form and the day first listed), SWF
+   RPO rows (the other object linked), GCAT changes from the latest reading, breakups, the launch if within 30 days.
+   The section always ends with what Orbit keeps and since when, so an empty section never reads as "nothing
+   happened".
+7. **Names and sources:** drawn from `rules.json`: names in the catalog's rank order with source, field, basis, read
+   date and reference; each source's record side by side; "Sources differ" with the rules note's explanation; name
+   swaps touching the object. A decay date is shown only from a source that says the object has left orbit (GCAT gives
+   a date for docked and grouped objects too).
+8. **Links:** every table row on the main page with a number, and each object named in the daily lead (lead parts
+   `{"s": name, "o": key}`), links to its page.
+9. Checked 18 Nov 2026 on a local build (live snapshot of 19:26 UTC, the catalog session's local shards): ISS, Prowler
+   (A04907), Starlink 30221, USA 270 (globe drawn from its listed change's set), an unknown number, phone width and
+   dark mode in headless Edge: no sideways scroll; console errors only a local `favicon.ico` 404 and Cesium's three
+   inline-style CSP refusals, which the main page's globe shows too.
+
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).

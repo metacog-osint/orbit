@@ -33,6 +33,7 @@ python tools/serve.py                      # http://127.0.0.1:8761 with _headers
 python tools/orbit.py catalog | spacetrack-catalog | catalog-sources   # the TIC catalog (local)
 python tools/orbit.py geo [--day] [--out data/geo] [--upload]           # GEO region
 python tools/orbit.py ledger | maneuver-report | maneuver-case
+python tools/orbit.py object-data         # object pages: catalog shards into site/data/catalog (method.md)
 ```
 GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `tools/geo_callouts.py` and
 `tools/geo_page.py build DIR site --snapshot data/snapshot.json` (local steps in `doctrine/method.md`, "The GEO page").

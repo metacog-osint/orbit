@@ -9,8 +9,9 @@ says where it comes from and links to its card. A source that was not read this 
 while, gets its own line: no line ever reads as "nothing happened" for lack of data. Observations only: no
 probability, warning or judgment of why.
 
-A line is {"kind", "href", "source", "parts"}. `parts` mixes text with {"t": ISO time}, {"d": ISO date} and
-{"cc": ISO country code} so the page writes times in the viewer's zone and countries by name.
+A line is {"kind", "href", "source", "parts"}. `parts` mixes text with {"t": ISO time}, {"d": ISO date},
+{"cc": ISO country code} and, from orbit-2.20, {"s": an object's name, "o": its NORAD number or JCAT id} so the
+page writes times in the viewer's zone and countries by name, and links each object to its page.
 """
 from __future__ import annotations
 
@@ -48,6 +49,12 @@ def _iso(t: datetime) -> str:
 
 def _plural(n: int, one: str, many: str | None = None) -> str:
     return f"{n} {one if n == 1 else (many or one + 's')}"
+
+
+def _obj(name: str, norad=None, jcat=None):
+    """An object's name, with its key for the page's link (orbit-2.20); plain text when it has neither."""
+    key = str(norad).lstrip("0") or None if norad not in (None, "") else jcat
+    return {"s": name, "o": key} if key else name
 
 
 def _names(parts: list, items: list, render) -> None:
@@ -94,7 +101,7 @@ def reentries_ahead(snap: dict, now: datetime) -> dict | None:
     soon.sort(key=lambda o: (not o.get("high_interest"), o["decay_epoch"]))
     parts = [_plural(len(soon), "object") + (" is" if len(soon) == 1 else " are") +
              " predicted to reenter in the next 24 hours"]
-    _names(parts, soon, lambda o: [f"{o.get('name') or 'NORAD ' + str(o['norad'])} at ", {"t": o["decay_epoch"]},
+    _names(parts, soon, lambda o: [_obj(o.get('name') or 'NORAD ' + str(o['norad']), o['norad']), " at ", {"t": o["decay_epoch"]},
                                     f" {_win(o.get('window_min'))}"])
     hi = sum(1 for o in soon if o.get("high_interest"))
     if hi:
@@ -111,7 +118,7 @@ def reentries_done(snap: dict, now: datetime) -> dict | None:
     done.sort(key=lambda o: o["after"]["decay_epoch"], reverse=True)
 
     def render(o):
-        out = [f"{o.get('name') or 'NORAD ' + str(o['norad'])} at ", {"t": o["after"]["decay_epoch"]}]
+        out = [_obj(o.get('name') or 'NORAD ' + str(o['norad']), o['norad']), " at ", {"t": o["after"]["decay_epoch"]}]
         if "offset_min" in o:
             m = o["offset_min"]
             how = f"{abs(m)} min {'later' if m > 0 else 'earlier'} than" if m else "at the time of"
@@ -138,7 +145,7 @@ def orbit_changes(snap: dict, archive_doc: dict | None, now: datetime) -> dict |
         return None
     new.sort(key=lambda e: -(e.get("dv_ms") or 0))
     parts = ["Orbit lists " + _plural(len(new), "new orbit change") + " among the satellites it watches"]
-    _names(parts, new, lambda e: [f"{e.get('gcat_name') or e.get('name')} (", {"cc": e.get("cc") or e.get("country")},
+    _names(parts, new, lambda e: [_obj(e.get('gcat_name') or e.get('name'), e.get('norad')), " (", {"cc": e.get("cc") or e.get("country")},
                                    f", {e.get('regime')}), {_dv(e.get('dv_ms'))} m/s between ", {"t": e.get("from")},
                                    " and ", {"t": e.get("to")}])
     return {"kind": "orbit_change", "href": "#maneuvers", "source": SOURCES["maneuver"], "parts": parts}
@@ -178,7 +185,7 @@ def breakups(snap: dict, now: datetime) -> dict | None:
     if not rows:
         return None
     parts = ["GCAT records " + _plural(len(rows), "breakup") + " in the last 7 days"]
-    _names(parts, rows, lambda b: [f"{b.get('name')} (", {"d": (b.get('date') or b.get('breakup_date'))[:10]}, ")"])
+    _names(parts, rows, lambda b: [_obj(b.get('name'), b.get('norad'), b.get('jcat')), " (", {"d": (b.get('date') or b.get('breakup_date'))[:10]}, ")"])
     return {"kind": "breakup", "href": "#breakups", "source": SOURCES["gcat"], "parts": parts}
 
 

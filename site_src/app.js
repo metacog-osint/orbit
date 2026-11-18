@@ -103,6 +103,16 @@
     s.appendChild(document.createTextNode(label));
     return s;
   }
+  /* A name linked to its object page (orbit-2.20): NORAD number first, else GCAT's JCAT id; plain text without either. */
+  function objA(text, norad, jcat) {
+    var k = norad != null && norad !== "" ? String(norad).replace(/^0+(?=\d)/, "") : jcat || "";
+    var sj = /^S0*(\d+)$/.exec(k);  // GCAT's S-ids are its satcat entries: the NORAD number
+    if (sj) k = sj[1];
+    if (!k) return document.createTextNode(text == null ? "" : text);
+    var a = el("a", "obj-link", text);
+    a.href = "object.html?" + (/^\d+$/.test(k) ? "n=" : "j=") + encodeURIComponent(k);
+    return a;
+  }
   function who(marks, name) {
     var d = el("div", "who");
     marks.forEach(function (m) { d.appendChild(m); });
@@ -155,6 +165,7 @@
         else if (p.t) li.appendChild(document.createTextNode(fmt(p.t)));
         else if (p.d) li.appendChild(document.createTextNode(dayOnly(p.d)));
         else if (p.cc) li.appendChild(document.createTextNode(countryName(p.cc)));
+        else if (p.s != null) li.appendChild(objA(p.s, /^\d+$/.test(String(p.o)) ? p.o : null, /^\d+$/.test(String(p.o)) ? null : p.o));
       });
       li.appendChild(document.createTextNode(" "));
       var a = el("a", "", "Details");
@@ -180,13 +191,18 @@
       pls.forEach(function (p) {
         var k = p.state || "?";
         if (!byOwner[k]) { byOwner[k] = { country: p.country, state: p.state, names: [] }; owners.push(k); }
-        byOwner[k].names.push(p.name);
+        byOwner[k].names.push(p);
       });
       owners.forEach(function (k) {
         var o = byOwner[k], line = el("div", "pl");
         line.appendChild(mark(o.country, o.state));
-        line.appendChild(el("span", "", o.names.slice(0, 6).join(", ") +
-          (o.names.length > 6 ? ", +" + (o.names.length - 6) + " more" : "")));
+        var sp = el("span");
+        o.names.slice(0, 6).forEach(function (p, i) {
+          if (i) sp.appendChild(document.createTextNode(", "));
+          sp.appendChild(objA(p.name, p.norad, p.jcat));
+        });
+        if (o.names.length > 6) sp.appendChild(document.createTextNode(", +" + (o.names.length - 6) + " more"));
+        line.appendChild(sp);
         what.appendChild(line);
       });
       cell(tr, what);
@@ -409,7 +425,7 @@
       if (!mvIds[e.norad]) { mvIds[e.norad] = 1; tr.id = "mv-" + e.norad; }  // the globe's satellites open this row
       var who = el("div");
       who.appendChild(mark(e.cc, e.state));
-      who.appendChild(document.createTextNode(e.gcat_name || e.name || ("NORAD " + e.norad)));
+      who.appendChild(objA(e.gcat_name || e.name || ("NORAD " + e.norad), e.norad));
       who.appendChild(el("div", "pl", "NORAD " + e.norad + (e.object_id ? ", " + e.object_id : "") +
         (e.regime ? ", " + e.regime : "")));
       cell(tr, who);
@@ -671,10 +687,12 @@
           g.members.join(", ") + "), from the alias file"));
         return;
       }
-      d.appendChild(el("div", "pl", on + ": " + (g.cat_name || g.gcat_name) +
-        (g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")") +
+      var ln = el("div", "pl", on + ": ");
+      ln.appendChild(objA(g.cat_name || g.gcat_name, g.norad, g.jcat));
+      ln.appendChild(document.createTextNode((g.norad ? " (" + g.norad + ")" : " (" + g.jcat + ")") +
         (g.by === "launch date" ? ", the one of that name launched in the year before" :
           g.by === "alias" ? ", from the alias file" : "")));
+      d.appendChild(ln);
     });
     return d;
   }
@@ -974,8 +992,9 @@
     groups.slice(0, 8).forEach(function (g) {
       var li = el("li");
       li.appendChild(mark(g.p.country, g.p.state));
-      li.appendChild(document.createTextNode(" " + g.names[0] +
-        (g.names.length > 1 ? " and " + (g.names.length - 1) + " more" : "") + ": " + orbitText(g.p)));
+      li.appendChild(document.createTextNode(" "));
+      li.appendChild(objA(g.names[0], g.p.norad, g.p.jcat));
+      li.appendChild(document.createTextNode((g.names.length > 1 ? " and " + (g.names.length - 1) + " more" : "") + ": " + orbitText(g.p)));
       ul.appendChild(li);
     });
     if (groups.length > 8) ul.appendChild(el("li", "muted", "+" + (groups.length - 8) + " more orbits"));
@@ -1188,7 +1207,7 @@
     var trs = rows.map(function (x) {
       var tr = el("tr");
       cell(tr, dayOnly(x.reentry_date) + (x.reentry_uncertain ? " ~" : ""));
-      cell(tr, x.name);
+      cell(tr, objA(x.name, x.norad, x.jcat));
       cell(tr, mark(x.country, x.state));
       cell(tr, x.norad || x.jcat, "muted");
       return tr;
@@ -1211,7 +1230,7 @@
       var tr = el("tr");
       tr.id = "breakup-" + x.jcat;
       cell(tr, dayOnly(x.breakup_date) + (x.breakup_uncertain ? " ~" : ""));
-      cell(tr, x.name);
+      cell(tr, objA(x.name, x.norad, x.jcat));
       cell(tr, x.type);
       cell(tr, BROKE[x.status] || x.status);
       cell(tr, mark(x.country, x.state));
@@ -1255,7 +1274,7 @@
       cell(tr, when);
       var who = el("div");
       if (x.cc || x.state) who.appendChild(mark(x.cc, x.state));
-      who.appendChild(document.createTextNode(x.name || ("NORAD " + x.norad)));
+      who.appendChild(objA(x.name || ("NORAD " + x.norad), x.norad));
       var sub = [x.name ? "NORAD " + x.norad : "", x.launch_tag || "",
         x.type && KIND[x.type.charAt(0)] ? KIND[x.type.charAt(0)] : "", x.high_interest ? "high interest" : ""]
         .filter(Boolean).join(", ");
@@ -1317,7 +1336,8 @@
     var rows = objs.map(function (x) {
       var tr = el("tr"), pr = x.predicted || {}, af = x.after, g = x.gcat;
       cell(tr, af ? fmt(af.decay_epoch) : el("span", "muted", "no message after it yet"));
-      var who = el("div", "", x.name || "Not in GCAT's index");
+      var who = el("div");
+      who.appendChild(objA(x.name || "Not in GCAT's index", x.norad));
       who.appendChild(el("div", "pl", String(x.norad)));
       cell(tr, who);
       var lp = el("div", "", pr.decay_epoch ? fmt(pr.decay_epoch) + " ±" + mins(pr.window_min || 0).slice(1) : "none kept");
@@ -1351,13 +1371,21 @@
       var ul = el("ul", "plain small");
       (ch.late_groups || []).slice(0, 8).forEach(function (g) {
         ul.appendChild(el("li", "", g.count + " new from launch " + g.launch_tag + " (" + g.launch_date + ", " +
-          g.states.join(", ") + "): " + g.objects.slice(0, 3).map(function (o) { return o.name; }).join(", ") +
-          (g.count > 3 ? "…" : "")));
+          g.states.join(", ") + "): "));
+        var gl = ul.lastChild;
+        g.objects.slice(0, 3).forEach(function (o, i) {
+          if (i) gl.appendChild(document.createTextNode(", "));
+          gl.appendChild(objA(o.name, o.norad, o.jcat));
+        });
+        if (g.count > 3) gl.appendChild(document.createTextNode("…"));
       });
       (ch.owner_changes || []).slice(0, 8).forEach(function (c) {
         var f = c.fields, parts = [];
         ["state", "owner"].forEach(function (k) { if (f[k]) parts.push(k + " " + (f[k][0] || "-") + " → " + (f[k][1] || "-")); });
-        ul.appendChild(el("li", "", c.name + ": " + parts.join(", ")));
+        var cl = el("li");
+        cl.appendChild(objA(c.name, c.norad, c.jcat));
+        cl.appendChild(document.createTextNode(": " + parts.join(", ")));
+        ul.appendChild(cl);
       });
       if (ul.children.length) box.appendChild(ul);
     } else {

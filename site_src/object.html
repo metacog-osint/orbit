@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Object · Orbit · The Intelligence Company</title>
+<meta name="description" content="One object in Earth orbit: its names from every source, owner, orbit, and everything Orbit holds on it (TIP reentry predictions, orbit changes, rendezvous and proximity operations, catalog changes), each with its source.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<script src="tic-time.js"></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <a href="./">Orbit's page</a>
+      <a href="geo.html">GEO belt</a>
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap obj">
+  <form class="obj-search" role="search" autocomplete="off">
+    <label for="obj-q" class="small muted">Find an object: name from any source, NORAD number, COSPAR ID</label>
+    <input id="obj-q" type="search" placeholder="ISS, Hornet 1, 25544, 1998-067A" spellcheck="false">
+    <ul class="search-results" hidden></ul>
+  </form>
+
+  <section class="obj-head" id="obj-head" aria-live="polite">
+    <h1 id="obj-name">Loading…</h1>
+    <p class="lede" id="obj-sub"></p>
+    <dl class="obj-facts" id="obj-facts"></dl>
+    <p class="small muted" id="obj-stale"></p>
+  </section>
+
+  <section class="card" id="obj-orbit-card">
+    <h2>Orbit</h2>
+    <p class="small muted">Each source's orbit as it states it, never merged. Perigee and apogee are the lowest and highest
+      points above the Earth's surface; inclination is the angle between the orbit and the equator.</p>
+    <div id="obj-orbit"></div>
+  </section>
+
+  <section class="card" id="obj-globe-card">
+    <h2>On the globe</h2>
+    <div id="obj-globe-body"></div>
+    <div class="obj-globe" id="obj-globe" hidden></div>
+  </section>
+
+  <section class="card" id="obj-holds-card">
+    <h2>What Orbit holds on it</h2>
+    <div id="obj-holds"></div>
+  </section>
+
+  <section class="card" id="obj-names-card">
+    <h2>Names and sources</h2>
+    <div id="obj-names"></div>
+  </section>
+
+  <section class="card" id="obj-cite-card">
+    <h2>Sources</h2>
+    <div id="obj-cite"></div>
+  </section>
+
+  <details class="terms small card">
+    <summary>New to this? The terms used here</summary>
+    <dl>
+      <dt>NORAD number</dt><dd>The catalog number the US Space Force gives each tracked object, as 25544 for the
+        International Space Station. Objects without one are keyed by GCAT's own id, as A04907.</dd>
+      <dt>COSPAR ID</dt><dd>The international designator: launch year, launch number in that year and a letter for
+        each piece, as 1998-067A.</dd>
+      <dt>Perigee, apogee</dt><dd>The lowest and highest points of an orbit, here in kilometres above the surface.</dd>
+      <dt>Inclination</dt><dd>The angle between the orbit and the equator: about 0° stays over the equator, 90° passes
+        over the poles, above 90° runs against the Earth's turn.</dd>
+      <dt>LEO, MEO, GEO</dt><dd>Low Earth orbit, below about 2,000 km; medium Earth orbit, between that and
+        geostationary; geostationary orbit, about 35,786 km above the equator, where a satellite keeps pace with the
+        Earth's turn and stays over one longitude.</dd>
+      <dt>Element set</dt><dd>The published numbers that describe an orbit at one moment (its epoch). A path drawn from
+        one drifts from the real one the further it runs from that moment.</dd>
+      <dt>TIP</dt><dd>Tracking and Impact Prediction: United States Space Command's reentry predictions on
+        Space-Track.org, each a predicted time and a window either side of it.</dd>
+      <dt>GCAT</dt><dd>Jonathan McDowell's General Catalog of Artificial Space Objects.</dd>
+      <dt>RPO</dt><dd>Rendezvous and proximity operations: one spacecraft approaching or meeting another, as Secure
+        World Foundation's public sheet lists them.</dd>
+    </dl>
+  </details>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit, The Intelligence Company. Publicly available information only; observations, not warnings or
+    predictions of Orbit's own. Not for conjunction assessment, collision avoidance or any operational use. Catalog
+    data: GCAT (J. McDowell, CC BY 4.0), Space-Track.org (USSPACECOM, 18th Space Defense Squadron), CelesTrak
+    SATCAT (T.S. Kelso), Wikidata (CC0), Secure World Foundation; each value names its source on this page.</p>
+</footer>
+<script src="search.js"></script>
+<script src="object.js"></script>
+</body>
+</html>

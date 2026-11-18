@@ -224,3 +224,37 @@ h2 .ref { color: var(--muted); font-weight: 400; }
 .spark i { display: block; width: 3px; background: var(--g-other); }
 .spark i.now { background: var(--accent); }
 .pos-above, .pos-below { font-weight: 600; }
+
+/* Object search and object pages (orbit-2.20). */
+.obj-search { position: relative; margin: 14px 0 4px; max-width: 640px; }
+.obj-search label { display: block; margin-bottom: 4px; }
+.obj-search input { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 4px; background: var(--panel); color: var(--text); }
+.search-results { position: absolute; z-index: 20; left: 0; right: 0; margin: 2px 0 0; padding: 4px 0; list-style: none;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px; max-height: 60vh; overflow-y: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); }
+.search-results li { padding: 5px 10px; line-height: 1.35; }
+.search-results li .pl { display: block; }
+.hero .obj-search { margin-top: 10px; }
+.obj-head { padding: 18px 0 10px; }
+.obj-head h1 { margin: 0 0 4px; font-size: 1.55rem; overflow-wrap: anywhere; }
+.obj-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 10px 0; font-size: 0.9rem; }
+.obj-facts dt { color: var(--muted); }
+.obj-facts dd { margin: 0; overflow-wrap: anywhere; }
+.obj-facts .src, .obj .src { color: var(--muted); font-size: 0.8rem; }
+@media (max-width: 560px) { .obj-facts { grid-template-columns: 1fr; } .obj-facts dd { margin-bottom: 6px; } }
+.obj-sub { margin-top: 14px; }
+.obj-sub h3 { margin: 0 0 4px; font-size: 0.98rem; }
+.obj-globe { height: 420px; border: 1px solid var(--border); border-radius: 4px; background: var(--badge); margin-top: 8px; }
+@media (max-width: 520px) { .obj-globe { height: 320px; } }
+.orb-fig { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 0; }
+.orb-fig svg { width: 100%; max-width: 320px; height: auto; }
+.orb-fig figcaption { flex-basis: 100%; }
+.orb-earth { fill: var(--g-us); fill-opacity: 0.35; stroke: var(--g-us); }
+.orb-path { fill: none; stroke: var(--accent); stroke-width: 2; }
+.orb-plane { stroke: var(--accent); stroke-width: 2; }
+.orb-eq { stroke: var(--muted); stroke-dasharray: 4 3; }
+.orb-txt { fill: var(--muted); font-size: 11px; }
+.obj td, .obj th { overflow-wrap: anywhere; }
+a.obj-link { color: inherit; text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+a.obj-link:hover { text-decoration-color: currentColor; }
