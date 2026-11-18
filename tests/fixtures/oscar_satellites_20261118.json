@@ -1,0 +1,3030 @@
+{
+ "_links": {
+  "first": {
+   "href": "http://space.oscar.wmo.int/api/v1/satellites?page=1&sort=id&order=asc"
+  },
+  "self": {
+   "href": "http://space.oscar.wmo.int/api/v1/satellites?page=1&sort=id&order=asc"
+  },
+  "next": {
+   "href": "http://space.oscar.wmo.int/api/v1/satellites?page=2&sort=id&order=asc"
+  },
+  "last": {
+   "href": "http://space.oscar.wmo.int/api/v1/satellites?page=36&sort=id&order=asc"
+  }
+ },
+ "page": {
+  "elementsPerPage": 30,
+  "totalElements": 1062,
+  "totalPages": 36,
+  "number": 1
+ },
+ "_embedded": {
+  "satellites": [
+   {
+    "id": 454,
+    "slug": "ace",
+    "acronym": "ACE",
+    "fullname": "Advanced Composition Explorer",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>Single flight unit of the ACE programme.</li>\r\n<li>Main missions; solar physics and Space weather.</li>\r\n</ul>",
+    "space_agency": "NASA",
+    "status": "Operational",
+    "orbit": "Lagrange libration point 1",
+    "launch_date": "25 Aug 1997",
+    "EoL": "≥2027",
+    "longitude": null,
+    "Altitude": "1.5e+06",
+    "ECT": null,
+    "data_access_link": "http://www.srl.caltech.edu/ACE/ASC/",
+    "satellite-instruments": [
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": 6,
+      "classification": [
+       "Solar and space environment monitors",
+       "Field or radiowave sensor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Magnetometer"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 707,
+       "slug": "mag_ace",
+       "name": "MAG (ACE)",
+       "fullname": "Magnetic Field Monitor",
+       "instrumenttype": "Field or radiowave sensor",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/mag_ace"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "degraded",
+      "data_latency": 6,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Proton sensor",
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor",
+           "Solar wind at L1 - Plasma density sensor",
+           "Solar wind at L1 - Plasma temperature sensor",
+           "Solar wind at L1 - Plasma velocity sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 708,
+       "slug": "sis",
+       "name": "SIS",
+       "fullname": "Solar Isotope Spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 702,
+       "slug": "swims",
+       "name": "SWIMS",
+       "fullname": "Solar Wind Ion Mass Spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/swims"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 704,
+       "slug": "uleis",
+       "name": "ULEIS",
+       "fullname": "Ultra-Low Energy Isotope Spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/uleis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Proton sensor",
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor",
+           "Solar wind at L1 - Plasma density sensor",
+           "Solar wind at L1 - Plasma temperature sensor",
+           "Solar wind at L1 - Plasma velocity sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 703,
+       "slug": "swics",
+       "name": "SWICS",
+       "fullname": "Solar Wind Ion Composition Spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/swics"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Proton sensor",
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor",
+           "Solar wind at L1 - Plasma density sensor",
+           "Solar wind at L1 - Plasma temperature sensor",
+           "Solar wind at L1 - Plasma velocity sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 709,
+       "slug": "cris_ace",
+       "name": "CRIS (ACE)",
+       "fullname": "Cosmic Ray Isotope Spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/cris_ace"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": 6,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Electron sensor",
+           "Solar wind at L1 - Proton sensor",
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor",
+           "Solar wind at L1 - Plasma density sensor",
+           "Solar wind at L1 - Plasma temperature sensor",
+           "Solar wind at L1 - Plasma velocity sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 710,
+       "slug": "epam",
+       "name": "EPAM",
+       "fullname": "Electron, Proton, and Alpha-particle Monitor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/epam"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "≥2027",
+      "status": "degraded",
+      "data_latency": 6,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Electron sensor",
+           "Solar wind at L1 - Proton sensor",
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Plasma density sensor",
+           "Solar wind at L1 - Plasma temperature sensor",
+           "Solar wind at L1 - Plasma velocity sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 706,
+       "slug": "swepam",
+       "name": "SWEPAM",
+       "fullname": "Solar Wind Electron, Proton, and Alpha Monitor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/swepam"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Nov 1997",
+      "EoL": "04 Feb 2005",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "24": {
+          "name": "Solar wind in situ plasma and energetic particles, magnetic field, at L1",
+          "wigos-filters": [
+           "Solar wind at L1 - Alpha-particle sensor",
+           "Solar wind at L1 - Heavy ion sensor"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 705,
+       "slug": "sepica",
+       "name": "SEPICA ",
+       "fullname": "Solar Energetic Particle Ionic Charge Analyzer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sepica"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 208,
+    "slug": "noaa_20",
+    "acronym": "NOAA-20",
+    "fullname": "National Oceanic and Atmospheric Administration - 20",
+    "WIGOS_Station_Identifier": "0-20009-0-225",
+    "link": "",
+    "description": "<ul>\r\n<li>1st flight unit of the JPSS programme, re-named NOAA-20 after the launch.</li>\r\n<li>Main mission: operational meteorology.</li>\r\n<li>Substantial contribution to atmospheric chemistry and climatology.</li>\r\n</ul>",
+    "space_agency": "NOAA,NASA",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "18 Nov 2017",
+    "EoL": "≥2031",
+    "longitude": null,
+    "Altitude": "824",
+    "ECT": "13:30 asc",
+    "data_access_link": "https://data.noaa.gov/onestop/collections?q=Noaa-20",
+    "satellite-instruments": [
+     {
+      "start-date": "Feb 2018",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": 88,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Cross-nadir infrared sounder, possibly including VIS channels"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "5": {
+          "name": "IR hyperspectral sounders [in SSO]",
+          "wigos-filters": [
+           "IR hyperspectral sounder [in SSO] "
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 93,
+       "slug": "cris",
+       "name": "CrIS",
+       "fullname": "Cross-track Infrared Sounder",
+       "instrumenttype": "Cross-nadir infrared sounder",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/cris"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Feb 2018",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Broadband Earth radiation radiometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "18": {
+          "name": "Absolutely calibrated broadband radiometers, and TSI and SSI radiometers",
+          "wigos-filters": [
+           "Broadband radiometer (for ERB)"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 78,
+       "slug": "ceres",
+       "name": "CERES",
+       "fullname": "Clouds and the Earth’s Radiant Energy System ",
+       "instrumenttype": "Broad band radiometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ceres"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Feb 2018",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Cross-nadir shortwave (UV/VIS) sounder"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "15": {
+          "name": "UV/VIS/NIR sounders, nadir and limb",
+          "wigos-filters": [
+           "UV/VIS/NIR nadir sounder"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 379,
+       "slug": "omps_nadir",
+       "name": "OMPS-nadir",
+       "fullname": "Ozone Mapping and Profiler Suite",
+       "instrumenttype": "Cross-nadir scanning SW sounder",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/omps_nadir"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Feb 2018",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Moderate resolution optical imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "7": {
+          "name": "VIS/IR imagery; realisation of a Day/Night band [in SSO]",
+          "wigos-filters": [
+           "VIS/IR imager [in SSO] ",
+           "VIS/IR imager with day/night capability [in SSO]]"
+          ]
+         },
+         "20": {
+          "name": "Narrow-band or hyperspectral imagers",
+          "wigos-filters": [
+           "Narrow-band imager (for ocean colour)"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 604,
+       "slug": "viirs",
+       "name": "VIIRS",
+       "fullname": "Visible Infrared Imager Radiometer Suite",
+       "instrumenttype": "Moderate-resolution optical imager",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/viirs"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Feb 2018",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": 45,
+      "classification": [
+       "Earth observation instrument",
+       "Passive microwave radiometer",
+       "Cross-track, special or non-scanning microwave radiometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "6": {
+          "name": "MW sounders [in SSO]",
+          "wigos-filters": [
+           "MW sounder [in SSO] "
+          ]
+         },
+         "14": {
+          "name": "MW cross-track upper stratospheric and mesospheric sounders",
+          "wigos-filters": [
+           "\tMW cross-track upper stratospheric and mesospheric sounder"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 53,
+       "slug": "atms",
+       "name": "ATMS",
+       "fullname": "Advanced Technology Microwave Sounder",
+       "instrumenttype": "Microwave cross-track scanning radiometer",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/atms"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 665,
+    "slug": "goes_18",
+    "acronym": "GOES-18",
+    "fullname": "Geostationary Operational Environmental Satellite - 18",
+    "WIGOS_Station_Identifier": "0-20009-0-272",
+    "link": "",
+    "description": "<ul>\r\n<li>3rd flight unit of the GOES 3rd generation programme.</li>\r\n<li>Mission: operational meteorology.</li>\r\n<li>Substantial contribution to space weather.</li>\r\n</ul>",
+    "space_agency": "NOAA,NASA",
+    "status": "Operational",
+    "orbit": "Geostationary orbit",
+    "launch_date": "01 Mar 2022",
+    "EoL": "≥2041",
+    "longitude": "-137",
+    "Altitude": "35786",
+    "ECT": null,
+    "data_access_link": "\thttp://cimss.ssec.wisc.edu/goes/goesdata.html",
+    "satellite-instruments": [
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Lightning imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "3": {
+          "name": "Lightning mappers  [in GEO]",
+          "wigos-filters": [
+           "Lightning mapper [in GEO] "
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 157,
+       "slug": "glm",
+       "name": "GLM",
+       "fullname": "Geostationary Lightning Mapper",
+       "instrumenttype": "Lightning imager",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/glm"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar EUV spectrometer [from L1, GEO, LEO]",
+           "Solar EUV imager [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 547,
+       "slug": "suvi",
+       "name": "SUVI",
+       "fullname": "Solar Ultraviolet Imager",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/suvi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar EUV spectrometer [from L1, GEO, LEO]",
+           "Solar EUV imager [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 547,
+       "slug": "suvi",
+       "name": "SUVI",
+       "fullname": "Solar Ultraviolet Imager",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/suvi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Field or radiowave sensor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Magnetometer at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 273,
+       "slug": "sem_mag",
+       "name": "SEM/MAG",
+       "fullname": "SEM / Magnetometer",
+       "instrumenttype": "Field or radiowave sensor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_mag"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": 21,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Moderate resolution optical imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "1": {
+          "name": "Multi-spectral VIS/IR imagery With rapid repeat cycles [in GEO]",
+          "wigos-filters": [
+           "Multi-spectral VIS/IR imager with rapid repeat cycles [in GEO] "
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 3,
+       "slug": "abi",
+       "name": "ABI",
+       "fullname": "Advanced Baseline Imager",
+       "instrumenttype": "Moderate-resolution optical imager",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/abi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Search and Rescue system"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 146,
+       "slug": "geos_r",
+       "name": "GEOS&R ",
+       "fullname": "Geostationary Search and Rescue",
+       "instrumenttype": "Search & rescue system",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/geos_r"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Data Collection System"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 863,
+       "slug": "dcis",
+       "name": "DCIS",
+       "fullname": "Data Collection and Interrogation Service",
+       "instrumenttype": "Data collection system",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/dcis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Proton sensor at GEO",
+           "Alpha-particle sensor at GEO",
+           "Heavy ion sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 939,
+       "slug": "seiss_ehis",
+       "name": "SEISS/EHIS",
+       "fullname": "SEISS / Energetic Heavy Ion Sensor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/seiss_ehis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Electron sensor at GEO",
+           "Proton sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 938,
+       "slug": "seiss_mps",
+       "name": "SEISS/MPS",
+       "fullname": "SEISS / Magnetospheric Particle Sensor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/seiss_mps"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 137,
+       "slug": "exis",
+       "name": "EXIS",
+       "fullname": "Extreme Ultraviolet Sensor / X-Ray Sensor Irradiance Sensors",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/exis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 137,
+       "slug": "exis",
+       "name": "EXIS",
+       "fullname": "Extreme Ultraviolet Sensor / X-Ray Sensor Irradiance Sensors",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/exis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 137,
+       "slug": "exis",
+       "name": "EXIS",
+       "fullname": "Extreme Ultraviolet Sensor / X-Ray Sensor Irradiance Sensors",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/exis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Jan 2023",
+      "EoL": "≥2041",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Proton sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 940,
+       "slug": "seiss_sgps",
+       "name": "SEISS/SGPS",
+       "fullname": "SEISS / Solar and Galactic Proton Sensor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/seiss_sgps"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 590,
+    "slug": "tempo",
+    "acronym": "TEMPO",
+    "fullname": "Tropospheric Emissions: Monitoring of Pollution",
+    "WIGOS_Station_Identifier": "0-20009-0-790",
+    "link": "",
+    "description": "<ul>\r\n<li>Actually not a specific satellite.&nbsp;</li>\r\n<li>The TEMPO instrument is mounted on Intelsat 40e.</li>\r\n<li>Main mission: air quality</li>\r\n<li>Coverage CONUS</li>\r\n</ul>",
+    "space_agency": "NASA",
+    "status": "Operational",
+    "orbit": "Geostationary orbit",
+    "launch_date": "07 Apr 2023",
+    "EoL": "≥2029",
+    "longitude": "-91",
+    "Altitude": "35786",
+    "ECT": null,
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "Oct 2023",
+      "EoL": "≥2029",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Cross-nadir shortwave (UV/VIS) sounder"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "4": {
+          "name": "UV/VIS/NIR sounders  [in GEO]",
+          "wigos-filters": [
+           "UV/VIS/NIR sounder [in GEO] "
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "46": {
+          "name": "NIR spectrometer",
+          "wigos-filters": [
+           "NIR spectrometer"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1030,
+       "slug": "spectrometer_tempo",
+       "name": "Spectrometer (TEMPO)",
+       "fullname": "Tropospheric Emissions: Monitoring of Pollution",
+       "instrumenttype": "Cross-nadir scanning SW sounder",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/spectrometer_tempo"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Oct 2023",
+      "EoL": "≥2029",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Cross-nadir shortwave (UV/VIS) sounder"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "4": {
+          "name": "UV/VIS/NIR sounders  [in GEO]",
+          "wigos-filters": [
+           "UV/VIS/NIR sounder [in GEO] "
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "46": {
+          "name": "NIR spectrometer",
+          "wigos-filters": [
+           "NIR spectrometer"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1030,
+       "slug": "spectrometer_tempo",
+       "name": "Spectrometer (TEMPO)",
+       "fullname": "Tropospheric Emissions: Monitoring of Pollution",
+       "instrumenttype": "Cross-nadir scanning SW sounder",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/spectrometer_tempo"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 633,
+    "slug": "iss_gedi",
+    "acronym": "ISS GEDI",
+    "fullname": "Global Ecosystem Dynamics Investigation on ISS",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>Mission consisting of hosting GEDI on the International Space Station.</li>\r\n<li>More information <a href=\"https://gedi.umd.edu/return-of-the-gedi/\"> here</a></li>\r\n</ul>",
+    "space_agency": "NASA,CSA,DLR,ESA,JAXA,Roscosmos",
+    "status": "Operational",
+    "orbit": "Drifting orbit",
+    "launch_date": "05 Dec 2018",
+    "EoL": "≥2029",
+    "longitude": null,
+    "Altitude": "424",
+    "ECT": null,
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "Mar 2019",
+      "EoL": "≥2029",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Lidar (Doppler lidar, backscatter lidar, lidar Dial, lidar altimeter)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "32": {
+          "name": "Lidar (single wavelength) (in addition to radar missions mentioned in Component 1)",
+          "wigos-filters": [
+           "Lidar (Altimeter - for surface)"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "47": {
+          "name": "Radar and lidar for vegetation mapping",
+          "wigos-filters": [
+           "Multi-footprint lidar altimeter for vegetation mapping"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1092,
+       "slug": "gedi_lidar",
+       "name": "GEDI Lidar",
+       "fullname": "Global Ecosystem Dynamics Investigation Lidar",
+       "instrumenttype": "Space lidar",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/gedi_lidar"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2019",
+      "EoL": "≥2029",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Lidar (Doppler lidar, backscatter lidar, lidar Dial, lidar altimeter)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "32": {
+          "name": "Lidar (single wavelength) (in addition to radar missions mentioned in Component 1)",
+          "wigos-filters": [
+           "Lidar (Altimeter - for surface)"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "47": {
+          "name": "Radar and lidar for vegetation mapping",
+          "wigos-filters": [
+           "Multi-footprint lidar altimeter for vegetation mapping"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1092,
+       "slug": "gedi_lidar",
+       "name": "GEDI Lidar",
+       "fullname": "Global Ecosystem Dynamics Investigation Lidar",
+       "instrumenttype": "Space lidar",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/gedi_lidar"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 74,
+    "slug": "electro_l_n2",
+    "acronym": "Electro-L N2",
+    "fullname": "Electro-L Number 2",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>2nd flight unit of the Electro-L series.</li>\r\n<li>Mission: operational meteorology.</li>\r\n<li>Substantial contribution to space weather.</li>\r\n<li>Calibration landing page <a href=\"http://planet.rssi.ru/calval/calibration-landing-pages-en\"> here</a></li>\r\n</ul>",
+    "space_agency": "RosHydroMet,Roscosmos",
+    "status": "Operational",
+    "orbit": "Geostationary orbit",
+    "launch_date": "11 Dec 2015",
+    "EoL": "≥2026",
+    "longitude": "-14.5",
+    "Altitude": "35786",
+    "ECT": null,
+    "data_access_link": "https://navigator.eumetsat.int/search?query=electro-L",
+    "satellite-instruments": [
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "degraded",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Moderate resolution optical imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "1": {
+          "name": "Multi-spectral VIS/IR imagery With rapid repeat cycles [in GEO]",
+          "wigos-filters": [
+           "Multi-spectral VIS/IR imager with rapid repeat cycles [in GEO] "
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 324,
+       "slug": "msu_gs",
+       "name": "MSU-GS",
+       "fullname": "Electro-L Imager",
+       "instrumenttype": "Moderate-resolution optical imager",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/msu_gs"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Data Collection System"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 109,
+       "slug": "dcs_electro",
+       "name": "DCS (Electro)",
+       "fullname": "Data Collection Service",
+       "instrumenttype": "Data collection system",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/dcs_electro"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 827,
+       "slug": "ggak_e_dir_e",
+       "name": "GGAK-E/DIR-E",
+       "fullname": "Solar X-ray radiation flux sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_dir_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 827,
+       "slug": "ggak_e_dir_e",
+       "name": "GGAK-E/DIR-E",
+       "fullname": "Solar X-ray radiation flux sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_dir_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 827,
+       "slug": "ggak_e_dir_e",
+       "name": "GGAK-E/DIR-E",
+       "fullname": "Solar X-ray radiation flux sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_dir_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 818,
+       "slug": "ggak_e_vuss_e",
+       "name": "GGAK-E/VUSS-E",
+       "fullname": "GGAK-E / Solar UV radiation sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_vuss_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Search and Rescue system"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 150,
+       "slug": "geos_r_electro",
+       "name": "GEOS&R (Electro)",
+       "fullname": "Geostationary Search and Rescue",
+       "instrumenttype": "Search & rescue system",
+       "providing-agency": "RosHydroMet",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/geos_r_electro"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "15 Feb 2013",
+      "EoL": "TBD",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Electron sensor at GEO",
+           "Proton sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 815,
+       "slug": "ggak_e_skl_e",
+       "name": "GGAK-E/SKL-E",
+       "fullname": "GGAK-E / Solar cosmic rays spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_skl_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Proton sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 816,
+       "slug": "ggak_e_gals_e",
+       "name": "GGAK-E/GALS-E",
+       "fullname": "GGAK-E / Detector of galactic cosmic rays",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_gals_e"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Mar 2016",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Electron sensor at GEO",
+           "Proton sensor at GEO",
+           "Plasma density sensor at GEO",
+           "Plasma temperature sensor at GEO",
+           "Plasma velocity sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 814,
+       "slug": "ggak_e_skif_6",
+       "name": "GGAK-E/SKIF-6",
+       "fullname": "GGAK-E / Corpuscular radiation spectrometer",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "Roscosmos",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ggak_e_skif_6"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 1085,
+    "slug": "rcm_2",
+    "acronym": "RCM-2",
+    "fullname": "RadarSat Constellation Mission - 1",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>2nd flight unit of the&nbsp;RCM programme.</li>\r\n<li>Main mission:&nbsp;multi-purpose SAR observation, expecially for ice.</li>\r\n<li>Substantial contribution to surveillance and emergency management.</li>\r\n<li>Includes AIS reception for ship location</li>\r\n</ul>",
+    "space_agency": "CSA",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "12 Jun 2019",
+    "EoL": "≥2031",
+    "longitude": null,
+    "Altitude": "592",
+    "ECT": "06:01 desc",
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "12 Jun 2019",
+      "EoL": "≥2031",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Data Collection System"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 1313,
+       "slug": "ais",
+       "name": "AIS",
+       "fullname": "Automated Identification System",
+       "instrumenttype": "Data collection system",
+       "providing-agency": "CSA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ais"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "12 Jun 2019",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Imaging radar (SAR)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "22": {
+          "name": "SAR imagers and altimeters",
+          "wigos-filters": [
+           "SAR imager"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 446,
+       "slug": "sar_rcm",
+       "name": "SAR RCM",
+       "fullname": "Synthetic Aperture Radar (C-band) for RadarSat constellation",
+       "instrumenttype": "Imaging radar (SAR)",
+       "providing-agency": "CSA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sar_rcm"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 1086,
+    "slug": "rcm_3",
+    "acronym": "RCM-3",
+    "fullname": "RadarSat Constellation Mission - 1",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>3rd flight unit of the&nbsp;RCM programme.</li>\r\n<li>Main mission:&nbsp;multi-purpose SAR observation, expecially for ice.</li>\r\n<li>Substantial contribution to surveillance and emergency management.</li>\r\n<li>Includes AIS reception for ship location</li>\r\n</ul>",
+    "space_agency": "CSA",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "12 Jun 2019",
+    "EoL": "≥2031",
+    "longitude": null,
+    "Altitude": "592",
+    "ECT": "06:01 desc",
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "12 Jun 2019",
+      "EoL": "≥2031",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Data Collection System"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 1313,
+       "slug": "ais",
+       "name": "AIS",
+       "fullname": "Automated Identification System",
+       "instrumenttype": "Data collection system",
+       "providing-agency": "CSA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/ais"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "12 Jun 2019",
+      "EoL": "≥2031",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Imaging radar (SAR)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "22": {
+          "name": "SAR imagers and altimeters",
+          "wigos-filters": [
+           "SAR imager"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 446,
+       "slug": "sar_rcm",
+       "name": "SAR RCM",
+       "fullname": "Synthetic Aperture Radar (C-band) for RadarSat constellation",
+       "instrumenttype": "Imaging radar (SAR)",
+       "providing-agency": "CSA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sar_rcm"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 1144,
+    "slug": "carruthers",
+    "acronym": "Carruthers",
+    "fullname": "Carruthers Geocorona Observatory",
+    "WIGOS_Station_Identifier": "0-20009-0-0",
+    "link": "",
+    "description": "<ul>\r\n<li>Small sat research mission&nbsp;</li>\r\n<li>Placed at the L1 point to observe the Earth's geocorona</li>\r\n<li>Main Mission Space Weather</li>\r\n</ul>",
+    "space_agency": "NASA",
+    "status": "Operational",
+    "orbit": "Lagrange libration point 1",
+    "launch_date": "24 Sep 2025",
+    "EoL": "≥2028",
+    "longitude": null,
+    "Altitude": "1.5e+06",
+    "ECT": null,
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "Mar 2026",
+      "EoL": "≥2028",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Limb sounders",
+       "Limb sounder"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "UV spectral imager [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1455,
+       "slug": "fuv_carruthers",
+       "name": "FUV (Carruthers)",
+       "fullname": "Far Ultra-violet cameras",
+       "instrumenttype": "Limb sounder",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/fuv_carruthers"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 1113,
+    "slug": "ews_g2_formerly_goes_15",
+    "acronym": "EWS-G2 (formerly GOES-15)",
+    "fullname": "Electro-optical Infrared Weather System-Geostationary mission-2",
+    "WIGOS_Station_Identifier": "0-20009-0-",
+    "link": "",
+    "description": "<ul>\r\n<li>GOES-15 transferred to DoD and renamed EWS-G2&nbsp;</li>\r\n<li>Main mission: operational meteorology.</li>\r\n<li>Substantial contribution to space weather.</li>\r\n</ul>",
+    "space_agency": "DoD,NOAA,USAF",
+    "status": "Operational",
+    "orbit": "Geostationary orbit",
+    "launch_date": "Dec 2023",
+    "EoL": "≥2027",
+    "longitude": "61.5",
+    "Altitude": "35786",
+    "ECT": null,
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "Dec 2023",
+      "EoL": "31 Jul 2022",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar X-ray imager [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 551,
+       "slug": "sxi",
+       "name": "SXI",
+       "fullname": "Solar X-ray Imager",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sxi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "31 Jul 2022",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar X-ray imager [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 551,
+       "slug": "sxi",
+       "name": "SXI",
+       "fullname": "Solar X-ray Imager",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sxi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "31 Jul 2022",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar X-ray imager [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 551,
+       "slug": "sxi",
+       "name": "SXI",
+       "fullname": "Solar X-ray Imager",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sxi"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "degraded",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Cross-nadir infrared sounder, possibly including VIS channels"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 526,
+       "slug": "sounder",
+       "name": "SOUNDER",
+       "fullname": "GOES Sounder",
+       "instrumenttype": "Cross-nadir infrared sounder",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sounder"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Field or radiowave sensor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Magnetometer at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 273,
+       "slug": "sem_mag",
+       "name": "SEM/MAG",
+       "fullname": "SEM / Magnetometer",
+       "instrumenttype": "Field or radiowave sensor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_mag"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Search and Rescue system"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 146,
+       "slug": "geos_r",
+       "name": "GEOS&R ",
+       "fullname": "Geostationary Search and Rescue",
+       "instrumenttype": "Search & rescue system",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/geos_r"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Other payload component",
+       "Data Collection System"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 863,
+       "slug": "dcis",
+       "name": "DCIS",
+       "fullname": "Data Collection and Interrogation Service",
+       "instrumenttype": "Data collection system",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/dcis"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Electron sensor at GEO",
+           "Proton sensor at GEO",
+           "Alpha-particle sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 849,
+       "slug": "sem_eps",
+       "name": "SEM/EPS",
+       "fullname": "SEM / Energetic Particles Sensor",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_eps"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "Moderate resolution optical imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "1": {
+          "name": "Multi-spectral VIS/IR imagery With rapid repeat cycles [in GEO]",
+          "wigos-filters": [
+           "Multi-spectral VIS/IR imager with rapid repeat cycles [in GEO] "
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 879,
+       "slug": "imager_goes_12_15",
+       "name": "IMAGER (GOES 12-15)",
+       "fullname": "GOES Imager",
+       "instrumenttype": "Moderate-resolution optical imager",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/imager_goes_12_15"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "30 Nov 2021",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 851,
+       "slug": "sem_xrs_euv",
+       "name": "SEM/XRS-EUV",
+       "fullname": "SEM / X-Ray Sensor - Extreme Ultra-Violet Sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_xrs_euv"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "30 Nov 2021",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 851,
+       "slug": "sem_xrs_euv",
+       "name": "SEM/XRS-EUV",
+       "fullname": "SEM / X-Ray Sensor - Extreme Ultra-Violet Sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_xrs_euv"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "30 Nov 2021",
+      "status": "inactive",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Solar activity monitor"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "27": {
+          "name": "X-ray spectrograph on GEO orbit",
+          "wigos-filters": [
+           "X-ray spectrometer at GEO"
+          ]
+         }
+        }
+       },
+       "Subcomponent 2": {
+        "name": "Subcomponent 2",
+        "wigos-classification": {
+         "41": {
+          "name": "Solar magnetograph, solar EUV/X-ray imagery and EUV/X-ray irradiance, both on the Earth-Sun line and off the Earth-Sun line",
+          "wigos-filters": [
+           "Solar X-ray spectrometer [from L1, GEO, LEO]",
+           "Solar EUV spectrometer [from L1, GEO, LEO]"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "51": {
+          "name": "UV spectral imagery (e.g. GEO, HEO, MEO, LEO)",
+          "wigos-filters": [
+           "X-ray spectrometer [from GEO, HEO, MEO, LEO]",
+           "EUV spectrometer [from GEO, HEO, MEO, LEO]"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 851,
+       "slug": "sem_xrs_euv",
+       "name": "SEM/XRS-EUV",
+       "fullname": "SEM / X-Ray Sensor - Extreme Ultra-Violet Sensor",
+       "instrumenttype": "Solar activity monitor",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_xrs_euv"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "Dec 2023",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Solar and space environment monitors",
+       "Energetic particle spectrometer"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "26": {
+          "name": "In-situ plasma probes, and energetic particle spectrometers and magnetometers at GEO and LEO, and magnetic field at GEO",
+          "wigos-filters": [
+           "Electron sensor at GEO",
+           "Proton sensor at GEO",
+           "Alpha-particle sensor at GEO"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 850,
+       "slug": "sem_hepad",
+       "name": "SEM/HEPAD",
+       "fullname": "SEM / High Energy Proton and Alpha Particles Detector",
+       "instrumenttype": "Energetic particle spectrometer",
+       "providing-agency": "NOAA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/sem_hepad"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 865,
+    "slug": "skysat_19",
+    "acronym": "SkySat-19",
+    "fullname": "Sky Satellite - 19",
+    "WIGOS_Station_Identifier": "0-20009-0-",
+    "link": "",
+    "description": "<ul>\r\n<li>19th satellite of the SkySat constellation.</li>\r\n<li>Main mission: high-resolution land observation and disaster monitoring.</li>\r\n</ul>",
+    "space_agency": "Planet",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "18 Aug 2020",
+    "EoL": "≥2026",
+    "longitude": null,
+    "Altitude": "500",
+    "ECT": "13:30 asc",
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "Nov 2020",
+      "EoL": "≥2026",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "High resolution optical imager"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 4": {
+        "name": "Subcomponent 4",
+        "wigos-classification": {
+         "57": {
+          "name": "High-resolution optical observation constellation (commercial)",
+          "wigos-filters": [
+           "High-resolution optical observation constellation (commercial)"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1083,
+       "slug": "skysat",
+       "name": "SkySat",
+       "fullname": "SkySat",
+       "instrumenttype": "High-resolution optical imager",
+       "providing-agency": "Terra Bella",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/skysat"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 6,
+    "slug": "alos_2",
+    "acronym": "ALOS-2",
+    "fullname": "Advanced Land Observing Satellite  - 2",
+    "WIGOS_Station_Identifier": "0-20009-0-",
+    "link": "",
+    "description": "<ul>\r\n<li>2nd&nbsp;flight unit of the&nbsp;ALOS&nbsp;programme.</li>\r\n<li>Main mission:&nbsp;land observation.</li>\r\n<li>Substantial contribution to ocean observation.</li>\r\n</ul>",
+    "space_agency": "JAXA",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "24 May 2014",
+    "EoL": "≥2027",
+    "longitude": null,
+    "Altitude": "640",
+    "ECT": "12:00 desc",
+    "data_access_link": "http://www.eorc.jaxa.jp/ALOS/en/index.htm",
+    "satellite-instruments": [
+     {
+      "start-date": "25 Aug 2014",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Passive optical radiometer or spectrometer",
+       "High resolution optical imager"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 944,
+       "slug": "circ",
+       "name": "CIRC",
+       "fullname": "Compact Infrared Camera",
+       "instrumenttype": "High-resolution optical imager",
+       "providing-agency": "JAXA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/circ"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "25 Aug 2014",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Imaging radar (SAR)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "22": {
+          "name": "SAR imagers and altimeters",
+          "wigos-filters": [
+           "SAR imager"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "8": {
+          "name": "MW imagery [in SSO]",
+          "wigos-filters": [
+           "Low-frequency SAR for vegetation mapping"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 388,
+       "slug": "palsar_2",
+       "name": "PALSAR-2",
+       "fullname": "Phased-Array L-band Synthetic Aperture Radar - 2",
+       "instrumenttype": "Imaging radar (SAR)",
+       "providing-agency": "JAXA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/palsar_2"
+        }
+       }
+      }
+     },
+     {
+      "start-date": "25 Aug 2014",
+      "EoL": "≥2027",
+      "status": "active",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Imaging radar (SAR)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 1": {
+        "name": "Subcomponent 1",
+        "wigos-classification": {
+         "22": {
+          "name": "SAR imagers and altimeters",
+          "wigos-filters": [
+           "SAR imager"
+          ]
+         }
+        }
+       },
+       "Subcomponent 3": {
+        "name": "Subcomponent 3",
+        "wigos-classification": {
+         "8": {
+          "name": "MW imagery [in SSO]",
+          "wigos-filters": [
+           "Low-frequency SAR for vegetation mapping"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 388,
+       "slug": "palsar_2",
+       "name": "PALSAR-2",
+       "fullname": "Phased-Array L-band Synthetic Aperture Radar - 2",
+       "instrumenttype": "Imaging radar (SAR)",
+       "providing-agency": "JAXA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/palsar_2"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 951,
+    "slug": "umbra",
+    "acronym": "UMBRA",
+    "fullname": "UMBRA",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>X-Band SAR satellite constellation planned to be 24 satellites.</li>\r\n<li>Substantial contribution to Land Surface and sea-ice observation at high resolution down to 25 cm.</li>\r\n</ul>",
+    "space_agency": "UMBRA",
+    "status": "Operational",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "≥2021",
+    "EoL": "≥2035",
+    "longitude": null,
+    "Altitude": "500",
+    "ECT": null,
+    "data_access_link": "https://umbra.space/products/sar",
+    "satellite-instruments": [
+     {
+      "start-date": "Feb 2021",
+      "EoL": "≥2035",
+      "status": "active *",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Imaging radar (SAR)"
+      ],
+      "wigos-subcomponent": {
+       "Subcomponent 4": {
+        "name": "Subcomponent 4",
+        "wigos-classification": {
+         "56": {
+          "name": "SAR constellation (commercial)",
+          "wigos-filters": [
+           "SAR constellation (commercial)"
+          ]
+         }
+        }
+       }
+      },
+      "instrument": {
+       "id": 1300,
+       "slug": "umbra_sar",
+       "name": "UMBRA-SAR",
+       "fullname": "SAR instrument for UMBRA satellites",
+       "instrumenttype": "Imaging radar (SAR)",
+       "providing-agency": "UMBRA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/umbra_sar"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/"
+     }
+    }
+   },
+   {
+    "id": 832,
+    "slug": "3d_winds",
+    "acronym": "3D-Winds",
+    "fullname": "Three-Dimensional Tropospheric Winds from Space-Based Lidar",
+    "WIGOS_Station_Identifier": "-20009--",
+    "link": "",
+    "description": "<ul>\r\n<li>Single satellite of the 3D-Winds programme.</li>\r\n<li>Main mission: atmospheric dynamics (wind profile).</li>\r\n<li>Substantial contribution to aerosol observation.</li>\r\n</ul>",
+    "space_agency": "NASA",
+    "status": "Mission concept",
+    "orbit": "Sunsynchronous orbit",
+    "launch_date": "TBD",
+    "EoL": "TBD",
+    "longitude": null,
+    "Altitude": "TBD",
+    "ECT": null,
+    "data_access_link": null,
+    "satellite-instruments": [
+     {
+      "start-date": "TBD",
+      "EoL": "TBD",
+      "status": "N/A",
+      "data_latency": null,
+      "classification": [
+       "Earth observation instrument",
+       "Active and radio-occultation sensor",
+       "Lidar (Doppler lidar, backscatter lidar, lidar Dial, lidar altimeter)"
+      ],
+      "wigos-subcomponent": [],
+      "instrument": {
+       "id": 956,
+       "slug": "3d_winds_lidar",
+       "name": "3D-Winds Lidar",
+       "fullname": "Lidar of 3D-Winds",
+       "instrumenttype": "Space lidar",
+       "providing-agency": "NASA",
+       "_links": {
+        "self": {
+         "href": "http://space.oscar.wmo.int/api/v1/instruments/3d_winds_lidar"
+        }
+       }
+      }
+     }
+    ],
+    "_links": {
+     "self": {
+      "href": "http://space.oscar.wmo.int/api/v1/satellites/3d_winds"
+     }
+    }
+   }
+  ]
+ }
+}

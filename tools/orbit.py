@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
+from orbit import (aliases, archive, oscar, oscarlinks, catalog, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, ledger, maneuver, navwarn,  # noqa: E402
                    news, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -899,6 +899,64 @@ def catalog_sources(data_dir: Path, clear: str | None = None) -> int:
     return 1 if bad else 0
 
 
+def oscar_read(data_dir: Path, stamp: str | None) -> int:
+    """WMO OSCAR/Space's satellite list, every page once into data/raw/wmo-oscar/<stamp>/ (local only; a stopped
+    read resumes with the same stamp). Not scheduled: OSCAR joins only through the reviewed link file."""
+    stamp = stamp or datetime.now(timezone.utc).strftime("%Y%m%d")
+    try:
+        out = oscar.read(data_dir, stamp)
+    except catsources.Refused as exc:
+        print(f"::error::{exc}. Stopped; a person looks before reading again.")
+        return 1
+    r = oscar.load(out)
+    print(f"{out}: {r['total']} satellites")
+    return 0
+
+
+def oscar_propose(data_dir: Path, stamp: str, satcat: Path, names: Path | None, draft: bool) -> int:
+    """NORAD candidates for OSCAR's operational satellites from launch date and orbit (orbit/oscar.py propose),
+    into data/catalog/oscar-proposals.json. With --draft, appends an unreviewed entry to oscar-links.yml for each
+    slug not yet in it whose proposal is single-fit with a name equal after normalising, or one-of-n with exactly
+    one such name. Nothing joins until a person reviews an entry (reviewed_by, reviewed)."""
+    r = oscar.load(data_dir / oscar.RAW / stamp)
+    rows = catsources.ct_parse(gzip.decompress(satcat.read_bytes()) if satcat.name.endswith(".gz")
+                               else satcat.read_bytes())
+    idx = catsources.read_json(names, None) if names and names.exists() else None
+    props = oscar.propose(r["satellites"], rows, idx)
+    out = data_dir / "catalog" / "oscar-proposals.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"read": r["read"], "satcat": satcat.name, "names_index": idx and idx.get("read"),
+                               "proposals": props}, ensure_ascii=False, indent=1), encoding="utf-8")
+    counts = {}
+    for p in props:
+        counts[p["outcome"]] = counts.get(p["outcome"], 0) + 1
+    print(f"{out}: {len(props)} proposals {counts}")
+    if not draft:
+        return 0
+    have = {e["slug"] for e in (oscarlinks.parse(oscarlinks.PATH.read_text(encoding="utf-8"))
+                                if oscarlinks.PATH.exists() else [])}
+    today = datetime.now(timezone.utc).date().isoformat()
+    added = []
+    for p in props:
+        if p["slug"] in have:
+            continue
+        agree = [c for c in p["candidates"] if c["name_agrees"]]
+        if p["outcome"] == "one" and agree:
+            c, kind = agree[0], "single-fit"
+        elif p["outcome"] == "several" and len(agree) == 1:
+            c, kind = agree[0], "one-of-n"
+        else:
+            continue
+        added.append(oscarlinks.entry_text(p["slug"], [c["norad"]], "same", kind, p["oscar_id"], p["acronym"],
+                                           r["read"], oscar.evidence(p, c), today))
+    if added:
+        with oscarlinks.PATH.open("a", encoding="utf-8") as f:
+            f.write("\n" + "\n".join(added))
+    oscarlinks.load()  # the file must still read
+    print(f"{oscarlinks.PATH.name}: {len(added)} unreviewed entries added")
+    return 0
+
+
 def spacetrack_catalog(data_dir: Path) -> int:
     """Space-Track SATCAT and DECAY, once a day after 17:00 UTC (orbit/stcat.py). Local for now: no workflow
     reads it until Tom says so."""
@@ -1003,7 +1061,23 @@ def main(argv=None) -> int:
     cs.add_argument("--clear-hold", choices=(catsources.CT, catsources.WD))
     cg.add_argument("--sources", default=str(ROOT / "data"),
                     help="data folder holding catalog-sources' state and last replies")
+    orr = sub.add_parser("oscar-read", help="WMO OSCAR/Space's satellite list, once, into data/raw (local only)")
+    orr.add_argument("--data", default=str(ROOT / "data"))
+    orr.add_argument("--stamp", help="folder under data/raw/wmo-oscar (default: today, UTC); reuse it to resume")
+    op = sub.add_parser("oscar-propose", help="NORAD candidates for OSCAR satellites from launch date and orbit; "
+                                             "--draft adds unreviewed entries to oscar-links.yml (local only)")
+    op.add_argument("--data", default=str(ROOT / "data"))
+    op.add_argument("--stamp", required=True, help="the OSCAR read under data/raw/wmo-oscar")
+    op.add_argument("--satcat", default=str(ROOT / "data" / catsources.CT_STORE),
+                    help="CelesTrak SATCAT CSV (catalog-sources' last reply)")
+    op.add_argument("--names", default=str(ROOT / "data" / "catalog" / "catalog-names.json.gz"),
+                    help="TIC name index (release `catalog`), for every source's names beside each candidate")
+    op.add_argument("--draft", action="store_true")
     args = ap.parse_args(argv)
+    if args.cmd == "oscar-read":
+        return oscar_read(Path(args.data), args.stamp)
+    if args.cmd == "oscar-propose":
+        return oscar_propose(Path(args.data), args.stamp, Path(args.satcat), Path(args.names), args.draft)
     if args.cmd == "spacetrack-catalog":
         return (catalog_release(Path(args.data), args.clear_hold) if args.release
                 else spacetrack_catalog(Path(args.data)))
