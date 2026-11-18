@@ -181,6 +181,7 @@ a.tile .k::after { content: " \2193"; color: var(--muted); }
 
 /* Long tables show their first rows; the rest open on request, or when a link points at one of them. */
 tr.folded { display: none; }
+#tipcheck-h { font-size: 1rem; margin: 1.2rem 0 0.3rem; }
 .more { margin: 8px 0 0; }
 .more button { background: var(--badge); color: var(--text); border: 1px solid var(--border); border-radius: 4px;
   padding: 5px 12px; font: inherit; font-size: 0.84rem; cursor: pointer; }

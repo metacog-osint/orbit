@@ -399,6 +399,29 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    the dot. Checked 17 Nov 2026 on Starlink 5046 (53892, TIP 08:59 UTC +-60 min) with CelesTrak's set of 16 Nov
    22:56 UTC: the line passes within about 100 km of TIP's point (one point a minute limits it) and reaches it about
    3 minutes before TIP's time; with drag left out, 130 km. A drawing for orientation, not a prediction of Orbit's.
+7. **TIP against the reentry (`orbit-2.17`, Tom's "Yes, build it", 18 Nov 2026 about 9:40 AM CST).** Space-Track's
+   reply covers 5 days and GCAT dated these reentries about 3 days later, so the TIP lane now hands every message of
+   the reply on (`decay.all_messages`: NORAD number, message time, predicted time, window, message id) and Orbit's
+   daily archive keeps each one once, on the day a run first saw it (`tip`, deduplicated over 10 days; carried or
+   failed lanes add nothing). Each run then builds snapshot block `tip_check` (`tip.check`) for objects that came
+   down in the last 30 days:
+   - **TIP's time after the reentry:** the newest message issued after the time it gives, with a 1-minute window.
+     In the 17 Nov reply every object that had come down had one, issued 2-8 hours after the time it gives. A message
+     issued late with a wider window (10-60 minutes seen, e.g. 45755 at plus or minus 39) stays a prediction: GCAT
+     marks those times uncertain and rounds them (01:00 for TIP's 00:48).
+   - **Last prediction:** the newest message issued before that time. `offset_min` is TIP's time after the reentry
+     minus the predicted time (positive: later than predicted), `inside` whether it falls within the window,
+     `lead_h` the hours from the message to the reentry.
+   - **GCAT:** GCAT's reentry time against TIP's time after the reentry (or, without one, the last prediction), with
+     GCAT's own uncertain mark. GCAT often takes its time from that same TIP message, so a match is not an
+     independent check; differences of a day or more are named on the card, each source as given, without saying
+     which is right.
+   Checked on the 17 Nov TIP fixture against GCAT's copy of 18 Nov 01:44 GMT: 20 objects with TIP's time after the
+   reentry; 17 came down inside the last prediction's window (outside: 45223 +79 min against +-60, 61642 -131 min
+   against +-60, 58706 2.3 days early against +-15 h, its last prediction issued 12 h before); GCAT gives the same
+   minute for 18 of the 19 it has dated. **Starlink 30221 (57418):** TIP's time after the reentry is 10 Nov 2026
+   17:37 UTC, GCAT's 17 Nov 2026 17:37 UTC, exactly 7 days apart. Shown as each gives it. Observations of the two
+   records, not a rating of either.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
