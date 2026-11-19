@@ -1,0 +1,17 @@
+Orbit: Copyright © 2026 Thomas Brummer, The Intelligence Company.
+The code is licensed under the GNU Affero General Public License v3.0 (LICENSE).
+
+Third-party and shared files in this repository keep their own licences:
+
+- doctrine/kit/        The Intelligence Company doctrine kit, MIT (doctrine/kit/LICENSE)
+- site_src/tic-time.js, site_src/tic-time.css, and their copies in site/
+  The Intelligence Company shared time display, MIT (SPDX line at the top of tic-time.js)
+- site_src/vendor/cesium/        CesiumJS 1.146.0, Apache 2.0 (LICENSE.md; the libraries it bundles are listed
+  in ThirdParty.json; local changes in PATCHED.md)
+- site_src/vendor/maplibre-gl/   MapLibre GL JS 6.14.0, BSD 3-Clause (LICENSE.txt)
+- site_src/vendor/satellite.js/  satellite.js, MIT (LICENSE.md)
+- site_src/vendor/three/         three.js r185, MIT (LICENSE)
+- site_src/flags/      flag-icons 7.6.0, MIT (site_src/flags/LICENSE.txt)
+
+Data keeps its sources' terms. Each source's licence is recorded in doctrine/sources.json and credited on the
+site.
