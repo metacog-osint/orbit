@@ -10,7 +10,11 @@
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
 <link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-tabs.css">
+<link rel="stylesheet" href="tic-fold.css">
 <script src="tic-time.js"></script>
+<script src="tic-tabs.js" defer></script>
+<script src="tic-fold.js" defer></script>
 <script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
 </head>
 <body>
@@ -25,25 +29,6 @@
     </nav>
   </div>
 </header>
-
-<nav class="secbar" aria-label="On this page">
-  <div class="wrap secbar-row">
-    <a href="#map-card">Map</a>
-    <a href="#launches">Launched <b data-n="launches"></b></a>
-    <a href="#upcoming">Scheduled <b data-n="upcoming"></b></a>
-    <a href="#hazards">Hazard areas <b data-n="hazards"></b></a>
-    <a href="#ledger">Ledger</a>
-    <a href="#reentries">Reentries <b data-n="reentries"></b></a>
-    <a href="#breakups">Breakups <b data-n="breakups"></b></a>
-    <a href="#decay">Predicted reentries <b data-n="decay"></b></a>
-    <a href="#catalog">Catalog</a>
-    <a href="#baseline">Two-year baseline</a>
-    <a href="#maneuvers">Orbit changes <b data-n="maneuvers"></b></a>
-    <a href="#asat">ASAT history</a>
-    <a href="#rpo">RPO history</a>
-    <a href="#sources">Sources</a>
-  </div>
-</nav>
 
 <main class="wrap">
   <section class="hero">
@@ -90,7 +75,10 @@
     </p>
   </section>
 
-
+  <!-- Sections row (tic-tabs.js from the hub): one group at a time on a phone, a jumping row wider. The tiles above
+       carry the counts and open their section. -->
+  <div data-tic-tabs>
+  <div id="sec-launches" data-tab-label="Launches">
   <section class="card" id="map-card" aria-labelledby="map-h">
     <div class="card-head">
       <h2 id="map-h">Launch sites, pads and hazard areas</h2>
@@ -170,7 +158,9 @@
     </div>
     <div id="ledger-body"></div>
   </section>
+  </div>
 
+  <div id="sec-reentries" data-tab-label="Reentries">
   <div class="two">
     <section class="card" id="reentries" aria-labelledby="re-h">
       <div class="card-head">
@@ -226,7 +216,9 @@
       Observations of USSPACECOM's and GCAT's records, not a rating of either.</p>
     <div class="tbl-wrap" id="tipcheck-body"></div>
   </section>
+  </div>
 
+  <div id="sec-baseline" data-tab-label="Baseline">
   <section class="card" id="baseline" aria-labelledby="base-h">
     <div class="card-head">
       <h2 id="base-h">The last 30 days against the two years before</h2>
@@ -238,7 +230,9 @@
     <div id="baseline-body"></div>
     <div id="archive-body"></div>
   </section>
+  </div>
 
+  <div id="sec-changes" data-tab-label="Orbit changes">
   <section class="card" id="maneuvers" aria-labelledby="mn-h">
     <div class="card-head">
       <h2 id="mn-h">Orbit changes in watched satellites, last 30 days</h2>
@@ -265,7 +259,9 @@
     </div>
     <div class="tbl-wrap" id="maneuver-body"></div>
   </section>
+  </div>
 
+  <div id="sec-history" data-tab-label="Reference">
   <section class="card" id="asat" aria-labelledby="asat-h">
     <div class="card-head">
       <h2 id="asat-h"><span class="ref">Reference · </span>Anti-satellite tests in space, 1959 to date</h2>
@@ -288,12 +284,15 @@
     </div>
     <div id="rpo-body"></div>
   </section>
+  </div>
 
-
+  <div id="sec-sources" data-tab-label="Sources">
   <section class="card" id="sources" aria-labelledby="src-h">
     <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
     <div id="lanes"></div>
   </section>
+  </div>
+  </div>
 </main>
 
 <footer class="wrap foot small muted">

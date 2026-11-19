@@ -175,6 +175,8 @@ button.linkish { background: none; border: 0; padding: 0; color: var(--link); te
 /* Section bar (14 Nov 2026): Orbit's sections with their counts, at the top while the page scrolls; the section in
    view is marked (app.js sets aria-current). Links land below it. */
 html { scroll-padding-top: calc(var(--tic-house-h, 0px) + 52px); }
+/* The main page has the shared sections row instead (tic-tabs.css sets its own scroll margin). */
+html:has([data-tic-tabs]) { scroll-padding-top: 0; }
 .secbar { position: sticky; top: var(--tic-house-h, 0px); z-index: 20; background: var(--panel); border-bottom: 1px solid var(--border); }
 .secbar-row { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
 .secbar-row::-webkit-scrollbar { display: none; }
@@ -190,13 +192,8 @@ a.tile { display: block; color: inherit; text-decoration: none; }
 a.tile:hover, a.tile:focus-visible { border-color: var(--accent); }
 a.tile .k::after { content: " \2193"; color: var(--muted); }
 
-/* Long tables show their first rows; the rest open on request, or when a link points at one of them. */
-tr.folded { display: none; }
+/* Long tables fold with the hub's tic-fold.js / tic-fold.css. */
 #tipcheck-h { font-size: 1rem; margin: 1.2rem 0 0.3rem; }
-.more { margin: 8px 0 0; }
-.more button { background: var(--badge); color: var(--text); border: 1px solid var(--border); border-radius: 4px;
-  padding: 5px 12px; font: inherit; font-size: 0.84rem; cursor: pointer; }
-.more button:hover { border-color: var(--accent); }
 
 /* The anti-satellite card is a record, not news. */
 h2 .ref { color: var(--muted); font-weight: 400; }
@@ -208,7 +205,6 @@ h2 .ref { color: var(--muted); font-weight: 400; }
   .tbl-wrap table, .tbl-wrap tbody, .tbl-wrap tr, .tbl-wrap td { display: block; width: 100%; }
   .tbl-wrap thead { display: none; }
   .tbl-wrap tr { padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .tbl-wrap tr.folded { display: none; }
   .tbl-wrap td { border: 0; padding: 2px 0 2px 7.5rem; position: relative; text-align: left; min-height: 1.6em; }
   .tbl-wrap td.num { text-align: left; }
   .tbl-wrap td::before { content: attr(data-label); position: absolute; left: 0; top: 4px; width: 7rem;
