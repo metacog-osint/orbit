@@ -67,7 +67,7 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
 | `decay` | `tip.py` | Space-Track TIP | Card only, not in the feed; runs before `maneuver` |
 | `maneuver` | `maneuver.py`, `spacetrack.py` | Space-Track GP, private watch list | Published with the disclaimer; feed items `orbit:maneuver:*` |
 End-of-run blocks: `tip_check` (TIP against GCAT's reentry), `lead` (`lead.py`), `archive` (`archive.py`,
-`orbit-archive/1`, 800 days, published at `/data/archive.json`). A failed lane keeps its last good copy
+`orbit-archive/1`, every day kept, published at `/data/archive.json`). A failed lane keeps its last good copy
 (`from_previous`); a failed, off or carried lane leaves no archive count that day, never a zero.
 
 ## Feed

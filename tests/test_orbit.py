@@ -167,6 +167,27 @@ class Catalog(unittest.TestCase):
         self.assertEqual(d["temporary_entries_closed"], 1)
         self.assertEqual(d["owner_changes"][0]["fields"]["state"], ["UK", "US"])
 
+    def test_full_diff_cuts_nothing_and_default_view_is_unchanged(self):
+        idx = gcat.build_index(self.objs)
+        prev = dict(idx)
+        for i in range(60):  # 60 objects gone from this reading, 60 owner changes: the published lists stop at 50
+            prev[f"S9{i:04d}"] = ["satcat", str(90000 + i), "1990-001", "D", f"Deleted {i}", "1990 Jan 1", "-", "-",
+                                  "O", "X", "US", "-"]
+        owners = [j for j in idx if idx[j][0] == "satcat"][:60]
+        for j in owners:
+            prev[j] = list(prev[j])
+            prev[j][gcat.INDEX_FIELDS.index("owner")] = "OLDOWNER"
+        default = gcat.diff(prev, self.objs, TODAY)
+        full = gcat.diff(prev, self.objs, TODAY, full=True)
+        self.assertEqual(len(default["removed_objects"]), 50)
+        self.assertNotIn("changed_objects", default)
+        self.assertEqual(len(full["removed_objects"]), 60)
+        self.assertEqual(len(full["changed_objects"]), full["changed"])
+        for k in default:  # the counts and every key the page reads agree
+            if k not in ("removed_objects", "owner_changes", "newly_numbered_objects", "late_groups"):
+                self.assertEqual(default[k], full[k], k)
+        self.assertTrue(any(c["fields"].get("owner", [None])[0] == "OLDOWNER" for c in full["changed_objects"]))
+
     def test_reentries_window(self):
         rows = gcat.recent_reentries(self.objs, TODAY, days=7)
         self.assertTrue(rows)

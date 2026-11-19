@@ -35,7 +35,6 @@ ATTRIBUTION = "Launch data: Launch Library 2, The Space Devs (thespacedevs.com)"
 RELEASE_TAG = "ledger"
 ASSET = "launch-ledger.json"
 PUBLIC_URL = f"https://github.com/metacog-osint/orbit/releases/download/{RELEASE_TAG}/{ASSET}"
-KEEP_CHANGES = 200      # the newest field changes kept in the ledger's log
 FINAL = ("Success", "Failure", "Partial Failure")   # LL2 status abbreviations that end a launch's story
 OPEN_DAYS = 14          # a launch without a final status this close to the newest is pulled again
 COMPARED = ("name", "net", "net_precision", "window_start", "window_end", "status", "status_name", "provider",
@@ -52,7 +51,7 @@ def id_url(launch_id: str) -> str:
 
 def empty() -> dict:
     return {"schema": SCHEMA, "attribution": ATTRIBUTION, "start": START, "page": PAGE, "updated_at": None,
-            "caught_up": False, "launches": [], "changes": [], "last_check": None}
+            "caught_up": False, "launches": [], "changes": [], "last_check": None}  # changes: every field change, never cut (18 Nov 2026)
 
 
 def _key(r: dict) -> tuple:
@@ -158,7 +157,6 @@ def step(ledger: dict, body: bytes, read_at: str, lookup=None) -> dict:
     ledger["launches"].sort(key=_key)
     for lid, d in report["changed"].items():
         ledger["changes"].append({"at": read_at, "id": lid, "fields": d})
-    ledger["changes"] = ledger["changes"][-KEEP_CHANGES:]
     ledger["caught_up"] = len(rows) < PAGE
     ledger["updated_at"] = read_at
     ledger["last_check"] = report

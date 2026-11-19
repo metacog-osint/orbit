@@ -96,13 +96,15 @@ class Record(unittest.TestCase):
         self.assertNotIn("quiet_or_untracked", text)
         self.assertEqual(doc["days"]["2026-11-16"]["maneuver"]["watched"], 12)  # the count the page shows
 
-    def test_keeps_max_days(self):
+    def test_keeps_every_day(self):  # retention rule, 18 Nov 2026: the old 800-day cap is gone
         doc = archive.empty()
-        for i in range(archive.MAX_DAYS + 5):
+        for i in range(900):
             doc["days"][str(date(2024, 1, 1).fromordinal(date(2024, 1, 1).toordinal() + i))] = {"runs": 1}
         doc = archive.record(doc, snap("2030-01-01T00:55:00Z"))
-        self.assertEqual(len(doc["days"]), archive.MAX_DAYS)
+        self.assertEqual(len(doc["days"]), 901)
+        self.assertIn("2024-01-01", doc["days"])
         self.assertIn("2030-01-01", doc["days"])
+        self.assertFalse(hasattr(archive, "MAX_DAYS"))
 
 
 class MergeAndSummary(unittest.TestCase):

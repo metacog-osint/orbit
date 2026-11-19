@@ -249,7 +249,7 @@ Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the c
 
 ## Orbit's own daily archive (`orbit-2.11`, 16 Nov 2026)
 Decision 8's second half (Tom, 15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,
-schema `orbit-archive/1`), the newest 800 days kept:
+schema `orbit-archive/1`), every day kept (no cap since 18 Nov 2026):
 1. **Listed orbit changes**, each keyed by NORAD number and start date, with name, regime, size and dominant term,
    on days the lane read Space-Track itself (`ok`, or `unchanged` while it waits out the hour). Only what the page
    lists goes in, with the watched count it already shows; the private watch list does not.
@@ -560,6 +560,23 @@ note, Orbit draws the page.
    (A04907), Starlink 30221, USA 270 (globe drawn from its listed change's set), an unknown number, phone width and
    dark mode in headless Edge: no sideways scroll; console errors only a local `favicon.ico` 404 and Cesium's three
    inline-style CSP refusals, which the main page's globe shows too.
+
+## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
+Public releases, one per month and kind, unique asset names, never clobbered (`orbit/retention.py`, `tests/test_retention.py`);
+only what is already public or open-licensed goes there. Nothing from Space-Track element sets or case reads.
+- Launch ledger: the change log in `launch-ledger.json` is no longer cut at 200 entries.
+- Daily archive: no 800-day cap. `update.yml` uploads a dated copy a day as `archive-YYYY-MM-DD.json.gz` to release
+  `archive-YYYY-MM` (after the deploy; a failed upload keeps the files as a workflow artifact).
+- GCAT catalog changes (CC BY 4.0): every reading's whole diff (added, removed, changed with field before and after,
+  owner changes, late groups; no 50-item cut) as `catalog-changes-<read time>.jsonl.gz` on release `catalog-changes-YYYY-MM`.
+  The published lists keep their cut of 50.
+- TIC catalog: `catalog.yml` keeps `catalog-<Monday>.json.gz` once a week on release `catalog-archive-YYYY-MM`.
+- Ended NAVAREA warnings: Cordon is the record (it commits `data/navarea.json` hourly and logs changes in its history
+  log); Orbit's `navwarn` lane keeps only the areas in force and the daily archive's area keys. No second store.
+- Needs a private store, not built (Space-Track data and the watch list may not go in a public repo): the element-set
+  store past 120 days, the stored case reads and report (`data/state`), and raw Space-Track replies. Raw replies of
+  open sources (NGA warnings, TIP excluded) could go to a public release; SWF sheets are CC BY-NC and CelesTrak
+  has no stated redistribution licence, so those wait for a decision.
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).

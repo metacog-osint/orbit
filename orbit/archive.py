@@ -17,7 +17,7 @@ in Orbit's own readings, so Orbit keeps them day by day and gives them baselines
 
 Every day also records how many runs it had and each lane's statuses, so a missed day or a failed lane is never
 read as a count of zero. Only what the page already publishes goes in: listed changes, never the private watch
-list. One entry per UTC day, the newest MAX_DAYS kept.
+list. One entry per UTC day, every day kept (retention rule, 18 Nov 2026: no cap).
 
 Kept in data/state/ (the Actions cache) and published with the site at /data/archive.json. A run whose cache
 entry is missing or older merges the published copy back in (one request to Orbit's own site), so losing the
@@ -29,7 +29,6 @@ from datetime import date, timedelta
 
 SCHEMA = "orbit-archive/1"
 PUBLIC_URL = "https://orbit.theintelligence.company/data/archive.json"
-MAX_DAYS = 800      # a little over two years, the GCAT baselines' span
 TIP_DEDUP_DAYS = 10  # a TIP message already kept in the last 10 days is not kept again (the reply covers 5)
 BASELINE_DAYS = 90  # decision 8: baselines from Orbit's own counts after 90 days
 
@@ -117,8 +116,6 @@ def record(doc: dict | None, snap: dict) -> dict:
             d.setdefault("tip", []).extend(new)
             doc["tip_attribution"] = dc.get("attribution")
 
-    for old in sorted(doc["days"])[:-MAX_DAYS]:
-        del doc["days"][old]
     doc["updated_at"] = stamp
     return doc
 
