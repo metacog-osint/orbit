@@ -27,6 +27,7 @@
     var t = el("table"), th = el("thead"), tr = el("tr");
     head.forEach(function (h) { var c = el("th", h.num ? "num" : "", h.label || h); tr.appendChild(c); });
     th.appendChild(tr); t.appendChild(th);
+    t.setAttribute("data-tic-fold", "5 10");
     var tb = el("tbody");
     var names = head.map(function (h) { return h.label || h || ""; });
     rows.forEach(function (r) {
@@ -42,33 +43,21 @@
     tr.appendChild(td);
     return td;
   }
-  var opened = {}; // folds the viewer has opened; kept when the page redraws (time settings)
-  function fold(box, rows, keep, noun, key) {
-    if (rows.length <= keep + 2) return;
-    var rest = rows.slice(keep);
-    var p = el("p", "more"), b = el("button");
-    b.type = "button";
-    function set(open) {
-      opened[key] = open;
-      rest.forEach(function (r) { r.classList.toggle("folded", !open); });
-      b.setAttribute("aria-expanded", String(open));
-      b.textContent = open ? "Show the first " + keep : "Show all " + rows.length + " " + noun;
-    }
-    b.addEventListener("click", function () { set(!opened[key]); });
-    b.foldOpen = function () { set(true); };
-    set(!!opened[key]);
-    p.appendChild(b);
-    box.appendChild(p);
+  // Long tables fold with the hub's tic-fold.js: table() marks every table, which shows its first 5 rows on a phone
+  // (each row is a tall block there) and 10 wider, as Orbit's own fold did, then "Show all" (only when 3 or more
+  // would hide). fold() sets other counts or adds a find box. A
+  // link to a folded row (the map's "Show in table", a hazard's scheduled launch) opens its fold and its section.
+  function fold(rows, counts, find) {
+    var t = rows.length && rows[0].closest("table");
+    if (!t) return;
+    if (counts) t.setAttribute("data-tic-fold", counts);
+    if (find) t.setAttribute("data-tic-fold-find", "");
   }
-  // A link to a folded row (the map's "Show in table", a hazard's scheduled launch) opens its table first.
-  function reveal(id) {
-    var r = id && document.getElementById(id);
-    if (!r) return null;
-    if (r.classList.contains("folded")) {
-      var b = r.closest(".tbl-wrap").querySelector(".more button");
-      if (b && b.foldOpen) b.foldOpen();
-    }
-    return r;
+  // The sections row (tic-tabs.js): on a phone one group shows at a time, so open the group that holds an element.
+  function openGroup(target) {
+    var grp = target && target.closest("[data-tab-label]");
+    var tabs = grp && window.TicTabs && window.TicTabs.setup(grp.parentElement);
+    if (tabs) tabs.show(grp.id);
   }
   function empty(box, text) { box.textContent = ""; box.appendChild(el("p", "muted small", text)); }
 
@@ -139,8 +128,6 @@
       d.appendChild(el("span", "k", t[0]));
       d.appendChild(el("span", "v", String(t[1])));
       box.appendChild(d);
-      var n = document.querySelector('.secbar b[data-n="' + t[2] + '"]');
-      if (n) n.textContent = String(t[1]);
     });
     document.getElementById("asof").textContent = "Built " + fmt(snap.generated_at) + ".";
     document.getElementById("method").textContent = snap.method_version || "";
@@ -385,7 +372,7 @@
     box.textContent = "";
     box.appendChild(table(["Next window", "Hazard and area", "Broadcast as",
       "Scheduled launches with NET in a window, and Launch's place check", "Map and cancellation"], rows));
-    fold(box, rows, 8, "warnings", "hazards");
+    fold(rows, "5 8");
   }
 
   /* Anti-satellite tests in space: Secure World Foundation's sheet as it stands (CC BY-NC 4.0). History, not new
@@ -454,7 +441,7 @@
       return tr;
     });
     box.appendChild(table(["Object", "When", "Change", "Longitude (geostationary)", "Source"], rows));
-    fold(box, rows, 10, "changes", "maneuvers");
+    fold(rows);
   }
 
   function countedText(c) {  // marks counted, not listed (orbit-2.8)
@@ -510,7 +497,7 @@
       wrap.appendChild(table(["", { label: "Last 30 days", num: true }, { label: "Before: median (range)", num: true },
         "Where it sits", "24 windows, then the last 30 days"], trs));
       box.appendChild(wrap);
-      fold(wrap, trs, keep, "rows", key);
+      fold(trs, "5 " + keep);
     }
     var all = function (label) { return function () { return document.createTextNode(label); }; };
     var cc = function (r) { var d = el("div"); d.appendChild(mark(r.country, r.state || r.key)); return d; };
@@ -631,7 +618,7 @@
     tw.appendChild(table(["Date", "Country", "Interceptor, type and target", "Launch site", "Object hit",
       { label: "Debris created", num: true }, { label: "Re-entered", num: true }, { label: "Still on orbit", num: true },
       "Last piece re-entered (debris lifespan)"], rows));
-    fold(tw, rows, 10, "tests", "asat");
+    fold(rows, "", true);
     box.appendChild(tw);
     // Notes and credit.
     var note = el("div", "muted small asat-note");
@@ -733,7 +720,7 @@
         .concat(planned ? ["Organisation", "SWF's notes"] : ["Orbit", "Launch site", "Debris released"]);
       var tw = el("div", "tbl-wrap");
       tw.appendChild(table(head, trs));
-      fold(tw, trs, 10, "operations", "rpo-" + tab);
+      fold(trs, "", true);
       box.appendChild(tw);
     });
     var note = el("div", "muted small asat-note");
@@ -1040,6 +1027,7 @@
   var pendingReentry = null;
   function showReentry(key) {  // a decay row's button: the globe, then that object's track over its window
     var card = document.getElementById("map-card");
+    openGroup(card);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
     pendingReentry = key;
     setView("globe");
@@ -1086,6 +1074,7 @@
   }
   function showOnMap(key) {
     var card = document.getElementById("map-card");
+    openGroup(card);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
     if (mapApi) { mapApi.select("nw-" + key); mapApi.flyTo("nw-" + key); onPick("nw-" + key); }
   }
@@ -1223,8 +1212,6 @@
     var box = document.getElementById("breakup-table");
     var since30 = daysAgo(30);
     var rows = (snap.breakups || []).filter(function (x) { return x.breakup_date >= since30; });
-    var n = document.querySelector('.secbar b[data-n="breakups"]');
-    if (n) n.textContent = String(rows.length);
     if (!rows.length) return empty(box, "No object GCAT marks exploded or collided has a date in the last 30 days.");
     var trs = rows.map(function (x) {
       var tr = el("tr");
@@ -1247,15 +1234,12 @@
     var box = document.getElementById("decay-body");
     var dc = (snap && snap.decay) || {};
     var lane = (snap.lanes || {}).decay || {};
-    var n = document.querySelector('.secbar b[data-n="decay"]');
     if (!dc.read_at) {
-      if (n) n.textContent = "";
       return empty(box, lane.status === "off" ? "Not read: " + (lane.reason || "the lane is off") + "." :
         "Not read yet: predictions appear after Orbit's next reading of Space-Track.");
     }
     var objs = dc.objects || [];
     var ahead = objs.filter(function (x) { return !x.passed; });
-    if (n) n.textContent = ahead.length ? String(ahead.length) : "";
     box.textContent = "";
     box.appendChild(el("p", "small", ahead.length + (ahead.length === 1 ? " object" : " objects") +
       " with a prediction window still open" + (objs.length > ahead.length ? ", " + (objs.length - ahead.length) +
@@ -1298,7 +1282,7 @@
       return tr;
     });
     box.appendChild(table(["Predicted time", "Object", "Place at that time", "Message"], rows));
-    fold(box, rows, 10, "objects", "decay");
+    fold(rows);
   }
 
   function mins(m) {  // a signed difference in minutes, in the largest unit that reads well
@@ -1358,7 +1342,7 @@
       return tr;
     });
     box.appendChild(table(["TIP after the reentry", "Object", "Last prediction", "Offset", "GCAT"], rows));
-    fold(box, rows, 10, "objects", "tipcheck");
+    fold(rows);
   }
 
   function catalogBody() {
@@ -1586,31 +1570,15 @@
     tiles(); leadCard(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); tipCheckCard(); catalogBody(); lanes();
     startMap();
     viewControls();
-    if (location.hash) { var t = reveal(location.hash.slice(1)); if (t) t.scrollIntoView(); }
-    markSection();
+    // A link to a card or row: scroll to it again once tic-fold.js has folded the tables drawn above it.
+    var t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (t) requestAnimationFrame(function () { requestAnimationFrame(function () { t.scrollIntoView(); }); });
   }
 
-  window.addEventListener("hashchange", function () {
-    var r = reveal(location.hash.slice(1));
-    if (r) r.scrollIntoView();
-    markSection();
+  // A map drawn in a hidden group (a phone opened on another section) has no size: redraw it when its group shows.
+  document.addEventListener("tic-tabs:show", function (e) {
+    if (mapApi && mapApi.resize && e.target.contains(document.getElementById("map-card"))) mapApi.resize();
   });
-
-  // The section bar marks the section in view.
-  var barLinks = [].slice.call(document.querySelectorAll(".secbar a"));
-  function markSection() {
-    var cur = 0, curTop = -Infinity;
-    barLinks.forEach(function (link, i) {
-      var s = document.getElementById(link.getAttribute("href").slice(1));
-      var top = s ? s.getBoundingClientRect().top : Infinity;
-      // Side-by-side cards (reentries and catalog) share a top: the first one keeps the mark.
-      if (top <= 120 && top > curTop + 1) { cur = i; curTop = top; }
-    });
-    barLinks.forEach(function (link, i) {
-      if (i === cur) link.setAttribute("aria-current", "location"); else link.removeAttribute("aria-current");
-    });
-  }
-  window.addEventListener("scroll", markSection, { passive: true });
 
   // On a phone, a long card note shows three lines; selecting it shows the rest.
   var notes = [].slice.call(document.querySelectorAll(".card-head p"));
