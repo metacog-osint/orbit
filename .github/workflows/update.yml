@@ -34,7 +34,7 @@ on:
     - cron: "41 */6 * * *"
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write   # releases only (retention archives, orbit/retention.py); nothing is committed
 concurrency:
   group: update
   cancel-in-progress: false
@@ -63,6 +63,7 @@ jobs:
         if: steps.state.outputs.cache-matched-key == ''
         run: echo "::warning::No state in the Actions cache, so this run is a first reading and can report no catalog change."
       - name: Live collection (a failed lane keeps its last good copy and says so on the page)
+        id: collect
         env:
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
@@ -111,3 +112,20 @@ jobs:
           fi
           npx --yes wrangler@4.151.3 pages deploy site --project-name orbit --branch main \
             --commit-hash "$GITHUB_SHA" --commit-message "update $GITHUB_SHA" --commit-dirty=true
+      # Retention (18 Nov 2026): after the deploy, so a failed upload never blocks the live site. GCAT's whole catalog diff
+      # (one file per reading, uncut) goes to release catalog-changes-YYYY-MM, and the daily archive (also public at
+      # /data/archive.json) to archive-YYYY-MM, one dated copy a day. Unique names, no clobber (orbit/retention.py).
+      # The state cache above already moved on, so if the upload fails the files are kept as a workflow artifact.
+      - name: Archive to monthly releases (GCAT catalog changes, daily archive)
+        id: archive
+        if: ${{ !cancelled() && steps.collect.conclusion == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/orbit.py archive-upload
+      - name: Keep the unsent archive files when the upload failed
+        if: ${{ failure() && steps.archive.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: orbit-archive-out-${{ github.run_id }}
+          path: data/archive_out
+          retention-days: 90

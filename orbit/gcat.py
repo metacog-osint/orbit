@@ -193,12 +193,16 @@ def _brief(o: dict) -> dict:
             "op_orbit": o["op_orbit"]}
 
 
-def diff(prev_index: dict[str, list], objs: list[dict], today: date, late_days: int = 30) -> dict:
+def diff(prev_index: dict[str, list], objs: list[dict], today: date, late_days: int = 30, full: bool = False) -> dict:
     """Changes between Orbit's previous reading and this one.
 
     'Late' new objects come from a launch more than late_days old: a payload released from a host, a
     fragmentation, or an object GCAT has only now identified. Orbit reports which, by type and parent,
-    and does not say why."""
+    and does not say why.
+
+    full=True (the retention archive, release `catalog-changes-YYYY-MM`) cuts no list at 50 and adds every added
+    object, every changed object and every temporary entry closed; the default is the published view, unchanged."""
+    cut = (lambda rows: rows) if full else (lambda rows: rows[:50])  # noqa: E731
     cur = {o["jcat"]: o for o in objs}
     added = [cur[j] for j in cur.keys() - prev_index.keys()]
     removed = [_from_index(j, prev_index[j]) for j in prev_index.keys() - cur.keys()]
@@ -236,7 +240,7 @@ def diff(prev_index: dict[str, list], objs: list[dict], today: date, late_days: 
             "parents": dict(parents.most_common(5)),
             "states": sorted({o["state"] for o in group}),
             "countries": sorted({c for c in (iso_country(o["state"]) for o in group) if c}),
-            "objects": [_brief(o) for o in sorted(group, key=lambda o: o["jcat"])][:50],
+            "objects": cut([_brief(o) for o in sorted(group, key=lambda o: o["jcat"])]),
         })
     late_out.sort(key=lambda g: (-g["count"], g["launch_tag"]))
 
@@ -244,20 +248,25 @@ def diff(prev_index: dict[str, list], objs: list[dict], today: date, late_days: 
     numbered = [c for c in changed if "norad" in c["fields"] and not c["fields"]["norad"][0] and c["fields"]["norad"][1]]
     status_moves = Counter(f"{c['fields']['status'][0]} -> {c['fields']['status'][1]}" for c in changed
                            if "status" in c["fields"])
-    return {
+    out = {
         "added": len(added),
         "added_fresh": len(fresh),
         "added_late": len(late),
         "late_groups": late_out,
         "removed": len(removed),
         "temporary_entries_closed": len(graduated),
-        "removed_objects": [_brief(o) for o in sorted(removed, key=lambda o: o["jcat"])][:50],
+        "removed_objects": cut([_brief(o) for o in sorted(removed, key=lambda o: o["jcat"])]),
         "changed": len(changed),
         "status_moves": dict(status_moves.most_common()),
-        "owner_changes": owner_changes[:50],
+        "owner_changes": cut(owner_changes),
         "newly_numbered": len(numbered),
-        "newly_numbered_objects": numbered[:50],
+        "newly_numbered_objects": cut(numbered),
     }
+    if full:
+        out["added_objects"] = [_brief(o) for o in sorted(added, key=lambda o: o["jcat"])]
+        out["changed_objects"] = sorted(changed, key=lambda c: c["jcat"])
+        out["temporary_entries_closed_objects"] = [_brief(o) for o in sorted(graduated, key=lambda o: o["jcat"])]
+    return out
 
 
 # --- launches and reentries ---------------------------------------------------------------------------------

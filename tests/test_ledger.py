@@ -55,6 +55,14 @@ class LedgerTest(unittest.TestCase):
         self.assertEqual(parse_qs(urlparse(ledger.next_url(doc)).query)["net__gte"], [day(3)])  # the newest saved
         self.assertTrue(ledger.id_url("abc").startswith("https://ll.thespacedevs.com/2.3.0/launches/abc/?"))
 
+    def test_change_log_is_never_cut(self):  # retention rule, 18 Nov 2026: the old 200-entry cap is gone
+        doc = ledger.empty()
+        ledger.step(doc, page(rec(1, day(1))), "t0")
+        for i in range(250):
+            ledger.step(doc, page(rec(1, day(1), name=f"Name {i}")), f"t{i + 1}")
+        self.assertEqual(len(doc["changes"]), 250)
+        self.assertEqual(doc["changes"][0]["fields"]["name"][1], "Name 0")
+
     def test_first_page_then_verify_and_add(self):
         doc = ledger.empty()
         r = ledger.step(doc, page(*[rec(i, day(i)) for i in range(1, 15)]), "t0")

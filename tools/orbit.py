@@ -49,7 +49,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
 from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn, objpage,  # noqa: E402
-                   news, oscar, oscarlinks, rpo, spacetrack, stcat, tip)
+                   news, oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -132,6 +132,11 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
     if index_doc:
         result["catalog_changes"] = {"previous_reading_at": index_doc["read_at"],
                                      **gcat.diff(index_doc["objects"], objs, today)}
+        # retention (18 Nov 2026): the whole per-object diff, uncut, for the release archive (orbit/retention.py);
+        # the published view above keeps its lists at 50
+        retention.write_changes(data_dir, retention.changes_lines(
+            gcat.diff(index_doc["objects"], objs, today, full=True), recs[0]["fetched_at"], index_doc["read_at"],
+            result["gcat_updated"]), recs[0]["fetched_at"])
     _write_index(data_dir, {"read_at": recs[0]["fetched_at"], "gcat_updated": result["gcat_updated"],
                             "objects": gcat.build_index(objs)})
     return result, recs, stamps
@@ -1009,6 +1014,21 @@ def spacetrack_catalog(data_dir: Path) -> int:
     return 0
 
 
+def archive_upload(data_dir: Path) -> int:
+    """Workflow update.yml, after the deploy: this run's GCAT catalog-change files and the day's copy of the daily
+    archive to monthly public releases (orbit/retention.py). No clobber; a failed upload exits 1."""
+    repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
+    try:
+        ch = retention.upload_changes(data_dir, repo)
+        ar = retention.upload_archive(data_dir / ARCHIVE, datetime.now(timezone.utc).date(),
+                                      data_dir / retention.OUT / "tmp", repo)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        return 1
+    print(f"Uploaded {len(ch)} catalog-change file(s) and {len(ar)} archive copy.")
+    return 0
+
+
 def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     """Workflow catalog.yml: the decay store and state from the public release `catalog`, one Space-Track read when
     due, GCAT's catalogs (one request each), the catalog built and uploaded with the store and state. Not due: exit 0
@@ -1058,6 +1078,15 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {catshards.SHARDS_ASSET}, {catshards.SEARCH_ASSET}, "
           f"{catshards.RULES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
           f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
+    # retention (18 Nov 2026): the catalog is replaced every build, so keep one dated copy a week (already public on
+    # release `catalog`); a failure fails the run, after the live files are up
+    try:
+        wk = retention.upload_catalog_week(out, datetime.now(timezone.utc).date(), repo)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        return 1
+    if wk:
+        print(f"Kept the weekly copy {wk[0]}.")
     return 1 if refused else 0
 
 
@@ -1076,6 +1105,8 @@ def main(argv=None) -> int:
                                               "BeiDou-2 G2) or iss (2024 reboosts and the May storm)")
     mc.add_argument("case", nargs="?", default="sj21", choices=sorted(CASES))
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
+    sub.add_parser("archive-upload", help="this run's catalog-change files and daily archive to monthly releases "
+                                          "(update.yml, after the deploy)")
     lg = sub.add_parser("ledger", help="one Launch Library 2 pull into data/state/launch-ledger.json (hourly)")
     lg.add_argument("--file", default=str(ROOT / "data" / "state" / ledger.ASSET))
     gp = sub.add_parser("geo", help="the GEO region: one Space-Track gp query, day file and element files (geo.yml)")
@@ -1144,6 +1175,8 @@ def main(argv=None) -> int:
               + (f"Catalog changes since {ch['previous_reading_at']}: {ch['added']} added, {ch['removed']} removed, "
                  f"{ch['changed']} changed." if ch.get("previous_reading_at") else "No previous catalog reading."))
         return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
+    if args.cmd == "archive-upload":
+        return archive_upload(ROOT / "data")
     if args.cmd == "ledger":
         return ledger_pull(Path(args.file))
     if args.cmd == "maneuver-case":
