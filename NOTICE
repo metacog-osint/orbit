@@ -4,8 +4,9 @@ The code is licensed under the GNU Affero General Public License v3.0 (LICENSE).
 Third-party and shared files in this repository keep their own licences:
 
 - doctrine/kit/        The Intelligence Company doctrine kit, MIT (doctrine/kit/LICENSE)
-- site_src/tic-time.js, site_src/tic-time.css, and their copies in site/
-  The Intelligence Company shared time display, MIT (SPDX line at the top of tic-time.js)
+- tic-*.js, tic-*.css in site/ and site_src/
+  The Intelligence Company's shared site scripts (tic-nav, tic-time), MIT.
+  Canonical copies: site/shared/ in github.com/metacog-osint/theintelligence-company.
 - site_src/vendor/cesium/        CesiumJS 1.146.0, Apache 2.0 (LICENSE.md; the libraries it bundles are listed
   in ThirdParty.json; local changes in PATCHED.md)
 - site_src/vendor/maplibre-gl/   MapLibre GL JS 6.14.0, BSD 3-Clause (LICENSE.txt)
