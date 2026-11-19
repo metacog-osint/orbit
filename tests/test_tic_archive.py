@@ -225,13 +225,34 @@ class RedactTests(Base):
             ta.Redactor(["TA_TEST_UNSET"], [])
 
     def test_source_files_not_modified(self):
-        os.environ["TA_TEST_APPNAME"] = "abc123"
+        os.environ["TA_TEST_APPNAME"] = "abc123def"
         try:
-            p = self.write("x.json", "?appname=abc123")
+            p = self.write("x.json", "?appname=abc123def")
             self.put(redactor=ta.Redactor(["TA_TEST_APPNAME"], []))
         finally:
             del os.environ["TA_TEST_APPNAME"]
-        self.assertEqual(p.read_bytes(), b"?appname=abc123")
+        self.assertEqual(p.read_bytes(), b"?appname=abc123def")
+
+    def test_redacted_files_marked_in_index(self):
+        os.environ["TA_TEST_APPNAME"] = "abc123def"
+        try:
+            self.write("x.json", "?appname=abc123def")
+            self.write("y.json", "nothing here")
+            r = self.put(redactor=ta.Redactor(["TA_TEST_APPNAME"], []))
+        finally:
+            del os.environ["TA_TEST_APPNAME"]
+        marks = {f["path"]: f.get("redacted", False) for f in r["doc"]["files"]}
+        self.assertEqual(marks, {"x.json": True, "y.json": False})
+
+    def test_optional_env_skipped_when_unset_and_short_values_refused(self):
+        os.environ.pop("TA_TEST_UNSET", None)
+        self.assertFalse(ta.Redactor([], [], ["TA_TEST_UNSET"]).active)
+        os.environ["TA_TEST_SHORT"] = "abc"
+        try:
+            with self.assertRaises(ta.ArchiveError):
+                ta.Redactor([], [], ["TA_TEST_SHORT"])
+        finally:
+            del os.environ["TA_TEST_SHORT"]
 
 
 class GhStoreTests(unittest.TestCase):

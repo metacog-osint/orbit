@@ -184,14 +184,18 @@ def tag_sort_key(tag: str, prefix: str):
 class Redactor:
     """Removes a secret echoed back by a source (ReliefWeb echoes the appname in href/links) before archiving."""
 
-    def __init__(self, env_names: list[str], params: list[str]):
+    def __init__(self, env_names: list[str], params: list[str], optional_env: list[str] = ()):
+        from urllib.parse import quote, quote_plus
         self.values: list[bytes] = []
-        for name in env_names:
+        for name in [*env_names, *optional_env]:
             v = os.environ.get(name, "")
             if not v.strip():
+                if name in optional_env:
+                    continue          # not set, so the collection never had it to leak
                 raise ArchiveError(f"--redact-env {name}: the variable is empty, so the archive would keep it "
                                    "unredacted; pass it to this step")
-            from urllib.parse import quote, quote_plus
+            if len(v) < 8:
+                raise ArchiveError(f"--redact-env {name}: under 8 characters, too short to replace safely")
             for form in {v, quote(v, safe=""), quote_plus(v)}:
                 self.values.append(form.encode("utf-8"))
         self.params = [re.compile(rb"(?i)\b(" + re.escape(p.encode()) + rb")=[^&\"'\s<>#;]+") for p in params]
@@ -207,16 +211,19 @@ class Redactor:
             data = rx.sub(rb"\1=REDACTED", data)
         return data
 
-    def file_bytes(self, p: Path) -> bytes:
+    def file_bytes(self, p: Path) -> tuple[bytes, bool]:
+        """(bytes to archive, whether anything was replaced). A .gz file is redacted inside the gzip."""
         raw = p.read_bytes()
         if p.name.endswith(".gz"):
             try:
                 inner = gzip.decompress(raw)
             except OSError:
-                return self.apply(raw)
-            red = self.apply(inner)
-            return raw if red == inner else gzip.compress(red, 6, mtime=0)
-        return self.apply(raw)
+                inner = None
+            if inner is not None:
+                red = self.apply(inner)
+                return (raw, False) if red == inner else (gzip.compress(red, 6, mtime=0), True)
+        red = self.apply(raw)
+        return red, red != raw
 
 
 def parse_sources(src) -> list[tuple[str, Path]]:
@@ -262,9 +269,11 @@ def _scan_one(src: Path, name: str, include, exclude, redactor) -> list[dict]:
         if any(fnmatch.fnmatch(rel, g) for g in exclude):
             continue
         if redactor is not None and redactor.active:
-            data = redactor.file_bytes(p)
-            files.append({"path": rel, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
-                          "_data": data})
+            data, changed = redactor.file_bytes(p)
+            f = {"path": rel, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(), "_data": data}
+            if changed:
+                f["redacted"] = True      # the archived bytes differ from the fetched ones (index.jsonl's sha256)
+            files.append(f)
         else:
             files.append({"path": rel, "bytes": p.stat().st_size, "sha256": sha256_file(p), "_src": p})
     return files
@@ -398,7 +407,8 @@ class Archive:
                    "previous": prev["stamp"] if prev else None,
                    "files": [{"path": f["path"], "bytes": f["bytes"], "sha256": f["sha256"],
                               "release": where[f["sha256"]][0], "asset": where[f["sha256"]][1],
-                              "member": where[f["sha256"]][2]} for f in files]}
+                              "member": where[f["sha256"]][2], **({"redacted": True} if f.get("redacted") else {})}
+                             for f in files]}
             index = work / f"{stamp}-{snap[:12]}.files.json"
             index.write_text(json.dumps(doc, indent=0, sort_keys=True) + "\n", encoding="utf-8")
             sizes = {p.name: p.stat().st_size for p in uploads + [index]}
@@ -486,6 +496,8 @@ def main(argv=None) -> int:
             s.add_argument("--exclude", action="append", default=[], help="glob on the relative path (repeat)")
             s.add_argument("--redact-env", action="append", default=[],
                            help="env var whose value is replaced by REDACTED in every file (must be set)")
+            s.add_argument("--redact-env-if-set", action="append", default=[],
+                           help="as --redact-env, but an unset variable is skipped")
             s.add_argument("--redact-param", action="append", default=[],
                            help="query parameter whose value is replaced by REDACTED (e.g. appname)")
             s.add_argument("--min-interval-hours", type=float, default=0)
@@ -497,7 +509,7 @@ def main(argv=None) -> int:
     try:
         arch = Archive(GhStore(), a.program, a.lane)
         if a.cmd == "put":
-            red = Redactor(a.redact_env, a.redact_param)
+            red = Redactor(a.redact_env, a.redact_param, a.redact_env_if_set)
             arch.put(a.src, a.include, a.exclude, red, a.dry_run, a.min_interval_hours)
         elif a.cmd == "restore":
             arch.restore(Path(a.dest), a.snapshot)
