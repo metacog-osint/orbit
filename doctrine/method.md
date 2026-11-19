@@ -172,7 +172,10 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    runs from GitHub's API just before asking: while a run is going, or within an hour of that step, it keeps its
    last reading and says why on the lane; if GitHub cannot be read it waits too. Noisefloor checks Orbit's
    snapshot the other way (16 Nov 2026). From the GEO region lane (below), the update run also waits for
-   Orbit's own workflow `geo.yml`, and that workflow waits for the update run and Noisefloor's.
+   Orbit's own workflow `geo.yml`, and that workflow waits for the update run and Noisefloor's. **From
+   `orbit-2.21` (18 Nov 2026) neither waits for Noisefloor:** its GEO page moved here and its GP step went with it
+   (Noisefloor PR #50), so the update run waits for `geo.yml` only and `geo.yml` for the update run only. Before
+   that, any Noisefloor daily run still in progress made Orbit skip, though it no longer queried.
 2. **One set per epoch**, the later-created where Space-Track re-issued one.
 3. **Change against the object's own noise.** For each pair of consecutive sets: the change in semi-major axis,
    inclination, node and eccentricity, less the object's median drift over that interval (drag decay, nodal
@@ -321,8 +324,8 @@ under the boundary Tom accepted on 16 Nov 2026 (Orbit: what is in orbit, who own
 signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit.py geo`, workflow `geo.yml`.
 1. **Source:** one Space-Track gp query a run for every object near GEO (mean motion 0.9-1.1 rev/day, eccentricity
    under 0.3, not decayed), through Orbit's client and limits (item 1 of the orbit changes above): at most an hour
-   after any other gp query on the shared account, checked from GitHub's record of Noisefloor's daily runs and
-   Orbit's update runs; a run inside the hour skips and says so. Plus one CelesTrak request for its GEO group, the
+   after any other gp query on the shared account, checked from GitHub's record of Orbit's update runs (and of
+   Noisefloor's daily runs until `orbit-2.21`, 18 Nov 2026); a run inside the hour skips and says so. Plus one CelesTrak request for its GEO group, the
    list of active payloads that the "quiet" event uses (yesterday's list when CelesTrak is not read).
 2. **Rules unchanged from Noisefloor:** the zone (IADC protected region, GEO +-200 km, inclination 15 deg or less),
    graveyard, below, crossing and inclined regions; 25 km and 0.25 deg edges against flicker; events new,

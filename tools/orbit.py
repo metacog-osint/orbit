@@ -71,7 +71,7 @@ EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "b
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
-ST_SHARED = spacetrack.shared_gp_busy       # Noisefloor's GP query on the same account (replaceable in tests)
+ST_SHARED = spacetrack.shared_gp_busy       # geo.yml's GP query on the same account (replaceable in tests)
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".txt", ".md", ".glsl", ".xml"}
@@ -814,7 +814,7 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     """The GEO region (orbit/geo_region.py; workflow geo.yml): one Space-Track gp query for every object near GEO,
     one CelesTrak request for its active GEO list, today's region file and the monthly element files, uploaded to
     the public release geo-YYYY. Skips, with a note and exit 0, when the shared account's hourly gp limit could be
-    broken (Noisefloor's daily run, Orbit's update run) or today's file was pulled under an hour ago."""
+    broken (Orbit's update run) or today's file was pulled under an hour ago."""
     out.mkdir(parents=True, exist_ok=True)
     gh_out = os.environ.get("GITHUB_OUTPUT")
     if upload:

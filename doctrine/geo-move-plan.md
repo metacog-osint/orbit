@@ -71,7 +71,10 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
    **Planned 18 Nov 2026** (file by file, in the suite's notes). The plan found that `geo.py`'s board
    (belt-wide manoeuvres, today's close pairs, the drifting count) never moved; **Tom: "Port to Orbit first"** (18 Nov 2026). Built the same day: the page's "Belt board"
    (`tools/geo_belt.py`; `method.md`, "The GEO page", item 5, with the check against Noisefloor's live board).
-   Noisefloor's side waits on the board being live.
+   Noisefloor's side waits on the board being live. **Noisefloor's side shipped 18 Nov 2026** (Noisefloor PR #50,
+   `d3544d6`; Tom's decisions: Noisefloor stops reading Orbit's day files, no GEO card or row on its home page, old
+   /geo 404s). It makes no GP query any more, so from `orbit-2.21` neither `geo.yml` nor the update run waits for
+   Noisefloor's daily runs (`spacetrack.FOR_GEO`, `FOR_MANEUVER`).
 
 ## Open questions for Tom
 1. **3D:** port Noisefloor's three.js globe as is (built and checked), or rebuild it in Cesium as part of Orbit's

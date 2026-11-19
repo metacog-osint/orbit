@@ -109,7 +109,8 @@ class Days(unittest.TestCase):
 
 
 class SharedAccount(unittest.TestCase):
-    """The GEO query waits for Noisefloor's and Orbit's update runs; the update run waits for Noisefloor's and this one."""
+    """The GEO query waits for Orbit's update run; the update run waits for this one. Noisefloor makes no GP query from
+    18 Nov 2026, so neither waits for it (orbit-2.21)."""
     NOW = datetime(2026, 11, 16, 15, 30, tzinfo=timezone.utc)
 
     def get(self, busy_url):
@@ -122,10 +123,16 @@ class SharedAccount(unittest.TestCase):
             return {"jobs": []}
         return _get
 
-    def test_geo_waits_for_update_and_noisefloor(self):
+    NF_RUNS = "https://api.github.com/repos/metacog-osint/noise-floor/actions/workflows/daily.yml/runs?per_page=5"
+
+    def test_geo_waits_for_update_only(self):
         self.assertIn("update run", spacetrack.shared_gp_busy(self.NOW, self.get(spacetrack.UPDATE_RUNS), spacetrack.FOR_GEO))
-        self.assertIn("Noisefloor", spacetrack.shared_gp_busy(self.NOW, self.get(spacetrack.SHARED_RUNS), spacetrack.FOR_GEO))
         self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get(spacetrack.GEO_RUNS), spacetrack.FOR_GEO))
+        self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get(self.NF_RUNS), spacetrack.FOR_GEO))
+
+    def test_noisefloor_is_not_checked(self):
+        for shared in (spacetrack.FOR_GEO, spacetrack.FOR_MANEUVER):
+            self.assertFalse([url for url, _, _ in shared if "noise-floor" in url])
 
     def test_update_waits_for_geo(self):
         self.assertIn("GEO region", spacetrack.shared_gp_busy(self.NOW, self.get(spacetrack.GEO_RUNS)))

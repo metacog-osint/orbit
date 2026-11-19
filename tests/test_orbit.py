@@ -1132,16 +1132,16 @@ class ManeuverLane(unittest.TestCase):
         self.run_lane()
         self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""), "logout"])  # no history again
 
-    def test_waits_while_noisefloor_holds_the_shared_gp_hour(self):
+    def test_waits_while_another_run_holds_the_shared_gp_hour(self):
         self.run_lane()
         FakeClient.log.clear()
         self.now[0] = NOW_M + timedelta(minutes=90)
-        with mock.patch.object(cli, "ST_SHARED", lambda now: "Noisefloor's GP query was under an hour ago"):
+        with mock.patch.object(cli, "ST_SHARED", lambda now: "Orbit's GEO region run's GP query was under an hour ago"):
             snap = self.run_lane()
         self.assertEqual(FakeClient.log, [])  # no request at all
         lane = snap["lanes"]["maneuver"]
         self.assertEqual(lane["status"], "unchanged")
-        self.assertIn("Noisefloor", lane["note"])
+        self.assertIn("GEO region run", lane["note"])
         self.assertEqual(len(snap["maneuvers"]["events"]), 1)  # the last reading is kept
         snap = self.run_lane()  # clear again: asks, and the note goes
         self.assertEqual(FakeClient.log, ["login", ("gp", (49330, 34779), ""), "logout"])
@@ -1216,7 +1216,7 @@ class SharedAccount(unittest.TestCase):
 
     def get(self, runs, steps):
         def _get(url):
-            if url == spacetrack.SHARED_RUNS:
+            if url == spacetrack.GEO_RUNS:
                 return {"workflow_runs": runs}
             return {"jobs": [{"steps": steps}]}
         return _get
@@ -1225,9 +1225,9 @@ class SharedAccount(unittest.TestCase):
         return {"id": 1, "status": status, "run_started_at": started, "jobs_url": "jobs"}
 
     def step(self, done, conclusion="success"):
-        return {"name": spacetrack.SHARED_STEP, "conclusion": conclusion, "completed_at": done}
+        return {"name": spacetrack.GEO_STEP, "conclusion": conclusion, "completed_at": done}
 
-    def test_recent_noisefloor_gp_query_is_busy(self):
+    def test_recent_geo_gp_query_is_busy(self):
         busy = spacetrack.shared_gp_busy(self.NOW, self.get([self.run_()], [self.step("2026-11-15T12:52:00Z")]))
         self.assertIn("under an hour", busy)
 
@@ -1240,7 +1240,7 @@ class SharedAccount(unittest.TestCase):
         self.assertIsNone(spacetrack.shared_gp_busy(self.NOW, self.get([self.run_(started="2026-11-15T05:40:00Z")],
                                                                      [self.step("2026-11-15T12:59:00Z")])))
 
-    def test_running_noisefloor_job_is_busy(self):
+    def test_running_geo_job_is_busy(self):
         self.assertIn("in_progress", spacetrack.shared_gp_busy(self.NOW, self.get([self.run_("in_progress")], [])))
 
     def test_github_unreadable_is_busy(self):
