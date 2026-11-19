@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-tic-layer="space">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,13 +9,14 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
 <script src="tic-time.js"></script>
 <script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-row">
-    <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
+    <div class="brand"><strong>Orbit</strong><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
     <nav class="top-nav">
       <a href="geo.html">GEO belt</a>
       <a href="data/feed.geojson">Feed (contract v2)</a>
@@ -80,7 +81,7 @@
         </dl>
       </details>
     </div>
-    <div class="tiles" id="tiles" aria-live="polite"></div>
+    <div class="tiles tic-tiles" id="tiles" aria-live="polite"></div>
     <p class="legend small muted" aria-label="Country colours">
       <span><span class="sw g-us"></span>United States</span>
       <span><span class="sw g-cn"></span>China</span>
