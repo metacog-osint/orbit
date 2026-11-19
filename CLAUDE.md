@@ -78,7 +78,7 @@ OR-EEI-5, at most 10, link `/#breakups`). COP's gate lists `orbit:maneuver` as m
 is launch pads only; ground tracks go only on the 3D globe; manoeuvres, reentries and catalog changes stay off maps.
 
 ## Source rules
-- **Space-Track** (account shared with Noisefloor and `geo.yml`): GP at most once an hour, off :57-:03 and :27-:33
+- **Space-Track** (account shared by the update run and `geo.yml`; Noisefloor makes no GP query from 18 Nov 2026): GP at most once an hour, off :57-:03 and :27-:33
   (`spacetrack.shared_gp_busy` checks the other runs by step name; a test holds the names), at most 4 requests a run
   2.5 s apart, GP_HISTORY once per object. SATCAT once per UTC day after 17:00; DECAY's whole history was read once
   and is stored on the release: never download it again. Cite as in the disclaimer. Credentials and the watch list

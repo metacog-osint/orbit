@@ -67,7 +67,7 @@ jobs:
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
           ORBIT_WATCH: ${{ secrets.ORBIT_WATCH }}
-          # reads Noisefloor's public workflow runs: it shares the Space-Track account and its GP query (orbit-2.8)
+          # reads geo.yml's runs: it shares the Space-Track account's hourly GP query (orbit-2.8; Noisefloor dropped, orbit-2.21)
           GH_TOKEN: ${{ github.token }}
         run: python tools/orbit.py collect
       - name: Build site/

@@ -9,13 +9,16 @@ Space-Track's own rules (space-track.org/documentation, read 14 Nov 2026):
     services ... conditioned on appropriate citation." "Publications of analysis based on USSPACECOM data also
     require appropriate citations."
 
-Noisefloor (github.com/metacog-osint/noise-floor, public) logs in with the same Space-Track account (Tom, 15 Nov
-2026) and makes one GP query in its daily workflow's step "GEO region (Space-Track)". GP once an hour is the
-account's limit, not Orbit's, so before asking, `shared_gp_busy` reads that workflow's recent runs from GitHub's
-API: a run still going, or that step finished within the hour, and Orbit waits for its next run. If GitHub cannot
-be read, Orbit waits too: the limit is kept even when it cannot be checked. From 16 Nov 2026 Orbit makes the GEO
-region's gp query itself (`geo_region.py`, workflow geo.yml): the update run checks Noisefloor's and geo.yml's runs
-(FOR_MANEUVER), and geo.yml checks Noisefloor's and the update run's (FOR_GEO).
+GP once an hour is the account's limit, not a workflow's. Orbit makes two GP queries on the account: the update
+run's watch-list query and the GEO region's (`geo_region.py`, workflow geo.yml, from 16 Nov 2026). Before asking,
+`shared_gp_busy` reads the other workflow's recent runs from GitHub's API: a run still going, or its GP step
+finished within the hour, and Orbit waits for its next run. If GitHub cannot be read, Orbit waits too: the limit is
+kept even when it cannot be checked. The update run checks geo.yml's runs (FOR_MANEUVER), and geo.yml checks the
+update run's (FOR_GEO).
+
+Noisefloor (github.com/metacog-osint/noise-floor) logs in with the same account but has made no GP query since
+18 Nov 2026 (its GEO page moved here; its Sentinel lane reads GP_HISTORY only, run by hand), so from `orbit-2.21`
+Orbit no longer waits for Noisefloor's daily runs. Until then a Noisefloor run in progress made Orbit skip.
 
 So a run makes at most four requests (log in, GP for the watch list, GP_HISTORY once for objects that have no
 stored history yet, log out), at least 2.5 s apart; never within an hour of the last GP query; and never at
@@ -48,9 +51,6 @@ GAP_S = 2.5          # seconds between requests: 24 a minute at most, under the 
 MIN_GP_GAP_S = 3600  # GP once an hour
 HISTORY_DAYS = 60    # first reading of an object: its last 60 days, stored and never asked for again
 BLOCKED_MINUTES = set(range(57, 60)) | set(range(0, 4)) | set(range(27, 34))
-SHARED_RUNS = ("https://api.github.com/repos/metacog-osint/noise-floor/actions/workflows/daily.yml/runs"
-               "?per_page=5&exclude_pull_requests=true")
-SHARED_STEP = "GEO region (Space-Track)"  # Noisefloor's one GP query on the same account
 SHARED_LOOKBACK_S = 3 * 3600              # runs older than this cannot hold a GP query inside the hour
 # Orbit's own GEO region query (orbit/geo_region.py, workflow geo.yml, from 16 Nov 2026) and its update run's
 # watch-list query (the collect step of update.yml). Each workflow checks the others, never itself.
@@ -60,11 +60,10 @@ GEO_STEP = "GEO region (Space-Track)"
 UPDATE_RUNS = ("https://api.github.com/repos/metacog-osint/orbit/actions/workflows/update.yml/runs"
                "?per_page=5&exclude_pull_requests=true")
 UPDATE_STEP = "Live collection (a failed lane keeps its last good copy and says so on the page)"
-NOISEFLOOR = (SHARED_RUNS, SHARED_STEP, "Noisefloor's daily run")
 GEO = (GEO_RUNS, GEO_STEP, "Orbit's GEO region run")
 UPDATE = (UPDATE_RUNS, UPDATE_STEP, "Orbit's update run")
-FOR_MANEUVER = (NOISEFLOOR, GEO)   # what the update run's watch-list query waits for
-FOR_GEO = (NOISEFLOOR, UPDATE)     # what the GEO region query waits for
+FOR_MANEUVER = (GEO,)    # what the update run's watch-list query waits for
+FOR_GEO = (UPDATE,)      # what the GEO region query waits for (Noisefloor makes no GP query from 18 Nov 2026)
 
 
 class NotReady(Exception):

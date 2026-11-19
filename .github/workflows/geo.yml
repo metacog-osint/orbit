@@ -3,12 +3,13 @@ name: geo
 # for every object near the geostationary region, one CelesTrak request for its active GEO list, today's
 # <day>.geo-region.json and the monthly element files, on this repository's public releases geo-YYYY.
 #
-# Space-Track's gp class is read at most once an hour on the account Orbit shares with Noisefloor. Before its query
-# this job reads GitHub's record of Noisefloor's daily runs and Orbit's update runs and skips (exit 0, a notice)
-# while either made, or may be making, a gp query within the hour; Orbit's update run checks this workflow the same
-# way. Step name "GEO region (Space-Track)" is what the others look for: keep it.
+# Space-Track's gp class is read at most once an hour on the account. Before its query this job reads GitHub's
+# record of Orbit's update runs and skips (exit 0, a notice) while one made, or may be making, a gp query within the
+# hour; the update run checks this workflow the same way. Step name "GEO region (Space-Track)" is what it looks for:
+# keep it. Noisefloor shares the account but has made no gp query since 18 Nov 2026, so it is not checked
+# (orbit-2.21).
 #
-# Twice a day, as Noisefloor's pull ran (its 05:40 and 12:40 UTC runs), at times clear of Orbit's update runs (:41
+# Twice a day, as Noisefloor's pull used to run (its 05:40 and 12:40 UTC runs), at times clear of Orbit's update runs (:41
 # and :55 past 00, 06, 12, 18 UTC). GitHub fires this account's schedules hours late, so the hub's tic-dispatch starts
 # this workflow at 03:15 and 15:15 UTC (from 17 Nov 2026); the cron below is the fallback, and a late start is still
 # safe, because of the checks above and because a run skips when today's file was pulled under an hour ago.
