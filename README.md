@@ -23,3 +23,9 @@ python tools/orbit.py check                # validate the registers and lint the
 python -m unittest discover -s tests       # offline tests against real fixtures
 python tools/serve.py                      # site/ on http://127.0.0.1:8761 with the headers in _headers
 ```
+
+## Licence
+
+Copyright © 2026 Thomas Brummer, The Intelligence Company. Orbit's code is licensed under the GNU Affero General Public License
+v3.0 (`LICENSE`). Third-party and shared files keep their own licences, and data keeps its sources'
+terms; both are listed in `NOTICE`.
