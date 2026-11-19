@@ -758,7 +758,10 @@ class Registers(unittest.TestCase):
         html = (ROOT / "site_src" / "index.html").read_text(encoding="utf-8")
         js = (ROOT / "site_src" / "app.js").read_text(encoding="utf-8")
         self.assertIn('id="breakups"', html)
-        self.assertIn('href="#breakups"', html)
+        # The feed's /#breakups link opens the card's group in the sections row (tic-tabs.js).
+        self.assertIn("data-tic-tabs", html)
+        self.assertLess(html.index('id="sec-reentries"'), html.index('id="breakups"'))
+        self.assertLess(html.index('id="breakups"'), html.index('id="sec-baseline"'))
         self.assertIn('id="breakup-table"', html)
         self.assertIn("breakupTable();", js)
 
