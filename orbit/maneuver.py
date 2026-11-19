@@ -54,7 +54,7 @@ MIN_PAIRS = 10
 MERGE_DAYS = 1.0
 MIN_RATE_DT = 0.1   # days: pairs closer than this do not set the steady-drift rate
 WINDOW_DAYS = 30    # changes reported from the last 30 days
-KEEP_DAYS = 120     # sets older than this are dropped from the store
+KEEP_DAYS = 120     # the analysis reads the sets of the last 120 days (view()); the store keeps every set
 STALE_DAYS = 3      # no new set for this long is named: an untracked object looks exactly like a quiet one
 GAP_LABEL_H = 48    # a change measured across a gap this long or longer is labelled: it happened somewhere inside it
 J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
@@ -79,8 +79,11 @@ def norm(rec: dict) -> list:
 
 
 def merge(store: dict, records: list[dict], now: datetime, keep_days: int = KEEP_DAYS) -> dict:
-    """Add Space-Track records to the store {norad: {name, object_id, country, decay, sets}}; one set per epoch
-    (the later-created one), sets older than keep_days dropped."""
+    """Add Space-Track records to the store {norad: {name, object_id, country, decay, sets, view_from}}; one set
+    per epoch (the later-created one). Every set is kept (retention rule, 18 Nov 2026: the store is copied to the
+    private archive, tic-archive release orbit-state-YYYY-MM). Until 19 Nov 2026 sets older than keep_days were
+    dropped here; now `view_from` records that cutoff and view() applies it, so the analysis reads exactly what
+    it read before."""
     cutoff = _iso(now - timedelta(days=keep_days))
     for rec in records:
         key = str(int(rec["NORAD_CAT_ID"]))
@@ -92,8 +95,18 @@ def merge(store: dict, records: list[dict], now: datetime, keep_days: int = KEEP
         old = by_epoch.get(row[0])
         if old is None or row[7] >= old[7]:
             by_epoch[row[0]] = row
-        obj["sets"] = sorted((s for s in by_epoch.values() if s[0] >= cutoff), key=lambda s: s[0])
+        obj["sets"] = sorted(by_epoch.values(), key=lambda s: s[0])
+        obj["view_from"] = cutoff
     return store
+
+
+def view(obj: dict) -> list:
+    """The sets the analysis reads: those from `view_from` (keep_days before the last merge that touched the
+    object), as the store held them when merge() still dropped older sets. A store written before 19 Nov 2026 has
+    no view_from and was already cut, so all its sets are read."""
+    sets = obj.get("sets") or []
+    cut = obj.get("view_from")
+    return [s for s in sets if s[0] >= cut] if cut else sets
 
 
 def _a(n_rev_day: float) -> float:
@@ -160,7 +173,7 @@ def _agrees(g: list[dict], p: dict) -> bool:
 
 
 def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
-    sets = obj.get("sets") or []
+    sets = view(obj)
     out = {"sets": len(sets), "events": [], "regime": None, "last_epoch": sets[-1][0] if sets else None,
            "max_gap_h": None, "note": None}
     if not sets:

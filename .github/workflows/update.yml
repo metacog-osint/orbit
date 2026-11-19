@@ -129,3 +129,25 @@ jobs:
           name: orbit-archive-out-${{ github.run_id }}
           path: data/archive_out
           retention-days: 90
+      # Private archive (19 Nov 2026). Space-Track's user agreement bars public redistribution and the watch list is
+      # private, so the watch-list element sets (every set: orbit/maneuver.py no longer drops sets past 120 days),
+      # the stored case reads and the raw replies go to the PRIVATE repo metacog-osint/tic-archive as release assets
+      # (tools/tic_archive.py: releases orbit-state-YYYY-MM and orbit-raw-YYYY-MM, a snapshot per run, only changed
+      # files uploaded). Never to this public repo's releases, artifacts or logs. Left out: GCAT tables (CC BY,
+      # GCAT keeps them), TIC's own published files and the rebuildable catalog index. After the deploy, so a
+      # failure turns the run red but never holds the live site. Token: TIC_ARCHIVE_TOKEN, contents:write on
+      # tic-archive only.
+      - name: Private archive (Space-Track state and raw replies, to tic-archive)
+        if: ${{ !cancelled() && steps.collect.conclusion == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::secret TIC_ARCHIVE_TOKEN is not set, so nothing went to the private archive"; exit 1
+          fi
+          rc=0
+          python tools/tic_archive.py put --program orbit --lane state --src data/state \
+            --exclude 'catalog_index.json.gz' || rc=1
+          python tools/tic_archive.py put --program orbit --lane raw --src data/raw \
+            --exclude 'gcat-*' --exclude 'tic-*' --exclude 'orbit-ledger/*' || rc=1
+          exit $rc
