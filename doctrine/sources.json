@@ -100,6 +100,17 @@
       "note": "orbit-2.12 (Tom's yes, 16 Nov 2026): one request a run, for the globe's paths of recent launches' payloads only; Space-Track stays the source for watched objects and orbit changes. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
     },
     {
+      "id": "celestrak-gp-active",
+      "name": "CelesTrak (T.S. Kelso): GP element sets, 'active' group (working satellites; the 18th Space Defense Squadron's GP data)",
+      "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv",
+      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, read 20 Nov 2026, updated 16 Nov 2026) states no redistribution or credit terms; it asks for compressed CSV, one download per update (GP data update every 2 hours), and a stop at any non-200 reply. The sets are the 18th Space Defense Squadron's GP data, which USSPACECOM approves for redistribution as basic SSA data with citation (see space-track); credited as CelesTrak, from 18 SDS data.",
+      "use": "ingest",
+      "grade": "A2",
+      "independence_group": "usspacecom",
+      "commercial_ok": "unknown",
+      "note": "orbit-2.23 (ideas#71, Tom's yes to the map design, 20 Nov 2026): once a UTC day, the home page's satellite map only, republished as /data/sats.json joined to GCAT owners. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
+    },
+    {
       "id": "space-track",
       "name": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron): GP and GP_HISTORY element sets",
       "url": "https://www.space-track.org/",
