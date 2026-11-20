@@ -718,7 +718,7 @@ class Registers(unittest.TestCase):
         # excluded sources stay out; the catalog's CelesTrak SATCAT and Wikidata (build step 4) are ingested but
         # feed no page lane yet, so the page, which lists sources by lane, does not show them
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
-                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch", "celestrak-gp",
+                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch", "celestrak-gp", "celestrak-gp-active",
                                       "celestrak-satcat", "wikidata"})
         self.assertEqual(by_id["wikidata"]["lanes"], [])
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
