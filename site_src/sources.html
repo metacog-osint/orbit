@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources · Orbit · The Intelligence Company</title>
+<meta name="description" content="Every source Orbit reads, when each lane last read it, its grade and terms, and Orbit's data files.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
+<script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map and launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="sources.html" aria-current="page">Sources</a>
+  </nav>
+</header>
+
+<main class="wrap" data-page="sources">
+  <section class="hero hero-sub">
+    <h1>Sources</h1>
+    <p class="lede">Every source Orbit reads and when each lane last read it. <span id="asof"></span></p>
+  </section>
+
+  <section class="card" id="sources" aria-labelledby="src-h">
+    <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
+    <div id="lanes"></div>
+  </section>
+
+  <section class="card" id="data-files" aria-labelledby="df-h">
+    <div class="card-head"><h2 id="df-h">Orbit's data files</h2>
+      <p class="muted small">Everything on these pages comes from these files, rebuilt on every run.</p></div>
+    <ul class="plain small">
+      <li><a href="data/feed.geojson">Feed</a>: what Orbit gives the suite (tic-feed contract v2).</li>
+      <li><a href="data/snapshot.json">Snapshot</a>: every lane's last reading.</li>
+      <li><a href="data/archive.json">Archive</a>: daily counts and leads.</li>
+      <li><a href="data/sources.json">Sources</a>: every source with its grade and terms.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
+    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
+    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
+    regrouped and reformatted by Orbit; place checks from the suite's
+    <a href="https://launch.theintelligence.company">Launch</a> program. Anti-satellite test history from Secure World Foundation, Global
+    Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
+    <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
+    CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's
+    (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
+    CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
+    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
