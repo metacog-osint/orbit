@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit changes · Orbit · The Intelligence Company</title>
+<meta name="description" content="Orbit changes in watched satellites from Space-Track.org element sets, and Secure World Foundation's histories of rendezvous and proximity operations and anti-satellite tests.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
+<script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map and launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html" aria-current="page">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="sources.html">Sources</a>
+  </nav>
+</header>
+
+<main class="wrap" data-page="changes">
+  <section class="hero hero-sub">
+    <h1>Orbit changes</h1>
+    <p class="lede">Changes in watched satellites' orbits, and the reference histories of rendezvous and proximity operations and anti-satellite tests. <span id="asof"></span></p>
+  </section>
+
+  <section class="card" id="maneuvers" aria-labelledby="mn-h">
+    <div class="card-head">
+      <h2 id="mn-h">Orbit changes in watched satellites, last 30 days</h2>
+      <div class="notice small source-note">
+        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
+          Squadron.</strong> Element sets are USSPACECOM's, redistributed under its blanket approval for basic space
+          situational awareness data, which requires this citation. The orbit changes listed here are The
+          Intelligence Company's own analysis of those element sets. They are not USSPACECOM's, and USSPACECOM and
+          Space-Track have not reviewed, endorsed or checked them.</p>
+        <p>A listed change means a watched object's published orbit moved by more than its element sets usually
+          move. It is not a confirmed manoeuvre, a statement of intent or a warning: a re-fit after a tracking gap, a
+          mislabelled element set or, in low orbit, storm-driven drag can do the same. Not for conjunction
+          assessment, collision avoidance or any operational use. Satellite operators should use Space-Track's own
+          services.</p>
+      </div>
+      <p class="muted small">How Orbit marks a change: each pair of consecutive element sets is measured against
+        that object's own usual set-to-set movement, after its steady drift is taken out. The change is given as the
+        velocity it implies (along track, plane change, or orbit shape), which is a rough size, not a burn record.
+        In geostationary orbit only changes of 0.25 m/s or more are listed. In low orbit, where plane and shape
+        readings are noisiest, a change that is mainly a plane change or orbit shape is listed only at 1 m/s or more;
+        each change also shows the velocity its semi-major-axis change alone implies. Changes less than a day apart
+        are shown as one when they point the same way. A change measured across two days or more without an element set is labelled with that gap: it
+        happened somewhere inside it. Quiet watched objects are counted, not named.</p>
+    </div>
+    <div class="tbl-wrap" id="maneuver-body"></div>
+  </section>
+
+  <section class="card" id="rpo" aria-labelledby="rpo-h">
+    <div class="card-head">
+      <h2 id="rpo-h"><span class="ref">Reference · </span>Rendezvous and proximity operations in space</h2>
+      <p class="muted small">Every robotic rendezvous and proximity operation in Secure World Foundation's history
+        sheet, in SWF's three tabs and SWF's own words: who, when, which satellite approached which, and what for.
+        Orbit reads SWF's dates into a span and names the rows whose dates it cannot read; satellites are matched
+        to GCAT only where exactly one GCAT payload fits. A record of past and planned operations, not new events
+        and not Orbit's judgment of intent.</p>
+    </div>
+    <div id="rpo-body"></div>
+  </section>
+
+  <section class="card" id="asat" aria-labelledby="asat-h">
+    <div class="card-head">
+      <h2 id="asat-h"><span class="ref">Reference · </span>Anti-satellite tests in space, 1959 to date</h2>
+      <p class="muted small">Every anti-satellite test in Secure World Foundation's history sheet, as SWF compiled it:
+        who tested, when, with which interceptor, against which target, and the cataloged debris created, since
+        re-entered and still on orbit. A record of past tests, not new events; tests SWF adds are listed at the top
+        after Orbit's next reading.</p>
+    </div>
+    <div id="asat-body"></div>
+  </section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
+    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
+    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
+    regrouped and reformatted by Orbit; place checks from the suite's
+    <a href="https://launch.theintelligence.company">Launch</a> program. Anti-satellite test history from Secure World Foundation, Global
+    Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
+    <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
+    CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's
+    (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
+    CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
+    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
