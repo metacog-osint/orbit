@@ -5,7 +5,7 @@ Third-party and shared files in this repository keep their own licences:
 
 - doctrine/kit/        The Intelligence Company doctrine kit, MIT (doctrine/kit/LICENSE)
 - tic-*.js, tic-*.css in site/ and site_src/
-  The Intelligence Company's shared site scripts (tic-nav, tic-time), MIT.
+  The Intelligence Company's shared site scripts (tic-nav, tic-time) and the stylesheet tic-shell.css, MIT.
   Canonical copies: site/shared/ in github.com/metacog-osint/theintelligence-company.
 - site_src/vendor/cesium/        CesiumJS 1.146.0, Apache 2.0 (LICENSE.md; the libraries it bundles are listed
   in ThirdParty.json; local changes in PATCHED.md)
