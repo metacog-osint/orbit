@@ -750,20 +750,56 @@ class Registers(unittest.TestCase):
         self.assertIsNone(f["geometry"])
         self.assertIn("exploded (broke up in orbit)", p["title"])
         self.assertIn("not a reentry", p["summary"])
-        self.assertTrue(p["visual"]["url"].endswith("/#breakups"))
+        self.assertTrue(p["visual"]["url"].endswith("/catalog#breakups"))
         regs = registers.ids(ROOT / "doctrine")
         self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
 
     def test_the_page_has_the_breakups_card_the_feed_links_to(self):
-        html = (ROOT / "site_src" / "index.html").read_text(encoding="utf-8")
+        html = (ROOT / "site_src" / "catalog.html").read_text(encoding="utf-8")
         js = (ROOT / "site_src" / "app.js").read_text(encoding="utf-8")
         self.assertIn('id="breakups"', html)
-        # The feed's /#breakups link opens the card's group in the sections row (tic-tabs.js).
-        self.assertIn("data-tic-tabs", html)
-        self.assertLess(html.index('id="sec-reentries"'), html.index('id="breakups"'))
-        self.assertLess(html.index('id="breakups"'), html.index('id="sec-baseline"'))
         self.assertIn('id="breakup-table"', html)
         self.assertIn("breakupTable();", js)
+        # Old /#breakups links (before orbit-2.22) are sent on to the catalog page.
+        self.assertIn('breakups: "catalog"', js)
+
+    def test_each_tab_is_its_own_page_and_every_feed_link_lands_on_its_card(self):
+        """orbit-2.22 (ideas#71, ideas#83): each group of cards is its own page; every feed link, lead link and
+        old /#section link names a page that holds the card."""
+        import re
+        site = ROOT / "site_src"
+        pages = {f: (site / f).read_text(encoding="utf-8") for f in
+                 ["index.html", "reentries.html", "catalog.html", "changes.html", "sources.html"]}
+        for f, html in pages.items():
+            self.assertNotIn("data-tic-tabs", html, f)
+            self.assertIn('class="page-nav', html, f)
+            self.assertIn('aria-current="page"', html, f)
+            self.assertIn('<script src="app.js"></script>', html, f)
+            self.assertIn('id="asof"', html, f)
+            self.assertIn('id="method"', html, f)
+            self.assertNotRegex(html, r"<script>|style=", f)
+        js = (site / "app.js").read_text(encoding="utf-8")
+        table = dict(re.findall(r'"?([a-z-]+)"?: "(index|reentries|catalog|changes|sources)"',
+                                js[js.index("var PAGE_OF"):js.index("function pageOf")]))
+        for card, pg in table.items():
+            if not card.endswith("-"):
+                self.assertIn('id="%s"' % card, pages[pg + ".html"], card)
+        ids = [m for html in pages.values() for m in re.findall(r'<section class="card" id="([a-z-]+)"', html)]
+        self.assertEqual(len(ids), len(set(ids)))  # every card on exactly one page
+        for c in ids:
+            self.assertIn(c, table, c)
+        src = (ROOT / "orbit" / "feed.py").read_text(encoding="utf-8")
+        links = re.findall(r'f"\{SITE\}/([a-z]*)#([a-z]+)(-?)', src)
+        self.assertGreaterEqual(len(links), 7)
+        for path, card, row in links:
+            pg = (path or "index") + ".html"
+            if row:  # a row link (#launch-...): the page that holds that row prefix
+                self.assertEqual(table[card + "-"], path or "index")
+            else:
+                self.assertTrue('id="%s"' % card in pages[pg], (path, card))
+        lead_src = (ROOT / "orbit" / "lead.py").read_text(encoding="utf-8")
+        for card in re.findall(r'"href": "#([a-z-]+)"', lead_src):
+            self.assertIn(card, table, card)
 
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",

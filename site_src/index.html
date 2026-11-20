@@ -10,27 +10,30 @@
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
 <link rel="stylesheet" href="tic-shell.css">
-<link rel="stylesheet" href="tic-tabs.css">
 <link rel="stylesheet" href="tic-fold.css">
 <script src="tic-time.js"></script>
-<script src="tic-tabs.js" defer></script>
 <script src="tic-fold.js" defer></script>
 <script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-row">
-    <div class="brand"><strong>Orbit</strong><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
     <nav class="top-nav">
-      <a href="geo.html">GEO belt</a>
-      <a href="data/feed.geojson">Feed (contract v2)</a>
-      <a href="data/snapshot.json">Snapshot</a>
       <span id="time-settings"></span>
     </nav>
   </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./" aria-current="page">Map and launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="sources.html">Sources</a>
+  </nav>
 </header>
 
-<main class="wrap">
+<main class="wrap" data-page="index">
   <section class="hero">
     <h1>What changed in Earth orbit.</h1>
     <p class="lede">Orbital launches, launches scheduled in the next two weeks, the launch hazard and space-debris
@@ -75,10 +78,6 @@
     </p>
   </section>
 
-  <!-- Sections row (tic-tabs.js from the hub): one group at a time on a phone, a jumping row wider. The tiles above
-       carry the counts and open their section. -->
-  <div data-tic-tabs>
-  <div id="sec-launches" data-tab-label="Launches">
   <section class="card" id="map-card" aria-labelledby="map-h">
     <div class="card-head">
       <h2 id="map-h">Launch sites, pads and hazard areas</h2>
@@ -148,7 +147,6 @@
     <div class="tbl-wrap" id="hazard-table"></div>
   </section>
 
-
   <section class="card" id="ledger" aria-labelledby="lg-h">
     <div class="card-head">
       <h2 id="lg-h">Launch ledger</h2>
@@ -158,141 +156,6 @@
     </div>
     <div id="ledger-body"></div>
   </section>
-  </div>
-
-  <div id="sec-reentries" data-tab-label="Reentries">
-  <div class="two">
-    <section class="card" id="reentries" aria-labelledby="re-h">
-      <div class="card-head">
-        <h2 id="re-h">Reentries, last 7 days</h2>
-        <p class="muted small">Payloads GCAT has dated as reentered. Dates are often approximate (marked ~).</p>
-      </div>
-      <div class="tbl-wrap" id="reentry-table"></div>
-    </section>
-
-    <section class="card" id="catalog" aria-labelledby="cat-h">
-      <div class="card-head">
-        <h2 id="cat-h">Catalog changes and owner codes</h2>
-        <p class="muted small">Changes between Orbit's last two readings of GCAT. Owners come from GCAT, which keeps
-          Soviet (SU) objects apart from Russian (RU) ones.</p>
-      </div>
-      <div id="catalog-body"></div>
-    </section>
-  </div>
-
-  <section class="card" id="breakups" aria-labelledby="bu-h">
-    <div class="card-head">
-      <h2 id="bu-h">Breakups and collisions, last 30 days</h2>
-      <p class="muted small">Objects GCAT marks exploded (E, broken up in orbit) or collided (C), with a date in the
-        last 30 days. They left the catalog as one object without reentering, so they are kept apart from reentries.
-        Pieces from them can later show as new catalog entries from an old launch (under Catalog changes). Dates are
-        often approximate (marked ~). Orbit reports what GCAT records and does not say why an object broke up.</p>
-    </div>
-    <div class="tbl-wrap" id="breakup-table"></div>
-  </section>
-
-  <section class="card" id="decay" aria-labelledby="decay-h">
-    <div class="card-head">
-      <h2 id="decay-h">Predicted reentries</h2>
-      <div class="notice small source-note">
-        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
-          Squadron.</strong> Tracking and Impact Prediction (TIP) messages, redistributed under USSPACECOM's blanket
-          approval for basic space situational awareness data, which requires this citation. These are USSPACECOM's
-          predictions, quoted as issued; The Intelligence Company has not checked them. Not for operational use.</p>
-      </div>
-      <p class="muted small">The newest TIP message for each object, from the last 5 days: its predicted reentry time
-        and window (read as plus or minus that many minutes), and where the object would be at that time. That place
-        is not where debris falls: inside a window of hours the object circles the Earth several times. "Track on the
-        globe" draws the ground track it would follow through the whole window; it comes down somewhere along that
-        line. Not on the flat map. A prediction whose whole window has closed stays for a day, marked closed; GCAT dates the
-        reentry itself later. Names and owners are GCAT's where GCAT lists the object.</p>
-    </div>
-    <div class="tbl-wrap" id="decay-body"></div>
-    <h3 id="tipcheck-h">TIP against the reentry</h3>
-    <p class="muted small">For each object that came down in the last 30 days: USSPACECOM's last prediction before the
-      reentry, set against the time TIP itself gives after it (the message issued after the reentry, with a 1-minute
-      window), and GCAT's reentry time beside both. GCAT often takes its time from that same TIP message, so a match is
-      not an independent check. Where TIP has no message after the reentry yet, the last prediction is shown alone.
-      Observations of USSPACECOM's and GCAT's records, not a rating of either.</p>
-    <div class="tbl-wrap" id="tipcheck-body"></div>
-  </section>
-  </div>
-
-  <div id="sec-baseline" data-tab-label="Baseline">
-  <section class="card" id="baseline" aria-labelledby="base-h">
-    <div class="card-head">
-      <h2 id="base-h">The last 30 days against the two years before</h2>
-      <p class="muted small">Counts from GCAT's own history: orbital launches by launching country and agency, payloads
-        launched by owner, and reentries by owner, in the last 30 days and in each of the 24 windows of 30 days before
-        them. "Above" or "below" means outside every one of those 24 windows. A count, not a warning. GCAT adds
-        payloads and dates reentries as it learns of them, so the newest window for those two can still grow.</p>
-    </div>
-    <div id="baseline-body"></div>
-    <div id="archive-body"></div>
-  </section>
-  </div>
-
-  <div id="sec-changes" data-tab-label="Orbit changes">
-  <section class="card" id="maneuvers" aria-labelledby="mn-h">
-    <div class="card-head">
-      <h2 id="mn-h">Orbit changes in watched satellites, last 30 days</h2>
-      <div class="notice small source-note">
-        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
-          Squadron.</strong> Element sets are USSPACECOM's, redistributed under its blanket approval for basic space
-          situational awareness data, which requires this citation. The orbit changes listed here are The
-          Intelligence Company's own analysis of those element sets. They are not USSPACECOM's, and USSPACECOM and
-          Space-Track have not reviewed, endorsed or checked them.</p>
-        <p>A listed change means a watched object's published orbit moved by more than its element sets usually
-          move. It is not a confirmed manoeuvre, a statement of intent or a warning: a re-fit after a tracking gap, a
-          mislabelled element set or, in low orbit, storm-driven drag can do the same. Not for conjunction
-          assessment, collision avoidance or any operational use. Satellite operators should use Space-Track's own
-          services.</p>
-      </div>
-      <p class="muted small">How Orbit marks a change: each pair of consecutive element sets is measured against
-        that object's own usual set-to-set movement, after its steady drift is taken out. The change is given as the
-        velocity it implies (along track, plane change, or orbit shape), which is a rough size, not a burn record.
-        In geostationary orbit only changes of 0.25 m/s or more are listed. In low orbit, where plane and shape
-        readings are noisiest, a change that is mainly a plane change or orbit shape is listed only at 1 m/s or more;
-        each change also shows the velocity its semi-major-axis change alone implies. Changes less than a day apart
-        are shown as one when they point the same way. A change measured across two days or more without an element set is labelled with that gap: it
-        happened somewhere inside it. Quiet watched objects are counted, not named.</p>
-    </div>
-    <div class="tbl-wrap" id="maneuver-body"></div>
-  </section>
-  </div>
-
-  <div id="sec-history" data-tab-label="Reference">
-  <section class="card" id="asat" aria-labelledby="asat-h">
-    <div class="card-head">
-      <h2 id="asat-h"><span class="ref">Reference · </span>Anti-satellite tests in space, 1959 to date</h2>
-      <p class="muted small">Every anti-satellite test in Secure World Foundation's history sheet, as SWF compiled it:
-        who tested, when, with which interceptor, against which target, and the cataloged debris created, since
-        re-entered and still on orbit. A record of past tests, not new events; tests SWF adds are listed at the top
-        after Orbit's next reading.</p>
-    </div>
-    <div id="asat-body"></div>
-  </section>
-
-  <section class="card" id="rpo" aria-labelledby="rpo-h">
-    <div class="card-head">
-      <h2 id="rpo-h"><span class="ref">Reference · </span>Rendezvous and proximity operations in space</h2>
-      <p class="muted small">Every robotic rendezvous and proximity operation in Secure World Foundation's history
-        sheet, in SWF's three tabs and SWF's own words: who, when, which satellite approached which, and what for.
-        Orbit reads SWF's dates into a span and names the rows whose dates it cannot read; satellites are matched
-        to GCAT only where exactly one GCAT payload fits. A record of past and planned operations, not new events
-        and not Orbit's judgment of intent.</p>
-    </div>
-    <div id="rpo-body"></div>
-  </section>
-  </div>
-
-  <div id="sec-sources" data-tab-label="Sources">
-  <section class="card" id="sources" aria-labelledby="src-h">
-    <div class="card-head"><h2 id="src-h">Sources and freshness</h2></div>
-    <div id="lanes"></div>
-  </section>
-  </div>
-  </div>
 </main>
 
 <footer class="wrap foot small muted">

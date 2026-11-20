@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.20"
+METHOD = "orbit-2.22"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -184,7 +184,7 @@ def _reentry_item(rows: list[dict], generated: str, accessed: str, since: str) -
         "coverage_fraction": 1.0,
         "precision_class": "none",
         "measures": {"reentries": len(rows), "payloads": len(payloads)},
-        "visual": {"type": "table", "url": f"{SITE}/#reentries"},
+        "visual": {"type": "table", "url": f"{SITE}/reentries#reentries"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}
@@ -216,7 +216,7 @@ def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
         "precision_class": "none",
         "measures": {"status": b.get("status"), "breakup_date": b["breakup_date"],
                      "uncertain": bool(b.get("breakup_uncertain"))},
-        "visual": {"type": "table", "url": f"{SITE}/#breakups"},
+        "visual": {"type": "table", "url": f"{SITE}/catalog#breakups"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}
@@ -242,7 +242,7 @@ def _late_item(g: dict, generated: str, accessed: str, prev_at: str) -> dict:
         "coverage_fraction": 1.0,
         "precision_class": "none",
         "measures": {"new_entries": g["count"]},
-        "visual": {"type": "table", "url": f"{SITE}/#catalog"},
+        "visual": {"type": "table", "url": f"{SITE}/catalog#catalog"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}
@@ -267,7 +267,7 @@ def _owner_item(changes: list[dict], generated: str, accessed: str, prev_at: str
         "coverage_fraction": 1.0,
         "precision_class": "none",
         "measures": {"objects": len(changes)},
-        "visual": {"type": "table", "url": f"{SITE}/#catalog"},
+        "visual": {"type": "table", "url": f"{SITE}/catalog#catalog"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}
@@ -313,7 +313,7 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "measures": {"dv_ms": e["dv_ms"], "da_km": e["da_km"], "di_deg": e["di_deg"],
                      **({"dv_sma_ms": e["dv_sma_ms"]} if e.get("dv_sma_ms") is not None else {}),
                      **({"gap_hours": gap["hours"]} if gap else {})},
-        "visual": {"type": "table", "url": f"{SITE}/#maneuvers"},
+        "visual": {"type": "table", "url": f"{SITE}/changes#maneuvers"},
         "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}

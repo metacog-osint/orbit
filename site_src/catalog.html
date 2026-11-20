@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalog · Orbit · The Intelligence Company</title>
+<meta name="description" content="Changes to the public satellite catalog (GCAT) between Orbit's readings, breakups and collisions of the last 30 days, and the last 30 days of launches, payloads and reentries against the two years before.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
+<script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map and launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html" aria-current="page">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="sources.html">Sources</a>
+  </nav>
+</header>
+
+<main class="wrap" data-page="catalog">
+  <section class="hero hero-sub">
+    <h1>Catalog</h1>
+    <p class="lede">Changes to the public satellite catalog between Orbit's own readings, breakups, and the last 30 days counted against the two years before. <span id="asof"></span></p>
+  </section>
+
+  <section class="card" id="catalog" aria-labelledby="cat-h">
+    <div class="card-head">
+      <h2 id="cat-h">Catalog changes and owner codes</h2>
+      <p class="muted small">Changes between Orbit's last two readings of GCAT. Owners come from GCAT, which keeps
+        Soviet (SU) objects apart from Russian (RU) ones.</p>
+    </div>
+    <div id="catalog-body"></div>
+  </section>
+
+  <section class="card" id="breakups" aria-labelledby="bu-h">
+    <div class="card-head">
+      <h2 id="bu-h">Breakups and collisions, last 30 days</h2>
+      <p class="muted small">Objects GCAT marks exploded (E, broken up in orbit) or collided (C), with a date in the
+        last 30 days. They left the catalog as one object without reentering, so they are kept apart from reentries.
+        Pieces from them can later show as new catalog entries from an old launch (under Catalog changes). Dates are
+        often approximate (marked ~). Orbit reports what GCAT records and does not say why an object broke up.</p>
+    </div>
+    <div class="tbl-wrap" id="breakup-table"></div>
+  </section>
+
+  <section class="card" id="baseline" aria-labelledby="base-h">
+    <div class="card-head">
+      <h2 id="base-h">The last 30 days against the two years before</h2>
+      <p class="muted small">Counts from GCAT's own history: orbital launches by launching country and agency, payloads
+        launched by owner, and reentries by owner, in the last 30 days and in each of the 24 windows of 30 days before
+        them. "Above" or "below" means outside every one of those 24 windows. A count, not a warning. GCAT adds
+        payloads and dates reentries as it learns of them, so the newest window for those two can still grow.</p>
+    </div>
+    <div id="baseline-body"></div>
+    <div id="archive-body"></div>
+  </section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
+    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
+    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
+    regrouped and reformatted by Orbit; place checks from the suite's
+    <a href="https://launch.theintelligence.company">Launch</a> program. Anti-satellite test history from Secure World Foundation, Global
+    Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
+    <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
+    CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's
+    (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
+    CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
+    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
