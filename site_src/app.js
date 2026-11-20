@@ -1493,6 +1493,7 @@
       ledger: "Orbit's launch ledger (Launch Library 2)",
       pairs: "Launch (the suite's launch-closure program): place check on Orbit's areas",
       paths: "CelesTrak, last-30-days element sets (paths of new payloads on the globe)",
+      sats: "CelesTrak, active group element sets, once a day (the satellite map's data, /data/sats.json)",
       maneuver: "Space-Track.org (USSPACECOM, 18th Space Defense Squadron)",
       decay: "Space-Track.org TIP reentry predictions (USSPACECOM, 18th Space Defense Squadron)" };
     var srcNames = { "nga-msi": "NGA Maritime Safety Information",

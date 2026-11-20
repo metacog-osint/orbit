@@ -587,6 +587,23 @@ It waits on a fresh read of CelesTrak's usage
 policy and a `sources.json` row for the active set: on 20 Nov 2026 celestrak.org refused connections from the
 build machine, so the terms could not be re-read.
 
+## The satellite map's data (`orbit-2.23`, 20 Nov 2026; ideas#71, Tom's yes to the map design)
+Lane `sats` (`orbit/satmap.py`): CelesTrak's GP group `active` (working satellites; the 18th Space Defense
+Squadron's GP data), FORMAT=csv, compressed, **once a UTC day**: a run on a day whose reading is already held asks
+nothing. CelesTrak's usage policy (read 20 Nov 2026, updated 16 Nov 2026) states no redistribution or credit terms,
+asks for compressed CSV and one download per update, and says to stop at any non-200 reply: a non-200 fails the
+lane, the last file stays, and nothing is asked again before the next run. A reading with under 90% of the last
+reading's objects fails the lane too. Source row `celestrak-gp-active` (A2, independence group `usspacecom`).
+
+Each object is joined to Orbit's GCAT index by NORAD number for the owner (`group`: us, cn, ru with SU, other; `cc`
+the ISO code or GCAT's state code), GCAT's type and launch date; an object GCAT has not numbered stays `other` with
+no type. Orbit class from mean motion n (rev/day) and eccentricity e: `heo` from e 0.25; `leo` above n 11.25 (under
+128 min a revolution); `geo` at n 0.9-1.1 (about a sidereal day, inclined orbits included); `meo` between; `other`
+below n 0.9. Constellation by the start of CelesTrak's name only: Starlink, OneWeb, Kuiper, Iridium, GPS (NAVSTAR),
+BeiDou, Galileo (GSAT0nnn). GLONASS (named COSMOS nnnn), Guowang and Qianfan are not named this way and are not
+listed. Published as `/data/sats.json` (`orbit-sats/1`: `fields` and `rows`, rounded to what SGP4 on a map needs);
+the snapshot keeps counts only. The map that draws it is the next step of ideas#71; until then the file is unused.
+
 ## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
 Public releases, one per month and kind, unique asset names, never clobbered (`orbit/retention.py`, `tests/test_retention.py`);
 only what is already public or open-licensed goes there. Nothing from Space-Track element sets or case reads.
