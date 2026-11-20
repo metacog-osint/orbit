@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reentries · Orbit · The Intelligence Company</title>
+<meta name="description" content="Payload reentries of the last 7 days from GCAT, and USSPACECOM's Tracking and Impact Prediction (TIP) messages from Space-Track.org with each prediction set against the reentry.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
+<script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map and launches</a>
+    <a href="reentries.html" aria-current="page">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="sources.html">Sources</a>
+  </nav>
+</header>
+
+<main class="wrap" data-page="reentries">
+  <section class="hero hero-sub">
+    <h1>Reentries</h1>
+    <p class="lede">Payloads that came down in the last 7 days, the reentry predictions now in window, and each prediction set against the reentry. <span id="asof"></span></p>
+  </section>
+
+  <section class="card" id="reentries" aria-labelledby="re-h">
+    <div class="card-head">
+      <h2 id="re-h">Reentries, last 7 days</h2>
+      <p class="muted small">Payloads GCAT has dated as reentered. Dates are often approximate (marked ~).</p>
+    </div>
+    <div class="tbl-wrap" id="reentry-table"></div>
+  </section>
+
+  <section class="card" id="decay" aria-labelledby="decay-h">
+    <div class="card-head">
+      <h2 id="decay-h">Predicted reentries</h2>
+      <div class="notice small source-note">
+        <p><strong>Source: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense
+          Squadron.</strong> Tracking and Impact Prediction (TIP) messages, redistributed under USSPACECOM's blanket
+          approval for basic space situational awareness data, which requires this citation. These are USSPACECOM's
+          predictions, quoted as issued; The Intelligence Company has not checked them. Not for operational use.</p>
+      </div>
+      <p class="muted small">The newest TIP message for each object, from the last 5 days: its predicted reentry time
+        and window (read as plus or minus that many minutes), and where the object would be at that time. That place
+        is not where debris falls: inside a window of hours the object circles the Earth several times. "Track on the
+        globe" draws the ground track it would follow through the whole window; it comes down somewhere along that
+        line. Not on the flat map. A prediction whose whole window has closed stays for a day, marked closed; GCAT dates the
+        reentry itself later. Names and owners are GCAT's where GCAT lists the object.</p>
+    </div>
+    <div class="tbl-wrap" id="decay-body"></div>
+    <h3 id="tipcheck-h">TIP against the reentry</h3>
+    <p class="muted small">For each object that came down in the last 30 days: USSPACECOM's last prediction before the
+      reentry, set against the time TIP itself gives after it (the message issued after the reentry, with a 1-minute
+      window), and GCAT's reentry time beside both. GCAT often takes its time from that same TIP message, so a match is
+      not an independent check. Where TIP has no message after the reentry yet, the last prediction is shown alone.
+      Observations of USSPACECOM's and GCAT's records, not a rating of either.</p>
+    <div class="tbl-wrap" id="tipcheck-body"></div>
+  </section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
+    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
+    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
+    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
+    regrouped and reformatted by Orbit; place checks from the suite's
+    <a href="https://launch.theintelligence.company">Launch</a> program. Anti-satellite test history from Secure World Foundation, Global
+    Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
+    <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
+    CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's
+    (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
+    CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
+    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
+    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

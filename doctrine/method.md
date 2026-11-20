@@ -561,6 +561,32 @@ note, Orbit draws the page.
    dark mode in headless Edge: no sideways scroll; console errors only a local `favicon.ico` 404 and Cesium's three
    inline-style CSP refusals, which the main page's globe shows too.
 
+## Pages (`orbit-2.22`, 20 Nov 2026; ideas#71 and ideas#83)
+Tom, 19 Nov 2026: every tab is its own page within the program. Orbit's one long page is split into pages that share
+one header, one row of page links (the current page marked) and one script, `app.js`, which draws only the cards on
+the page it runs on:
+- `/` Map and launches: the daily lead, tiles, object search, the map, and the launch cards (launches of the last 7
+  days, scheduled launches, hazard warnings, the ledger). The launch cards stay here until the satellite map below
+  replaces the launch map; then they move to a temporary `/launches` page until the Ascent move (ideas#69) retires
+  them.
+- `/reentries`: reentries of the last 7 days, predicted reentries (TIP) and TIP against the reentry. "Track on the
+  globe" opens the home page's globe with `?track=re-<NORAD>`.
+- `/catalog`: catalog changes and owner codes, breakups and collisions, the 30-day baseline and archive note.
+- `/changes`: orbit changes in watched satellites (with the Space-Track citation), SWF's RPO and ASAT histories.
+- `/geo`: the GEO belt, as before. `/sources`: sources and freshness, and links to Orbit's data files (feed,
+  snapshot, archive, sources), which moved there from the header.
+- `/object`: as before, with the same page row.
+A table in `app.js` (`PAGE_OF`) names the page that holds each card and each row-id prefix. A link to a card or row
+not on the current page goes to its page; an old `/#section` link on the home page (feeds, COP, bookmarks made before
+the split) is sent on to the page that now holds it. The feed's `visual.url` links name the page (`/catalog#breakups`).
+A test checks that every card is on exactly one page and every feed and lead link lands on its card.
+
+**Not built yet (the rest of ideas#71):** the whole-catalog satellite map on `/` (CelesTrak `GROUP=active` once a
+day into `data/sats.json`, with display options and filters, in the design Tom approved on 20 Nov 2026).
+It waits on a fresh read of CelesTrak's usage
+policy and a `sources.json` row for the active set: on 20 Nov 2026 celestrak.org refused connections from the
+build machine, so the terms could not be re-read.
+
 ## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
 Public releases, one per month and kind, unique asset names, never clobbered (`orbit/retention.py`, `tests/test_retention.py`);
 only what is already public or open-licensed goes there. Nothing from Space-Track element sets or case reads.

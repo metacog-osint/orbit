@@ -59,6 +59,42 @@
     var tabs = grp && window.TicTabs && window.TicTabs.setup(grp.parentElement);
     if (tabs) tabs.show(grp.id);
   }
+  /* Pages (orbit-2.22, ideas#71 and ideas#83): each group of cards is its own page. PAGE_OF names the page that
+     holds a card id or a row id prefix; a link to an id not on this page goes to that page, and an old /#section
+     link on the home page is sent there too. */
+  var PAGE = (document.querySelector("main[data-page]") || { getAttribute: function () { return "index"; } }).getAttribute("data-page");
+  var PAGE_OF = {
+    "map-card": "index", launches: "index", upcoming: "index", hazards: "index", ledger: "index", globe: "index",
+    "launch-": "index", "up-": "index", "nw-": "index",
+    reentries: "reentries", decay: "reentries", "decay-h": "reentries", "tipcheck-h": "reentries", "re-": "reentries",
+    catalog: "catalog", breakups: "catalog", baseline: "catalog", "breakup-": "catalog",
+    maneuvers: "changes", rpo: "changes", asat: "changes", "mv-": "changes",
+    sources: "sources", "data-files": "sources"
+  };
+  function pageOf(id) {
+    if (!id) return null;
+    if (PAGE_OF[id]) return PAGE_OF[id];
+    var m = /^[a-z]+-/.exec(id);
+    return m && PAGE_OF[m[0]] || null;
+  }
+  function pageUrl(pg) { return pg === "index" ? "./" : pg + ".html"; }
+  function hrefTo(id) {  // "#id" on this page, else the page that holds it
+    var pg = pageOf(id);
+    return pg && pg !== PAGE && !document.getElementById(id) ? pageUrl(pg) + "#" + id : "#" + id;
+  }
+  (function oldLinks() {  // /#maneuvers and the like, from feeds, COP and bookmarks made before the split
+    var id = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+    var pg = pageOf(id);
+    if (PAGE === "index" && pg && pg !== "index") location.replace(pageUrl(pg) + "#" + id);
+  })();
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented) return;
+    var id = decodeURIComponent(a.getAttribute("href").slice(1));
+    if (!id || document.getElementById(id)) return;
+    var pg = pageOf(id);
+    if (pg && pg !== PAGE) { e.preventDefault(); location.href = pageUrl(pg) + "#" + id; }
+  });
   function empty(box, text) { box.textContent = ""; box.appendChild(el("p", "muted small", text)); }
 
   /* Country marks. Colour is kept for the three largest actors (US, China, Russia with the USSR); every mark also
@@ -111,6 +147,7 @@
 
   function tiles() {
     var box = document.getElementById("tiles");
+    if (!box) return;
     box.textContent = "";
     var since7 = daysAgo(7);
     var launches = (snap.launches || []).filter(function (x) { return x.date >= since7; });
@@ -124,13 +161,11 @@
       "maneuvers"],
      ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–", "catalog"]].forEach(function (t) {
       var d = el("a", "tile");
-      d.href = "#" + t[2];
+      d.href = hrefTo(t[2]);
       d.appendChild(el("span", "k", t[0]));
       d.appendChild(el("span", "v", String(t[1])));
       box.appendChild(d);
     });
-    document.getElementById("asof").textContent = "Built " + fmt(snap.generated_at) + ".";
-    document.getElementById("method").textContent = snap.method_version || "";
   }
 
   function leadCard() {  // orbit/lead.py (orbit-2.18): what changed in the last 24 hours, each line to its card
@@ -156,7 +191,7 @@
       });
       li.appendChild(document.createTextNode(" "));
       var a = el("a", "", "Details");
-      a.href = x.href || "#";
+      a.href = x.href && x.href.charAt(0) === "#" ? hrefTo(x.href.slice(1)) : x.href || "#";
       li.appendChild(a);
       if (x.source) li.appendChild(el("span", "src", " · " + x.source));
       ul.appendChild(li);
@@ -165,6 +200,7 @@
 
   function launchTable() {
     var box = document.getElementById("launch-table");
+    if (!box) return;
     var since7 = daysAgo(7);
     var rows = (snap.launches || []).filter(function (x) { return x.date >= since7; }).map(function (x) {
       var tr = el("tr");
@@ -234,6 +270,7 @@
   }
   function upcomingTable() {
     var box = document.getElementById("upcoming-table");
+    if (!box) return;
     var rows = (snap.upcoming || []).map(function (x) {
       var tr = el("tr");
       tr.id = "up-" + x.id;
@@ -308,6 +345,7 @@
   }
   function hazardTable() {
     var box = document.getElementById("hazard-table");
+    if (!box) return;
     var nw = (snap && snap.navwarn) || {};
     var areas = hazardAreas();
     if (!nw.read_at) return empty(box, "Not read yet: navigational warnings appear after Orbit's next collection.");
@@ -392,6 +430,7 @@
   }
   function maneuverCard() {
     var box = document.getElementById("maneuver-body");
+    if (!box) return;
     var mv = (snap && snap.maneuvers) || {};
     var lane = (snap.lanes || {}).maneuver || {};
     if (!mv.read_at) {
@@ -455,6 +494,7 @@
 
   function baselineCard() {
     var box = document.getElementById("baseline-body");
+    if (!box) return;
     var b = (snap && snap.baseline) || {};
     if (!b.recent) return empty(box, "Not read yet: the baseline appears after Orbit's next reading of GCAT.");
     box.textContent = "";
@@ -539,6 +579,7 @@
 
   function counterspaceCard() {
     var box = document.getElementById("asat-body");
+    if (!box) return;
     var cs = (snap && snap.counterspace) || {};
     var tests = cs.tests || [];
     if (!cs.read_at) return empty(box, "Not read yet: the test history appears after Orbit's next collection.");
@@ -685,6 +726,7 @@
   }
   function rpoCard() {
     var box = document.getElementById("rpo-body");
+    if (!box) return;
     var rp = (snap && snap.rpo) || {};
     if (!rp.read_at) return empty(box, "Not read yet: the history appears after Orbit's next collection.");
     box.textContent = "";
@@ -1027,6 +1069,7 @@
   var pendingReentry = null;
   function showReentry(key) {  // a decay row's button: the globe, then that object's track over its window
     var card = document.getElementById("map-card");
+    if (!card) { location.href = "./?track=" + encodeURIComponent(key) + "#map-card"; return; }
     openGroup(card);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
     pendingReentry = key;
@@ -1126,6 +1169,7 @@
     if (mapStarted) return;
     mapStarted = true;
     var box = document.getElementById("map");
+    if (!box) return;
     var test = document.createElement("canvas");
     var gl = null;
     try { gl = test.getContext("webgl2") || test.getContext("webgl"); } catch (e) { gl = null; }
@@ -1190,6 +1234,7 @@
 
   function reentryTable() {
     var box = document.getElementById("reentry-table");
+    if (!box) return;
     var since7 = daysAgo(7);
     var rows = (snap.reentries || []).filter(function (x) { return x.reentry_date >= since7 && x.type === "payload"; });
     if (!rows.length) return empty(box, "No payload reentries dated in the last 7 days.");
@@ -1210,6 +1255,7 @@
   var BROKE = { E: "Exploded", C: "Collided" };
   function breakupTable() {  // GCAT statuses E and C, last 30 days (gcat.recent_breakups, orbit-2.14)
     var box = document.getElementById("breakup-table");
+    if (!box) return;
     var since30 = daysAgo(30);
     var rows = (snap.breakups || []).filter(function (x) { return x.breakup_date >= since30; });
     if (!rows.length) return empty(box, "No object GCAT marks exploded or collided has a date in the last 30 days.");
@@ -1232,6 +1278,7 @@
   var KIND = { P: "payload", R: "rocket stage", C: "component", D: "debris", S: "suborbital" };
   function decayCard() {  // Space-Track TIP messages (orbit/tip.py, orbit-2.13)
     var box = document.getElementById("decay-body");
+    if (!box) return;
     var dc = (snap && snap.decay) || {};
     var lane = (snap.lanes || {}).decay || {};
     if (!dc.read_at) {
@@ -1347,6 +1394,7 @@
 
   function catalogBody() {
     var box = document.getElementById("catalog-body");
+    if (!box) return;
     box.textContent = "";
     var ch = snap.catalog_changes || {};
     if (ch.previous_reading_at) {
@@ -1436,6 +1484,7 @@
   }
   function lanes() {
     var box = document.getElementById("lanes");
+    if (!box) return;
     box.textContent = "";
     var names = { catalog: "GCAT catalog and launch list (J. McDowell)", upcoming: "Launch Library 2 (The Space Devs)",
       news: "Spaceflight News API (headlines, links only)",
@@ -1567,9 +1616,16 @@
 
   function render() {
     if (!snap) return;
+    var asof = document.getElementById("asof"), meth = document.getElementById("method");
+    if (asof) asof.textContent = "Built " + fmt(snap.generated_at) + ".";
+    if (meth) meth.textContent = snap.method_version || "";
     tiles(); leadCard(); launchTable(); upcomingTable(); hazardTable(); ledgerCard(); maneuverCard(); baselineCard(); archiveNote(); counterspaceCard(); rpoCard(); reentryTable(); breakupTable(); decayCard(); tipCheckCard(); catalogBody(); lanes();
-    startMap();
-    viewControls();
+    if (document.getElementById("map-card")) {
+      startMap();
+      viewControls();
+      var tr = /[?&]track=(re-\d+)/.exec(location.search);
+      if (tr && !render.tracked) { render.tracked = true; showReentry(tr[1]); }
+    }
     // A link to a card or row: scroll to it again once tic-fold.js has folded the tables drawn above it.
     var t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if (t) requestAnimationFrame(function () { requestAnimationFrame(function () { t.scrollIntoView(); }); });
@@ -1619,6 +1675,7 @@
   }).then(function (sd) {
     sources = sd; render(); startTicking();
   }).catch(function (e) {
-    document.getElementById("tiles").textContent = "Could not load data/snapshot.json: " + e;
+    var box = document.getElementById("tiles") || document.querySelector("main");
+    box.appendChild(el("p", "muted", "Could not load data/snapshot.json: " + e));
   });
 })();
