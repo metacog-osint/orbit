@@ -919,8 +919,12 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
               "read_at": st["state"]["satcat_read_at"]}
     more = catsources.load(src_dir or raw_dir.parent)
     entries = aliases.load(source_ids=aliases.source_ids(ROOT))
+    os_read = oscar.store_load(src_dir or raw_dir.parent, catsources.read_json(
+        (src_dir or raw_dir.parent) / catsources.STATE, {}))
+    os_join = ({**os_read, "links": oscarlinks.reviewed(oscarlinks.load())} if os_read else None)
     doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st,
-                        celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries)
+                        celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries,
+                        oscar_join=os_join)
     out.parent.mkdir(parents=True, exist_ok=True)
     # Written in compact form (catshards, schema tic-catalog/2: default read, ref and basis left out; build step 6),
     # with the object page's shards, search index and rules note beside it.
@@ -942,18 +946,22 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
           f"swaps; {len(raw) / 1e6:.1f} MB JSON ({full_mb:.1f} MB with every record in full) -> {out}; name index "
           f"{len(idx['objects'])} objects, {len(idx_raw) / 1e6:.1f} MB JSON -> {out.parent / stcat.NAMES_ASSET}; "
           + ", ".join(f"{n} {len(b) / 1e6:.2f} MB" for n, b in assets.items()))
-    for k in ("space_track", catsources.CT, catsources.WD, aliases.SOURCE):
+    for k in ("space_track", catsources.CT, catsources.WD, oscar.SOURCE, aliases.SOURCE):
         if c.get(k):
             print(f"{k}: {c[k]}")
     return 0
 
 
 def catalog_sources(data_dir: Path, clear: str | None = None) -> int:
-    """CelesTrak SATCAT (at most daily, once per file update) and Wikidata (weekly), each only when due
-    (orbit/catsources.py). A refusal (any answer but 200) puts the source on hold and is printed for a person."""
+    """CelesTrak SATCAT (at most daily, once per file update), Wikidata (weekly) and WMO OSCAR/Space (weekly, 36
+    pages 3 s apart), each only when due (orbit/catsources.py, orbit/oscar.py). A refusal (any answer but 200) puts
+    the source on hold and is printed for a person."""
     if clear:
         print(f"Hold on {clear} cleared." if catsources.clear_hold(data_dir, clear) else f"No hold on {clear}.")
     notes = catsources.pull(data_dir)
+    state = catsources.read_json(data_dir / catsources.STATE, {})
+    notes[oscar.SOURCE] = oscar.pull(data_dir, datetime.now(timezone.utc), state)
+    catsources.write_json(data_dir / catsources.STATE, state)
     bad = False
     for src, n in notes.items():
         if n.get("refused"):
