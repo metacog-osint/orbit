@@ -13,12 +13,13 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from orbit import aliases, catsources, oscar, oscarlinks  # noqa: E402
+from orbit import aliases, catalog, catsources, oscar, oscarlinks  # noqa: E402
 
 FIX = ROOT / "tests" / "fixtures"
 DOC = json.loads((FIX / "oscar_satellites_20261118.json").read_text(encoding="utf-8"))
@@ -200,6 +201,175 @@ class Links(unittest.TestCase):
                                   ['a "quoted" line'], "2026-11-18")
         e = self.load(t)[0]
         self.assertEqual((e["acronym"], e["evidence"]), ('NOAA-20 "x"', ['a "quoted" line']))
+
+
+
+
+LINK = """- slug: {slug}
+  {num}
+  relation: {rel}
+  proposal: single-fit
+  oscar_id: 1
+  read: 2026-11-18
+  evidence:
+    - "one line"
+  proposed_by: oscar-propose
+  proposed: 2026-11-18
+  reviewed_by: "tic-analyst"
+  reviewed: 2026-11-18
+"""
+
+
+class Join(unittest.TestCase):
+    """The join (catalog.add_oscar) and the weekly read (oscar.pull), on the 14 real satellites of the fixture."""
+
+    def numbered(self):
+        out = {}
+        for k, name, ops in (("43013", "NOAA 20", "+"), ("25544", "ISS (ZARYA)", "+"), ("54234", "CYGNSS 1", "-"),
+                             ("99999", "OTHER", "+")):
+            e = {"norad": int(k), "jcat": None, "type": "payload", **{f: [] for f in catalog.FIELDS},
+                 "only_in": ["celestrak-satcat"]}
+            e["names"].append(catalog.rec(name, "celestrak-satcat", "2026-11-20", "attributed", ref=k))
+            e["ops_status"].append(catalog.rec(ops, "celestrak-satcat", "2026-11-20", cmp="active" if ops == "+"
+                                               else "inactive", ref=k))
+            catalog.finish(e)
+            out[k] = e
+        return out
+
+    def links(self, *entries):
+        return oscarlinks.reviewed(oscarlinks.validate(aliases.parse("\n".join(entries))))
+
+    def test_a_reviewed_same_entry_adds_operator_names_and_status(self):
+        n = self.numbered()
+        links = self.links(LINK.format(slug="noaa_20", num="norad: 43013", rel="same"))
+        c = catalog.add_oscar(n, links, SATS, "2026-11-20")
+        self.assertEqual((c["names"], c["operators"], c["status"]), (2, 1, 1))
+        e = n["43013"]
+        op = e["operator"][0]
+        self.assertEqual((op["value"], op["basis"], op["ref"], op["source"]), ("NOAA,NASA", "declared", "noaa_20",
+                                                                              oscar.SOURCE))
+        self.assertEqual([r["value"] for r in e["names"] if r["source"] == oscar.SOURCE],
+                         ["NOAA-20", "National Oceanic and Atmospheric Administration - 20"])
+        st = [r for r in e["ops_status"] if r["source"] == oscar.SOURCE][0]
+        self.assertEqual((st["value"], st["cmp"]), ("Operational", "active"))
+        self.assertEqual(e["name"], "NOAA 20")           # OSCAR ranks after CelesTrak: no name is replaced
+        self.assertEqual(e["disagreements"], [])         # active and active
+
+    def test_status_disagreement_is_listed_not_resolved(self):
+        n = self.numbered()
+        n["43013"]["ops_status"][0] = catalog.rec("-", "celestrak-satcat", "2026-11-20", cmp="inactive", ref="43013")
+        catalog.add_oscar(n, self.links(LINK.format(slug="noaa_20", num="norad: 43013", rel="same")), SATS,
+                          "2026-11-20")
+        d = n["43013"]["disagreements"]
+        self.assertEqual([x["field"] for x in d], ["ops_status"])
+        self.assertEqual(n["43013"]["ops_status"][0]["value"], "-")
+
+    def test_unreviewed_entries_do_not_join(self):
+        text = LINK.format(slug="noaa_20", num="norad: 43013", rel="same").replace(
+            "  reviewed_by: \"tic-analyst\"\n  reviewed: 2026-11-18\n", "")
+        self.assertEqual(self.links(text), [])
+
+    def test_members_get_operator_and_programme_only(self):
+        n = self.numbered()
+        links = self.links(LINK.format(slug="noaa_20", num="members: [54234, 43013]", rel="same"))
+        c = catalog.add_oscar(n, links, SATS, "2026-11-20")
+        self.assertEqual((c["programs"], c["operators"], c["names"], c["status"]), (2, 2, 0, 0))
+        self.assertEqual(n["54234"]["program"][0]["value"], "NOAA-20")
+        self.assertEqual(len(n["54234"]["names"]), 1)
+        self.assertEqual(len(n["54234"]["ops_status"]), 1)
+
+    def test_hosted_adds_a_note_to_the_host_and_nothing_else(self):
+        n = self.numbered()
+        links = self.links(LINK.format(slug="iss_gedi", num="norad: 25544", rel="hosted"))
+        c = catalog.add_oscar(n, links, SATS, "2026-11-20")
+        self.assertEqual(c["hosted"], 1)
+        e = n["25544"]
+        self.assertEqual(e["hosted"][0]["value"], "ISS GEDI")
+        self.assertEqual((len(e["names"]), len(e["ops_status"]), "operator" in e), (1, 1, False))
+
+    def test_missing_number_or_slug_is_counted_never_invented(self):
+        n = self.numbered()
+        links = self.links(LINK.format(slug="noaa_20", num="norad: 11111", rel="same"),
+                           LINK.format(slug="gone_sat", num="norad: 99999", rel="same"))
+        c = catalog.add_oscar(n, links, SATS, "2026-11-20")
+        self.assertEqual((c["not_in_catalog"], c["slug_not_in_read"]), ([11111], ["gone_sat"]))
+        self.assertNotIn("11111", n)
+
+    def test_nothing_of_the_review_reaches_the_catalog(self):
+        n = self.numbered()
+        catalog.add_oscar(n, self.links(LINK.format(slug="noaa_20", num="norad: 43013", rel="same")), SATS, "x")
+        blob = json.dumps(n)
+        for word in ("tic-analyst", "evidence", "reviewed", "oscar-propose"):
+            self.assertNotIn(word, blob)
+
+    def test_build_ranks_oscar_after_wikidata_and_lists_it_as_a_source(self):
+        self.assertLess(catalog.RANK.index("wikidata"), catalog.RANK.index(oscar.SOURCE))
+        self.assertLess(catalog.RANK.index(oscar.SOURCE), catalog.RANK.index("swf-rpo"))
+
+    # --- the weekly read ---
+
+    def fake(self, pages):
+        calls = []
+
+        def get(source, url, accept="*/*", timeout=120):
+            calls.append(url)
+            n = int(url.split("page=")[1].split("&")[0])
+            a = pages[n - 1]
+            if isinstance(a, Exception):
+                raise a
+            return a
+        return get, calls
+
+    def two_pages(self):
+        a = {**DOC, "page": {"elementsPerPage": 7, "totalElements": 14, "totalPages": 2, "number": 1},
+             "_embedded": {"satellites": SATS[:7]}}
+        b = {**a, "page": {**a["page"], "number": 2}, "_embedded": {"satellites": SATS[7:]}}
+        return [json.dumps(a).encode(), json.dumps(b).encode()]
+
+    def test_pull_reads_every_page_stores_the_slim_list_and_waits_a_week(self):
+        floor, oscar.MIN_SATS = oscar.MIN_SATS, 10
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                get, calls = self.fake(self.two_pages())
+                state = {}
+                now = datetime(2026, 11, 20, 23, 0, tzinfo=timezone.utc)
+                n = oscar.pull(Path(d), now, state, get=get, pause=0, sleep=lambda s: None)
+                self.assertEqual((n["read"], n["rows"], len(calls)), (True, 14, 2))
+                got = oscar.store_load(Path(d), state)
+                self.assertEqual(len(got["satellites"]), 14)
+                self.assertEqual(got["read"], "2026-11-20")
+                self.assertNotIn("satellite-instruments", got["satellites"][0])
+                self.assertEqual(set(got["satellites"][0]), set(oscar.KEEP))
+                again = oscar.pull(Path(d), now.replace(day=22), state, get=get, pause=0, sleep=lambda s: None)
+                self.assertFalse(again["read"])
+                self.assertEqual(len(calls), 2)
+                later = oscar.pull(Path(d), now.replace(day=27, hour=18), {oscar.SOURCE: state[oscar.SOURCE]},
+                                   get=self.fake(self.two_pages())[0], pause=0, sleep=lambda s: None)
+                self.assertTrue(later["read"])
+        finally:
+            oscar.MIN_SATS = floor
+
+    def test_a_refusal_holds_the_source_and_keeps_the_last_read(self):
+        with tempfile.TemporaryDirectory() as d:
+            get, calls = self.fake([catsources.Refused(oscar.SOURCE, "u", 403)])
+            state = {}
+            now = datetime(2026, 11, 20, 23, 0, tzinfo=timezone.utc)
+            n = oscar.pull(Path(d), now, state, get=get, pause=0, sleep=lambda s: None)
+            self.assertEqual(n["refused"], 403)
+            self.assertIn("hold", state[oscar.SOURCE])
+            n2 = oscar.pull(Path(d), now.replace(day=21), state, get=get, pause=0, sleep=lambda s: None)
+            self.assertFalse(n2["read"])
+            self.assertEqual(len(calls), 1)             # held until a person clears it: no second request
+            self.assertIsNone(oscar.store_load(Path(d), state))
+
+    def test_a_short_list_is_not_stored(self):
+        with tempfile.TemporaryDirectory() as d:
+            get, _ = self.fake(self.two_pages())
+            state = {}
+            n = oscar.pull(Path(d), datetime(2026, 11, 20, tzinfo=timezone.utc), state, get=get, pause=0,
+                           sleep=lambda s: None)
+            self.assertFalse(n["read"])
+            self.assertIsNone(oscar.store_load(Path(d), state))
 
 
 if __name__ == "__main__":

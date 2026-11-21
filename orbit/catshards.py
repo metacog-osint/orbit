@@ -35,7 +35,7 @@ RULES_ASSET = "catalog-rules.json"
 SHARD_DIR = "catalog"  # inside the tar: catalog/n25.json, catalog/jA4.json, catalog/search.json, catalog/rules.json
 
 # Fields holding lists of value records ({value, source, ref, read, basis}).
-RECORD_FIELDS = catalog.FIELDS + ("program",)
+RECORD_FIELDS = catalog.FIELDS + ("program", "operator", "hosted")
 
 # The source whose own key for an object is the default `ref` of its records.
 REF_BY_SOURCE = {catalog.GCAT: "jcat", catalog.ST: "norad", catalog.CT: "norad"}
@@ -187,6 +187,11 @@ SOURCE_LABELS = {
                  "Space-Track, with names and status codes of its own.", "url": "https://celestrak.org/satcat/"},
     catalog.WD: {"label": "Wikidata", "about": "The open knowledge base; an item names the object and carries its "
                  "NORAD number. Each value links to its item.", "url": "https://www.wikidata.org"},
+    catalog.OS: {"label": "WMO OSCAR/Space", "about": "The World Meteorological Organization's register of "
+                 "Earth-observation, weather and space-weather satellites, with the operating agency and status each "
+                 "agency reports to WMO. It carries no NORAD number, so TIC joins it only through a link file whose "
+                 "entries a person has checked; the linked satellite's values show here. Used with credit to WMO.",
+                 "url": "https://space.oscar.wmo.int/"},
     "swf-rpo": {"label": "Secure World Foundation", "about": "SWF's public sheet of rendezvous and proximity "
                 "operations.", "url": None},
     aliases.SOURCE: {"label": "TIC alias file", "about": "Names TIC added by hand, one claim per entry, each with "
@@ -212,10 +217,12 @@ NAME_FIELDS = {
     "label:en": "Wikidata's English label.",
     "label:mul": "Wikidata's label for all languages.",
     "altLabel:en": "Wikidata's English alias.",
+    "acronym": "WMO OSCAR/Space's acronym for the satellite.",
+    "fullname": "WMO OSCAR/Space's full name for the satellite.",
 }
 
 FIELD_NOTES = {
-    "name": "The display name. The best-ranked source's name (Space-Track, then GCAT, CelesTrak, Wikidata, SWF, the "
+    "name": "The display name. The best-ranked source's name (Space-Track, then GCAT, CelesTrak, Wikidata, WMO OSCAR/Space, SWF, the "
             "alias file); when that is a catalog designation such as USA 257, the best-ranked other name follows in "
             "brackets: USA 257 (CLIO). Names are text to read and search; they never link or move a number.",
     "names": "Every name every source gives, none dropped.",
@@ -231,7 +238,8 @@ FIELD_NOTES = {
     "status": "GCAT's orbital status code (in orbit, reentered, docked, attached, deep space and others).",
     "ops_status": "CelesTrak's operational status code: + operational, - nonoperational, P partially operational, "
                   "B backup or standby, S spare, X extended mission, D decayed or deorbited, ? unknown "
-                  "(celestrak.org/satcat/status.php, read 17 Nov 2026).",
+                  "(celestrak.org/satcat/status.php, read 17 Nov 2026). WMO OSCAR/Space gives its own words (Operational, "
+                  "Inactive, Presumably inactive and others), compared with CelesTrak's as active or inactive.",
     "decayed": "Whether each source says the object has left orbit.",
     "decay_date": "Reentry or decay date as each source gives it; Space-Track's come from its SATCAT and its "
                   "Historical decay messages.",
@@ -240,7 +248,11 @@ FIELD_NOTES = {
              "GCAT's comes with the date of the elements it is from, which can be years old (GCAT's orbit for the "
              "ISS's first module is dated 20 Dec 1998), and its orbit class (OpOrbit). CelesTrak's adds the period "
              "(minutes) and its orbit centre and type codes; it gives no date, so its file's time dates it.",
-    "program": "A programme the object belongs to, from the alias file (for example GSSAP).",
+    "program": "A programme the object belongs to, from the alias file (for example GSSAP) or, for an object that "
+               "WMO OSCAR/Space lists only as part of a group, that group's OSCAR name.",
+    "operator": "The agency that operates the satellite, as it reports it to WMO OSCAR/Space.",
+    "hosted": "An instrument or payload that WMO OSCAR/Space lists as a satellite of its own and that this object "
+              "carries (for example an instrument on the International Space Station).",
 }
 
 FLAGS = {

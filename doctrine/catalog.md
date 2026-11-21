@@ -100,8 +100,8 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   --stamp S [--draft]` proposes NORAD candidates from launch date (within a day) and orbit only (CelesTrak SATCAT
   payloads; bounds in `oscar.orbit_fits`), names from the TIC name index listed beside them, never choosing.
   `orbit/oscarlinks.py` reads `orbit/data/catalog/oscar-links.yml` (aliases' YAML subset): per slug `norad` or
-  `members`, `relation` same/hosted, `proposal`, evidence; **only entries with `reviewed_by` and `reviewed` join, and
-  no join code exists yet** (the build would need OSCAR's values in `catalog.yml`: a workflow change for Tom).
+  `members`, `relation` same/hosted, `proposal`, evidence; **only entries with `reviewed_by` and `reviewed` join**
+  (the join landed 20 Nov 2026, see the join bullet below).
   `--draft` appends unreviewed entries only for a single fit with an equal name or the one equal name among several.
   Read 18 Nov: 1,062 satellites, 414 operational; drafted 285, left 129 for a person (hosted instruments,
   constellation entries, operator names the catalogs lack, OSCAR values that do not fit). Never query CelesTrak for
@@ -133,4 +133,20 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
     alias file); 300 tests pass, check PASS. `catalog.yml`'s test step runs them (Tom's yes, 18 Nov 2026).
 - **OSCAR links reviewed (18 Nov 2026; branch `feat/catalog-oscar-review`):** all 285 drafted entries accepted by a
   TIC analyst, none withdrawn; each has `reviewed_by: "tic-analyst"` and `reviewed`. The review record is kept
-  privately. Nothing joins yet: the join code and OSCAR's weekly read in `catalog.yml` are not built.
+  privately.
+- **OSCAR join (20 Nov 2026; Tom's yes of 20 Nov to the OSCAR join including the `catalog.yml` change; branch
+  `feat/catalog-oscar-join`):** `oscar.pull` reads the satellite list weekly (36 pages, 3 s apart, in the run that
+  makes the Space-Track read; any non-200 holds the source like CelesTrak's, a 429 or 5xx until the next UTC day,
+  anything else until a person clears it with `--clear-hold wmo-oscar-space`; a list under 900 satellites is
+  refused and the last read kept), keeps `KEEP` fields only (no instruments) in `state/wmo-oscar-satellites.json.gz`
+  and records `read_at` in the sources state on the release. `catalog.yml` gets its own Actions cache entry
+  (`catalog-oscar-`) for that file, so the existing cache's path list is untouched (changing a path list orphans
+  earlier entries) and `tests.test_oscar` joins its test step. `catalog.add_oscar` joins reviewed entries only:
+  a `same` entry with one number adds `operator` (OSCAR's `space_agency`, basis declared), `ops_status` (OSCAR's
+  words; Operational is active, Inactive and Presumably inactive inactive, the rest not compared) and the acronym
+  and full name as names; a `members` entry adds `operator` and a `program` (the OSCAR name) to each member and no
+  name or status; a `hosted` entry adds a `hosted` record to the host and nothing else. Source rank: after
+  Wikidata, before SWF (choice made 20 Nov: OSCAR never replaces a name another source gives). Evidence and the
+  reviewer never enter the catalog. Local build from the stored 18 Nov read: 285 links, 492 names, 285 operators,
+  285 statuses, none missing; one status disagreement (42901 VENUS: CelesTrak `-`, OSCAR Operational). 380 tests
+  pass, check PASS. The first catalog.yml run after the merge reads OSCAR once (about 2 minutes extra).
