@@ -8,13 +8,14 @@ import tempfile
 import unittest
 import urllib.error
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import importlib.util  # noqa: E402
 
-from orbit import satmap  # noqa: E402
+from orbit import catsources, satmap  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("orbit_cli_satmap", ROOT / "tools" / "orbit.py")
 TOOL = importlib.util.module_from_spec(_spec)
@@ -99,11 +100,66 @@ class SatsLane(unittest.TestCase):
             self.tool._lane_sats(self.tmp / "raw", prev, self.getter)
 
         def refuse(url, timeout):
-            raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+            raise catsources.Refused("celestrak-gp-active", url, 403)
         prev["sats"]["count"] = 42
-        with self.assertRaises(urllib.error.HTTPError):
+        with self.assertRaises(satmap.Stopped):
             self.tool._lane_sats(self.tmp / "raw", prev, refuse)
         self.assertEqual(json.loads((self.tmp / "state" / "sats.json").read_text(encoding="utf-8"))["count"], 42)
+
+    def _stopped(self, code=403):
+        def refuse(url, timeout):
+            self.calls.append(url)
+            raise catsources.Refused("celestrak-gp-active", url, code)
+        with self.assertRaises(satmap.Stopped) as ctx:
+            self.tool._lane_sats(self.tmp / "raw", {}, refuse)
+        self.assertIn(f"HTTP {code}", str(ctx.exception))
+        self.assertIn("until a person clears", str(ctx.exception))
+        self.calls.clear()
+        return json.loads((self.tmp / "state" / "sats_stop.json").read_text(encoding="utf-8"))
+
+    def test_a_non_200_stops_every_later_request_even_a_503_on_a_later_day(self):
+        clear = self.tmp / "clear.txt"
+        with mock.patch.object(satmap, "CLEAR_FILE", clear):
+            self.assertEqual(self._stopped(503)["code"], 503)
+            for _ in range(3):
+                with self.assertRaises(satmap.Stopped):
+                    self.tool._lane_sats(self.tmp / "raw", {"sats": {"read_at": "2020-01-01T00:00:00Z"}}, self.getter)
+        self.assertEqual(self.calls, [])
+
+    def test_only_the_stops_own_time_clears_it_and_the_record_is_kept(self):
+        clear = self.tmp / "clear.txt"
+        with mock.patch.object(satmap, "CLEAR_FILE", clear):
+            stop = self._stopped()
+            clear.write_text("2020-01-01T00:00:00Z\n", encoding="utf-8")
+            with self.assertRaises(satmap.Stopped):
+                self.tool._lane_sats(self.tmp / "raw", {}, self.getter)
+            self.assertEqual(self.calls, [])
+            clear.write_text(stop["at"] + "\n", encoding="utf-8")
+            out, _, _ = self.tool._lane_sats(self.tmp / "raw", {}, self.getter)
+        self.assertEqual((out["sats"]["count"], len(self.calls)), (42, 1))
+        self.assertFalse((self.tmp / "state" / "sats_stop.json").exists())
+        kept = json.loads((self.tmp / "state" / "sats_stop_history.jsonl").read_text(encoding="utf-8"))
+        self.assertEqual((kept["code"], kept["at"]), (403, stop["at"]))
+
+    def test_an_unreadable_stop_record_still_stops(self):
+        (self.tmp / "state" / "sats_stop.json").write_text("{not json", encoding="utf-8")
+        with mock.patch.object(satmap, "CLEAR_FILE", self.tmp / "clear.txt"), self.assertRaises(satmap.Stopped):
+            self.tool._lane_sats(self.tmp / "raw", {}, self.getter)
+        self.assertEqual(self.calls, [])
+
+    def test_a_timeout_is_not_a_stop_and_the_next_run_asks_again(self):
+        def slow(url, timeout):
+            raise urllib.error.URLError("timed out")
+        with self.assertRaises(urllib.error.URLError):
+            self.tool._lane_sats(self.tmp / "raw", {}, slow)
+        self.assertFalse((self.tmp / "state" / "sats_stop.json").exists())
+        out, _, _ = self.tool._lane_sats(self.tmp / "raw", {}, self.getter)
+        self.assertEqual(out["sats"]["count"], 42)
+
+    def test_get_refuses_any_status_but_200(self):
+        err = urllib.error.HTTPError(satmap.URL, 301, "Moved", {}, None)
+        with mock.patch.object(catsources._OPENER, "open", side_effect=err), self.assertRaises(catsources.Refused):
+            satmap.get()
 
 
 if __name__ == "__main__":

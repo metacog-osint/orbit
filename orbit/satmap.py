@@ -5,15 +5,19 @@ owner, type and launch date, written as one compact file the home page's map dra
 CelesTrak's usage policy (read 20 Nov 2026, updated 16 Nov 2026): request compressed data, use FORMAT=csv (JSON is
 about three times the size), download once per update (GP data update every 2 hours), and stop at any non-200 reply
 and leave it for a person. It states no redistribution or credit terms; the sets are credited as CelesTrak, from 18 SDS
-data, as the `paths` lane does. Orbit asks once a UTC day; a non-200 fails the lane, keeps the last file and is not
-retried until the next day's run. Standard library only."""
+data, as the `paths` lane does. Orbit asks once a UTC day. Any reply but 200 (redirects are not followed) is recorded
+in data/state/sats_stop.json: the last file stays and the lane asks nothing more until a person clears the stop by
+committing the stop's time to orbit/sats_stop_clear.txt. A timeout gets no reply, so it is not a stop and the next run
+asks again. Standard library only."""
 from __future__ import annotations
 
 import csv
-import gzip
 import io
+import json
 import re
-import urllib.request
+from pathlib import Path
+
+from orbit import catsources
 
 URL = "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv"
 SCHEMA = "orbit-sats/1"
@@ -27,17 +31,46 @@ CONSTELLATIONS = [("starlink", re.compile(r"^STARLINK\b")), ("oneweb", re.compil
                   ("gps", re.compile(r"^NAVSTAR\b")), ("beidou", re.compile(r"^BEIDOU\b")),
                   ("galileo", re.compile(r"^GSAT0\d|GALILEO"))]
 BIG = {"US": "us", "CN": "cn", "RU": "ru"}
+CLEAR_FILE = Path(__file__).with_name("sats_stop_clear.txt")  # a person commits the stop's time here to clear it
+
+
+class Stopped(RuntimeError):
+    """CelesTrak answered with something other than 200: the lane asks nothing until a person clears it."""
+
+
+def stop_message(stop: dict) -> str:
+    return (f"CelesTrak answered HTTP {stop.get('code')} at {stop.get('at')}; "
+            "Orbit asks nothing more until a person clears the stop")
+
+
+def record_stop(path: Path, code, url: str, at: str) -> dict:
+    stop = {"code": code, "url": url, "at": at}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(stop) + "\n", encoding="utf-8", newline="\n")
+    return stop
+
+
+def check_stop(path: Path, now: str) -> None:
+    """Raise Stopped while a stop stands. CLEAR_FILE holding that stop's exact time clears it, so an old clear can never
+    lift a later stop; the cleared record moves to sats_stop_history.jsonl. An unreadable record still stops the lane."""
+    if not path.exists():
+        return
+    try:
+        stop = json.loads(path.read_text(encoding="utf-8"))
+    except ValueError:
+        stop = {"code": "unknown", "at": "unknown"}
+    cleared = CLEAR_FILE.read_text(encoding="utf-8").strip() if CLEAR_FILE.exists() else ""
+    if cleared != stop.get("at"):
+        raise Stopped(stop_message(stop))
+    with path.with_name("sats_stop_history.jsonl").open("a", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps({**stop, "cleared_at": now}) + "\n")
+    path.unlink()
 
 
 def get(url: str = URL, timeout: int = 240) -> bytes:
-    """One compressed request, as CelesTrak asks. urllib raises HTTPError on any non-200, which fails the lane."""
-    req = urllib.request.Request(url, headers={"User-Agent": "metacog-osint/orbit (github.com/metacog-osint/orbit)",
-                                               "Accept": "text/csv", "Accept-Encoding": "gzip"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        body = resp.read()
-        if (resp.headers.get("Content-Encoding") or "").lower() == "gzip":
-            body = gzip.decompress(body)
-        return body
+    """One compressed request, as CelesTrak asks, no redirects followed. Any status but 200 raises catsources.Refused,
+    which the lane records as a stop."""
+    return catsources.get("celestrak-gp-active", url, "text/csv", timeout)
 
 
 def orbit_class(n: float, e: float) -> str:

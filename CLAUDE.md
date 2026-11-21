@@ -6,9 +6,8 @@ RPO and ASAT history, the GEO belt, a globe, a daily archive and a daily lead, p
 Observations only: no probabilities, no warnings. Repo `metacog-osint/orbit` (**public**); live at
 https://orbit.theintelligence.company (Cloudflare Pages project `orbit`, `orbit-q2t.pages.dev`).
 
-**Slimmed 18 Nov 2026** from 60,669 bytes to durable rules. Full earlier text (build notes, measurements, shas,
-checks, decisions with Tom's words): `.claude/notes-archive-2026-11-18.md`. **Current state and open items:
-`.claude/HANDOFF.md`**; read it before starting work. Keep this file under 12 KB (global rule); state and narrative
+Full earlier text: `.claude/notes-archive-2026-11-18.md`. **Current state and open items:
+`.claude/HANDOFF.md`**; read it before starting work. Keep this file under 12 KB; state and narrative
 go in the handoff, shas and "landed" notes are left to git.
 
 ## Where things are
@@ -28,8 +27,8 @@ go in the handoff, shas and "landed" notes are left to git.
 python tools/orbit.py collect              # every live lane into data/snapshot.json (--only LANE, --force)
 python tools/orbit.py build                # site/ from data/snapshot.json (refuses without one)
 python tools/orbit.py check                # registers + feed lint
-python -m unittest discover -s tests       # offline tests (about 270 on 18 Nov 2026)
-python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP); launch config "orbit-site"
+python -m unittest discover -s tests       # offline tests
+python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP)
 python tools/orbit.py catalog | spacetrack-catalog | catalog-sources   # the TIC catalog (local)
 python tools/orbit.py geo [--day] [--out data/geo] [--upload]           # GEO region
 python tools/orbit.py ledger | maneuver-report | maneuver-case
@@ -41,7 +40,7 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
 ## Workflows and schedules
 - `update.yml`: tests, state from the Actions cache, collect, build, check, GEO page data, save state, deploy to
   Pages. **Runs on every push to `main`, so a push deploys.** Cron `41 */6`; the hub's `tic-dispatch` starts it at :55
-  past 00/06/12/18 UTC (GitHub runs schedules hours late, the cron is the fallback). Timeout 22 min (Space-Track wait).
+  past 00/06/12/18 UTC (the cron is the fallback). Timeout 22 min (Space-Track wait).
 - `ledger.yml`: hourly Launch Library 2 ledger on release `ledger` (`launch-ledger.json`, `orbit-ledger/1`; dated daily copy in private `tic-archive`);
   dispatched at :45 (:55 at 01/05/09/13/17/21 UTC), own cron `45 * * * *`.
 - `geo.yml`: GEO region at 03:15 and 15:15 UTC by tic-dispatch, own cron :17 (skips if today's file is under an hour
@@ -91,7 +90,7 @@ is launch pads only; ground tracks go only on the 3D globe; manoeuvres, reentrie
   scored v1 record).
 - **GCAT**: never `--force` in a schedule (Jonathan McDowell's own server). Republishes about daily at no fixed time.
 - **CelesTrak**: one download per 2-hour update; SATCAT only when `jsonDir.php` shows a new FILE_MTIME. **Wikidata**:
-  one SPARQL query a week, UA names the repo. Any non-200 puts a catalog source on hold (`--clear-hold` by a person).
+  one SPARQL query a week, UA names the repo. Any non-200 puts a catalog source on hold (`--clear-hold` by a person) and stops `sats` (clear: method.md).
 - **Launch Library 2**: free to use and republish with credit (Tom, 15 Nov 2026); images never used (own licences).
 - **Japan Coast Guard NAVAREA XI: not read** (robots.txt disallows `/TUHO/`; Tom, 14 Nov). `navwarn.JCG_READ = False`.
 - **ITU**: TIES is closed to TIC; never use a government-affiliated TIES account. BR IFIC zips only after written
