@@ -64,8 +64,9 @@
      link on the home page is sent there too. */
   var PAGE = (document.querySelector("main[data-page]") || { getAttribute: function () { return "index"; } }).getAttribute("data-page");
   var PAGE_OF = {
-    "map-card": "index", launches: "index", upcoming: "index", hazards: "index", ledger: "index", globe: "index",
-    "launch-": "index", "up-": "index", "nw-": "index",
+    "sat-map": "index",
+    "map-card": "launches", launches: "launches", upcoming: "launches", hazards: "launches", ledger: "launches",
+    globe: "launches", "launch-": "launches", "up-": "launches", "nw-": "launches",
     reentries: "reentries", decay: "reentries", "decay-h": "reentries", "tipcheck-h": "reentries", "re-": "reentries",
     catalog: "catalog", breakups: "catalog", baseline: "catalog", "breakup-": "catalog",
     maneuvers: "changes", rpo: "changes", asat: "changes", "mv-": "changes",
@@ -1069,7 +1070,7 @@
   var pendingReentry = null;
   function showReentry(key) {  // a decay row's button: the globe, then that object's track over its window
     var card = document.getElementById("map-card");
-    if (!card) { location.href = "./?track=" + encodeURIComponent(key) + "#map-card"; return; }
+    if (!card) { location.href = "launches.html?track=" + encodeURIComponent(key) + "#map-card"; return; }
     openGroup(card);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
     pendingReentry = key;
