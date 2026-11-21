@@ -18,12 +18,14 @@ from __future__ import annotations
 
 import re
 
-from . import aliases, catsources, gcat, stcat
+from . import aliases, catsources, gcat, oscar, oscarlinks, stcat
 
 SCHEMA = "tic-catalog/1"
 
-# Name ranking (Tom, 16 Nov 2026): Space-Track, GCAT, CelesTrak, Wikidata, SWF, then cited aliases.
-RANK = ("space-track", "gcat-mcdowell", "celestrak-satcat", "wikidata", "swf-rpo", "aliases")
+# Name ranking (Tom, 16 Nov 2026): Space-Track, GCAT, CelesTrak, Wikidata, SWF, then cited aliases. WMO OSCAR/Space
+# (join step, 20 Nov 2026) sits after Wikidata: its acronyms never replace a name another source gives; only an
+# object with no other name shows OSCAR's.
+RANK = ("space-track", "gcat-mcdowell", "celestrak-satcat", "wikidata", "wmo-oscar-space", "swf-rpo", "aliases")
 
 # Designations and placeholders: shown, but a better name goes beside them in brackets (Tom, 16 Nov 2026).
 DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.I)
@@ -368,6 +370,64 @@ def add_wikidata(numbered: dict, rows: list[dict], read: str) -> dict:
     return counts
 
 
+OS = oscar.SOURCE
+
+
+def add_oscar(numbered: dict, links: list[dict], satellites: list[dict], read: str) -> dict:
+    """WMO OSCAR/Space (build join step, Tom's yes 20 Nov 2026) through the reviewed link file only: `links` are the
+    reviewed live entries of oscar-links.yml (oscarlinks.reviewed), `satellites` the last read (oscar.store_load).
+    A `same` entry with one number adds OSCAR's operator (`space_agency`, declared through WMO), its status (compared
+    with CelesTrak's through oscar.STATUS_CLASS) and its acronym and full name as names. An entry that stands for
+    several objects (`members`) adds the operator and the OSCAR entry's name as a `program` to each, no status or
+    name: it describes the group, not each member. A `hosted` entry (an instrument on another object) adds only a
+    `hosted` record to the host, never a name, operator or status. The link file's evidence and reviewer never
+    enter the catalog. A linked number the catalog does not hold, or a slug the read no longer lists, is counted."""
+    by_slug = {s["slug"]: s for s in satellites}
+    counts = {"links": 0, "names": 0, "operators": 0, "status": 0, "programs": 0, "hosted": 0,
+              "slug_not_in_read": [], "not_in_catalog": []}
+    for link in links:
+        counts["links"] += 1
+        sat = by_slug.get(link["slug"])
+        if sat is None:
+            counts["slug_not_in_read"].append(link["slug"])
+            continue
+        slug = link["slug"]
+        label = (sat.get("acronym") or sat.get("fullname") or slug).strip()
+        agency = (sat.get("space_agency") or "").strip()
+        for n in oscarlinks.numbers(link):
+            e = numbered.get(str(n))
+            if e is None:
+                counts["not_in_catalog"].append(n)
+                continue
+            _entry(numbered, str(n), OS)  # makes sure every list field exists
+            if link["relation"] == "hosted":
+                e.setdefault("hosted", []).append(rec(label, OS, read, "attributed", ref=slug, field="satellite"))
+                counts["hosted"] += 1
+                continue
+            if agency:
+                e.setdefault("operator", []).append(rec(agency, OS, read, "declared", ref=slug, field="space_agency"))
+                counts["operators"] += 1
+            if "members" in link:
+                e.setdefault("program", []).append(rec(label, OS, read, "attributed", ref=slug, field="acronym"))
+                counts["programs"] += 1
+                continue
+            have = set()
+            for name, field in ((sat.get("acronym"), "acronym"), (sat.get("fullname"), "fullname")):
+                name = (name or "").strip()
+                if name and name.lower() not in have:
+                    have.add(name.lower())
+                    e["names"].append(rec(name, OS, read, name_basis(name), ref=slug, field=field))
+                    counts["names"] += 1
+            status = (sat.get("status") or "").strip()
+            if status:
+                cls = oscar.STATUS_CLASS.get(status)
+                e["ops_status"].append(rec(status, OS, read, "attributed", ref=slug, field="status",
+                                           **({"cmp": cls} if cls else {"nocompare": True})))
+                counts["status"] += 1
+            finish(e)
+    return counts
+
+
 def _rank(source: str) -> int:
     return RANK.index(source) if source in RANK else len(RANK)
 
@@ -519,10 +579,11 @@ def names_index(doc: dict, keys: set[str] | None = None) -> dict:
 
 def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: str | None = None,
           spacetrack: dict | None = None, celestrak: dict | None = None, wikidata: dict | None = None,
-          alias_entries: list[dict] | None = None) -> dict:
+          alias_entries: list[dict] | None = None, oscar_join: dict | None = None) -> dict:
     """`spacetrack`: {"satcat": rows, "decay": every DECAY message held, "read": 'YYYY-MM-DD', "read_at": ...}.
     `celestrak`, `wikidata`: {"rows": ..., "read": 'YYYY-MM-DD', "read_at": ...}, as catsources.load gives them.
-    `alias_entries`: the alias file's live entries (aliases.load)."""
+    `alias_entries`: the alias file's live entries (aliases.load).
+    `oscar_join`: {"links": reviewed link entries, "satellites": ..., "read": 'YYYY-MM-DD', "read_at": ...}."""
     numbered, unnumbered = from_gcat(tables, orgs, read)
     sources = {GCAT: {"read": read, "updated": gcat_updated, "citation": gcat.CITATION}}
     st_counts = None
@@ -538,6 +599,9 @@ def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: st
         more[WD] = add_wikidata(numbered, wikidata["rows"], wikidata["read"])
         sources[WD] = {"read": wikidata["read"], "read_at": wikidata.get("read_at"),
                        "citation": catsources.WD_CITATION}
+    if oscar_join and oscar_join.get("satellites") and oscar_join.get("links"):
+        more[OS] = add_oscar(numbered, oscar_join["links"], oscar_join["satellites"], oscar_join["read"])
+        sources[OS] = {"read": oscar_join["read"], "read_at": oscar_join.get("read_at"), "citation": oscar.CITATION}
     if alias_entries:
         more[aliases.SOURCE] = add_aliases(numbered, unnumbered, alias_entries)
         sources[aliases.SOURCE] = {"read": max(e["read"] for e in alias_entries), "entries": len(alias_entries),

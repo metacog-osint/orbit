@@ -76,6 +76,7 @@ ST_SHARED = spacetrack.shared_gp_busy       # geo.yml's GP query on the same acc
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 SATS = Path("state") / "sats.json"  # the satellite map's file (orbit/satmap.py), published at /data/sats.json
+SATS_STOP = Path("state") / "sats_stop.json"  # CelesTrak's last non-200, until a person clears it (orbit/satmap.py)
 TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".txt", ".md", ".glsl", ".xml"}
 ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
@@ -475,15 +476,19 @@ def _lane_decay(raw_dir: Path, prev: dict, getter, **_):
 
 def _lane_sats(raw_dir: Path, prev: dict, getter, **_):
     """The satellite map (orbit/satmap.py, orbit-2.23): CelesTrak's active group once a UTC day, joined to this run's
-    GCAT index. Any non-200 fails the lane (the last file stays) and is not asked again until the next run, as
-    CelesTrak's policy says. Under 90% of the last reading's objects fails the lane too."""
+    GCAT index. Any non-200 fails the lane, keeps the last file and stops all requests until a person clears the stop,
+    as CelesTrak's policy says; a timeout is not a stop. Under 90% of the last reading's objects fails the lane too."""
     data_dir = raw_dir.parent
     path = data_dir / SATS
     last = (prev.get("sats") or {}).get("read_at") or ""
     now = fetch.now_utc()
+    satmap.check_stop(data_dir / SATS_STOP, now)
     if path.exists() and last[:10] == now[:10]:
         return None, [], "CelesTrak's active group was read today already (once a UTC day)"
-    body, rec = fetch.fetch("celestrak-gp-active", satmap.URL, None, "csv", timeout=240, getter=getter or satmap.get)
+    try:
+        body, rec = fetch.fetch("celestrak-gp-active", satmap.URL, None, "csv", timeout=240, getter=getter or satmap.get)
+    except catsources.Refused as exc:
+        raise satmap.Stopped(satmap.stop_message(satmap.record_stop(data_dir / SATS_STOP, exc.code, satmap.URL, now))) from exc
     doc = satmap.parse(body, _read_index(data_dir), rec["fetched_at"])
     before = (prev.get("sats") or {}).get("count") or 0
     if path.exists() and doc["count"] < MIN_KEEP * before:
@@ -919,8 +924,12 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
               "read_at": st["state"]["satcat_read_at"]}
     more = catsources.load(src_dir or raw_dir.parent)
     entries = aliases.load(source_ids=aliases.source_ids(ROOT))
+    os_read = oscar.store_load(src_dir or raw_dir.parent, catsources.read_json(
+        (src_dir or raw_dir.parent) / catsources.STATE, {}))
+    os_join = ({**os_read, "links": oscarlinks.reviewed(oscarlinks.load())} if os_read else None)
     doc = catalog.build(tables, orgs, gcat.today_utc().isoformat(), gcat_updated=stamp, spacetrack=st,
-                        celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries)
+                        celestrak=more[catsources.CT], wikidata=more[catsources.WD], alias_entries=entries,
+                        oscar_join=os_join)
     out.parent.mkdir(parents=True, exist_ok=True)
     # Written in compact form (catshards, schema tic-catalog/2: default read, ref and basis left out; build step 6),
     # with the object page's shards, search index and rules note beside it.
@@ -942,18 +951,22 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
           f"swaps; {len(raw) / 1e6:.1f} MB JSON ({full_mb:.1f} MB with every record in full) -> {out}; name index "
           f"{len(idx['objects'])} objects, {len(idx_raw) / 1e6:.1f} MB JSON -> {out.parent / stcat.NAMES_ASSET}; "
           + ", ".join(f"{n} {len(b) / 1e6:.2f} MB" for n, b in assets.items()))
-    for k in ("space_track", catsources.CT, catsources.WD, aliases.SOURCE):
+    for k in ("space_track", catsources.CT, catsources.WD, oscar.SOURCE, aliases.SOURCE):
         if c.get(k):
             print(f"{k}: {c[k]}")
     return 0
 
 
 def catalog_sources(data_dir: Path, clear: str | None = None) -> int:
-    """CelesTrak SATCAT (at most daily, once per file update) and Wikidata (weekly), each only when due
-    (orbit/catsources.py). A refusal (any answer but 200) puts the source on hold and is printed for a person."""
+    """CelesTrak SATCAT (at most daily, once per file update), Wikidata (weekly) and WMO OSCAR/Space (weekly, 36
+    pages 3 s apart), each only when due (orbit/catsources.py, orbit/oscar.py). A refusal (any answer but 200) puts
+    the source on hold and is printed for a person."""
     if clear:
         print(f"Hold on {clear} cleared." if catsources.clear_hold(data_dir, clear) else f"No hold on {clear}.")
     notes = catsources.pull(data_dir)
+    state = catsources.read_json(data_dir / catsources.STATE, {})
+    notes[oscar.SOURCE] = oscar.pull(data_dir, datetime.now(timezone.utc), state)
+    catsources.write_json(data_dir / catsources.STATE, state)
     bad = False
     for src, n in notes.items():
         if n.get("refused"):

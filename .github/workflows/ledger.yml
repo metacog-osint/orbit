@@ -52,3 +52,15 @@ jobs:
           gh release view ledger >/dev/null 2>&1 || gh release create ledger --title "Launch ledger" --latest=false \
             --notes "Orbit's launch ledger: every launch since 1 Jan 2024 from Launch Library 2 (The Space Devs, thespacedevs.com), checked hourly. launch-ledger.json; schema orbit-ledger/1 (orbit/ledger.py). Launch data: Launch Library 2, The Space Devs."
           gh release upload ledger data/state/launch-ledger.json --clobber
+      # The release holds one copy, replaced on each change. Keep a dated copy in the PRIVATE tic-archive repo at most
+      # once a day (ideas#54, Tom, 21 Nov 2026): release orbit-ledger-YYYY-MM, nothing replaced, an unchanged ledger
+      # skipped. Runs after the publish, so a failure turns the run red but never holds the ledger back.
+      - name: Private archive (dated daily copy of the ledger, to tic-archive)
+        env:
+          GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::secret TIC_ARCHIVE_TOKEN is not set, so the ledger did not go to the private archive"; exit 1
+          fi
+          python tools/tic_archive.py put --program orbit --lane ledger --src data/state \
+            --include launch-ledger.json --min-interval-hours 23

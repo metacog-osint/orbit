@@ -584,9 +584,13 @@ A test checks that every card is on exactly one page and every feed and lead lin
 Lane `sats` (`orbit/satmap.py`): CelesTrak's GP group `active` (working satellites; the 18th Space Defense
 Squadron's GP data), FORMAT=csv, compressed, **once a UTC day**: a run on a day whose reading is already held asks
 nothing. CelesTrak's usage policy (read 20 Nov 2026, updated 16 Nov 2026) states no redistribution or credit terms,
-asks for compressed CSV and one download per update, and says to stop at any non-200 reply: a non-200 fails the
-lane, the last file stays, and nothing is asked again before the next run. A reading with under 90% of the last
-reading's objects fails the lane too. Source row `celestrak-gp-active` (A2, independence group `usspacecom`).
+asks for compressed CSV and one download per update, and says to stop at any non-200 reply and leave it for a
+person. Any reply but 200 (redirects are not followed) fails the lane, keeps the last file and is recorded in
+`data/state/sats_stop.json`; the lane then asks nothing and its status says so. To clear it after looking at the
+refusal, commit that record's `at` time as the only content of `orbit/sats_stop_clear.txt`: the push starts a run, the
+record moves to `sats_stop_history.jsonl`, and an old clear can never lift a later stop. A timeout gets no reply, so
+it is not a stop and the next run asks again. A reading with under 90% of the last reading's objects fails the lane
+too. Source row `celestrak-gp-active` (A2, independence group `usspacecom`).
 
 Each object is joined to Orbit's GCAT index by NORAD number for the owner (`group`: us, cn, ru with SU, other; `cc`
 the ISO code or GCAT's state code), GCAT's type and launch date; an object GCAT has not numbered stays `other` with
