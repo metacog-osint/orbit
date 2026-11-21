@@ -565,12 +565,11 @@ note, Orbit draws the page.
 Tom, 19 Nov 2026: every tab is its own page within the program. Orbit's one long page is split into pages that share
 one header, one row of page links (the current page marked) and one script, `app.js`, which draws only the cards on
 the page it runs on:
-- `/` Map and launches: the daily lead, tiles, object search, the map, and the launch cards (launches of the last 7
-  days, scheduled launches, hazard warnings, the ledger). The launch cards stay here until the satellite map below
-  replaces the launch map; then they move to a temporary `/launches` page until the Ascent move (ideas#69) retires
-  them.
+- `/` Map: the daily lead, tiles, object search and the satellite map (`orbit-2.24`).
+- `/launches`: the launch map and cards (launches of the last 7 days, scheduled launches, hazard warnings, the
+  ledger), a temporary page until the Ascent move (ideas#69) retires them.
 - `/reentries`: reentries of the last 7 days, predicted reentries (TIP) and TIP against the reentry. "Track on the
-  globe" opens the home page's globe with `?track=re-<NORAD>`.
+  globe" opens the launch page's globe with `launches.html?track=re-<NORAD>`.
 - `/catalog`: catalog changes and owner codes, breakups and collisions, the 30-day baseline and archive note.
 - `/changes`: orbit changes in watched satellites (with the Space-Track citation), SWF's RPO and ASAT histories.
 - `/geo`: the GEO belt, as before. `/sources`: sources and freshness, and links to Orbit's data files (feed,
@@ -580,12 +579,6 @@ A table in `app.js` (`PAGE_OF`) names the page that holds each card and each row
 not on the current page goes to its page; an old `/#section` link on the home page (feeds, COP, bookmarks made before
 the split) is sent on to the page that now holds it. The feed's `visual.url` links name the page (`/catalog#breakups`).
 A test checks that every card is on exactly one page and every feed and lead link lands on its card.
-
-**Not built yet (the rest of ideas#71):** the whole-catalog satellite map on `/` (CelesTrak `GROUP=active` once a
-day into `data/sats.json`, with display options and filters, in the design Tom approved on 20 Nov 2026).
-It waits on a fresh read of CelesTrak's usage
-policy and a `sources.json` row for the active set: on 20 Nov 2026 celestrak.org refused connections from the
-build machine, so the terms could not be re-read.
 
 ## The satellite map's data (`orbit-2.23`, 20 Nov 2026; ideas#71, Tom's yes to the map design)
 Lane `sats` (`orbit/satmap.py`): CelesTrak's GP group `active` (working satellites; the 18th Space Defense
@@ -623,3 +616,17 @@ only what is already public or open-licensed goes there. Nothing from Space-Trac
 
 ## Not built
 ITU filings (BR IFIC, after ITU's legal office answers).
+
+## The satellite map (`orbit-2.24`, 20 Nov 2026; ideas#71)
+`site_src/satmap.js` draws every row of `/data/sats.json` on the home page's Cesium globe as one point, coloured by
+owner group (the four validated tokens). Places are SGP4 from the row's element set with drag left out, refreshed
+every 2 s in slices across frames. It is a drawing for orientation, not a tracking product. Larger, ringed points are
+objects Orbit holds a finding on: a listed orbit change, an SWF RPO row matched to the object, a GCAT breakup, a
+payload in CelesTrak's last-30-days group, or a TIP message not yet passed. A mark says Orbit has a record on the
+object, nothing more. Filters: owner, orbit class, constellation, hide Starlink, launched in 30 days (GCAT's date or
+the last-30-days group), with a finding only. Display: globe or flat map, the selected object's orbit line and ground
+track, labels on marked objects when zoomed in. Filters and display options are kept in the URL. A table lists the
+first 200 shown objects, those with a finding first. A missing file (Pages answers it with index.html) shows a note,
+and without WebGL the filters and the list still work.
+**Not built from the approved design:** time controls (play, scrub), colour by orbit class (needs a validator run),
+all filtered orbit lines, owner search, launch-date range, and rocket bodies and debris (not in the active group).

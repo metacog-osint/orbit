@@ -13,7 +13,7 @@ import { propagate, gstime } from "./vendor/satellite.js/propagation.js";
 import { eciToEcf, eciToGeodetic } from "./vendor/satellite.js/transforms.js";
 
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-function loadCesium() {
+export function loadCesium() {
   if (window.Cesium) return Promise.resolve(window.Cesium);
   const BASE = new URL("vendor/cesium/", location.href).href;
   window.CESIUM_BASE_URL = BASE;
@@ -30,7 +30,7 @@ function loadCesium() {
   });
 }
 
-async function token() {
+export async function token() {
   try {
     const r = await fetch("data/cesium.json", { cache: "no-cache" });
     return r.ok ? ((await r.json()).token || null) : null;
@@ -39,7 +39,7 @@ async function token() {
   }
 }
 
-async function baseLayer(C, tok) {
+export async function baseLayer(C, tok) {
   if (tok) {
     try {
       C.Ion.defaultAccessToken = tok;
