@@ -76,6 +76,7 @@ ST_SHARED = spacetrack.shared_gp_busy       # geo.yml's GP query on the same acc
 ST_NOW = lambda: datetime.now(timezone.utc)  # noqa: E731
 INDEX = Path("state") / "catalog_index.json.gz"
 SATS = Path("state") / "sats.json"  # the satellite map's file (orbit/satmap.py), published at /data/sats.json
+SATS_STOP = Path("state") / "sats_stop.json"  # CelesTrak's last non-200, until a person clears it (orbit/satmap.py)
 TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".txt", ".md", ".glsl", ".xml"}
 ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
@@ -475,15 +476,19 @@ def _lane_decay(raw_dir: Path, prev: dict, getter, **_):
 
 def _lane_sats(raw_dir: Path, prev: dict, getter, **_):
     """The satellite map (orbit/satmap.py, orbit-2.23): CelesTrak's active group once a UTC day, joined to this run's
-    GCAT index. Any non-200 fails the lane (the last file stays) and is not asked again until the next run, as
-    CelesTrak's policy says. Under 90% of the last reading's objects fails the lane too."""
+    GCAT index. Any non-200 fails the lane, keeps the last file and stops all requests until a person clears the stop,
+    as CelesTrak's policy says; a timeout is not a stop. Under 90% of the last reading's objects fails the lane too."""
     data_dir = raw_dir.parent
     path = data_dir / SATS
     last = (prev.get("sats") or {}).get("read_at") or ""
     now = fetch.now_utc()
+    satmap.check_stop(data_dir / SATS_STOP, now)
     if path.exists() and last[:10] == now[:10]:
         return None, [], "CelesTrak's active group was read today already (once a UTC day)"
-    body, rec = fetch.fetch("celestrak-gp-active", satmap.URL, None, "csv", timeout=240, getter=getter or satmap.get)
+    try:
+        body, rec = fetch.fetch("celestrak-gp-active", satmap.URL, None, "csv", timeout=240, getter=getter or satmap.get)
+    except catsources.Refused as exc:
+        raise satmap.Stopped(satmap.stop_message(satmap.record_stop(data_dir / SATS_STOP, exc.code, satmap.URL, now))) from exc
     doc = satmap.parse(body, _read_index(data_dir), rec["fetched_at"])
     before = (prev.get("sats") or {}).get("count") or 0
     if path.exists() and doc["count"] < MIN_KEEP * before:
