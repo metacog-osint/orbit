@@ -41,7 +41,7 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
 - `update.yml`: tests, state from the Actions cache, collect, build, check, GEO page data, save state, deploy to
   Pages. **Runs on every push to `main`, so a push deploys.** Cron `41 */6`; the hub's `tic-dispatch` starts it at :55
   past 00/06/12/18 UTC (the cron is the fallback). Timeout 22 min (Space-Track wait).
-- `ledger.yml`: hourly Launch Library 2 ledger on release `ledger` (`launch-ledger.json`, `orbit-ledger/1`);
+- `ledger.yml`: hourly Launch Library 2 ledger on release `ledger` (`launch-ledger.json`, `orbit-ledger/1`; dated daily copy in private `tic-archive`);
   dispatched at :45 (:55 at 01/05/09/13/17/21 UTC), own cron `45 * * * *`.
 - `geo.yml`: GEO region at 03:15 and 15:15 UTC by tic-dispatch, own cron :17 (skips if today's file is under an hour
   old); releases `geo-YYYY`. `geo-import.yml`: one-off copy of Noisefloor's history.
