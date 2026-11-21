@@ -27,7 +27,7 @@ import gzip
 import json
 import re
 import time
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from . import catsources
@@ -333,3 +333,64 @@ def evidence(p: dict, c: dict) -> list[str]:
                  ", ".join(f"'{x}'" for x in c["names"][:4]) +
                  (f"; equal after normalising: '{c['name_agrees']}'" if c["name_agrees"] else "; none equal"))
     return lines
+
+
+# --- the weekly read for the catalog build (join step, 20 Nov 2026) -----------------------------------------------
+
+STORE = Path("state") / "wmo-oscar-satellites.json.gz"  # the last read, slimmed (Actions cache, own cache entry)
+DAYS = 7           # one full read (36 pages, 3 s apart, about two minutes) a week
+MIN_SATS = 900     # 1,062 satellites on 18 Nov 2026; a shorter list is refused and the last read kept
+KEEP = ("id", "slug", "acronym", "fullname", "space_agency", "status", "orbit", "launch_date")
+
+
+def due(now: datetime, st: dict) -> str | None:
+    """Why OSCAR must not be asked now (None when it may be): on hold, or read within the week."""
+    why = catsources.held(st, now)
+    if why:
+        return why
+    last = catsources._t(st.get("read_at"))
+    if last and now - last < timedelta(days=DAYS) - timedelta(hours=6):
+        return f"read {st['read_at']}; once a week"
+    return None
+
+
+def pull(data_dir: Path, now: datetime, state: dict, get=catsources.get, pause: float = PAUSE,
+         sleep=time.sleep) -> dict:
+    """The weekly read: every page once into data/raw/wmo-oscar/<stamp>/, the satellites (fields in KEEP, no
+    instruments) into the store. Any answer but 200 puts the source on hold and is returned as `refused`. With the
+    store gone (the Actions cache can be evicted) it reads again rather than build without OSCAR."""
+    data_dir = Path(data_dir)
+    st = state.setdefault(SOURCE, {})
+    why = due(now, st) if (data_dir / STORE).exists() else catsources.held(st, now)
+    if why:
+        return {"read": False, "why": why}
+    stamp = now.strftime("%Y%m%dT%H%MZ")
+    try:
+        out = read(data_dir, stamp, get=get, pause=pause, sleep=sleep)
+    except catsources.Refused as exc:
+        catsources.hold(st, exc, now)
+        return {"read": False, "why": str(exc), "refused": exc.code}
+    try:
+        r = load(out)
+    except ValueError as exc:
+        return {"read": False, "why": f"{exc}; kept the last read"}
+    if r["total"] < MIN_SATS:
+        return {"read": False, "why": f"list has {r['total']} satellites (1,062 on 18 Nov 2026); kept the last read"}
+    sats = [{k: s.get(k) for k in KEEP} for s in r["satellites"]]
+    catsources.write_json(data_dir / STORE, {"satellites": sats})
+    st.update({"read_at": catsources._iso(now), "satellites": r["total"]})
+    st.pop("hold", None)
+    return {"read": True, "rows": r["total"], "requests": len(list(out.glob("page-*.json")))}
+
+
+def store_load(data_dir: Path, state: dict) -> dict | None:
+    """The last read as {satellites, read, read_at}, or None (no request)."""
+    st = state.get(SOURCE) or {}
+    doc = catsources.read_json(Path(data_dir) / STORE, None)
+    if doc is None or not st.get("read_at"):
+        return None
+    return {"satellites": doc["satellites"], "read": st["read_at"][:10], "read_at": st["read_at"]}
+
+
+# OSCAR's status texts as the active / inactive split catalog.disagreements compares; the rest are kept, not compared.
+STATUS_CLASS = {"Operational": "active", "Inactive": "inactive", "Presumably inactive": "inactive"}

@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Catalog tests
-        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards
+        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards tests.test_oscar
       - name: CelesTrak and Wikidata replies from the Actions cache (none on the first run)
         uses: actions/cache/restore@v6
         with:
@@ -48,13 +48,25 @@ jobs:
             data/state/wikidata-p377.json.gz
           key: catalog-sources-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: catalog-sources-
-      - name: Catalog (Space-Track SATCAT and DECAY, CelesTrak SATCAT, Wikidata, GCAT)
+      - name: WMO OSCAR/Space's last satellite list from the Actions cache (none on the first run)
+        uses: actions/cache/restore@v6
+        with:
+          path: data/state/wmo-oscar-satellites.json.gz
+          key: catalog-oscar-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: catalog-oscar-
+      - name: Catalog (Space-Track SATCAT and DECAY, CelesTrak SATCAT, Wikidata, WMO OSCAR/Space, GCAT)
         env:
           GH_TOKEN: ${{ github.token }}
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
           CLEAR_HOLD: ${{ inputs.clear_hold }}
         run: python tools/orbit.py spacetrack-catalog --release ${CLEAR_HOLD:+--clear-hold "$CLEAR_HOLD"}
+      - name: Keep WMO OSCAR/Space's list for the next run
+        if: success() || failure()
+        uses: actions/cache/save@v6
+        with:
+          path: data/state/wmo-oscar-satellites.json.gz
+          key: catalog-oscar-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Keep CelesTrak's and Wikidata's replies for the next run
         if: success() || failure()
         uses: actions/cache/save@v6

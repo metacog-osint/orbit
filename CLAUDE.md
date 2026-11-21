@@ -98,7 +98,7 @@ is launch pads only; ground tracks go only on the 3D globe; manoeuvres, reentrie
   permission from ITU's legal office. **CSIS**: all rights reserved, not used.
 - **Catalog**: every value is {value, source, ref, read, basis} (the file leaves out defaults, `catshards`); NORAD keys from satcat/satcat100k only (auxcat's
   Satcat cell is not a claim); operator codes and TBD/UNKN never compared; alias `swap` entries refused until built.
-  WMO OSCAR joins only through hand-reviewed link entries (no NORAD or COSPAR id in its API).
+  WMO OSCAR joins only through hand-reviewed link entries (no NORAD or COSPAR id in its API); read weekly.
 
 ## Page rules
 - Country marks: flag + code + colour bar (flag-icons 7.6.0, MIT). SU gets its own mark, never Russia's flag;

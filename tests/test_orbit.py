@@ -719,7 +719,7 @@ class Registers(unittest.TestCase):
         # feed no page lane yet, so the page, which lists sources by lane, does not show them
         self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
                                       "swf-counterspace", "swf-rpo", "space-track", "tic-launch", "celestrak-gp", "celestrak-gp-active",
-                                      "celestrak-satcat", "wikidata"})
+                                      "celestrak-satcat", "wikidata", "wmo-oscar-space"})
         self.assertEqual(by_id["wikidata"]["lanes"], [])
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
