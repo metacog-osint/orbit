@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Orbit · The Intelligence Company</title>
-<meta name="description" content="Orbital launches, scheduled launches with news headlines, launch hazard warnings, reentries, satellite catalog changes, orbit changes in watched satellites and the history of anti-satellite tests, from GCAT, Launch Library 2, the Spaceflight News API, NGA, Secure World Foundation and Space-Track.org.">
-<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
+<meta name="description" content="A map of the working satellites in Earth orbit with owner, orbit and constellation filters, plus reentries, catalog changes, orbit changes in watched satellites and the GEO belt, from CelesTrak, GCAT, Secure World Foundation and Space-Track.org.">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
@@ -24,7 +23,8 @@
     </nav>
   </div>
   <nav class="page-nav wrap" aria-label="Orbit's pages">
-    <a href="./" aria-current="page">Map and launches</a>
+    <a href="./" aria-current="page">Map</a>
+    <a href="launches.html">Launches</a>
     <a href="reentries.html">Reentries</a>
     <a href="catalog.html">Catalog</a>
     <a href="changes.html">Orbit changes</a>
@@ -36,9 +36,8 @@
 <main class="wrap" data-page="index">
   <section class="hero">
     <h1>What changed in Earth orbit.</h1>
-    <p class="lede">Orbital launches, launches scheduled in the next two weeks, the launch hazard and space-debris
-      areas navigational warnings announce, reentries, and changes to the public satellite catalog between Orbit's
-      own readings. Everything here is measured or reported by the sources named
+    <p class="lede">The working satellites in Earth orbit, reentries, and changes to the public satellite catalog
+      between Orbit's own readings. Everything here is measured or reported by the sources named
       on it; Orbit adds no judgment. <span id="asof"></span></p>
     <form class="obj-search" role="search" autocomplete="off">
       <label for="obj-q" class="small muted">Find an object: name from any source, NORAD number, COSPAR ID</label>
@@ -78,83 +77,52 @@
     </p>
   </section>
 
-  <section class="card" id="map-card" aria-labelledby="map-h">
+  <section class="card" id="sat-map" aria-labelledby="sm-h">
     <div class="card-head">
-      <h2 id="map-h">Launch sites, pads and hazard areas</h2>
-      <p class="muted small">Launches of the last 7 days at their GCAT launch site, scheduled launches at their pad, and
-        the launch hazard and space-debris areas in navigational warnings now in force. Pale dots are every launch
-        since 1 Jan 2024 at its pad, from Orbit's launch ledger (Launch Library 2), sized by count. A dotted line joins
-        a scheduled launch's pad to a hazard area where the suite's Launch program finds the two coincide in time and
-        place: a coincidence, not an attribution. Select a launch dot for its payloads and their orbits, a pale dot
-        for that pad's launches. Ctrl and scroll (or two fingers) to zoom.</p>
+      <h2 id="sm-h">Satellites in orbit now</h2>
+      <p class="muted small">Every object in CelesTrak's "active" group, placed with SGP4 from its newest public element
+        set, drag left out, and refreshed every two seconds. A drawing for orientation, not a tracking product. Larger,
+        ringed points are objects Orbit has a finding on. Select a point or a row for its details. <span id="sm-read"></span></p>
     </div>
-    <p class="map-ctl small">
-      <span class="view-pick" role="group" aria-label="Map view"><button type="button" id="view-flat" aria-pressed="true">Flat map</button><button
-        type="button" id="view-globe" aria-pressed="false">Globe (3D)</button></span>
-      <label><input type="checkbox" id="hist-on" checked> Launch history (ledger)</label>
-      <label>Year <select id="hist-year"><option value="">All</option></select></label>
-      <label>Provider <select id="hist-who"><option value="">Everyone</option><option value="us">United States</option>
-        <option value="cn">China</option><option value="ru">Russia</option><option value="other">Everyone else</option></select></label>
-      <span class="muted" id="hist-n" aria-live="polite"></span>
-    </p>
-    <div class="map-stage"><div id="map" class="map"></div><div id="globe" class="map globe" hidden></div></div>
-    <p class="small muted" id="globe-note" aria-live="polite" hidden></p>
-    <p class="legend small muted" aria-label="Map key">
-      <span><span class="mk dot"></span>Launch, last 7 days (colour: launching country)</span>
-      <span><span class="mk ring"></span>Scheduled launch (colour: provider's country)</span>
-      <span><span class="mk area"></span>Rocket launching area</span>
-      <span><span class="mk area dash"></span>Space-debris area</span>
-      <span><span class="mk hist"></span>Launches since 2024 at a pad (ledger)</span>
-      <span><span class="mk pair"></span>Time and place, as Launch checks it</span>
-    </p>
-    <p class="small" id="map-info" aria-live="polite"></p>
-  </section>
-
-  <section class="card" id="launches" aria-labelledby="la-h">
-    <div class="card-head">
-      <h2 id="la-h">Orbital launches, last 7 days</h2>
-      <p class="muted small">From GCAT's launch list. Payloads are those GCAT has cataloged so far; new ones are
-        often added a day or more after launch.</p>
+    <div class="sm-ctl">
+      <fieldset class="sm-group"><legend>View</legend>
+        <span class="view-pick" role="group" aria-label="Map view"><button type="button" id="sm-view-3d" aria-pressed="true">Globe</button><button
+          type="button" id="sm-view-2d" aria-pressed="false">Flat map</button></span>
+      </fieldset>
+      <fieldset class="sm-group"><legend>Owner</legend>
+        <label><input type="checkbox" data-sm="own" value="us" checked><span class="sw g-us"></span>United States</label>
+        <label><input type="checkbox" data-sm="own" value="cn" checked><span class="sw g-cn"></span>China</label>
+        <label><input type="checkbox" data-sm="own" value="ru" checked><span class="sw g-ru"></span>Russia, USSR</label>
+        <label><input type="checkbox" data-sm="own" value="other" checked><span class="sw g-other"></span>Everyone else</label>
+      </fieldset>
+      <fieldset class="sm-group"><legend>Orbit</legend>
+        <label><input type="checkbox" data-sm="cls" value="leo" checked>LEO</label>
+        <label><input type="checkbox" data-sm="cls" value="meo" checked>MEO</label>
+        <label><input type="checkbox" data-sm="cls" value="geo" checked>GEO</label>
+        <label><input type="checkbox" data-sm="cls" value="heo" checked>HEO</label>
+      </fieldset>
+      <fieldset class="sm-group"><legend>Filter</legend>
+        <label>Constellation <select id="sm-con"><option value="">All</option><option value="starlink">Starlink</option>
+          <option value="oneweb">OneWeb</option><option value="kuiper">Kuiper</option><option value="iridium">Iridium</option>
+          <option value="gps">GPS</option><option value="galileo">Galileo</option><option value="beidou">BeiDou</option>
+          <option value="none">None of these</option></select></label>
+        <label><input type="checkbox" id="sm-nostar">Hide Starlink</label>
+        <label><input type="checkbox" id="sm-recent">Launched in 30 days</label>
+        <label><input type="checkbox" id="sm-marked">With a finding only</label>
+        <button type="button" id="sm-reset" class="sm-reset">Reset</button>
+      </fieldset>
+      <fieldset class="sm-group"><legend>Draw</legend>
+        <label><input type="checkbox" id="sm-lines" checked>Orbit line</label>
+        <label><input type="checkbox" id="sm-track" checked>Ground track</label>
+        <label><input type="checkbox" id="sm-labels" checked>Labels when zoomed in</label>
+      </fieldset>
     </div>
-    <div class="tbl-wrap" id="launch-table"></div>
-  </section>
-
-  <section class="card" id="upcoming" aria-labelledby="up-h">
-    <div class="card-head">
-      <h2 id="up-h">Scheduled launches, next 14 days</h2>
-      <p class="muted small">From Launch Library 2. Scheduled times are the provider's or the press's and often
-        move; some military launches are listed late or not at all. Countdowns run on your device's clock to the
-        listed NET, refresh each minute, and are never finer than the NET's own precision; the status is Launch
-        Library 2's when Orbit last read it. Headlines under a launch come from the Spaceflight News API and link to
-        each outlet's own page; Orbit shows the headline only and has not checked the reporting.</p>
-    </div>
-    <div class="tbl-wrap" id="upcoming-table"></div>
-  </section>
-
-  <section class="card" id="hazards" aria-labelledby="hz-h">
-    <div class="card-head">
-      <h2 id="hz-h">Launch hazard and space-debris warnings in force</h2>
-      <p class="muted small">Navigational warnings that name rocket launching, space debris or reentry, from NGA's
-        daily in-force memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and XII). NAVAREA XI (the Japan Coast
-        Guard's area, including the waters off China) appears only where NGA rebroadcasts it. Windows and areas are the issuer's; the same area broadcast by
-        more than one coordinator is one row. A scheduled launch is shown against a warning only when its NET falls
-        in a window of four hours or less, or up to an hour before one opens. Under each, the suite's Launch program
-        says whether the area also lies along a bearing and at a distance seen in that pad's closure history (time
-        and place) or not (time only), with the distance, azimuth and the inclination the azimuth implies. Either way
-        it is a coincidence, not an attribution. Not for navigation:
-        mariners use the official broadcasts.</p>
-    </div>
-    <div class="tbl-wrap" id="hazard-table"></div>
-  </section>
-
-  <section class="card" id="ledger" aria-labelledby="lg-h">
-    <div class="card-head">
-      <h2 id="lg-h">Launch ledger</h2>
-      <p class="muted small">Orbit's own record of every launch since 1 Jan 2024 from Launch Library 2, built 14
-        launches an hour and checked each hour; the map's pale dots are drawn from it. Launches after GCAT's newest
-        launch date are listed here, since the launches table above waits for GCAT.</p>
-    </div>
-    <div id="ledger-body"></div>
+    <p class="small" id="sm-count" aria-live="polite"></p>
+    <p class="small muted" id="sm-note" aria-live="polite" hidden></p>
+    <div class="map-stage sm-stage"><div id="sm-globe" class="map globe sm-globe"></div><aside id="sm-card" class="sm-card small" aria-live="polite" hidden></aside></div>
+    <h3 class="sm-list-h">The objects shown</h3>
+    <p class="small muted" id="sm-list-note"></p>
+    <div class="tbl-wrap"><table id="sm-list" data-tic-fold data-tic-fold-find><thead><tr><th>Name</th><th>NORAD</th><th>Owner</th><th>Orbit</th><th>Launched</th><th>Finding</th></tr></thead><tbody id="sm-rows"></tbody></table></div>
   </section>
 </main>
 
@@ -171,11 +139,11 @@
     CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's
     (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
     CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
-    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause,
-    <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth, detail from OpenFreeMap,
-    &copy; OpenMapTiles, &copy; OpenStreetMap contributors. Publicly available information only.</p>
+    (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map element sets from <a href="https://celestrak.org">CelesTrak</a>, GP group "active", from the 18th Space Defense
+    Squadron's GP data; globe by <a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a>, positions by satellite.js. Publicly available information only.</p>
 </footer>
 <script src="search.js"></script>
 <script src="app.js"></script>
+<script type="module" src="satmap.js"></script>
 </body>
 </html>

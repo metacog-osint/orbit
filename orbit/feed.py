@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.23"
+METHOD = "orbit-2.24"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -124,7 +124,7 @@ def _launch_item(x: dict, generated: str, accessed: str) -> dict:
         "coverage_fraction": 1.0,
         "precision_class": "approximate",
         "measures": {"payloads_cataloged": x["payloads_cataloged"]},
-        "visual": {"type": "table", "url": f"{SITE}/#launch-{x['launch_tag'].replace(' ', '-')}"},
+        "visual": {"type": "table", "url": f"{SITE}/launches#launch-{x['launch_tag'].replace(' ', '-')}"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     geom = {"type": "Point", "coordinates": [site["lon"], site["lat"]]} if site else None
@@ -154,7 +154,7 @@ def _upcoming_item(x: dict, generated: str, accessed: str) -> dict:
         "requirement_ids": ["OR-PIR-3"],
         "coverage_fraction": 1.0,
         "precision_class": "point",
-        "visual": {"type": "table", "url": f"{SITE}/#upcoming"},
+        "visual": {"type": "table", "url": f"{SITE}/launches#upcoming"},
         "sources": [{**SRC_LL2, "url": x.get("ll2_url") or SRC_LL2["url"], "accessed_at": accessed}],
     }
     geom = {"type": "Point", "coordinates": [x["lon"], x["lat"]]} if x.get("lat") is not None else None

@@ -769,7 +769,7 @@ class Registers(unittest.TestCase):
         import re
         site = ROOT / "site_src"
         pages = {f: (site / f).read_text(encoding="utf-8") for f in
-                 ["index.html", "reentries.html", "catalog.html", "changes.html", "sources.html"]}
+                 ["index.html", "launches.html", "reentries.html", "catalog.html", "changes.html", "sources.html"]}
         for f, html in pages.items():
             self.assertNotIn("data-tic-tabs", html, f)
             self.assertIn('class="page-nav', html, f)
@@ -779,7 +779,7 @@ class Registers(unittest.TestCase):
             self.assertIn('id="method"', html, f)
             self.assertNotRegex(html, r"<script>|style=", f)
         js = (site / "app.js").read_text(encoding="utf-8")
-        table = dict(re.findall(r'"?([a-z-]+)"?: "(index|reentries|catalog|changes|sources)"',
+        table = dict(re.findall(r'"?([a-z-]+)"?: "(index|launches|reentries|catalog|changes|sources)"',
                                 js[js.index("var PAGE_OF"):js.index("function pageOf")]))
         for card, pg in table.items():
             if not card.endswith("-"):
