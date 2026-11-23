@@ -634,3 +634,18 @@ first 200 shown objects, those with a finding first. A missing file (Pages answe
 and without WebGL the filters and the list still work.
 **Not built from the approved design:** time controls (play, scrub), colour by orbit class (needs a validator run),
 all filtered orbit lines, owner search, launch-date range, and rocket bodies and debris (not in the active group).
+
+## Feed contract revision 2.1 (`orbit-2.25`, 23 Nov 2026)
+Every feed item states `subject_id`, `event_start` and `last_change`. Ids that carry a day (the reentry count, late
+catalog entries, owner changes) keep it; their `subject_id` does not, so one subject reads as one subject from day to
+day. An orbit change keeps its date in `subject_id`, because that date is what tells two changes of one object apart.
+
+Event times: a launch at its time (day precision when GCAT marks the time uncertain); a scheduled launch from NET to
+the end of its window, at Launch Library's precision; reentries from the first to the last date in the count; a
+breakup on GCAT's date; catalog changes over the two readings between which GCAT made them; an orbit change over the
+element sets that show it, which bound the change and do not time a burn.
+
+`last_change` comes from the source's own dates, because Orbit keeps no log of its feed items: `new` for a launch, a
+breakup, an orbit change or a catalog change, and `changed` for a Launch Library record (its last edit, which may be
+its creation) and for the rolling reentry count (its newest date). Orbit has no anomaly tier, so no item carries
+`signal`.

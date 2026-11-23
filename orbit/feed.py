@@ -12,6 +12,7 @@ of its own readings yet, so nothing is called an anomaly (see doctrine/method.md
 """
 from __future__ import annotations
 
+import re
 import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -19,10 +20,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
-from tic_doctrine import CONTRACT, geo  # noqa: E402
+from tic_doctrine import CONTRACT, __version__ as KIT_VERSION, geo  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.24"
+METHOD = "orbit-2.25"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -90,6 +91,34 @@ def _base(generated: str, valid_hours: int = 48) -> dict:
     }
 
 
+NET_PRECISION = {"Hour": "hour", "Day": "day", "Month": "month", "Week": "day", "Quarter": "month", "Year": "month",
+                 "Fiscal Year": "month"}          # LL2's words; finer ones (Minute, Second) need no precision
+
+
+def _floor(iso: str, precision: str | None) -> str:
+    """A time at the start of its period, as the contract's event_time_precision reads it."""
+    if precision == "month":
+        return f"{iso[:7]}-01T00:00:00Z"
+    if precision == "day":
+        return f"{iso[:10]}T00:00:00Z"
+    if precision == "hour":
+        return f"{iso[:13]}:00:00Z"
+    return iso
+
+
+def _day(value) -> str | None:
+    text = str(value or "")[:10]
+    return f"{text}T00:00:00Z" if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text) else None
+
+
+def _change(kind: str, at: str | None, generated: str) -> dict:
+    """last_change from the source's own date, never after this build. Orbit keeps no log of its feed items, so an
+    item says what its source dates: a launch, a breakup or an orbit change is new at its own time, a catalog change
+    at the reading that found it, and a Launch Library record or the rolling reentry count changed when last edited
+    or last added to."""
+    return {"last_change": kind, "last_change_at": min(at, generated)} if at else {"last_change": "none"}
+
+
 def _countries(*codes) -> list[str]:
     return sorted({c for c in codes if c and geo.name(c)})
 
@@ -112,6 +141,10 @@ def _launch_item(x: dict, generated: str, accessed: str) -> dict:
     props = {
         **_base(generated),
         "id": f"orbit:launch:{x['launch_tag'].lower().replace(' ', '-')}",
+        "subject_id": f"orbit:launch:{x['launch_tag'].lower().replace(' ', '-')}",
+        "event_start": _floor(when, "day") if not x["time"] or x["time_uncertain"] else when,
+        **({"event_time_precision": "day"} if not x["time"] or x["time_uncertain"] else {}),
+        **_change("new", when, generated),
         "title": f"{x['kind'].capitalize()} launch: {x['vehicle']}, {label}, from {site.get('name') or x['site_code']}"
                  + ("" if x["outcome"] == "success" else f" ({x['outcome']})"),
         "summary": (f"{x['vehicle']} launched {label} from {site.get('full_name') or x['site_code']}"
@@ -138,9 +171,16 @@ def _upcoming_item(x: dict, generated: str, accessed: str) -> dict:
     end = x.get("window_end") or net
     valid = max(_dt(end) + timedelta(hours=6), _dt(generated) + timedelta(hours=6))
     mission_bits = [b for b in (x["mission_type"], x["orbit_name"]) if b]
+    precision = NET_PRECISION.get(x.get("net_precision") or "")
+    start, stop = _floor(net, precision), _floor(end, precision)
     props = {
         **_base(generated),
         "id": f"orbit:upcoming:{x['id']}",
+        "subject_id": f"orbit:upcoming:{x['id']}",
+        "event_start": start,
+        **({"event_end": stop} if stop > start else {}),
+        **({"event_time_precision": precision} if precision else {}),
+        **_change("changed", x.get("last_updated"), generated),
         "title": f"Scheduled launch: {x['name']} ({x['status']}), {net[:16].replace('T', ' ')} UTC",
         "summary": (f"Launch Library 2 lists {x['name']} for {net[:16].replace('T', ' ')} UTC "
                     f"(status {x['status_name'] or x['status']}; NET precision {x['net_precision'] or 'not given'}) "
@@ -169,9 +209,16 @@ def _reentry_item(rows: list[dict], generated: str, accessed: str, since: str) -
     payloads = [r for r in rows if r["type"] == "payload"]
     named = ", ".join(f"{r['name']} ({r['state']}, {r['reentry_date']})" for r in payloads[:12])
     more = f" and {len(payloads) - 12} more" if len(payloads) > 12 else ""
+    days = sorted(d for d in (_day(r["reentry_date"]) for r in rows) if d)
+    first = days[0] if days else _day(since)
     props = {
         **_base(generated, 24),
         "id": f"orbit:reentries:{generated[:10]}",
+        "subject_id": "orbit:reentries:last-7-days",     # the id carries the day; the rolling count is one subject
+        "event_start": first,
+        **({"event_end": days[-1]} if days and days[-1] > first else {}),
+        "event_time_precision": "day",
+        **_change("changed", days[-1] if days else None, generated),
         "title": f"Reentries dated by GCAT since {since}: {len(rows)} objects, {len(payloads)} payloads",
         "summary": (f"GCAT dates {len(rows)} reentries since {since} ("
                     + ", ".join(f"{n} {t}" for t, n in by_type.most_common()) + "; by owner state "
@@ -203,6 +250,10 @@ def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
     props = {
         **_base(generated, 48),
         "id": f"orbit:breakup:{b['jcat']}",
+        "subject_id": f"orbit:breakup:{b['jcat']}",
+        **({"event_start": _day(b["breakup_date"]), "event_time_precision": "day"} if _day(b["breakup_date"])
+           else {"event_start": accessed}),
+        **_change("new", _day(b["breakup_date"]) or accessed, generated),
         "title": f"{b['name']} ({b['type']}, {b['state']}) {word}, {b['breakup_date']} (GCAT)",
         "summary": (f"GCAT gives {b['name']} ({b['jcat']}{', NORAD ' + str(b['norad']) if b.get('norad') else ''}"
                     f"{parent}) status {b.get('status')}: {word}, on {when}.{launched} Orbit class "
@@ -228,6 +279,10 @@ def _late_item(g: dict, generated: str, accessed: str, prev_at: str) -> dict:
     props = {
         **_base(generated),
         "id": f"orbit:late-object:{g['launch_tag'].lower().replace(' ', '-')}:{accessed[:10]}",
+        "subject_id": f"orbit:late-object:{g['launch_tag'].lower().replace(' ', '-')}",
+        "event_start": prev_at,                          # the two readings between which GCAT added the entries
+        "event_end": accessed,
+        **_change("new", accessed, generated),
         "title": f"New catalog entries from launch {g['launch_tag']} ({g['launch_date']}): {g['count']} ({types})",
         "summary": (f"Between Orbit's readings of {prev_at[:16].replace('T', ' ')} UTC and "
                     f"{accessed[:16].replace('T', ' ')} UTC, GCAT added {g['count']} objects ({types}) from launch "
@@ -256,6 +311,10 @@ def _owner_item(changes: list[dict], generated: str, accessed: str, prev_at: str
     props = {
         **_base(generated),
         "id": f"orbit:owner-change:{accessed[:10]}",
+        "subject_id": "orbit:owner-change:gcat",
+        "event_start": prev_at,
+        "event_end": accessed,
+        **_change("new", accessed, generated),
         "title": f"Owner or owner-state changes in GCAT: {len(changes)} objects",
         "summary": (f"Between Orbit's readings of {prev_at[:16].replace('T', ' ')} UTC and "
                     f"{accessed[:16].replace('T', ' ')} UTC, GCAT changed the owner or owner state of "
@@ -296,6 +355,10 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
     props = {
         **_base(generated),
         "id": f"orbit:maneuver:{e['norad']}:{e['from'][:10]}",
+        "subject_id": f"orbit:maneuver:{e['norad']}:{e['from'][:10]}",   # one change of one object; its date is its identity
+        "event_start": e["from"],
+        "event_end": e["to"],
+        **_change("new", e["to"], generated),
         "title": f"Orbit change: {name} ({e['regime'] or 'orbit unknown'}, {owner}), {e['dv_ms']:g} m/s {e['dominant']}",
         "summary": (f"{name} (catalog {e['norad']}, {e['object_id']}, owner {owner}): its published orbit changed by "
                     f"about {e['dv_ms']:g} m/s, mostly {e['dominant']}, semi-major axis {e['da_km']:+g} km"
@@ -324,7 +387,7 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
 SOURCE_LANES = {"gcat-mcdowell": "catalog", "ll2-thespacedevs": "upcoming", "space-track": "maneuver"}
 
 
-def source_health(snap: dict) -> dict:
+def source_health(snap: dict, features: list | None = None) -> dict:
     """The feed's per-source `health` block (the doctrine kit's form, as Headwind's and Blackout's): one entry per
     source id the items carry, from the snapshot's lane records. A source counts as read when last_ok equals
     checked_at and the state is up: its lane was fetched, or GCAT said its files had not changed (as
@@ -333,6 +396,11 @@ def source_health(snap: dict) -> dict:
     the kept copies as sightings (15 Nov 2026). States are the kit's health_state words (vocab/enums.json, feed
     contract revision 2.1): up, failing, never (off or never fetched), stale (fetched on an earlier run only)."""
     lanes = snap.get("lanes") or {}
+    newest: dict[str, str] = {}
+    for f in features or []:
+        p = f["properties"]
+        sid = p["sources"][0]["id"]
+        newest[sid] = max(newest.get(sid, ""), min(p["data_as_of"], p["published_at"]))
     out = {}
     for src, lane in SOURCE_LANES.items():
         rec = lanes.get(lane)
@@ -354,7 +422,9 @@ def source_health(snap: dict) -> dict:
         if rec.get("error") or rec.get("reason"):
             detail += f": {(rec.get('error') or rec.get('reason'))[:200]}"
         out[src] = {"state": state, "last_ok": checked if read else rec.get("fetched_at"), "checked_at": checked,
-                    "lane": lane, "detail": detail}
+                    "last_error": (rec.get("error") or "")[:200] or None if status == "failed" else None,
+                    "failures": int(rec.get("failures") or 0) if status == "failed" else 0,
+                    "data_as_of": newest.get(src), "lane": lane, "detail": detail}
     return out
 
 
@@ -401,6 +471,8 @@ def build_feed(snap: dict) -> dict:
     return {
         "type": "FeatureCollection",
         "contract": CONTRACT,
+        "contract_rev": "2.1",
+        "kit": KIT_VERSION,
         "program": "orbit",
         "generated_at": generated,
         "method_version": METHOD,
@@ -411,6 +483,6 @@ def build_feed(snap: dict) -> dict:
         "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat) "
                        "and Launch Library 2 (The Space Devs)" + credit,
         "language_key": LANGUAGE_KEY,
-        "health": source_health(snap),
+        "health": source_health(snap, features),
         "features": features,
     }
