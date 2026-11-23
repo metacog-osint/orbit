@@ -37,7 +37,7 @@ class Block(unittest.TestCase):
     def test_a_fetched_lane_is_read(self):
         h = feed.source_health(snap(catalog={"status": "ok", "fetched_at": NOW, "from_previous": False}))
         self.assertEqual(h["gcat-mcdowell"], {"state": "up", "last_ok": NOW, "checked_at": NOW, "lane": "catalog",
-                                              "detail": "ok"})
+                                              "last_error": None, "failures": 0, "data_as_of": None, "detail": "ok"})
         self.assertEqual(history.lanes_ok(h), {"gcat-mcdowell"})
 
     def test_gcat_unchanged_is_read(self):
