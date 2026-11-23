@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, satmap, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, navwarn, objpage,  # noqa: E402
+from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, satmap, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, names, navwarn, notable, objpage,  # noqa: E402
                    news, oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
@@ -253,6 +253,7 @@ def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
 
 
 NAMES_URL = f"https://github.com/{geo_region.REPO}/releases/download/{stcat.RELEASE}/{stcat.NAMES_ASSET}"
+_RUN: dict = {}  # what one collect run hands from a lane to its end-of-run steps; cleared when collect starts
 
 
 def _catalog_names(raw_dir: Path, getter) -> tuple[dict | None, dict | None, str | None]:
@@ -287,6 +288,7 @@ def _lane_rpo(raw_dir: Path, prev: dict, getter, **_):
     except Exception:  # noqa: BLE001 - the date is shown as unknown
         bodies["about"] = b""
     names_doc, nrec, why = _catalog_names(raw_dir, getter)
+    _RUN["names_doc"] = names_doc  # read once a run; the end of collect names the listed orbit changes from it
     if nrec:
         recs.append(nrec)
     entries = aliases.load(source_ids=aliases.source_ids(ROOT))
@@ -512,6 +514,7 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
     prev = json.loads(snap_path.read_text(encoding="utf-8")) if snap_path.exists() else {}
     now = fetch.now_utc()
     snap = {"generated_at": now, "method_version": feed.METHOD, "lanes": {}}
+    _RUN.clear()
     for lane, fn in LANES.items():
         fields = LANE_FIELDS[lane]
         prev_lane = (prev.get("lanes") or {}).get(lane) or {}
@@ -562,10 +565,32 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
         if prev.get("maneuvers") or (prev.get("lanes") or {}).get("maneuver"):
             held["note"] = "dropped from a snapshot written while PUBLISH was on"
         _st_write(data_dir, "held_lane.json", held)
+    _describe_changes(root, data_dir, snap)
     data_dir.mkdir(parents=True, exist_ok=True)
     snap["archive"] = _archive_run(data_dir, snap, getter)
     snap_path.write_text(json.dumps(snap, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     return snap
+
+
+def _roles(root: Path) -> dict[int, dict]:
+    """The GEO page's role list (site_src/geo_roles.json: each entry cites published reporting), by catalog number."""
+    path = root / "site_src" / "geo_roles.json"
+    return notable.roles_index(json.loads(path.read_text(encoding="utf-8"))) if path.exists() else {}
+
+
+def _describe_changes(root: Path, data_dir: Path, snap: dict) -> None:
+    """End of every collect (orbit-2.26): each listed orbit change gets the other names its object goes by (the
+    name index the rpo lane read on this run; none read, names from an earlier run stay), and a GEO change gets
+    what happened in words and the notable mark (orbit/notable.py). New and carried changes alike; no request.
+    Only objects with a listed change are looked up in the private store."""
+    events = (snap.get("maneuvers") or {}).get("events") or []
+    if not events:
+        return
+    store = _st_read(data_dir, "sets.json.gz", {})
+    wanted = {str(e.get("norad")) for e in events}
+    names_doc = _RUN.get("names_doc")
+    notable.enrich(events, {k: v for k, v in store.items() if k in wanted}, _roles(root),
+                   names.index(names_doc) if names_doc else None)
 
 
 def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
@@ -665,6 +690,8 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     # The globe's Cesium ion token (orbit-2.11): a public, read-only token restricted to Orbit's hosts, from the
     # repository variable CESIUM_ION_TOKEN; without it the globe uses Cesium's own Natural Earth imagery.
     files["data/cesium.json"] = dump({"token": os.environ.get("CESIUM_ION_TOKEN") or None})
+    # Notable orbit changes (orbit-2.26), for readers and tools that want only those: orbit/notable.py.
+    files["data/notable.json"] = dump(notable.public(snapshot, _roles(root), feed.SITE))
     # The satellite map's file (orbit-2.23), as the sats lane last wrote it; without one the map says so.
     if (root / "data" / SATS).exists():
         files["data/sats.json"] = (root / "data" / SATS).read_text(encoding="utf-8")

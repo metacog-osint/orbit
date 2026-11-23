@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from orbit import names
+
 HOURS = 24
 GCAT_STALE_H = 36      # GCAT usually publishes daily; past this the lead says how old its copy is
 BREAKUP_DAYS = 7       # GCAT dates breakups late, so a week, said as such
@@ -130,24 +132,66 @@ def reentries_done(snap: dict, now: datetime) -> dict | None:
     return {"kind": "reentry_done", "href": "#tipcheck-h", "source": SOURCES["tipcheck"], "parts": parts}
 
 
-def orbit_changes(snap: dict, archive_doc: dict | None, now: datetime) -> dict | None:
+def _who(e: dict) -> list:
+    """The object as the lane names it, linked, with up to two of the other names it goes by (orbit-2.26)."""
+    also = (e.get("names") or [])[:names.TITLE_NAMES]
+    return [_obj(e.get('gcat_name') or e.get('name'), e.get('norad'))] + ([", also " + " and ".join(also)] if also else [])
+
+
+def _new_changes(snap: dict, archive_doc: dict | None, now: datetime) -> list[dict]:
+    """Listed changes first listed since the start of yesterday (UTC), by the archive's days."""
     m = snap.get("maneuvers") or {}
     if not m.get("read_at"):
-        return None
+        return []
     first: dict[str, str] = {}
     for day in sorted(((archive_doc or {}).get("days") or {})):
         for k in (((archive_doc["days"][day].get("maneuver") or {}).get("listed")) or {}):
             first.setdefault(k, day)
     since = (now - timedelta(hours=HOURS)).date().isoformat()
-    new = [e for e in m.get("events") or []
-           if first.get(f"{e.get('norad')}:{(e.get('from') or '')[:10]}", now.date().isoformat()) >= since]
+    return [e for e in m.get("events") or []
+            if first.get(f"{e.get('norad')}:{(e.get('from') or '')[:10]}", now.date().isoformat()) >= since]
+
+
+def _gap(e: dict) -> list:
+    g = e.get("gap")
+    if not g:
+        return []
+    days = g["hours"] / 24
+    return [f", measured across a {round(days) if days >= 10 else round(days, 1):g}-day gap between element sets (",
+            {"t": g["from"]}, " to ", {"t": g["to"]}, ")"]
+
+
+def notable_changes(snap: dict, archive_doc: dict | None, now: datetime) -> list[dict]:
+    """One line for each notable change (orbit/notable.py: a listed-role GEO object that started drifting, stopped
+    or changed its drift rate), while it is new or its newest element set is under 24 hours old. First in the
+    lead (Tom, 23 Nov 2026). What moved and how, from which sets; never why."""
+    m = snap.get("maneuvers") or {}
+    new = {id(e) for e in _new_changes(snap, archive_doc, now)}
+    out = []
+    for e in m.get("events") or []:
+        t = _dt(e.get("to"))
+        if not e.get("notable") or not (id(e) in new or (t and t >= now - timedelta(hours=HOURS))):
+            continue
+        parts = ["Notable: "] + _who(e) + [" (", {"cc": e.get("cc") or e.get("country")},
+                                          f"; listed role on Orbit's GEO page: {e['notable']['role']}) "]
+        parts += list(e.get("what") or []) + [f"; {_dv(e.get('dv_ms'))} m/s"] + _gap(e) + ["."]
+        out.append({"kind": "notable", "href": "#maneuvers", "source": SOURCES["maneuver"], "parts": parts})
+    return out
+
+
+def orbit_changes(snap: dict, archive_doc: dict | None, now: datetime) -> dict | None:
+    new = [e for e in _new_changes(snap, archive_doc, now) if not e.get("notable")]  # notable ones have their own line
     if not new:
         return None
     new.sort(key=lambda e: -(e.get("dv_ms") or 0))
     parts = ["Orbit lists " + _plural(len(new), "new orbit change") + " among the satellites it watches"]
-    _names(parts, new, lambda e: [_obj(e.get('gcat_name') or e.get('name'), e.get('norad')), " (", {"cc": e.get("cc") or e.get("country")},
-                                   f", {e.get('regime')}), {_dv(e.get('dv_ms'))} m/s between ", {"t": e.get("from")},
-                                   " and ", {"t": e.get("to")}])
+
+    def render(e):
+        out = _who(e) + [" (", {"cc": e.get("cc") or e.get("country")}, f", {e.get('regime')})"]
+        if e.get("what"):  # a geostationary change: where it was and how it drifts now (orbit-2.26)
+            out += [" "] + list(e["what"])
+        return out + [f", {_dv(e.get('dv_ms'))} m/s between ", {"t": e.get("from")}, " and ", {"t": e.get("to")}]
+    _names(parts, new, render)
     return {"kind": "orbit_change", "href": "#maneuvers", "source": SOURCES["maneuver"], "parts": parts}
 
 
@@ -234,8 +278,9 @@ def gaps(snap: dict) -> dict | None:
 
 def build(snap: dict, archive_doc: dict | None = None) -> dict:
     now = _dt(snap.get("generated_at")) or datetime.now(timezone.utc)
-    lines = [x for x in (reentries_ahead(snap, now), reentries_done(snap, now), orbit_changes(snap, archive_doc, now),
-                         breakups(snap, now), catalog(snap, now), launches(snap, now), baseline(snap)) if x]
+    lines = notable_changes(snap, archive_doc, now)
+    lines += [x for x in (reentries_ahead(snap, now), reentries_done(snap, now), orbit_changes(snap, archive_doc, now),
+                          breakups(snap, now), catalog(snap, now), launches(snap, now), baseline(snap)) if x]
     lines = lines[:MAX_LINES]
     g = gaps(snap)
     if g:

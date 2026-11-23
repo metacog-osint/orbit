@@ -649,3 +649,52 @@ element sets that show it, which bound the change and do not time a burn.
 breakup, an orbit change or a catalog change, and `changed` for a Launch Library record (its last edit, which may be
 its creation) and for the rolling reentry count (its newest date). Orbit has no anomaly tier, so no item carries
 `signal`.
+
+## What a GEO change did, notable changes and other names (`orbit-2.26`, 23 Nov 2026; ideas#249, #250, #251)
+Tom, 23 Nov 2026, after LUCH (OLYMP) 2 (55841) left 62 E: Orbit had listed "8.5 m/s between 15 Oct and 22 Nov" as
+one routine row under GCAT's name, and he heard of the move elsewhere ("file all eight, then take on items 1-3").
+Modules `orbit/notable.py` and `orbit/names.py`; step `_describe_changes` at the end of every collect, on new and
+carried changes alike. No request: the element sets are the watch lane's, the names are the index the `rpo` lane
+already reads, the roles are `site_src/geo_roles.json`.
+1. **What happened** (a listed geostationary change only). From the set before and the set after: longitude and
+   drift on each side (`maneuver.geo_position`), and the kind in the GEO board's words and at its line
+   (`DRIFT_KEPT`, 0.1 deg a day; a test holds the two equal): station-keeping, started drifting, stopped drifting,
+   drift rate changed (slowed, sped up or reversed). "Left" is used only when the two sets are 0.5 deg or more
+   apart in longitude; under that the line says "began to drift from". The height above or below geostationary altitude is the one
+   the drift rate implies, from the mean motion. The sentence is stored as lead parts in the change's `what`
+   (times written in the viewer's zone on the page, UTC in the feed), and is on the row, in the lead and at the
+   head of the feed summary. Measures gain `lon_before_deg`, `lon_after_deg`, `drift_before_deg_day`,
+   `drift_after_deg_day`, `alt_after_km`.
+2. **How long it had held the earlier longitude** is counted back through the sets Orbit holds for the object
+   (every stored set, not the 120-day view) while each is under `DRIFT_KEPT` and within `HELD_LON` (0.5 deg) of
+   that longitude. Orbit's sets start 60 days before it first read an object, so when the count reaches the first
+   set the line says "in every element set Orbit holds since", never "since".
+3. **Notable.** A listed change is notable when the object has a listed role on the GEO page (each role entry
+   cites published reporting; a test holds that every entry has a source), the kind is not station-keeping, and
+   the drift rate changed by `NOTABLE_RATE` (0.25 deg a day, about 0.7 m/s along track) or more. The floor keeps
+   out a roaming inspector edging across the 0.1 line: on the live snapshot of 23 Nov 2026, without it, USA 270
+   read as "started drifting" at 0.12 deg a day on a 0.9 m/s change; with it the snapshot's notable changes are
+   55841 (62 E, 2.5 deg a day west) and USA 271 (4.4 to 8.9 deg a day west, 12.9 m/s).
+   A notable change is the first line of the daily lead while it is new (first listed since the start of
+   yesterday, UTC) or its newest set is under 24 hours old, and it is left out of the ordinary orbit-change line.
+   The archive's listed row carries `notable` with the kind. `/data/notable.json` (`orbit-notable/1`) holds the
+   notable changes of the 30-day window, each readable alone: names, role with its basis and sources, the
+   sentence, the sets, the gap. The feed item's title begins "Notable orbit change:"; **its tier stays
+   `routine`** and its id is unchanged. A higher tier, or a COP mark, is Tom's call.
+4. **What it never says:** why, where the object is going, or which satellite it is near. No likelihood words.
+   A pass-by table and a stop projection are ideas#248, with the wording put to Tom first.
+5. **Other names.** A lane keeps the name it shows (GCAT's, for orbit changes). `names` on a listed change is
+   every other name the TIC catalog's index gives the object: the catalog's display name first, then the
+   index's order; a name differing only by case, spacing or punctuation from one already shown is left out, as
+   are names a source marks uncertain (ending "?"), bare catalog numbers, and a joined form "A (B)" whose A is
+   already shown and whose B is a name of its own ("USA 270 (Hornet 3)" beside "USA 270"). Titles and lead lines show two
+   ("Luch-5Kh No. 3, also LUCH (OLYMP) 2 and LUCH-5X (OLYMP-K 2)"); the summary and the row show all. Nothing
+   is merged: which source gives which name is on the object's page. A run where the index was not read keeps
+   the names set on an earlier run.
+6. **Known case** (`tests/test_notable.py`, fixture `luch2_sets_2026.json`: the 91 sets of 55841 in Orbit's public
+   GEO release, 1 Jul to 22 Nov 2026): one change, 15 Oct 15:56Z to 22 Nov 15:37Z across an 887.7-hour gap;
+   62.00 E to 58.19 E, drift -0.008 to -2.467 deg a day, about 193 km above geostationary altitude; kind
+   "started drifting"; notable (role: inspection).
+7. **Limits.** The simple longitude holds for low inclinations; an inclined object swings either side of it
+   daily. A set fitted during a burn smears the rate. A change measured across a gap happened somewhere inside
+   it, and the row and the lead say so. Objects with under 10 set pairs are still not judged (ideas#252).
