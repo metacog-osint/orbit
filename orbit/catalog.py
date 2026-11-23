@@ -1,6 +1,6 @@
 """TIC's satellite catalog (schema `tic-catalog/1`): one entry per NORAD number, every value with its source.
 
-Design: [local path] (Tom's answers in its section 9). Build step 2: GCAT.
+Design: the private planning notes (Tom's answers in its section 9). Build step 2: GCAT.
 Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Build step 4 (17 Nov 2026): CelesTrak
 SATCAT and Wikidata (orbit/catsources.py). Build step 5 (17 Nov 2026): the hand-kept alias file (orbit/aliases.py)
 and a name index for readers (`names_index`). WMO OSCAR/Space comes through a reviewed link file; each source arrives

@@ -1,4 +1,4 @@
-/* Orbit's object page (orbit-2.20, 18 Nov 2026; design in [local path]).
+/* Orbit's object page (orbit-2.20, 18 Nov 2026; design in the private planning notes).
    object.html?n=<NORAD number> or ?j=<GCAT JCAT id>. Reads the TIC satellite catalog's shard for the object
    (data/catalog/, unpacked by the update run from release `catalog`) and its rules note, plus Orbit's own snapshot
    and daily archive. Every value names its source; sources that disagree are shown side by side and never merged.

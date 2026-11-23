@@ -1,6 +1,6 @@
 """TIC's hand-kept alias file, `orbit/data/catalog/aliases.yml` (catalog build step 5, 17 Nov 2026).
 
-Design: [local path], section 3. One claim per entry, reviewed by diff:
+Design: the private planning notes, section 3. One claim per entry, reviewed by diff:
 
 - a **name** for one object: `norad` (or `jcat` for an object with no number), `name`, `basis`, `source` (an id
   from doctrine/sources.json), `read`, `evidence` (a list: a link needs evidence beyond a name), and optionally

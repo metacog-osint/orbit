@@ -6,7 +6,7 @@ in each repo.
 
 ## Why
 The GEO belt is space domain awareness: who sits where in the geostationary belt, who moved, who parked beside
-whom. That is Orbit's scope (`_ideas/new-programs.md`: catalog changes, launches, manoeuvres, counterspace).
+whom. That is Orbit's scope (the private planning notes: catalog changes, launches, manoeuvres, counterspace).
 Noisefloor's job is GPS and PNT interference. Two more reasons:
 - Orbit's orbit-change lane watches GEO objects (USA 270 and USA 271 among them) with its own rules, and
   Noisefloor's callout C5 marks orbit changes of listed objects with different thresholds. Two TIC sites can

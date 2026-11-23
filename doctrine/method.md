@@ -1,7 +1,7 @@
 # Orbit method (`orbit-2.11`, 16 Nov 2026)
 
 ## Purpose
-The space layer of the suite: what changed in Earth orbit. Planned scope (`_ideas/new-programs.md`, program row
+The space layer of the suite: what changed in Earth orbit. Planned scope (the private planning notes, program row
 and roadmap step 14): catalog changes, launches, manoeuvres and counterspace events. `orbit-2.0` was the first
 live slice: launches, scheduled launches, reentries and catalog changes. Launch hazard warnings (`orbit-2.2`), ASAT
 test history (`orbit-2.3`), orbit changes in watched objects (`orbit-2.4`) and news headlines for scheduled
@@ -479,7 +479,7 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
 ## Daily lead (`orbit-2.18`, 18 Nov 2026)
 Tom, 18 Nov 2026 about 10:30 AM CST: "capture all of those ideas and the plan, then begin with the daily lead
 first"; readers are "mostly people with some amount of elevated knowledge but there will be people new to this topic
-as well". Plan: `[local path]`. Built by `orbit/lead.py` from the
+as well". Plan: the private planning notes. Built by `orbit/lead.py` from the
 snapshot and the daily archive, no request, at the end of each run (`_archive_run`, after the TIP check).
 1. **Lines, in this order, each only when it has something:** objects TIP predicts to reenter in the next 24 hours
    (USSPACECOM's high-interest flags first); objects TIP's messages after the reentry, issued in the last 24 hours,
@@ -520,7 +520,7 @@ use), one entry per source id the items name, from the snapshot's lane records (
    built 15 Nov 2026, landed 18 Nov). A new source id on the items needs its line in `SOURCE_LANES`.
 
 ## Object pages (`orbit-2.20`, 18 Nov 2026)
-Tom, 18 Nov 2026: "Yes, build it" (design `[local path]`, globe option A). Split
+Tom, 18 Nov 2026: "Yes, build it" (design the private planning notes, globe option A). Split
 agreed the same day with the catalog session: the TIC satellite catalog (build step 6) supplies the data and the rules
 note, Orbit draws the page.
 1. **Address:** `object.html?n=<NORAD number>`, or `?j=<GCAT JCAT id>` for an object without one (GCAT's `S` ids are

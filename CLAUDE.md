@@ -1,4 +1,4 @@
-# Orbit (`[local path]`)
+# Orbit
 
 The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
 scheduled launches, reentries and TIP predictions, catalog changes, breakups, orbit changes in watched satellites,
@@ -16,7 +16,7 @@ go in the handoff, shas and "landed" notes are left to git.
   `requirements.json`, `indicators.json`, `interests.json`, `ncf_map.json`: the registers `check` lints.
 - `doctrine/spacetrack-disclaimer.md`: Tom's approved wording; change it only with his yes.
   `doctrine/geo-move-plan.md`: the GEO move from Noisefloor.
-- Plans: `[local path]` (site: daily lead, a page per object with search,
+- Plans: the private planning notes (site: daily lead, a page per object with search,
   owner and constellation views), `sat-catalog-design-2026-11.md` (the catalog; sections 9-10 hold Tom's answers and
   the real counts; build record per step: `doctrine/catalog.md`),
   `space-programs-reorg-2026-11-16.md` (program boundaries), Orbit's row in `new-programs.md`.
