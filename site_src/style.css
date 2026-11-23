@@ -73,6 +73,10 @@ a { color: var(--link); }
 .lead-list { margin: 0 0 8px; padding-left: 1.1rem; }
 .lead-list li { margin: 0 0 6px; line-height: 1.45; }
 .lead-list .src { color: var(--muted); font-size: 0.82rem; }
+.lead-list .lead-notable { font-weight: 600; }
+.lead-list .lead-notable .src, .lead-list .lead-notable a { font-weight: 400; }
+.notable-note { font-weight: 600; }
+.what-note { margin-top: 2px; max-width: 34rem; }
 .terms summary { cursor: pointer; color: var(--link); }
 .terms dl { margin: 8px 0 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
 .terms dt { font-weight: 600; }

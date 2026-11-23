@@ -22,8 +22,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 from tic_doctrine import CONTRACT, __version__ as KIT_VERSION, geo  # noqa: E402
 
+from orbit import names, notable  # noqa: E402
+
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.25"
+METHOD = "orbit-2.26"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -340,6 +342,9 @@ def _lon(x: float) -> str:
 def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> dict:
     """Off the map (geometry null): where to draw a satellite on COP's map is Tom's open decision (ground tracks)."""
     name = e.get("gcat_name") or e["name"]
+    also = e.get("names") or []          # the other names the object goes by (orbit/names.py, orbit-2.26)
+    shown = names.label(name, also)
+    note = e.get("notable")              # orbit/notable.py: a listed-role GEO object, not station-keeping
     owner = e.get("state") or e.get("country") or "unknown owner"
     t = lambda s: s[:16].replace("T", " ")
     gap = e.get("gap")
@@ -352,6 +357,25 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
     g = e.get("geo")
     geo_text = (f" Geostationary longitude {_lon(g['lon_before'])} before and {_lon(g['lon_after'])} after, drift "
                 f"{g['drift_before']:+.3f} to {g['drift_after']:+.3f} deg/day." if g else "")
+    what = notable.text(e.get("what"))   # what happened, in words, for a geostationary change
+    moved = bool(what) and (g or {}).get("kind") not in (None, notable.KEPT)
+    lead_in = f"{name} {what}. " if what else ""
+    if moved:
+        lead_in += ("Drift is how far along the belt the satellite moves each day; an orbit above geostationary "
+                    "altitude circles slower than the Earth turns, so the satellite falls back to the west, and one "
+                    "below it runs ahead to the east. ")
+    if also:
+        lead_in += (f"Also known as {'; '.join(also)} (names from the TIC catalog; the object's page on Orbit says "
+                    "which source gives which). ")
+    if note:
+        lead_in += (f"Orbit marks this change as notable: the object has a listed role on Orbit's GEO page "
+                    f"({note.get('role_text') or note['role']}"
+                    + (f"; basis: {note['basis']}" if note.get("basis") else "") + ") and the change is not "
+                    "station-keeping. Notable is not a tier, a warning or a judgment of why. ")
+    title_what = (f": {g['kind']} {'east' if g['drift_after'] > 0 else 'west'} at {abs(g['drift_after']):.2f} deg/day "
+                  f"from {_lon(g['lon_before'])};" if moved and g["kind"] == notable.STARTED else
+                  f": {g['kind']} at {_lon(g['lon_after'])};" if moved and g["kind"] == notable.STOPPED else
+                  f": {g['kind']}, {g['drift_before']:+.2f} to {g['drift_after']:+.2f} deg/day;" if moved else ",")
     props = {
         **_base(generated),
         "id": f"orbit:maneuver:{e['norad']}:{e['from'][:10]}",
@@ -359,8 +383,9 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "event_start": e["from"],
         "event_end": e["to"],
         **_change("new", e["to"], generated),
-        "title": f"Orbit change: {name} ({e['regime'] or 'orbit unknown'}, {owner}), {e['dv_ms']:g} m/s {e['dominant']}",
-        "summary": (f"{name} (catalog {e['norad']}, {e['object_id']}, owner {owner}): its published orbit changed by "
+        "title": (f"{'Notable orbit change' if note else 'Orbit change'}: {shown} ({e['regime'] or 'orbit unknown'}, "
+                  f"{owner}){title_what} {e['dv_ms']:g} m/s {e['dominant']}"),
+        "summary": (f"{lead_in}{name} (catalog {e['norad']}, {e['object_id']}, owner {owner}): its published orbit changed by "
                     f"about {e['dv_ms']:g} m/s, mostly {e['dominant']}, semi-major axis {e['da_km']:+g} km"
                     + (f" (about {e['dv_sma_ms']:g} m/s from that change alone)" if e.get("dv_sma_ms") is not None else "")
                     + ", "
@@ -375,7 +400,10 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "precision_class": "none",
         "measures": {"dv_ms": e["dv_ms"], "da_km": e["da_km"], "di_deg": e["di_deg"],
                      **({"dv_sma_ms": e["dv_sma_ms"]} if e.get("dv_sma_ms") is not None else {}),
-                     **({"gap_hours": gap["hours"]} if gap else {})},
+                     **({"gap_hours": gap["hours"]} if gap else {}),
+                     **({"lon_before_deg": g["lon_before"], "lon_after_deg": g["lon_after"],
+                         "drift_before_deg_day": g["drift_before"], "drift_after_deg_day": g["drift_after"]} if g else {}),
+                     **({"alt_after_km": g["alt_km_after"]} if g and "alt_km_after" in g else {})},
         "visual": {"type": "table", "url": f"{SITE}/changes#maneuvers"},
         "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],
     }
