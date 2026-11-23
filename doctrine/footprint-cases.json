@@ -1,0 +1,115 @@
+{
+  "note": "Prototype cases for tools/footprints.py (ideas#232). Every number that is not geometry carries its source here. Published contour files are named but not held in this repository. Read 23 Nov 2026.",
+  "cases": [
+    {
+      "id": "geo-wide-badr8",
+      "class": "wide-beam GEO",
+      "title": "Wide-beam GEO: Arabsat 7B (Badr-8)",
+      "norad": 56757,
+      "summary": "A broadcast and trunking satellite at 26 degrees east with a few large shaped beams. Its line of sight is exact. Its beams are only estimated here from their names, because the operator's own contour files could not be read by an automated client and no reuse terms were found.",
+      "line_of_sight_deg": [5, 0],
+      "fit": "los",
+      "published": [],
+      "estimates": [
+        {
+          "id": "est-mena",
+          "method": "area",
+          "label": "Ku-band 'MENA' beam, from its name",
+          "area_words": "the 22 member states of the Arab League, taken as what 'MENA' means for the Arab League's own operator",
+          "countries": ["DZ", "BH", "KM", "DJ", "EG", "IQ", "JO", "KW", "LB", "LY", "MR", "MA", "OM", "PS", "QA", "SA", "SO", "SD", "SY", "TN", "AE", "YE"],
+          "source": "Beam name from third-party listings of Badr-8's beams; the country list is Orbit's reading of the name",
+          "source_url": "https://www.airbus.com/en/newsroom/news/2023-05-airbus-eurostar-neo-arabsat-badr-8-telecoms-satellite-shipped-to-launch-site",
+          "date": "2026-11-23",
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
+        },
+        {
+          "id": "est-nwa",
+          "method": "area",
+          "label": "Ku-band 'North West Africa' beam, from its name",
+          "area_words": "the UN's Northern Africa without Egypt and Sudan, plus its Western Africa",
+          "countries": ["DZ", "LY", "MA", "TN", "EH", "MR", "BJ", "BF", "CV", "CI", "GM", "GH", "GN", "GW", "LR", "ML", "NE", "NG", "SN", "SL", "TG"],
+          "source": "Beam name as in Arabsat's own contour file names (seen in search results only, not opened); the country list is Orbit's reading of the name",
+          "date": "2026-11-23",
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
+        }
+      ],
+      "notes": [
+        "Airbus, which built the satellite, says it provides connectivity over Europe, the Middle East, Africa and central Asia, in C and Ku band. That is nearly everything in its line of sight, which is why the line of sight alone says little about where a beam points.",
+        "Arabsat appears to host contour files for this satellite on its own site (KML, downlink EIRP in dBW, for a C-band global beam and a North West Africa beam). Its site refused automated requests, so they were not opened, and no reuse terms were found. If a person saves them and Tom allows their use, the two estimates here can be scored against them.",
+        "Uplink and downlink beams are different shapes on most satellites. Only downlink beams are named in the public material found."
+      ]
+    },
+    {
+      "id": "geo-hts-kasat",
+      "class": "high-throughput GEO",
+      "title": "High-throughput GEO: KA-SAT",
+      "norad": 37258,
+      "summary": "A Ka-band satellite at 9 degrees east that covers Europe and the Mediterranean with about 82 small spot beams instead of a few large ones. The public record gives the number of spots, a round figure for their size and the region in words. Where each spot sits is on the operator's map, which may be linked but not redrawn.",
+      "line_of_sight_deg": [10, 5],
+      "published": [],
+      "estimates": [
+        {
+          "id": "est-spot",
+          "method": "spot_km",
+          "label": "One spot beam, for scale",
+          "diameter_km": 300,
+          "aim": [12.5, 41.9],
+          "aim_words": "Rome, as an example only",
+          "source": "Eutelsat's own 2012 presentation gives about 300 km across for each spot; another technical page gives 0.5 degrees",
+          "source_url": "https://en.wikipedia.org/wiki/KA-SAT",
+          "date": "2026-11-23",
+          "uncertainty": "A round published figure with no gain level; sources give 250 to 300 km. The aim point is an example, not a real beam centre, so this shows the size of a spot and nothing about its place."
+        },
+        {
+          "id": "est-envelope",
+          "method": "area",
+          "label": "Whole service area, from the words 'Europe and the Mediterranean Basin'",
+          "area_words": "the mainland and nearby islands of 48 European and Mediterranean countries (between 12 west and 45 east, 27 and 72 north), as Orbit read the phrase",
+          "box": [-12, 27, 45, 72],
+          "countries": ["PT", "ES", "FR", "IE", "GB", "BE", "NL", "LU", "DE", "CH", "AT", "IT", "MT", "DK", "NO", "SE", "FI", "EE", "LV", "LT", "PL", "CZ", "SK", "HU", "SI", "HR", "BA", "RS", "ME", "AL", "MK", "GR", "BG", "RO", "MD", "UA", "BY", "TR", "CY", "LB", "IL", "PS", "JO", "EG", "LY", "TN", "DZ", "MA"],
+          "source": "Service area in words from public descriptions of KA-SAT; the country list is Orbit's reading",
+          "source_url": "https://en.wikipedia.org/wiki/KA-SAT",
+          "date": "2026-11-23",
+          "uncertainty": "An outline around named countries. Spot-beam satellites leave gaps inside such an outline (sea, desert, unserved countries), which this cannot show. Not checked against any published contour."
+        }
+      ],
+      "notes": [
+        "Sources give 82 or 83 spot beams; two of the beams are said to be alternatives to each other.",
+        "KA-SAT was Eutelsat's and is now owned by Viasat (through Euro Broadband Infrastructure). Blackout's register reaches it through Skylogic's networks, which run its gateways. A network number therefore does not name the satellite's owner.",
+        "On a spot-beam satellite a user's outage can come from one spot or one gateway. Neither can be placed from public data without the operator's beam map.",
+        "No contour for this satellite was found in a public filing: it is not US-licensed, and ITU's beam data needs a login that Orbit does not use."
+      ]
+    },
+    {
+      "id": "leo-starlink",
+      "class": "LEO constellation",
+      "title": "LEO constellation: Starlink",
+      "summary": "A low-orbit constellation has no fixed footprint. From orbits alone, the only thing that can be computed is how many satellites stand high enough in the sky at each latitude. Where service is actually sold and switched on is set by licences, gateways and the operator, and has to come from what the operator publishes or from terminals seen in use.",
+      "tle_file": "starlink.tle",
+      "tle_source": "CelesTrak, Starlink group (element sets from the 18th Space Defense Squadron)",
+      "tle_url": "https://celestrak.org/NORAD/elements/",
+      "tle_date": "2026-11-23",
+      "min_elevation_deg": 25,
+      "min_elevation_north": {"from_lat": 62, "deg": 5},
+      "min_alt_km": 425,
+      "max_alt_km": 600,
+      "hours": 24,
+      "step_s": 300,
+      "band_deg": 2,
+      "measured_file": "ripe_atlas_as14593.json",
+      "measured": {
+        "label": "Terminals seen in use: RIPE Atlas probes connected through Starlink's network (AS14593), at the places their hosts report",
+        "source": "RIPE Atlas probe API (RIPE NCC)",
+        "source_url": "https://atlas.ripe.net/probes/",
+        "date": "2026-11-23",
+        "uncertainty": "A lower bound from volunteers, mostly in North America and Europe. Places are reported by each host and may be offset on purpose. No probe says nothing about no service."
+      },
+      "notes": [
+        "Service angles as the FCC authorised them: user terminals work down to 25 degrees above the horizon below 62 degrees north, and down to 5 degrees at and above it (FCC DA 24-1193). SpaceX has asked for 20 degrees on its 400 to 500 km shells; no grant was found.",
+        "Serving satellites are taken as those between 425 and 600 km on near-circular orbits. The FCC's January 2026 order (DA 26-36) also authorises shells at 340 to 365 km, and the element sets hold about 800 satellites near 350 to 375 km. Whether those are serving or still raising cannot be told from the orbits, so they are left out and counted under Other.",
+        "Starlink's IP geolocation feed is not drawn. It lists 238 countries and territories, including ones where Starlink has no licence, and SpaceX does not say what a row means, so it is not a service-area map.",
+        "Not shown, because it is not geometry: which countries have service (the operator's availability map says), where gateways are, and how much capacity a cell has."
+      ]
+    }
+  ]
+}
