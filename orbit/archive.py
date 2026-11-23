@@ -81,6 +81,8 @@ def record(doc: dict | None, snap: dict) -> dict:
                                           "regime": e.get("regime"), "from": e.get("from"), "to": e.get("to"),
                                           "dv_ms": e.get("dv_ms"), "dominant": e.get("dominant"),
                                           "country": e.get("cc") or e.get("country")})
+            if e.get("notable"):  # orbit-2.26 (orbit/notable.py): kept from the run that first marks it
+                mv["listed"][key].setdefault("notable", e["notable"].get("kind"))
 
     nw = snap.get("navwarn") or {}
     if _fresh(snap, "navwarn") and nw:
