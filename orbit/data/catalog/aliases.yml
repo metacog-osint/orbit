@@ -1,4 +1,4 @@
-# TIC satellite catalog: hand-kept aliases (design note [local path], section 3).
+# TIC satellite catalog: hand-kept aliases (design note the private planning notes, section 3).
 # One claim per entry, reviewed by diff. Never edit an entry to change its number: add `withdrawn: <date>` and
 # `reason`, and add a new entry. Every link needs evidence beyond a name. Read by orbit/aliases.py (a YAML subset:
 # scalars, quoted strings, [flow lists] and block lists of strings).
