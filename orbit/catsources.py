@@ -1,6 +1,6 @@
 """CelesTrak SATCAT and Wikidata for TIC's satellite catalog (build step 4, 17 Nov 2026).
 
-Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md, sections 1, 2, 4 and 9. Each source's values arrive as more
+Design: the private planning notes, sections 1, 2, 4 and 9. Each source's values arrive as more
 records on the NORAD-keyed entries of orbit/catalog.py, ranked by catalog.RANK; nothing is replaced and nothing
 joins on a name.
 

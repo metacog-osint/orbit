@@ -1,6 +1,6 @@
 """Space-Track SATCAT and DECAY for TIC's satellite catalog (build step 3, 17 Nov 2026).
 
-Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md, sections 2 and 4. Space-Track ranks first for identity
+Design: the private planning notes, sections 2 and 4. Space-Track ranks first for identity
 keys (`intldes`), decay and names (catalog.RANK); GCAT ranks first for launch date and state.
 
 Space-Track's limits (space-track.org/documentation, "Use Policy" table, read 17 Nov 2026 18:00 UTC):

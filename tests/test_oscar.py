@@ -168,10 +168,10 @@ class Links(unittest.TestCase):
     def test_only_reviewed_entries_join(self):
         a = self.load(ENTRY)
         self.assertEqual(oscarlinks.reviewed(a), [])
-        b = self.load(ENTRY + "  reviewed_by: Tom\n  reviewed: 2026-11-19\n")
+        b = self.load(ENTRY + "  reviewed_by: tic-analyst\n  reviewed: 2026-11-19\n")
         self.assertEqual(len(oscarlinks.reviewed(b)), 1)
         with self.assertRaises(oscarlinks.LinkError):
-            self.load(ENTRY + "  reviewed_by: Tom\n")  # a review needs its date
+            self.load(ENTRY + "  reviewed_by: tic-analyst\n")  # a review needs its date
 
     def test_refusals(self):
         for bad in (ENTRY.replace("relation: same", "relation: guess"),

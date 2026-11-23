@@ -1,5 +1,5 @@
 """TIC's satellite catalog, build step 2 (GCAT only): the test objects of the design note's section 7
-(D:/Projects/_ideas/sat-catalog-design-2026-11.md). Rows copied unchanged from GCAT's satcat and orgs of 13 Nov 2026."""
+(the private planning notes). Rows copied unchanged from GCAT's satcat and orgs of 13 Nov 2026."""
 import sys
 import unittest
 from pathlib import Path
