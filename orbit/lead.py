@@ -1,6 +1,6 @@
 """The daily lead: what changed in the last 24 hours and what is due in the next 24 (orbit-2.18, 18 Nov 2026).
 
-Tom, 18 Nov 2026: "begin with the daily lead first"; plan in D:\\Projects\\_ideas\\orbit-useful-engaging-2026-11-18.md.
+Tom, 18 Nov 2026: "begin with the daily lead first"; plan in the private planning notes.
 Readers are mostly informed, some new to the topic, so each line is exact (source, time, number) and the page
 defines its terms beside it.
 

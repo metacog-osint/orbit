@@ -1,8 +1,8 @@
 """TIC satellite catalog, build step 6: a smaller catalog file, shards for Orbit's object page, a search index and a
 rules note for the page's "Names and sources" section.
 
-Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md (build order step 6); the page: D:/Projects/_ideas/
-orbit-object-page-2026-11-18.md. Split agreed 18 Nov 2026: the catalog supplies the data and the rules, Orbit's page
+Design: the private planning notes (build order step 6); the page: the private planning notes.
+Split agreed 18 Nov 2026: the catalog supplies the data and the rules, Orbit's page
 draws them; no page code here.
 
 - **Compact records (schema tic-catalog/2).** Every value is still a record {value, source, ref, read, basis}; a

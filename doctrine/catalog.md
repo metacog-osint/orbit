@@ -1,13 +1,13 @@
 # TIC satellite catalog: Orbit's build record
 
 Moved from Orbit's CLAUDE.md on 18 Nov 2026 (Tom's yes: CLAUDE.md keeps what the program is, commands, rules and
-pointers). Design, Tom's answers and the full build log: `D:\Projects\_ideas\sat-catalog-design-2026-11.md`
+pointers). Design, Tom's answers and the full build log: the private planning notes
 (sections 9 and 10). This file is the per-step record of what was built in this repository.
 
 Build steps 1-5 live 17 Nov 2026, published on the public release `catalog` by `.github/workflows/catalog.yml`;
 the WMO OSCAR/Space link file on branch `feat/catalog-oscar` (18 Nov 2026).
 
-Design and Tom's answers: `D:\Projects\_ideas\sat-catalog-design-2026-11.md` (section 9). Branch `feat/sat-catalog`,
+Design and Tom's answers: the private planning notes (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
 - **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
   ingest (`use` `excluded` with `planned_use` `ingest` until each build step lands, so the page lists only live

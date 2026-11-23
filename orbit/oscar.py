@@ -1,6 +1,6 @@
 """WMO OSCAR/Space for TIC's satellite catalog: the reader and the slug-to-NORAD link proposer (18 Nov 2026).
 
-Design: D:/Projects/_ideas/sat-catalog-design-2026-11.md, sections 1, 2 and 9 (Tom's answer 8, 17 Nov 2026).
+Design: the private planning notes, sections 1, 2 and 9 (Tom's answer 8, 17 Nov 2026).
 
 Terms (space.oscar.wmo.int/pages/disclaimer, read 16 and 17 Nov 2026): "All information available on these pages
 may be used and redistributed freely", and "any publication using this information should acknowledge WMO";
