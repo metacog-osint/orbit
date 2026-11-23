@@ -169,6 +169,17 @@
     });
   }
 
+  function partsInto(node, parts) {  // orbit/lead.py's parts: text, a time, a date, a country, an object's name
+    (parts || []).forEach(function (p) {
+      if (typeof p === "string") node.appendChild(document.createTextNode(p));
+      else if (p.t) node.appendChild(document.createTextNode(fmt(p.t)));
+      else if (p.d) node.appendChild(document.createTextNode(dayOnly(p.d)));
+      else if (p.cc) node.appendChild(document.createTextNode(countryName(p.cc)));
+      else if (p.s != null) node.appendChild(objA(p.s, /^\d+$/.test(String(p.o)) ? p.o : null, /^\d+$/.test(String(p.o)) ? null : p.o));
+    });
+    return node;
+  }
+
   function leadCard() {  // orbit/lead.py (orbit-2.18): what changed in the last 24 hours, each line to its card
     var ul = document.getElementById("lead-list");
     if (!ul) return;
@@ -182,14 +193,8 @@
     if (h) h.textContent = "The last 24 hours, to " + fmt(L.at);
     if (L.nothing_new) ul.appendChild(el("li", "", "Nothing new in the last 24 hours from the sources read on this run."));
     (L.lines || []).forEach(function (x) {
-      var li = el("li");
-      (x.parts || []).forEach(function (p) {
-        if (typeof p === "string") li.appendChild(document.createTextNode(p));
-        else if (p.t) li.appendChild(document.createTextNode(fmt(p.t)));
-        else if (p.d) li.appendChild(document.createTextNode(dayOnly(p.d)));
-        else if (p.cc) li.appendChild(document.createTextNode(countryName(p.cc)));
-        else if (p.s != null) li.appendChild(objA(p.s, /^\d+$/.test(String(p.o)) ? p.o : null, /^\d+$/.test(String(p.o)) ? null : p.o));
-      });
+      var li = el("li", x.kind === "notable" ? "lead-notable" : "");
+      partsInto(li, x.parts);
       li.appendChild(document.createTextNode(" "));
       var a = el("a", "", "Details");
       a.href = x.href && x.href.charAt(0) === "#" ? hrefTo(x.href.slice(1)) : x.href || "#";
@@ -453,8 +458,11 @@
       var who = el("div");
       who.appendChild(mark(e.cc, e.state));
       who.appendChild(objA(e.gcat_name || e.name || ("NORAD " + e.norad), e.norad));
+      if (e.names && e.names.length) who.appendChild(el("div", "pl", "also " + e.names.join("; ")));  // orbit-2.26
       who.appendChild(el("div", "pl", "NORAD " + e.norad + (e.object_id ? ", " + e.object_id : "") +
         (e.regime ? ", " + e.regime : "")));
+      if (e.notable) who.appendChild(el("div", "pl notable-note", "Notable: listed role on the GEO page (" +
+        e.notable.role + "), " + e.notable.kind));
       cell(tr, who);
       var when = el("div", "", fmt(e.from));
       when.appendChild(el("div", "pl", "to " + fmt(e.to) + (e.pairs > 1 ? " (" + e.pairs + " set pairs)" : "")));
@@ -475,6 +483,8 @@
       if (e.geo) {
         pos.appendChild(document.createTextNode(lonText(e.geo.lon_before) + " to " + lonText(e.geo.lon_after)));
         pos.appendChild(el("div", "pl", driftText(e.geo.drift_before) + ", then " + driftText(e.geo.drift_after)));
+        if (e.what) partsInto(pos.appendChild(el("div", "pl what-note", "What the sets show: it ")), e.what)
+          .appendChild(document.createTextNode("."));
       }
       cell(tr, pos);
       cell(tr, el("span", "muted small", "Space-Track.org (USSPACECOM) element sets; Intelligence Company analysis."));
