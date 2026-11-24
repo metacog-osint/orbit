@@ -12,6 +12,7 @@
 <script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap top-row">
     <div class="brand"><a href="./"><strong>Orbit</strong></a><span class="muted">The Intelligence Company</span></div>
@@ -31,7 +32,8 @@
   </nav>
 </header>
 
-<main class="wrap obj">
+<main id="main" class="wrap obj">
+  <noscript><p class="noscript">This page needs JavaScript to draw its tables and maps.</p></noscript>
   <form class="obj-search" role="search" autocomplete="off">
     <label for="obj-q" class="small muted">Find an object: name from any source, NORAD number, COSPAR ID</label>
     <input id="obj-q" type="search" placeholder="ISS, Hornet 1, 25544, 1998-067A" spellcheck="false">
