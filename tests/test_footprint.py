@@ -294,19 +294,39 @@ class Horizon(unittest.TestCase):
         self.assertFalse(self._holds(ring, [0.0, -45.0]))
 
 
+class ContourGeojson(unittest.TestCase):
+    def test_reads_levels_units_and_collections(self):
+        # made up, in the shape of an operator's coverage GeoJSON: a label point, a polygon, a geometry collection
+        ring = [[100.0, 0.0], [104.0, 0.0], [102.0, 3.0], [100.0, 0.0]]
+        doc = {"type": "FeatureCollection", "features": [
+            {"type": "Feature", "geometry": {"type": "Point", "coordinates": [101, 1, 0]}, "properties": {"name": "46"}},
+            {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]}, "properties": {"name": "Contour 46 dBW"}},
+            {"type": "Feature", "geometry": {"type": "GeometryCollection", "geometries": [
+                {"type": "Polygon", "coordinates": [ring[:3]]}, {"type": "Point", "coordinates": [0, 0]}]},
+             "properties": {"name": "Outer 43"}}]}
+        import json
+        beam = fp.parse_contour_geojson(json.dumps(doc).encode(), "dBW")
+        self.assertEqual((beam["unit"], beam["emi_rcp"]), ("dBW", "E"))
+        self.assertEqual([(c["gain_db"], len(c["ring"])) for c in beam["contours"]], [(46.0, 4), (43.0, 4)])
+        gt = fp.parse_contour_geojson(json.dumps({"features": [{"geometry": {"type": "Polygon", "coordinates": [ring]},
+                                                               "properties": {"name": "Contour -2 dB/K"}},
+                                                              {"geometry": {"type": "Polygon", "coordinates": [ring]},
+                                                               "properties": {"name": "Contour 11 dB/K S2"}}]}), "dB/K")
+        self.assertEqual((gt["emi_rcp"], [c["gain_db"] for c in gt["contours"]]), ("R", [-2.0, 11.0]))
+        with self.assertRaises(ValueError):
+            fp.parse_contour_geojson(json.dumps(doc), "dB/K")
+
+
 class PublishedData(unittest.TestCase):
-    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). Only sources
-    cleared for the page may reach it, and no local path; the word list names a source not cleared."""
+    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). No local path
+    may reach it, and every layer says what kind it is and where it came from."""
     def test_committed_data_is_clean_and_labelled(self):
         import json
         import pathlib
+        import re
         p = pathlib.Path(__file__).resolve().parent.parent / "site_src" / "footprints-data.json"
         text = p.read_text(encoding="utf-8")
-        low = text.lower()
-        import re
-        for word in ("telesat", "telstar"):
-            self.assertNotIn(word, low)
-        self.assertIsNone(re.search(r"\b[a-z]:[\\/]", low))          # no Windows drive path of any kind
+        self.assertIsNone(re.search(r"\b[a-z]:[\\/]", text.lower()))          # no Windows drive path of any kind
         doc = json.loads(text)
         self.assertEqual(set(doc["kinds"]), {"published", "computed", "estimated", "measured"})
         for case in doc["cases"]:

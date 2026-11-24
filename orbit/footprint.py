@@ -506,6 +506,36 @@ def parse_eirp_kml(text, beam_id=None):
     return beam
 
 
+def parse_contour_geojson(data, unit="dBW", beam_id=None):
+    """Contours from an operator's GeoJSON coverage file, where each polygon feature is named like "Contour 46 dBW",
+    "Outer 59 dBW", "Contour 5 dB/K" or "Contour 11 dB/K S2" (read 24 Nov 2026 from Telesat's fleet map: downlink EIRP in dBW and uplink
+    G/T in dB/K, Polygon or GeometryCollection, label points beside them). A name with no unit takes `unit`.
+    Returns the beam dict `parse_eirp_kml` gives, with `unit` "dBW" (downlink, emi_rcp E) or "dB/K" (uplink, R).
+    Inner rings (holes) are not used."""
+    import json
+    import re
+    doc = json.loads(data.decode("utf-8") if isinstance(data, (bytes, bytearray)) else data)
+    beam = {"beam_id": beam_id, "emi_rcp": "R" if unit == "dB/K" else "E", "polar": None, "reason": None,
+            "peak_dbi": None, "unit": unit, "boresights": [], "contours": []}
+    for f in doc.get("features", []):
+        g = f.get("geometry") or {}
+        # a spot's name may follow the unit ("Contour 11 dB/K S2")
+        m = re.match(r"\s*(?:Contour|Outer)\s+(-?\d+(?:\.\d+)?)\s*(dBW|dB/K)?(?:\s|$)", (f.get("properties") or {}).get("name") or "")
+        if not m:
+            continue
+        if (m.group(2) or unit) != unit:
+            raise ValueError(f"contour unit {m.group(2)} in a {unit} file")
+        polys = [g["coordinates"]] if g.get("type") == "Polygon" else \
+                [x["coordinates"] for x in g.get("geometries", []) if x.get("type") == "Polygon"]
+        for p in polys:
+            ring = [[float(c[0]), float(c[1])] for c in p[0]]
+            if len(ring) >= 3:
+                if ring[0] != ring[-1]:
+                    ring.append(list(ring[0]))
+                beam["contours"].append({"gain_db": float(m.group(1)), "closed": True, "ring": ring})
+    return beam
+
+
 def close_on_horizon(sat, lines, inside, n=1440):
     """Open filed contours of one level (each starts and ends on the Earth's edge as the satellite sees it) joined
     along that edge into the ring that holds `inside` ([lon, lat], normally the beam's boresight). One level can
