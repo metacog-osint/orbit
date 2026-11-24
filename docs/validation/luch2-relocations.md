@@ -22,7 +22,7 @@ sets, 2,225 distinct epochs, 13 Mar 2023 to 22 Nov 2026.
   This is how the 78°E checkout appears: the satellite never held under 0.1° a day for two days there.
 - **Brake projection:** from the peak drift on, each set's drift is compared with a set at least 0.5 days earlier.
   When the drift has fallen by 0.05° a day or more, constant braking at that measured rate gives a stop longitude.
-  *Steady* is the first projection within 1° of the one before it. A live tracker could publish that one, because
+  *Steady* is the first projection within 1° of the one before it, with no set between them that showed no fall (corrected 25 Nov 2026; the first version did not reset on a pause, which gave 61.69°E instead of 61.48°E on the 2025 move). A live tracker could publish that one, because
   it does not need the answer.
 
 ## Stops, checked against Marco Langbroek's table
@@ -49,31 +49,34 @@ ended somewhere inside a 37-day gap with no public sets (15 Oct to 21 Nov 2026),
 started unseen.
 
 ## Relocations
-| From to | Moved | Departure to arrival | Peak drift (height vs GEO) | Speeding up / braking | Steady stop projection | Within 1° |
+| From to | Moved | Departure to arrival | Peak drift (height vs GEO) | Speeding up / coasting / braking | Steady stop projection | Within 1° |
 |---|---|---|---|---|---|---|
-| 78.60°E to 58.00°E | 20.6° W | 24 Mar to 9 Apr 2023, 16.4 d | 2.78°/d (+218 km) | 5.7 d / 10.7 d | 7.9 d ahead, off 0.55° | 8.0 d |
-| 58.00°E to 8.93°E | 49.1° W | 2 to 22 May 2023, 20.3 d | 4.42°/d (+348 km) | 6.5 d / 13.8 d | 8.6 d ahead, off 4.62° | 6.1 d |
-| 8.93°E to 3.20°E | 5.7° W | 25 Sep to 4 Oct 2023, 9.1 d | 1.04°/d (+82 km) | 2.6 d / 6.5 d | 3.4 d ahead, off 0.53° | 3.6 d |
-| 3.20°E to 2.65°E | 0.6° W | 3 to 6 Dec 2023, 3.5 d | 0.39°/d (+31 km) | 1.9 d / 1.6 d | none (one projection) | 1.1 d |
-| 2.65°E to 4.73°E | 2.1° E | 26 to 30 Mar 2024, 4.6 d | 0.90°/d (-70 km) | 2.3 d / 2.2 d | none (one projection) | 1.3 d |
-| 4.73°E to 0.59°W | 5.3° W | 22 Jun to 1 Jul 2024, 8.9 d | 0.94°/d (+73 km) | 2.4 d / 6.5 d | 2.5 d ahead, off 0.65° | 3.5 d |
-| 0.59°W to 0.90°W | 0.3° W | 16 to 19 Sep 2024, 2.6 d | 0.24°/d (+18 km) | 0.7 d / 2.0 d | none (one projection) | 0.6 d |
-| 0.90°W to 61.99°E | 62.9° E | 6 Feb to 7 Mar 2025, 28.8 d | 3.38°/d (-261 km) | 16.8 d / 12.0 d | 7.6 d ahead, off 0.30° | 9.4 d |
+| 78.60°E to 58.00°E | 20.6° W | 24 Mar to 9 Apr 2023, 16.4 d | 2.78°/d (+218 km) | 5.4 / 0.3 / 10.7 d | 7.9 d ahead, off 0.55° | 8.0 d |
+| 58.00°E to 8.93°E | 49.1° W | 2 to 22 May 2023, 20.3 d | 4.42°/d (+348 km) | 6.5 / 3.6 / 10.2 d | 8.6 d ahead, off 4.62° | 6.1 d |
+| 8.93°E to 3.20°E | 5.7° W | 25 Sep to 4 Oct 2023, 9.1 d | 1.04°/d (+82 km) | 2.3 / 2.5 / 4.3 d | 3.4 d ahead, off 0.53° | 3.6 d |
+| 3.20°E to 2.65°E | 0.6° W | 3 to 6 Dec 2023, 3.5 d | 0.39°/d (+31 km) | 1.9 / 0.0 / 1.6 d | none (one projection) | 1.1 d |
+| 2.65°E to 4.73°E | 2.1° E | 26 to 30 Mar 2024, 4.6 d | 0.90°/d (-70 km) | 2.3 / 0.0 / 2.2 d | none (one projection) | 1.3 d |
+| 4.73°E to 0.59°W | 5.3° W | 22 Jun to 1 Jul 2024, 8.9 d | 0.94°/d (+73 km) | 2.4 / 2.5 / 4.0 d | 2.5 d ahead, off 0.65° | 3.5 d |
+| 0.59°W to 0.90°W | 0.3° W | 16 to 19 Sep 2024, 2.6 d | 0.24°/d (+18 km) | 0.7 / 0.7 / 1.2 d | none (one projection) | 0.6 d |
+| 0.90°W to 61.99°E | 62.9° E | 6 Feb to 7 Mar 2025, 28.8 d | 3.38°/d (-261 km) | 6.8 / 10.3 / 11.8 d | 7.6 d ahead, off 0.51° | 9.4 d |
 
 Departure and arrival are the last set of one stop and the first set of the next. Speeding up runs from departure to
-the set with the peak drift, and braking from that set to arrival. During moves the largest gap between sets was
+the first set within 2% of the peak drift, coasting from there to the last such set, and braking from that set to
+arrival. **Corrected 25 Nov 2026:** the first version of this note ran speeding up to the peak set itself and
+braking from it, which folded the 2025 move's 10-day coast into "speeding up" (16.8 days) and gave braking as 10.7,
+13.8 and 12.0 days on the long moves; the 2% rule gives 10.7, 10.2 and 11.8. During moves the largest gap between sets was
 3.5 days (0.7-1.7 days on the rest).
 
 ## What this means for the tracker (ideas#248)
-1. **Braking on the long moves took 11-14 days, not 1.5-2.** On the three moves of 20° or more, the drift fell from
-   its peak to the stop over 10.7, 13.8 and 12.0 days. The one-off pass-by windows written on 23 Nov 2026 (in
+1. **Braking on the long moves took 10-12 days, not 1.5-2.** On the three moves of 20° or more, the drift fell from
+   its peak to the stop over 10.7, 10.2 and 11.8 days; speeding up took 5.4, 6.5 and 6.8 days. The one-off pass-by windows written on 23 Nov 2026 (in
    ideas#248) allowed 1.5-2 days of braking, so their later dates are likely too early. The tracker's braking
    allowance should come from this table, not from a fixed figure.
-2. **Peak drift on the long moves was 2.8-4.4° a day.** The 2025 move coasted at about 3.38° a day for about 6 days
-   (18-23 Feb) before braking. The 2026 move was at 2.47° a day in its last public set and still speeding up.
+2. **Peak drift on the long moves was 2.8-4.4° a day.** The 2025 move reached about 3.36° a day by 13 Feb and
+   coasted near it for 10.3 days before braking. The 2026 move was at 2.47° a day in its last public set and still speeding up.
 3. **A brake projection gives roughly a week's notice on the long moves, and 1-4 days on the short ones.** The first
    fall in drift is not enough on its own: on the 2025 move it projected 121°E, 59° too far, because the braking
-   started gently. Waiting for two projections that agree within 1° gave 61.7°E, 7.6 days before arrival. On the
+   started gently. Waiting for two projections that agree within 1° gave 61.5°E, 7.6 days before arrival. Redone on each later set, the projection then fell to 60.0-60.2°E from 28 Feb to 3 Mar, about 2° short, because the braking came in two stages (a pause at 0.56° a day on 3-5 Mar). On the
    2023 move to 9°E, two agreeing projections were still 4.6° off at 8.6 days out, and came within 1° from 6.1 days.
    The page should show a projection only once it is steady, and say how far off steady projections have been on
    this object.
@@ -82,5 +85,5 @@ the set with the peak drift, and braking from that set to arrival. During moves 
 5. **Turnarounds count as stops.** Without the turnaround rule, the 78°E checkout is lost, so the stop table would
    miss one of Langbroek's nine stops.
 6. **The start of the 2026 move:** at 1.62° a day on 21 Nov, 1.71° west of 62°E, uniform speeding up from rest puts
-   the start about 2 days earlier (about 19 Nov). Past moves took 0.7-16.8 days to reach their peak, so this
+   the start about 2 days earlier (about 19 Nov). Past moves took 0.7-6.8 days to reach full speed, so this
    estimate rests on the assumption of uniform speeding up and should be shown with that caveat.
