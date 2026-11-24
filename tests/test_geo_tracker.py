@@ -105,6 +105,18 @@ class Luch2November2026(unittest.TestCase):
         stale = next(m for m in self.doc["movers"] if m["norad"] == 51281)
         self.assertNotIn("track", stale)
 
+    def test_last_day(self):
+        """ideas#322: nothing new in the 24 hours to 24 Nov 19:00Z; the day of 22 Nov brought one set, faster than
+        the one before it."""
+        self.assertEqual(self.m["last_day"]["new_sets"], 0)
+        objs, elsets = load_2026()
+        doc = gt.build(objs, elsets, ROLES, datetime(2026, 11, 22, 20, 0, tzinfo=timezone.utc))
+        d = next(m for m in doc["movers"] if m["norad"] == 55841)["last_day"]
+        self.assertEqual(d["new_sets"], 1)
+        self.assertEqual(d["set_before"], "2026-11-21T15:41:09Z")
+        self.assertAlmostEqual(d["drift_before"], -1.62, delta=0.01)
+        self.assertEqual(d["brake_before"], "none")
+
     def test_wording(self):
         self.assertIn("not a forecast", self.doc["note"])
         self.assertIn("braking", self.doc["braking_note"])
@@ -178,7 +190,8 @@ class PageWiring(unittest.TestCase):
         start = js.index("relocation tracker (tools/geo_tracker.py")
         part = js[start:js.index('document.addEventListener("click"', start)]
         for words in ("At the last measured rate", "Still speeding up", "extrapolated", "braking_note", "note",
-                      "How to read this section", "moverSummary", "moverChart", "mv-chartbox", "movers-"):
+                      "How to read this section", "moverSummary", "moverChart", "mv-chartbox", "movers-",
+                      "Last 24 hours", "From now", "An element set is", "slips west"):
             self.assertIn(words, part)
         self.assertEqual(part.count("braking_note"), 1)             # the braking note once, at the top (ideas#321)
         for bad in ("likely", "probab", "expected to", "will arrive", "target"):

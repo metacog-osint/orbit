@@ -25,6 +25,8 @@ Arithmetic on the last public element sets, not a forecast. For every object wit
                ones fell up to 2 deg short in a two-stage brake (2025).
   stops        the object's stop history in Orbit's sets, each with the nearest station-kept objects at the stop's
                departure (or now, for a current stop).
+  last_day     (ideas#322) the sets of the 24 hours before the build: how many, the drift of the newest set before
+               them, and the brake state as of 24 hours ago, so the page can say what changed since yesterday.
   track        for the page's chart (ideas#321): the sets from TRACK_LEAD_DAYS before the last held set (or the last
                TRACK_DAYS when Orbit holds no stop) to the newest, at most TRACK_MAX (thinned evenly, newest kept);
                none for a stale entry.
@@ -226,6 +228,15 @@ def track(o, rws, objs, elsets, role, now):
                          if abs(M._wrap180(k[0] - brake["projected_lon"])) <= STOP_NEAR_DEG]
         brake["near"].sort(key=lambda x: x["deg"])
     out["brake"] = brake
+    day_ago = now - timedelta(days=1)
+    before = [r for r in rws if _t(r["t"]) <= day_ago]
+    ld = {"new_sets": sum(1 for r in rws if _t(r["t"]) > day_ago), "brake_before": None, "drift_before": None,
+          "set_before": None}
+    if before:
+        ld["drift_before"], ld["set_before"] = before[-1]["drift"], before[-1]["t"]
+    if not stale:
+        ld["brake_before"] = steady_projection([r for r in moving if _t(r["t"]) <= day_ago])["state"]
+    out["last_day"] = ld
     passes = []
     out["passes"], out["passes_more"], out["passed_since_newest"] = [], 0, 0
     if brake.get("state") not in ("steady", "stale"):

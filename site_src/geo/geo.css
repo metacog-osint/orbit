@@ -125,6 +125,7 @@ button.linkish { font: inherit; font-size: var(--fs-sm); color: var(--acc); back
 button.mv-tt { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
   text-decoration: underline dotted; text-underline-offset: 3px; }
 #geo-movers abbr[title] { text-decoration: none; cursor: help; }
+.mv-fn { display: none; }
 @media (max-width: 34rem) {
   .mv-sum thead { display: none; }
   .mv-sum tr { display: block; padding: .45rem 0; border-bottom: 1px solid var(--line-2); }
@@ -135,4 +136,6 @@ button.mv-tt { font: inherit; color: inherit; background: none; border: 0; paddi
   .mv-sum td:last-child::after { content: ""; }
   .mv-sum td.num { white-space: normal; text-align: left; }
   .mv-pass-t th:nth-child(3), .mv-pass-t td:nth-child(3) { display: none; }   /* degrees ahead: the longitude says it */
+  .mv-pass-t th:nth-child(5), .mv-pass-t td:nth-child(5) { display: none; }   /* from now: shown under the date instead */
+  .mv-fn { display: block; }
 }
