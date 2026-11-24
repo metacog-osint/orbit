@@ -10,9 +10,11 @@
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
 <link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
 <link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 <link rel="stylesheet" href="footprints.css">
 <script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
 <script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
 </head>
 <body>
@@ -60,14 +62,14 @@
     </div>
     <p id="fp-fallback" class="small muted" hidden></p>
     <h3>Outlines in this case</h3>
-    <div class="table-wrap"><table id="fp-layers" class="fp-table">
+    <div class="table-wrap"><table id="fp-layers" class="fp-table" data-tic-fold>
       <thead><tr><th scope="col">Show</th><th scope="col">Kind</th><th scope="col">Outline</th><th scope="col">Source and date</th><th scope="col">Uncertainty</th></tr></thead>
       <tbody></tbody>
     </table></div>
     <div id="fp-scores-box" hidden>
       <h3>How far off the estimates are</h3>
       <p class="small muted">Each estimate against a published contour of the same beam. Shared area is the area inside both outlines over the area inside either. Edge distance is how far apart the two outlines run.</p>
-      <div class="table-wrap"><table id="fp-scores" class="fp-table">
+      <div class="table-wrap"><table id="fp-scores" class="fp-table" data-tic-fold>
         <thead><tr><th scope="col">Estimate</th><th scope="col">Checked against</th><th scope="col">Shared area</th><th scope="col">Published area covered</th><th scope="col">Estimate outside it</th><th scope="col">Edge distance, median</th><th scope="col">Edge distance, 95th percentile</th></tr></thead>
         <tbody></tbody>
       </table></div>
@@ -78,7 +80,7 @@
 </main>
 
 <footer class="wrap small muted">
-  <p>Prototype for review, not a published Orbit page. Satellite positions from element sets by Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, and CelesTrak; the footprint geometry is Orbit's own and has not been reviewed by USSPACECOM. Not for operational use. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause, <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth. Publicly available information only.</p>
+  <p>Prototype for review, not a published Orbit page. Satellite positions from element sets by Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, and CelesTrak; the footprint geometry is Orbit's own and has not been reviewed by USSPACECOM. Operators' contours (Arabsat, Telesat) are redrawn as facts with credit, from the operators' own maps; their files are not copied. Filed contours are credited to the Federal Communications Commission by file number; the contour data are the applicants'. Not for operational use. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause, <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth. Publicly available information only.</p>
 </footer>
 <script type="module" src="footprints.js"></script>
 </body>
