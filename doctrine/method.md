@@ -778,3 +778,16 @@ above) stands.
    time on two lines on a phone; a tap swaps it with UTC and back. Owner codes carry CelesTrak's full name on hover,
    and a closed list under each table names every code in it. On a phone the "Degrees ahead" column is hidden (the
    longitude gives it).
+
+## GEO movers: terms in place, open stop history, last 24 hours (`orbit-2.29`, 24 Nov 2026; ideas#322)
+
+1. **Terms.** The caveat block says what an element set is; each card's height above or below geostationary
+   altitude says why it drifts (higher: a longer orbit than the Earth's turn, so west; lower, east; about
+   0.013 deg a day for each km, from d(lon)/dt = -1.5 (da/a) x 360 deg a day).
+2. **From now.** Each pass-by table has a "From now" column, worked out in the viewer's browser from the coast date
+   (hours under 2 days, else days; "passed" once the date has gone by).
+3. **Stops shown open.** The stop history is a table under its own heading, with the rule for a stop stated.
+4. **Last 24 hours.** `geo_tracker` adds `last_day`: the sets in the 24 hours before the build, the drift of the
+   newest set before them, and the brake state as of 24 hours ago. The card says how many new public sets came,
+   whether the drift changed (by 0.01 deg a day or more), and whether the brake state changed. From the element
+   sets themselves; no stored copy of yesterday's page.
