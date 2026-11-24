@@ -1317,6 +1317,7 @@ function main() {
         (r.sources || []).map((x) => '<a href="' + esc(x[1]) + '">' + esc(x[0]) + "</a>").join(", ") + "</td></tr>";
     })) : "<p>None.</p>";
     beltTables(g.belt);
+    moverCards(g.belt && g.belt.movers);
   }
   // ---------------------------------------------------------------- belt board (tools/geo_belt.py; from Noisefloor's board, step 5)
   const ROLE_WORD = { inspection: "inspection-capable", servicing: "servicing" };
@@ -1374,6 +1375,77 @@ function main() {
     $("geo-drift").innerHTML = dr.length ? table(["Satellite", "Owner", "Longitude", "Drift"], dr.map((d) => "<tr><td>" + pick([d.norad], d.name) + roleTag(d.role) + "</td><td>" + esc(d.owner || "") +
       '</td><td class="num">' + (d.lon == null ? "–" : lonTxt(d.lon)) + '</td><td class="num">' + esc(rateTxt(d.drift)) + "</td></tr>")) : "<p>None.</p>";
   }
+  // relocation tracker (tools/geo_tracker.py, method orbit-2.27): wording as Tom chose on 24 Nov 2026
+  const when = (s) => esc(bothTxt(epochMs(s.replace("Z", "")), true));
+  const hoursTxt = (h) => (h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days");
+  const heightTxt = (km) => (Math.abs(km) < 1 ? "at geostationary altitude" : "about " + fmtN(Math.round(Math.abs(km))) + " km " + (km > 0 ? "above" : "below") + " geostationary altitude");
+  const ownTag = (o) => (o ? ' <span class="small muted">' + esc(o) + "</span>" : "");
+  const namesTxt = (os) => os.map((x) => pick([x.norad], x.name) + ownTag(x.owner)).join(", ");
+  const nearTxt = (xs) => xs.map((x) => pick([x.norad], x.name) + " (" + x.deg.toFixed(2) + "°)").join(", ");
+  function moverCard(m) {
+    const n = m.newest, out = ["<h3>" + pick([m.norad], m.name) + roleTag(m.role) + ownTag(m.owner) + "</h3>"];
+    out.push("<p><strong>Newest element set:</strong> " + when(n.t) + ", " + hoursTxt(n.age_h) + " old: " + lonTxt(n.lon) + ", drifting " + esc(rateTxt(n.drift)) + ", " + heightTxt(n.dh_km) + ".");
+    if (m.stale) {
+      out.push(" No public set for over 3 days, so Orbit shows no position now and no dates.</p>");
+      return out.join("");
+    }
+    out.push(" <strong>Now:</strong> about " + lonTxt(m.now.lon) + " at " + when(m.now.at) + ", <em>extrapolated</em> at that rate.</p>");
+    const d = m.departure;
+    if (d) {
+      const est = d.estimated_start || [], ts = est.map((e) => epochMs(e.t.replace("Z", ""))).sort((a, b) => a - b);
+      out.push("<p><strong>Left " + lonTxt(d.lon) + ":</strong> its last set there was " + when(d.last_held_set) + ".");
+      if (ts.length) {
+        out.push(" The move began about " + esc(bothTxt(ts[0], true)) + (ts.length > 1 && ts[ts.length - 1] - ts[0] > 6e4 ? " to " + esc(bothTxt(ts[ts.length - 1], true)) : "") +
+          ' <span class="small muted">(estimated from the drift rates of ' + (est.length > 1 ? "its first two moving sets" : "its first moving set") + ", assuming it sped up evenly from rest)</span>.");
+      }
+      if (d.gap_to_first_moving_h >= 48) out.push(" No public set from then until the first set showing the move, " + hoursTxt(d.gap_to_first_moving_h) + " later.");
+      out.push("</p>");
+    } else {
+      out.push("<p>Orbit’s element sets show no stop for it: it drifts in every set Orbit holds (" + fmtN(m.moving_sets) + ").</p>");
+    }
+    const b = m.brake || {};
+    if (b.state === "steady") {
+      out.push("<p><strong>Braking:</strong> the drift is falling. At a constant rate of braking it would stop at about <strong>" + lonTxt(b.projected_lon) + "</strong> (the set of " + when(b.at) +
+        "; the one before gave " + lonTxt(b.previous_lon) + "). " + (b.near && b.near.length ? "Station-kept satellites within 2°: " + nearTxt(b.near) + "." : "No station-kept satellite within 2°.") +
+        ' <span class="small muted">On Luch (Olymp) 2’s long moves such projections came 7.6 to 8.6 days before arrival and were off by 0.5 to 4.6°.</span></p>');
+      return out.join("") + stopsTable(m);
+    }
+    if (b.state === "braking seen") out.push("<p><strong>Braking seen</strong> in the newest sets; no steady stop projection yet.</p>");
+    const ps = m.passes || [], accel = (m.cases || []).indexOf("speeding up") >= 0;
+    out.push("<h4>At the last measured rate</h4>");
+    if (ps.length) {
+      const head = ["Longitude", "Satellites there", "Degrees ahead", "At the last measured rate"].concat(accel ? ["Still speeding up"] : []);
+      out.push(foldTable(head, ps.map((p) => '<tr><td class="num">' + lonTxt(p.lon) + "</td><td>" + namesTxt(p.objects) + '</td><td class="num">' + p.deg_ahead.toFixed(1) + "°</td><td>" + when(p.coast) + "</td>" +
+        (accel ? "<td>" + (p.speeding_up ? when(p.speeding_up) : "–") + "</td>" : "") + "</tr>")));
+    } else {
+      out.push("<p>No station-kept satellite ahead within 45 days at this rate.</p>");
+    }
+    const notes = [];
+    if (m.passed_since_newest) notes.push(fmtN(m.passed_since_newest) + (m.passed_since_newest > 1 ? " slots" : " slot") + " passed at this rate since the newest set, not listed.");
+    if (m.passes_more) notes.push(fmtN(m.passes_more) + " more slots within 45 days, not listed.");
+    notes.push(accel ? "Two cases: the newest rate held, and the rate still rising as between the last two sets (" + esc(String(m.speeding_up.rate_change)) + "° a day per day), to at most 4.5° a day."
+      : "One case: the newest rate held. The still-speeding-up case needs three moving sets whose rates rise in turn.");
+    notes.push(esc(m.braking_note));
+    notes.push(esc(m.note));
+    out.push('<p class="small">' + notes.join(" ") + "</p>");
+    return out.join("") + stopsTable(m);
+  }
+  function stopsTable(m) {
+    const st = m.stops || [];
+    if (!st.length) return "";
+    return '<details class="globe-more"><summary>Stops in Orbit’s element sets (' + fmtN(st.length) + ")</summary>" +
+      table(["Longitude", "From", "To", "Days", "Nearest station-kept satellites then"], st.map((s) => '<tr><td class="num">' + lonTxt(s.lon) + (s.kind === "turnaround" ? " (turned)" : "") +
+        "</td><td>" + when(s.arrival) + "</td><td>" + when(s.departure) + '</td><td class="num">' + s.days.toFixed(1) + "</td><td>" + nearTxt(s.neighbours) + "</td></tr>")) +
+      '<p class="small">Orbit’s GEO element sets start on 1 July 2026, so the first stop listed may have begun earlier.</p></details>';
+  }
+  const foldTable = (head, rows) => table(head, rows).replace("<table>", "<table data-tic-fold>");
+  function moverCards(t) {
+    if (!$("geo-movers")) return;
+    if (!t || t.error) { $("geo-movers").textContent = "Not built in the last update" + (t && t.error ? " (" + t.error + ")" : "") + "."; return; }
+    const ms = (t.movers || []).slice().sort((a, b) => (a.stale === b.stale ? 0 : a.stale ? 1 : -1));
+    $("geo-movers").innerHTML = (ms.length ? ms.map(moverCard).join("") : "<p>No satellite with a listed role is drifting along the belt.</p>") +
+      '<p class="small">At ' + when(t.at_utc) + ". " + esc(t.attribution) + "</p>";
+  }
   document.addEventListener("click", (e) => {
     const b = e.target.closest("button[data-pick]");
     if (!b) return;
@@ -1391,7 +1463,7 @@ function main() {
   if (S.place) { $("g-place").value = S.place.name || S.place.lat.toFixed(3) + ", " + S.place.lon.toFixed(3); $("g-noplace").hidden = false; }
   filtersUI();
   fetch("data/geo/globe.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((g) => {
-    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles", "geo-belt-status", "geo-close", "geo-changes", "geo-drift"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
+    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles", "geo-belt-status", "geo-close", "geo-changes", "geo-drift", "geo-movers"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
     const board = { roles: g.roles || {}, region: g.region || {}, rpo: g.rpo || {} };
     S.globe = g; S.board = board; S.owners = g.owners || {}; S.cite = g.source;
     const cols = g.cols, roleIds = new Set(Object.keys((board || {}).roles || {}).map(Number));

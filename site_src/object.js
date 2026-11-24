@@ -9,7 +9,7 @@
   var q = new URLSearchParams(location.search);
   var KEY = (q.get("n") || q.get("j") || "").trim().toUpperCase().replace(/^S0*(?=\d)/, "").replace(/^0+(?=\d)/, "");
   var NUMBERED = /^\d+$/.test(KEY);
-  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null;
+  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null, movers = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -353,6 +353,27 @@
       var to = link("On Orbit's page", "./#mv-" + n);
       sm.appendChild(to);
     }
+    // relocation tracker (method orbit-2.27): the GEO page's section for this object, in short
+    var mover = n && movers && !movers.error ? (movers.movers || []).filter(function (m) { return String(m.norad) === n; })[0] : null;
+    if (mover) {
+      any = true;
+      var nw = mover.newest, lonT = function (x) { return Math.abs(x).toFixed(2) + "°" + (x < 0 ? "W" : "E"); };
+      var age = nw.age_h < 48 ? Math.round(nw.age_h) + " hours" : Math.round(nw.age_h / 24) + " days";
+      var sg = sub(box, "On the move along the GEO belt", mover.note);
+      var lines = ["Newest element set " + fmt(nw.t) + ", " + age + " old: " + lonT(nw.lon) + ", drifting " + Math.abs(nw.drift).toFixed(2) + "° a day " +
+        mover.direction + "."];
+      if (mover.stale) lines.push("No public set for over 3 days, so Orbit shows no position now and no dates.");
+      else lines.push("Now about " + lonT(mover.now.lon) + " at " + fmt(mover.now.at) + ", extrapolated at that rate.");
+      var dep = mover.departure;
+      if (dep) {
+        var est = (dep.estimated_start || []).map(function (e) { return e.t; }).sort();
+        lines.push("Left " + lonT(dep.lon) + " after its set of " + fmt(dep.last_held_set) + (est.length ? "; the move began about " + fmt(est[0]) +
+          (est.length > 1 && est[est.length - 1] !== est[0] ? " to " + fmt(est[est.length - 1]) : "") + " (estimated from the drift rates, assuming it sped up evenly from rest)" : "") + ".");
+      }
+      if (mover.brake && mover.brake.state === "steady") lines.push("Braking: at a constant rate of braking it would stop at about " + lonT(mover.brake.projected_lon) + ".");
+      lines.forEach(function (t) { sg.appendChild(el("p", "", t)); });
+      sg.appendChild(link("Pass-by dates and stops on the GEO page", "geo.html#movers"));
+    }
     var rpo = (((snap.rpo || {}).rows) || []).filter(function (r) {
       var g = r.gcat || {};
       return (g.target || []).concat(g.chaser || []).some(mine);
@@ -536,8 +557,8 @@
     return;
   }
   Promise.all([getJson("data/catalog/" + shardName(KEY)), getJson("data/catalog/rules.json"), getJson("data/catalog/index.json"),
-    getJson("data/snapshot.json"), getJson("data/archive.json")]).then(function (r) {
-    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4];
+    getJson("data/snapshot.json"), getJson("data/archive.json"), getJson("data/geo/movers.json")]).then(function (r) {
+    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4]; movers = r[5];
     shard = r[0] && rules ? r[0] : r[0] === null && rules && man ? { missing: true, sources: {}, swaps: [] } : null;
     obj = shard && !shard.missing ? (shard.objects || {})[KEY] || null : null;
     if (shard && !obj) shard.missing = true;  // the shard is here but this key is not in it

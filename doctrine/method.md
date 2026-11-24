@@ -703,7 +703,8 @@ already reads, the roles are `site_src/geo_roles.json`.
 Tom, 23 Nov 2026, after LUCH (OLYMP) 2 left 62 E: Orbit could say that it moved, not where it is now, what it will
 pass or where it stops. Module `tools/geo_tracker.py` (standard library, build time, no request); calibration
 `tools/geo_relocations.py` and `docs/validation/luch2-relocations.md` (Luch 2's full history, 2023-2026, read once).
-**Not on the page or in any public file yet:** the wording is Tom's call first (item 9).
+On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#movers`), in `globe.json`'s
+`belt.movers` and in `data/geo/movers.json`, which the object pages read (item 10).
 1. **Scope.** Objects with a listed role (`site_src/geo_roles.json`) that the belt board classes as drifting
    (|drift| 0.1 deg a day or more), from the element sets the GEO run already publishes. Low-inclination longitudes
    (`maneuver.geo_position`); neighbours are station-kept objects (inclination under 1 deg), where the same formula
@@ -741,6 +742,12 @@ pass or where it stops. Module `tools/geo_tracker.py` (standard library, build t
 8. **What it never says:** why, where the object is going, which satellite it means to approach, or how likely
    anything is. Every figure is arithmetic on public element sets and says how many sets it rests on; the page says
    so in one line (`geo_tracker.NOTE`). Feed tier, item kind and ids are unchanged (Tom's call).
-9. **Wording, Tom's call before publishing** (recommended default): a table headed "At the last measured rate",
-   the two cases named as in item 4, no likelihood words, the braking note and the object's own record of steady
-   projections beside it; the estimated start shown on the GEO page and the object page, not in the feed id.
+9. **Wording (Tom, 24 Nov 2026: "Yes, use the default"):** a table headed "At the last measured rate", the two
+   cases named as in item 4, no likelihood words, the braking note and Luch 2's record of steady projections
+   beside it; the estimated start shown on the GEO page and the object page, not in the feed id. A test holds the
+   section free of likelihood words.
+10. **Where it shows.** The GEO page: one card per mover, those with a current set first; the pass-by table in the
+   shared ten-row window (`tic-fold.js`, loaded on the GEO page from this version); stops in a closed list. The
+   object page: newest set, now, departure and estimated start, a steady stop projection, and a link to the GEO
+   page. Built in the update run by `tools/geo_page.py` (`movers`); a failure there leaves the belt board as it was
+   and says the section was not built.
