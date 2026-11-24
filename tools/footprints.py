@@ -3,6 +3,12 @@ site_src/footprints-data.json (Tom, 24 Nov 2026: publish), built here from the r
 
     python tools/footprints.py build --day-file DAY.geo-region.json --tle-dir DIR [--published DIR] --out FILE
     python tools/footprints.py preview --json FILE --dir FOLDER      a small standalone copy of the page to serve
+    python tools/footprints.py gateways --gateways FILE [--data FILE]  add or refresh only the FCC earth-station layer
+
+Earth stations (decision 5): with --gateways (the file tools/ibfs_gateways.py writes from the FCC's IBFS bulk
+database), each case that names its satellite's IBFS entries under "fcc_earth_stations" gets a published layer of
+the sites licensed to work that satellite, a table of every licence, and the bulk file's age at build time. Names
+are matched exactly, never guessed: a case with no entry gets a note saying none was matched.
 
 Three cases, each outline labelled published, computed or estimated (orbit/footprint.py says what those mean):
 a wide-beam GEO satellite, a high-throughput GEO satellite and a LEO constellation. The cases and every assumption
@@ -373,15 +379,90 @@ def geo_case(case, day_file, published_dir, when):
             "layers": layers, "scores": scores, "notes": notes, "bounds": bounds(rings_all[:1] if case.get("fit") == "los" or not est_rings else est_rings, pad=6.0)}
 
 
+GATEWAY_SOURCE = "FCC IBFS bulk database, earth station licences (credit: Federal Communications Commission)"
+
+
+def gateway_parts(case, gw, built):
+    """The FCC earth-station layer, table and notes for one case. `gw` is the file ibfs_gateways.py writes;
+    `built` the build date. Returns (layer or None, table or None, notes)."""
+    want = case.get("fcc_earth_stations")
+    if want is None:
+        return None, None, []
+    h = gw["header"]
+    by_id = {x["id"]: x for x in gw["satellites"]}
+    missing = [w for w in want if w not in by_id]
+    if missing:                                    # a renamed entry must fail the build, not vanish from the page
+        raise SystemExit(f"{case['id']}: fcc_earth_stations not in the gateways file: {missing}")
+    feats = [f for w in want for f in by_id[w]["features"]]
+    file_day = datetime.fromisoformat(h["file_date"]).date()
+    age = (built - file_day).days
+    when = f"the FCC's bulk file of {file_day.day} {file_day:%b %Y}, {age} days old when this page was built"
+    if not feats:
+        return None, None, [f"No current FCC earth-station licence names this satellite in {when}. Earth stations "
+                            "licensed in other countries are not in the FCC's records."]
+    rows, points = [], []
+    for f in feats:
+        q = f["properties"]
+        rows.append([q["callsign"], q.get("licensee") or "", q.get("station_class_text") or q.get("station_class") or "",
+                     q.get("date_grant") or "", q.get("date_expire") or "", "yes" if f["geometry"] else "no coordinates"])
+        if f["geometry"]:
+            points.append({"type": "Feature", "geometry": f["geometry"],
+                           "properties": {k: q.get(k) for k in ("callsign", "licensee", "station_class", "date_expire")}})
+    rows.sort(key=lambda r: (r[1].lower(), r[0]))
+    n, drawn = len(feats), len(points)
+    names = ", ".join(w.split("@")[0].strip() for w in want)
+    layer = {"id": "fcc-es", "kind": "published", "label": f"Earth stations the FCC has licensed to work {names}: "
+             f"{drawn} sites drawn" + (f", {n - drawn} more with no coordinates on file" if n > drawn else ""),
+             "source": GATEWAY_SOURCE, "date": h["file_date"], "on": True, "point_radius": 3,
+             "uncertainty": f"As of {when}: licences granted since are missing, and some shown may since have lapsed or been "
+                            "surrendered. A licence naming the satellite is not proof the site uses it, and not every site is "
+                            "a gateway (the class is in the table). US licences only.",
+             "geojson": {"type": "FeatureCollection", "features": points}}
+    table = {"title": f"FCC earth-station licences for {names} ({n})", "text_cols": [1, 2, 5],
+             "note": f"Current licences only (granted, not expired, surrendered, denied or dismissed), from {when}. "
+                     "Blanket licences for user terminals have no site and are not listed. Sites on the FCC's "
+                     "Permitted List may also work this satellite without naming it, and are not counted here.",
+             "columns": ["Call sign", "Licensee", "Station class", "Granted", "Expires", "On the map"], "rows": rows}
+    return layer, table, []
+
+
+def add_gateways(case, out, gw, built):
+    """Put the earth-station parts into one built case, replacing any from an earlier build."""
+    layer, table, notes = gateway_parts(case, gw, built)
+    out["layers"] = [l for l in out.get("layers", []) if l["id"] != "fcc-es"] + ([layer] if layer else [])
+    title = "FCC earth-station licences for "
+    tables = [t for t in out.get("tables", []) if not t["title"].startswith(title)] + ([table] if table else [])
+    if tables or "tables" in out:
+        out["tables"] = tables
+    old = [x for x in out.get("notes", []) if not x.startswith("No current FCC earth-station licence")]
+    out["notes"] = old + notes
+
+
+def cmd_gateways(a):
+    cases = {c["id"]: c for c in json.loads(CASES.read_text(encoding="utf-8"))["cases"]}
+    gw = json.loads(pathlib.Path(a.gateways).read_text(encoding="utf-8"))
+    path = pathlib.Path(a.data)
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    built = datetime.fromisoformat(doc["generated_at"].replace("Z", "+00:00")).date()
+    for out in doc["cases"]:
+        add_gateways(cases[out["id"]], out, gw, built)
+        print(out["id"], "earth stations:", next((len(l["geojson"]["features"]) for l in out["layers"] if l["id"] == "fcc-es"), 0))
+    path.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    print("wrote", path, path.stat().st_size, "bytes")
+
+
 def cmd_build(a):
     cases = json.loads(CASES.read_text(encoding="utf-8"))
     when = datetime.fromisoformat(a.when.replace("Z", "+00:00")) if a.when else datetime.now(timezone.utc).replace(microsecond=0)
     out = []
+    gw = json.loads(pathlib.Path(a.gateways).read_text(encoding="utf-8")) if a.gateways else None
     for case in cases["cases"]:
         if case["class"] == "LEO constellation":
             out.append(leo_case(case, a.tle_dir, when))
         else:
             out.append(geo_case(case, a.day_file, a.published, when))
+        if gw:
+            add_gateways(case, out[-1], gw, datetime.now(timezone.utc).date())
         print(case["id"], "layers:", [l["id"] for l in out[-1]["layers"]], "scores:", len(out[-1].get("scores", [])))
     doc = {"schema": "orbit-footprints/0", "prototype": True, "generated_at": iso(datetime.now(timezone.utc)), "positions_at": iso(when),
            "kinds": KINDS, "cases": out}
@@ -418,8 +499,13 @@ def main():
     s.add_argument("--tle-dir", required=True)
     s.add_argument("--published")
     s.add_argument("--when", help="UTC time for positions, ISO 8601 (default now)")
+    s.add_argument("--gateways", help="earth stations by satellite, from tools/ibfs_gateways.py")
     s.add_argument("--out", default=str(ROOT / "data" / "footprints" / "footprints.json"))
     s.set_defaults(fn=cmd_build)
+    s = sub.add_parser("gateways")
+    s.add_argument("--gateways", required=True)
+    s.add_argument("--data", default=str(ROOT / "site_src" / "footprints-data.json"))
+    s.set_defaults(fn=cmd_gateways)
     s = sub.add_parser("preview")
     s.add_argument("--json", required=True)
     s.add_argument("--dir", required=True)
