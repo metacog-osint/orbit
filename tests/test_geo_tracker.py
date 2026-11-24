@@ -146,5 +146,29 @@ class Luch2Move2025(unittest.TestCase):
         self.assertNotIn("projected_lon", m["brake"])
 
 
+class PageWiring(unittest.TestCase):
+    def test_movers_in_belt(self):
+        """geo_page.movers gives the tracker; a failure becomes {"error": ...} so the belt board still shows."""
+        import geo_page
+        objs, elsets = load_2026()
+        now = datetime(2026, 11, 24, 19, 0)
+        doc = geo_page.movers(objs, elsets, ROLES, now)
+        self.assertEqual(sorted(m["norad"] for m in doc["movers"]), [51281, 55841])
+        self.assertIn("error", geo_page.movers([{"norad": 55841, "class": "drifting"}], {55841: [{}]}, ROLES, now))
+
+    def test_page_wording(self):
+        """Tom's wording (24 Nov 2026): the table heading, both cases named, the braking note, the extrapolated mark;
+        no likelihood words in the section."""
+        html = open(os.path.join(ROOT, "site_src", "geo.html"), encoding="utf-8").read()
+        js = open(os.path.join(ROOT, "site_src", "geo", "globe.js"), encoding="utf-8").read()
+        self.assertIn('id="geo-movers"', html)
+        self.assertIn('src="tic-fold.js"', html)
+        part = js[js.index("relocation tracker (tools/geo_tracker.py"):js.index("function moverCards")]
+        for words in ("At the last measured rate", "Still speeding up", "extrapolated", "braking_note", "note"):
+            self.assertIn(words, part)
+        for bad in ("likely", "probab", "expected to", "will arrive", "target"):
+            self.assertNotIn(bad, part.lower())
+
+
 if __name__ == "__main__":
     unittest.main()

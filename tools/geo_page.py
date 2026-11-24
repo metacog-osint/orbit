@@ -209,10 +209,24 @@ def belt(region, active, elsets, now):
     import geo_belt
     cols = region["object_cols"]
     objs = [o for o in (dict(zip(cols, row)) for row in region["objects"]) if o["norad"] in active]
+    rmap = {k: v["role"] for k, v in roles().items()}
     try:
-        return geo_belt.build(objs, elsets, {k: v["role"] for k, v in roles().items()}, now.replace(tzinfo=timezone.utc))
+        b = geo_belt.build(objs, elsets, rmap, now.replace(tzinfo=timezone.utc))
     except Exception as e:  # noqa: BLE001: reported on the page and in the log
         print(f"geo page: belt board skipped: {e!r}")
+        return {"error": f"{type(e).__name__}: {e}"}
+    b["movers"] = movers(objs, elsets, rmap, now)
+    return b
+
+
+def movers(objs, elsets, rmap, now):
+    """The relocation tracker (tools/geo_tracker.py, method orbit-2.27) for listed-role objects drifting along the
+    belt; `objs` carry the belt board's class. {"error": ...} on a failure, so the board still shows."""
+    import geo_tracker
+    try:
+        return geo_tracker.build(objs, elsets, rmap, now.replace(tzinfo=timezone.utc))
+    except Exception as e:  # noqa: BLE001
+        print(f"geo page: relocation tracker skipped: {e!r}")
         return {"error": f"{type(e).__name__}: {e}"}
 
 
@@ -258,6 +272,10 @@ def build(release, site, now=None, snapshot=None):
            "belt": belt(region, active, elsets, now)}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
+    # the relocation tracker alone, small, for the object pages (method orbit-2.27)
+    mv = (doc["belt"] or {}).get("movers") if "error" not in (doc["belt"] or {}) else {"error": doc["belt"]["error"]}
+    with open(os.path.join(out_dir, "movers.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(mv or {"error": "not built"}, f, separators=(",", ":"), ensure_ascii=False)
     return doc
 
 
@@ -286,6 +304,10 @@ def main():
         print(f"belt board: {b['objects']} active objects {b['counts']}; {b['close_other_owner_count']} close pairs of "
               f"different owners ({b['close_same_owner_count']} of one owner); orbit changes {b['change_counts']} "
               f"({len(b['not_judged'])} objects not judged)")
+        mv = b.get("movers") or {}
+        if "error" not in mv:
+            print(f"relocation tracker: {len(mv['movers'])} listed-role movers "
+                  f"({sum(1 for m in mv['movers'] if m['stale'])} with a stale newest set)")
 
 
 if __name__ == "__main__":
