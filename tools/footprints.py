@@ -226,6 +226,8 @@ def read_published(path, b):
     """One filed beam from a GXT text file or a GIMS database block saved as .bin (see orbit.footprint)."""
     if b.get("format") == "kml" or path.suffix.lower() == ".kml":
         return fp.parse_eirp_kml(path.read_bytes(), b.get("beam_id"))
+    if b.get("format") == "geojson_contours":
+        return fp.parse_contour_geojson(path.read_bytes(), b.get("unit", "dBW"), b.get("beam_id"))
     if b.get("format") == "gims_block" or path.suffix.lower() == ".bin":
         return fp.parse_gims_block(path.read_bytes(), b.get("beam_id"), b.get("emi_rcp"), b.get("polar"))
     doc = fp.parse_gxt(path.read_bytes().decode("cp1252"))
@@ -233,6 +235,16 @@ def read_published(path, b):
     if not want:
         raise SystemExit(f"{path}: no beam {b.get('beam_id')}")
     return want[0]
+
+
+def contour_words(beam, level, short=False):
+    """How a published contour is named on the page, by its unit."""
+    unit = beam.get("unit")
+    if unit == "dBW":
+        return f"operator's contour, {level:g} dBW downlink EIRP" if short else f"operator's contour at {level:g} dBW downlink EIRP, redrawn"
+    if unit == "dB/K":
+        return f"operator's contour, {level:g} dB/K uplink G/T" if short else f"operator's contour at {level:g} dB/K uplink G/T, redrawn"
+    return f"filed contour, {level:g} dB" if short else f"filed contour at {level:g} dB from the beam's peak"
 
 
 def level_rings(sat, beam, level, bore):
@@ -279,7 +291,7 @@ def geo_case(case, day_file, published_dir, when):
             continue
         beam = read_published(path, b)
         beams[b["id"]] = beam
-        bore = beam["boresights"][0]["point"] if beam["boresights"] else None
+        bore = beam["boresights"][0]["point"] if beam["boresights"] else b.get("near")
         for level in b.get("levels_db", []):
             main, rings, joined = level_rings(sat, beam, level, bore)
             if not main:
@@ -288,9 +300,8 @@ def geo_case(case, day_file, published_dir, when):
             published[(b["id"], level)] = main
             rings_all += rings
             note = " Parts that reach the Earth's edge as the satellite sees it are closed along that edge." if joined else ""
-            what = (f"operator's contour at {level:g} dBW downlink EIRP, redrawn" if beam.get("unit") == "dBW"
-                    else f"filed contour at {level:g} dB from the beam's peak")
-            layers.append({"id": lid, "kind": "published", "label": f"{b['label']}: {what}",
+            what = contour_words(beam, level)
+            layers.append({"id": lid, "kind": "published", "label": f"{b['label']}: {what}", "on": b.get("on", True),
                            "source": b["source"], "source_url": b.get("source_url"), "date": b.get("date"),
                            "uncertainty": b.get("uncertainty", "As filed. A filing shows the design, not a measurement, and may predate launch.") + note,
                            "geojson": {"type": "FeatureCollection", "features": [feature(polygon(r), gain_db=level, beam=beam.get("beam_id"),
@@ -335,17 +346,24 @@ def geo_case(case, day_file, published_dir, when):
         layers.append({"id": est["id"], "kind": "estimated", "label": f"{est['label']}: {how}", "source": est["source"],
                        "source_url": est.get("source_url"), "date": est.get("date"), "uncertainty": unc,
                        "geojson": {"type": "FeatureCollection", "features": [feature(polygon(ring), method=est["method"])]}})
-        key = tuple(est["check"]) if est.get("check") else None
-        if key and (key[0], key[1]) in published:
-            pub = published[(key[0], key[1])]
-            scores.append({"estimate": est["label"], "published": (f"operator's contour, {key[1]:g} dBW" if beams[key[0]].get("unit") == "dBW" else f"filed contour, {key[1]:g} dB"), **fp.overlap(ring, pub), **fp.contour_distance(ring, pub)})
+        for key in ([est["check"]] if est.get("check") else []) + est.get("checks", []):
+            if (key[0], key[1]) in published:
+                pub = published[(key[0], key[1])]
+                scores.append({"estimate": est["label"], "published": contour_words(beams[key[0]], key[1], short=True),
+                               **fp.overlap(ring, pub), **fp.contour_distance(ring, pub)})
     for e, lid in ((x, f"los{x}") for x in case.get("line_of_sight_deg", [])[:1]):
         for (bid, level), pub in published.items():
             if case.get("score_line_of_sight") and (bid, level) == tuple(case["score_line_of_sight"]):
                 los = fp.los_contour(sat, e)
                 scores.append({"estimate": f"Line of sight, {e:g} degrees (computed, shown for scale)",
-                               "published": (f"operator's contour, {level:g} dBW" if beams[bid].get("unit") == "dBW" else f"filed contour, {level:g} dB"),
+                               "published": contour_words(beams[bid], level, short=True),
                                **fp.overlap(los, pub), **fp.contour_distance(los, pub)})
+    # one published contour against another: a filing against the operator's map, uplink against downlink
+    for x in case.get("cross_checks", []):
+        a, b2 = tuple(x["contour"]), tuple(x["against"])
+        if a in published and b2 in published:
+            scores.append({"estimate": x["label"], "published": contour_words(beams[b2[0]], b2[1], short=True),
+                           **fp.overlap(published[a], published[b2]), **fp.contour_distance(published[a], published[b2])})
     notes = left_out + list(case.get("notes", []))
     if not published and case.get("published"):
         notes.insert(0, "No published contour was supplied to this build, so the estimates carry no score.")
@@ -383,7 +401,7 @@ def cmd_preview(a):
     (dst / "data").mkdir(parents=True, exist_ok=True)
     src = ROOT / "site_src"
     for name in ("footprints.html", "footprints.js", "footprints.css", "style.css", "tic-time.css", "tic-time.js", "tic-nav.css",
-                 "tic-nav.js", "tic-shell.css", "_headers"):
+                 "tic-nav.js", "tic-shell.css", "tic-fold.css", "tic-fold.js", "_headers"):
         shutil.copy2(src / name, dst / name)
     shutil.copytree(src / "vendor" / "maplibre-gl", dst / "vendor" / "maplibre-gl", dirs_exist_ok=True)
     countries = json.loads((ROOT / "doctrine" / "kit" / "geo" / "countries.json").read_text(encoding="utf-8"))
