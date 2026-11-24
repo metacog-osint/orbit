@@ -101,11 +101,12 @@ function table(c) {
   (c.tables || []).forEach((t) => {
     extra.append(el("h3", {}, t.title));
     if (t.note) extra.append(el("p", { class: "small muted" }, t.note));
-    const wrap = el("div", { class: "table-wrap" }), tb = el("table", { class: "fp-table" }), head = el("tr");
+    const wrap = el("div", { class: "table-wrap" }), tb = el("table", { class: "fp-table", "data-tic-fold": "", "data-tic-fold-find": "" }), head = el("tr");
+    const text = new Set(t.text_cols || []);
     t.columns.forEach((h) => head.append(el("th", { scope: "col" }, h)));
     const th = el("thead"); th.append(head);
     const bd = el("tbody");
-    t.rows.forEach((r) => { const tr = el("tr"); r.forEach((v, i) => tr.append(el("td", i ? { class: "num" } : {}, String(v)))); bd.append(tr); });
+    t.rows.forEach((r) => { const tr = el("tr"); r.forEach((v, i) => tr.append(el("td", i && !text.has(i) ? { class: "num" } : {}, String(v)))); bd.append(tr); });
     tb.append(th, bd); wrap.append(tb); extra.append(wrap);
   });
   const notes = $("fp-notes");
