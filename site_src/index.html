@@ -73,8 +73,22 @@
           <dt>Breakup</dt><dd>An object that came apart in orbit, or collided with another, as GCAT records it.</dd>
           <dt>Debris, rocket stage</dt><dd>Pieces left in orbit by launches and breakups, and the spent upper stages
             of rockets, catalogued alongside working satellites.</dd>
+          <dt>MEO, HEO</dt><dd>Medium Earth orbit, between low orbit and geostationary, where navigation satellites
+            such as GPS fly; highly elliptical orbit, swinging far out and back close each turn.</dd>
+          <dt>NORAD number, COSPAR ID</dt><dd>An object's catalogue number from the US space surveillance catalogue
+            (25544 is the International Space Station), and its international designator: launch year, launch number
+            that year and a piece letter (1998-067A).</dd>
+          <dt>Owner code</dt><dd>A two-letter country code beside its flag (CN China, RU Russia, JP Japan). SU is the
+            Soviet Union, which GCAT keeps apart from Russia. An intergovernmental owner shows its code only, such as
+            ESA, the European Space Agency.</dd>
+          <dt>RPO</dt><dd>Rendezvous and proximity operations: one satellite manoeuvring close to another, as the
+            Secure World Foundation's report records them.</dd>
+          <dt>Element set, GP, SGP4</dt><dd>The published numbers that describe an orbit at one moment (GP, general
+            perturbations, is the current format), and the standard model that turns them into a position.</dd>
         </dl>
       </details>
+      <p class="small muted caveat">Observations from public catalogues and element sets: not warnings, and nothing here
+        says why a satellite moved. <a href="https://github.com/metacog-osint/orbit/blob/main/doctrine/method.md">How Orbit reads them</a>.</p>
     </div>
     <div class="tiles tic-tiles" id="tiles" aria-live="polite"></div>
     <p class="legend small muted" aria-label="Country colours">
