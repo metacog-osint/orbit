@@ -7,6 +7,7 @@
 <meta name="description" content="Every object in and near the geostationary belt on a globe, from public orbital data: where each one is, where it has been, arrivals and departures, callouts, and Secure World Foundation's rendezvous and proximity pairs. Proximity and behaviour, never intent.">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="geo/geo.css">
+<link rel="alternate" type="application/json" title="Orbit GEO data (JSON)" href="data/geo/globe.json">
 <link rel="stylesheet" href="tic-time.css">
 <link rel="stylesheet" href="tic-nav.css">
 <script src="tic-time.js"></script>
@@ -20,8 +21,6 @@
   <div class="wrap top-row">
     <div class="brand"><strong>Orbit</strong><span class="muted">The Intelligence Company</span></div>
     <nav class="top-nav">
-      <a href="data/geo/globe.json">GEO data</a>
-      <a href="data/geo/callouts.json">Callouts</a>
       <span id="time-settings"></span>
     </nav>
   </div>
@@ -171,6 +170,10 @@
     Space Defense Squadron, redistributed under USSPACECOM's blanket approval for basic SSA data. Orbit-change analysis:
     The Intelligence Company, not reviewed or endorsed by USSPACECOM. Not for operational use. Publicly available
     information only.</p>
+  <nav class="tic-data" aria-label="Data and downloads"><span class="tic-data-k">Data and downloads</span>
+    <a href="data/geo/globe.json">GEO data (JSON)</a>
+    <a href="data/geo/callouts.json">Callouts (JSON)</a>
+    <a href="https://github.com/metacog-osint/orbit">Source code</a></nav>
 </footer>
 </body>
 </html>
