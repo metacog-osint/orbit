@@ -295,9 +295,8 @@ class Horizon(unittest.TestCase):
 
 
 class PublishedData(unittest.TestCase):
-    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). Telesat's beam
-    files were read for private scoring only, so nothing of Telesat's may reach this file without Tom's further yes;
-    nor may a local path."""
+    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). Only sources
+    cleared for the page may reach it, and no local path; the word list names a source not cleared."""
     def test_committed_data_is_clean_and_labelled(self):
         import json
         import pathlib
