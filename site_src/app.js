@@ -156,13 +156,14 @@
     var h = snap.hygiene || {};
     [["Orbital launches, 7 days", launches.length, "launches"],
      ["Scheduled, next 14 days", (snap.upcoming || []).length, "upcoming"],
-     ["Launch hazard areas in force", hazardAreas().length, "hazards"],
+     ["NGA launch warnings in force", hazardAreas().length, "hazards"],
      ["Payload reentries, 7 days", reentries.length, "reentries"],
      ["Orbit changes, watched, 30 days", (snap.maneuvers || {}).read_at ? (snap.maneuvers.events || []).length : "–",
       "maneuvers"],
      ["Objects in orbit (GCAT)", h.in_orbit ? h.in_orbit.toLocaleString() : "–", "catalog"]].forEach(function (t) {
       var d = el("a", "tile");
-      d.href = hrefTo(t[2]);
+      d.href = t[2] === "hazards" ? "https://launch.theintelligence.company/#live" : hrefTo(t[2]);
+      if (t[2] === "hazards") d.title = "Each warning can list several areas. Launch counts every closure area, from NGA warnings, NOTAMs and FAA TFRs; its live list is linked here.";
       d.appendChild(el("span", "k", t[0]));
       d.appendChild(el("span", "v", String(t[1])));
       box.appendChild(d);
