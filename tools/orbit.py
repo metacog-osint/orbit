@@ -777,7 +777,12 @@ CASE_ISS = {"ids": [25544], "from": "2024-01-15", "to": "2024-06-01", "file": "c
                  "url": _NASA + "05/24/iss-daily-summary-report-5-24-2024/"}],
             # the G5 geomagnetic storm (NOAA SWPC): from about 17 UTC on 10 May; drag, not a manoeuvre
             "storm": {"label": "G5 storm, 10-12 May 2024", "from": "2024-05-10T12:00:00Z", "to": "2024-05-13T00:00:00Z"}}
-CASES = {"sj21": CASE, "iss": CASE_ISS}
+# Luch (Olymp) 2 (55841, 2023-031A), from launch to the read: its relocations along the GEO belt, the calibration
+# for the relocation tracker (ideas#248, #256). Read once on 24 Nov 2026 on Tom's word; Orbit's own GEO sets start
+# 1 Jul 2026. Stop table and profiles: tools/geo_relocations.py, docs/validation/luch2-relocations.md.
+CASE_LUCH2 = {"ids": [55841], "from": "2023-03-01", "to": "2026-11-25", "file": "case_luch2_2023.json.gz",
+              "now": "2026-11-25T00:00:00Z", "window_days": 1365, "keep_days": 1400}
+CASES = {"sj21": CASE, "iss": CASE_ISS, "luch2": CASE_LUCH2}
 
 
 def print_report(rep: dict) -> None:
@@ -828,7 +833,8 @@ def maneuver_case(root: Path = ROOT, name: str = "sj21") -> int:
         finally:
             client.logout()
         _st_write(data_dir, CASE["file"], records)
-    store = maneuver.merge({}, records, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")), keep_days=400)
+    store = maneuver.merge({}, records, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")),
+                           keep_days=CASE.get("keep_days", 400))
     rep = maneuver.report(store, datetime.fromisoformat(CASE["now"].replace("Z", "+00:00")), CASE["window_days"])
     print(f"{len(records)} element sets, Space-Track (USSPACECOM). Thresholds {rep['thresholds']}.")
     print_report(rep)
@@ -1168,7 +1174,7 @@ def main(argv=None) -> int:
     od.add_argument("--site", default=str(ROOT / "site"))
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
-                                              "BeiDou-2 G2) or iss (2024 reboosts and the May storm)")
+                                              "BeiDou-2 G2), iss (2024 reboosts and the May storm) or luch2 (Luch (Olymp) 2, 2023-2026)")
     mc.add_argument("case", nargs="?", default="sj21", choices=sorted(CASES))
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
     sub.add_parser("archive-upload", help="this run's catalog-change files and daily archive to monthly releases "
