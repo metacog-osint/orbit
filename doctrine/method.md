@@ -698,3 +698,49 @@ already reads, the roles are `site_src/geo_roles.json`.
 7. **Limits.** The simple longitude holds for low inclinations; an inclined object swings either side of it
    daily. A set fitted during a burn smears the rate. A change measured across a gap happened somewhere inside
    it, and the row and the lead say so. Objects with under 10 set pairs are still not judged (ideas#252).
+
+## GEO relocation tracker (`orbit-2.27`, 25 Nov 2026; ideas#248, calibrated by ideas#256)
+Tom, 23 Nov 2026, after LUCH (OLYMP) 2 left 62 E: Orbit could say that it moved, not where it is now, what it will
+pass or where it stops. Module `tools/geo_tracker.py` (standard library, build time, no request); calibration
+`tools/geo_relocations.py` and `docs/validation/luch2-relocations.md` (Luch 2's full history, 2023-2026, read once).
+**Not on the page or in any public file yet:** the wording is Tom's call first (item 9).
+1. **Scope.** Objects with a listed role (`site_src/geo_roles.json`) that the belt board classes as drifting
+   (|drift| 0.1 deg a day or more), from the element sets the GEO run already publishes. Low-inclination longitudes
+   (`maneuver.geo_position`); neighbours are station-kept objects (inclination under 1 deg), where the same formula
+   holds.
+2. **Newest set and now.** Longitude, drift and height above or below GEO at the newest set's epoch, with its age at
+   the build time. "Now" is the newest set coasted at its own rate and is always marked extrapolated. A newest set
+   older than 3 days (`maneuver.STALE_DAYS`) gives no position now, no pass-by dates and no stop projection: the
+   entry says how old the set is and nothing more. On 24 Nov 2026 that held back USA 270, USA 271 and USA 325
+   (newest sets 9-22 days old).
+3. **Departure.** The last stop in Orbit's own sets (item 6) and its last held set. The start of the move is
+   estimated twice, both assuming it sped up uniformly from rest, each naming its sets: from the first moving set's
+   distance and rate (t = 2d / v), and, with two moving sets speeding up, from their change in rate (t = v / a).
+   Both are clamped to the last held set. Luch 2, 24 Nov 2026: held 61.98 E to 15 Oct 15:56Z; estimates
+   19 Nov 13:32Z and 18:04Z. Its feed item keeps its id (`orbit:maneuver:55841:2026-10-15`, the set pair Orbit's
+   rule measured); the estimate is a separate field.
+4. **Two cases.** "At the last measured rate" (coast): the newest rate held. "Still speeding up": the rate change
+   between the last two sets held until 4.5 deg a day (just above Luch 2's fastest, 4.42 in May 2023), then
+   coasting; only with 3 moving sets whose rates rise in turn, so two sets give the coast case only. Neither case
+   includes braking. On Luch 2's three long moves braking took 10.2-11.8 days from full speed to the stop, so once
+   an object brakes, dates further along come later than shown; the note says so beside every table.
+5. **Pass-by table.** Station-kept active objects ahead in the drift direction, grouped into slots 0.3 deg wide, to
+   45 days at the coast rate and under one turn of the belt, at most 40 slots; a date for each case. Slots the coast
+   case has already passed by the build time are counted, not listed. Dropped once a stop is projected.
+6. **Stops.** Held: |drift| under 0.1 deg a day for 2 days or more; runs within 0.2 deg with a break of under
+   7 days merge. Turnaround: the drift reverses between two sets both under 0.5 deg a day, outside a stop. Each stop
+   lists the three nearest station-kept objects at its departure (now, for a current stop), each placed by its last
+   set before then. Checked on Luch 2's 2023-2026 history: all nine stops in Marco Langbroek's published table,
+   held stops within 0.07 deg and 2 days; the 62 E stop's nearest is INTELSAT 39 at 0.01 deg.
+7. **Brake detection.** From the fastest moving set on, each set's drift is compared with a set at least 0.5 days
+   earlier; a fall of 0.05 deg a day or more projects a stop at constant braking (lon + v^2 / 2b in the drift
+   direction). A projection is shown only when steady: within 1 deg of the one before it, with no set between
+   them that showed no fall. Shown with the station-kept objects within 2 deg of it, the sets it rests on, and the
+   object's own record: on Luch 2's long moves steady projections came 7.6-8.6 days before arrival, off by
+   0.5-4.6 deg, and in 2025 later ones fell about 2 deg short (a two-stage brake).
+8. **What it never says:** why, where the object is going, which satellite it means to approach, or how likely
+   anything is. Every figure is arithmetic on public element sets and says how many sets it rests on; the page says
+   so in one line (`geo_tracker.NOTE`). Feed tier, item kind and ids are unchanged (Tom's call).
+9. **Wording, Tom's call before publishing** (recommended default): a table headed "At the last measured rate",
+   the two cases named as in item 4, no likelihood words, the braking note and the object's own record of steady
+   projections beside it; the estimated start shown on the GEO page and the object page, not in the feed id.
