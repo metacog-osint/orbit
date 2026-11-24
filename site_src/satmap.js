@@ -11,7 +11,16 @@ import { loadCesium, token, baseLayer, path } from "./globe.js";
 
 const REFRESH_MS = 2000, SLICE_MS = 7, LIST_MAX = 200, DAY_MS = 86400000;
 const OWNERS = ["us", "cn", "ru", "other"], CLASSES = ["leo", "meo", "geo", "heo"];
-const OWNER_NAME = { us: "United States", cn: "China", ru: "Russia and the Soviet Union", other: "Everyone else" };
+// ideas#264: an owner's name in place of its bare code. SU is the Soviet Union; other non-country codes stay as GCAT prints them.
+let REGION = null;
+try { REGION = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) { REGION = null; }
+function ownerName(cc) {
+  if (cc === "SU") return "Soviet Union";
+  if (REGION && /^[A-Z]{2}$/.test(cc || "")) {
+    try { const n = REGION.of(cc); if (n && n !== cc && n !== "Unknown Region") return n; } catch (e) { /* keep the code */ }
+  }
+  return cc;
+}
 const CLASS_NAME = { leo: "LEO", meo: "MEO", geo: "GEO", heo: "HEO", other: "Other" };
 const CON_NAME = { starlink: "Starlink", oneweb: "OneWeb", kuiper: "Kuiper", iridium: "Iridium", gps: "GPS",
   galileo: "Galileo", beidou: "BeiDou" };
@@ -185,7 +194,7 @@ async function start() {
       btn.addEventListener("click", () => select(i, true));
       name.append(btn);
       const owner = make("td");
-      owner.append(make("span", "sw g-" + r[f.group]), document.createTextNode(r[f.cc] || "not in GCAT"));
+      owner.append(make("span", "sw g-" + r[f.group]), document.createTextNode(r[f.cc] ? ownerName(r[f.cc]) : "not in GCAT"));
       tr.append(name, make("td", "num", r[f.norad]), owner, make("td", null, CLASS_NAME[r[f.cls]] || r[f.cls]),
         make("td", null, r[f.launch] || ""), make("td", null, m ? [...m].map((k) => MARK_NAME[k]).join(", ") : ""));
       frag.append(tr);
@@ -310,7 +319,7 @@ async function start() {
     const row = (k, v) => { if (v) dl.append(make("dt", null, k), make("dd", null, v)); };
     row("NORAD", String(r[f.norad]));
     row("COSPAR", r[f.cospar]);
-    row("Owner", r[f.cc] ? r[f.cc] + " (" + OWNER_NAME[r[f.group]] + ")" : "Not in GCAT");
+    row("Owner", r[f.cc] ? (ownerName(r[f.cc]) === r[f.cc] ? r[f.cc] : ownerName(r[f.cc]) + " (" + r[f.cc] + ")") : "Not in GCAT");
     row("Orbit", CLASS_NAME[r[f.cls]] || r[f.cls]);
     row("Constellation", CON_NAME[r[f.con]]);
     row("Launched", r[f.launch]);
