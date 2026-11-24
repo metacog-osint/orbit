@@ -93,6 +93,18 @@ class Luch2November2026(unittest.TestCase):
         self.assertEqual(s["neighbours"][0]["name"], "INTELSAT 39")
         self.assertLessEqual(s["neighbours"][0]["deg"], 0.05)
 
+    def test_track_for_the_chart(self):
+        """ideas#321: the chart's sets run from 7 days before the last held set (15 Oct) to the newest; a stale
+        entry carries none."""
+        tr = self.m["track"]
+        self.assertEqual(tr["from"], "2026-10-08T15:56Z")
+        self.assertEqual(tr["sets"][-1], ["2026-11-22T15:37:18Z", 58.19])
+        self.assertTrue(all(s[0] >= "2026-10-08T15:56" for s in tr["sets"]))
+        self.assertEqual([s[0][:10] for s in tr["sets"]], ["2026-10-09", "2026-10-10", "2026-10-11", "2026-10-14",
+                                                         "2026-10-15", "2026-11-21", "2026-11-22"])
+        stale = next(m for m in self.doc["movers"] if m["norad"] == 51281)
+        self.assertNotIn("track", stale)
+
     def test_wording(self):
         self.assertIn("not a forecast", self.doc["note"])
         self.assertIn("braking", self.doc["braking_note"])
@@ -163,9 +175,12 @@ class PageWiring(unittest.TestCase):
         js = open(os.path.join(ROOT, "site_src", "geo", "globe.js"), encoding="utf-8").read()
         self.assertIn('id="geo-movers"', html)
         self.assertIn('src="tic-fold.js"', html)
-        part = js[js.index("relocation tracker (tools/geo_tracker.py"):js.index("function moverCards")]
-        for words in ("At the last measured rate", "Still speeding up", "extrapolated", "braking_note", "note"):
+        start = js.index("relocation tracker (tools/geo_tracker.py")
+        part = js[start:js.index('document.addEventListener("click"', start)]
+        for words in ("At the last measured rate", "Still speeding up", "extrapolated", "braking_note", "note",
+                      "How to read this section", "moverSummary", "moverChart", "mv-chartbox", "movers-"):
             self.assertIn(words, part)
+        self.assertEqual(part.count("braking_note"), 1)             # the braking note once, at the top (ideas#321)
         for bad in ("likely", "probab", "expected to", "will arrive", "target"):
             self.assertNotIn(bad, part.lower())
 
