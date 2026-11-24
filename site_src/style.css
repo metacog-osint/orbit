@@ -297,3 +297,8 @@ a.obj-link:hover { text-decoration-color: currentColor; }
 .tic-data a:hover { text-decoration-thickness: 2px; }
 .tic-data a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 @media (max-width: 760px) { .tic-data { gap: 2px 14px; } .tic-data-k { flex-basis: 100%; } }
+
+/* Skip link and noscript line (ideas#300) */
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--panel); color: var(--link); padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; }
+.skip:focus { left: 8px; }
+.noscript { margin: 16px 0 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); }
