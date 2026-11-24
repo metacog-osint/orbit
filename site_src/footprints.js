@@ -1,4 +1,4 @@
-// Footprints prototype (ideas#232): draws data/footprints.json, written by tools/footprints.py. Every outline keeps
+// Footprints prototype (ideas#232): draws footprints-data.json, written by tools/footprints.py (committed beside this file). Every outline keeps
 // its kind (published, computed, estimated), source, date and uncertainty beside it; kinds differ by line pattern,
 // not colour. No inline styles or scripts (CSP).
 import * as ml from "./vendor/maplibre-gl/maplibre-gl.mjs";
@@ -129,8 +129,9 @@ function tabs() {
 
 async function main() {
   try {
-    const r = await fetch("data/footprints.json", { cache: "no-cache" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
+    const r = await fetch("footprints-data.json", { cache: "no-cache" });
+    // Pages answers a missing file with its HTML page and a 200, so check the type before reading it
+    if (!r.ok || !(r.headers.get("content-type") || "").includes("json")) throw new Error(r.ok ? "no file" : "HTTP " + r.status);
     doc = await r.json();
   } catch (e) {
     $("fp-fallback").hidden = false;

@@ -294,5 +294,25 @@ class Horizon(unittest.TestCase):
         self.assertFalse(self._holds(ring, [0.0, -45.0]))
 
 
+class PublishedData(unittest.TestCase):
+    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). Telesat's beam
+    files were read for private scoring only, so nothing of Telesat's may reach this file without Tom's further yes;
+    nor may a local path."""
+    def test_committed_data_is_clean_and_labelled(self):
+        import json
+        import pathlib
+        p = pathlib.Path(__file__).resolve().parent.parent / "site_src" / "footprints-data.json"
+        text = p.read_text(encoding="utf-8")
+        low = text.lower()
+        for word in ("telesat", "telstar", "orbit-232-research", "c:/users", "c:\\\\users", "[local path]"):
+            self.assertNotIn(word, low)
+        doc = json.loads(text)
+        self.assertEqual(set(doc["kinds"]), {"published", "computed", "estimated", "measured"})
+        for case in doc["cases"]:
+            for layer in case["layers"]:
+                self.assertIn(layer["kind"], doc["kinds"])
+                self.assertTrue(layer.get("source"), layer["id"])
+
+
 if __name__ == "__main__":
     unittest.main()
