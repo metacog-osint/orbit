@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Footprints (prototype) · Orbit · The Intelligence Company</title>
+<meta name="description" content="Prototype: where communications satellites' beams reach the ground, with every outline labelled as published, computed or estimated.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
+<link rel="stylesheet" href="footprints.css">
+<script src="tic-time.js"></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map</a>
+    <a href="launches.html">Launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="footprints.html" aria-current="page">Footprints</a>
+    <a href="sources.html">Sources</a>
+  </nav>
+</header>
+
+<main class="wrap" data-page="footprints">
+  <section class="hero hero-sub">
+    <h1>Footprints <span class="badge badge-warn">prototype</span></h1>
+    <p class="lede">Where a communications satellite's beams reach the ground. Every outline says which kind it is, because the kinds are not equally reliable. <span id="fp-asof" class="muted"></span></p>
+  </section>
+
+  <section class="card" aria-labelledby="fp-kinds-h">
+    <h2 id="fp-kinds-h">Kinds of outline</h2>
+    <ul class="fp-kinds">
+      <li><span class="fp-key fp-published" aria-hidden="true"></span><strong>Published.</strong> A contour the operator filed with a regulator or published itself, drawn as given, with its source and date.</li>
+      <li><span class="fp-key fp-computed" aria-hidden="true"></span><strong>Computed.</strong> Exact geometry from the satellite's position: where it stands above a stated angle over the horizon. It says where a signal could reach, not where a beam points.</li>
+      <li><span class="fp-key fp-estimated" aria-hidden="true"></span><strong>Estimated.</strong> A beam drawn from stated assumptions, such as a filed antenna gain or a named service area. Its error is unknown unless a published contour of the same beam is there to check it against; where one is, the scores are shown.</li>
+      <li><span class="fp-key fp-measured" aria-hidden="true"></span><strong>Measured.</strong> Places where a terminal on the network was seen in use. A lower bound: it shows where service works, and its absence shows nothing. <span class="muted">(A fourth kind proposed in this prototype.)</span></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="fp-case-h">
+    <h2 id="fp-case-h">Cases</h2>
+    <div id="fp-cases" class="fp-cases" role="tablist" aria-label="Footprint cases"></div>
+    <p id="fp-summary" class="small"></p>
+    <div class="fp-stage">
+      <div id="fp-map" class="fp-map" role="region" aria-label="Map of the selected case's outlines. Every outline is also listed below the map."></div>
+    </div>
+    <p id="fp-fallback" class="small muted" hidden></p>
+    <h3>Outlines in this case</h3>
+    <div class="table-wrap"><table id="fp-layers" class="fp-table">
+      <thead><tr><th scope="col">Show</th><th scope="col">Kind</th><th scope="col">Outline</th><th scope="col">Source and date</th><th scope="col">Uncertainty</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div id="fp-scores-box" hidden>
+      <h3>How far off the estimates are</h3>
+      <p class="small muted">Each estimate against a published contour of the same beam. Shared area is the area inside both outlines over the area inside either. Edge distance is how far apart the two outlines run.</p>
+      <div class="table-wrap"><table id="fp-scores" class="fp-table">
+        <thead><tr><th scope="col">Estimate</th><th scope="col">Checked against</th><th scope="col">Shared area</th><th scope="col">Published area covered</th><th scope="col">Estimate outside it</th><th scope="col">Edge distance, median</th><th scope="col">Edge distance, 95th percentile</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+    <div id="fp-extra"></div>
+    <ul id="fp-notes" class="small"></ul>
+  </section>
+</main>
+
+<footer class="wrap small muted">
+  <p>Prototype for review, not a published Orbit page. Satellite positions from element sets by Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, and CelesTrak; the footprint geometry is Orbit's own and has not been reviewed by USSPACECOM. Not for operational use. Map: <a href="https://maplibre.org/">MapLibre GL JS</a> (BSD-3-Clause, <a href="vendor/maplibre-gl/LICENSE.txt">licence</a>), land from Natural Earth. Publicly available information only.</p>
+</footer>
+<script type="module" src="footprints.js"></script>
+</body>
+</html>
