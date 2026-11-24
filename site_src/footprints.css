@@ -1,0 +1,23 @@
+/* Footprints prototype (ideas#232). Kinds are told apart by line pattern, not colour: Orbit's palette is fixed. */
+.fp-stage { position: relative; }
+.fp-map { width: 100%; height: min(68vh, 620px); min-height: 340px; border: 1px solid var(--border); border-radius: 6px; }
+.fp-cases { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.fp-cases button { font: inherit; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel); color: var(--text); cursor: pointer; }
+.fp-cases button[aria-selected="true"] { border-color: var(--text); font-weight: 600; }
+.fp-cases button:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.fp-kinds { list-style: none; padding: 0; margin: 0; }
+.fp-kinds li { margin: 0 0 6px; padding-left: 46px; position: relative; }
+.fp-key { position: absolute; left: 0; top: 0.7em; width: 36px; height: 0; border-top: 3px solid var(--text); }
+.fp-key.fp-computed { border-top-style: dashed; }
+.fp-key.fp-estimated { border-top-style: dotted; }
+.fp-table { width: 100%; border-collapse: collapse; }
+.fp-table th, .fp-table td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.86rem; }
+.fp-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fp-kind { display: inline-block; padding: 1px 7px; border-radius: 4px; background: var(--badge); font-size: 0.76rem; white-space: nowrap; }
+.fp-kind[data-kind="published"] { border-bottom: 3px solid var(--text); }
+.fp-kind[data-kind="computed"] { border-bottom: 3px dashed var(--text); }
+.fp-kind[data-kind="estimated"] { border-bottom: 3px dotted var(--text); }
+.table-wrap { overflow-x: auto; }
+#fp-extra table { margin-top: 6px; }
+.fp-key.fp-measured { border-top: 0; top: 0.45em; left: 13px; width: 9px; height: 9px; border-radius: 50%; background: var(--text); }
+.fp-kind[data-kind="measured"] { border-bottom: 3px double var(--text); }

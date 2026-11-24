@@ -1,0 +1,121 @@
+{
+  "note": "Prototype cases for tools/footprints.py (ideas#232). Every number that is not geometry carries its source here. Published contour files are named but not held in this repository. Read 23 Nov 2026; FCC cases added 24 Nov 2026.",
+  "cases": [
+    {
+      "id": "geo-wide-badr8",
+      "class": "wide-beam GEO",
+      "title": "Wide-beam GEO: Arabsat 7B (Badr-8)",
+      "norad": 56757,
+      "summary": "A broadcast and trunking satellite at 26 degrees east with a few large shaped beams. Its line of sight is exact. Three of its beams are drawn from Arabsat's own downlink EIRP contours, read on 24 Nov 2026 and redrawn with credit; two beams are also estimated from their names and scored against those contours.",
+      "line_of_sight_deg": [5, 0],
+      "fit": "los",
+      "published": [{"id": "mena", "file": "arabsat-badr8/BADR8_MENA_FSS_DL-EIRP.kml", "format": "kml", "label": "Ku-band FSS MENA beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "nwa", "file": "arabsat-badr8/BADR8_NWA_DL-EIRP.kml", "format": "kml", "label": "Ku-band North West Africa beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "cglobal", "file": "arabsat-badr8/BADR8_C_Gloabl.kml", "format": "kml", "label": "C-band global beam", "levels_db": [38], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}],
+      "score_line_of_sight": ["cglobal", 38],
+      "estimates": [
+        {
+          "id": "est-mena",
+          "method": "area",
+          "label": "Ku-band 'MENA' beam, from its name",
+          "area_words": "the 22 member states of the Arab League, taken as what 'MENA' means for the Arab League's own operator",
+          "countries": ["DZ", "BH", "KM", "DJ", "EG", "IQ", "JO", "KW", "LB", "LY", "MR", "MA", "OM", "PS", "QA", "SA", "SO", "SD", "SY", "TN", "AE", "YE"],
+          "source": "Beam name from third-party listings of Badr-8's beams; the country list is Orbit's reading of the name",
+          "source_url": "https://www.airbus.com/en/newsroom/news/2023-05-airbus-eurostar-neo-arabsat-badr-8-telecoms-satellite-shipped-to-launch-site",
+          "date": "2026-11-23",
+          "check": ["mena", 43],
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Scored below against Arabsat's 43 dBW contour of the same beam; expect errors of hundreds of km."
+        },
+        {
+          "id": "est-nwa",
+          "method": "area",
+          "label": "Ku-band 'North West Africa' beam, from its name",
+          "area_words": "the UN's Northern Africa without Egypt and Sudan, plus its Western Africa",
+          "countries": ["DZ", "LY", "MA", "TN", "EH", "MR", "BJ", "BF", "CV", "CI", "GM", "GH", "GN", "GW", "LR", "ML", "NE", "NG", "SN", "SL", "TG"],
+          "source": "Beam name as in Arabsat's own contour file names; the country list is Orbit's reading of the name",
+          "date": "2026-11-23",
+          "check": ["nwa", 43],
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Scored below against Arabsat's 43 dBW contour of the same beam; expect errors of hundreds of km."
+        }
+      ],
+      "notes": [
+        "Airbus, which built the satellite, says it provides connectivity over Europe, the Middle East, Africa and central Asia, in C and Ku band. That is nearly everything in its line of sight, which is why the line of sight alone says little about where a beam points.",
+        "Arabsat publishes contour files for this satellite behind the Badr-8 page of its website (KML, downlink EIRP in dBW: six Ku-band beams and a C-band global beam). They were read on 24 Nov 2026 for where the contours run, and are redrawn here with credit; no file is copied. Arabsat's terms ask that its site not be linked without consent, so it is credited by name only.",
+        "Uplink and downlink beams are different shapes on most satellites. Only downlink beams are named in the public material found."
+      ]
+    },
+    {
+      "id": "geo-hts-kasat",
+      "class": "high-throughput GEO",
+      "title": "High-throughput GEO: KA-SAT",
+      "norad": 37258,
+      "summary": "A Ka-band satellite at 9 degrees east that covers Europe and the Mediterranean with about 82 small spot beams instead of a few large ones. The public record gives the number of spots, a round figure for their size and the region in words. Where each spot sits is on the operator's map, which may be linked but not redrawn.",
+      "line_of_sight_deg": [10, 5],
+      "published": [],
+      "estimates": [
+        {
+          "id": "est-spot",
+          "method": "spot_km",
+          "label": "One spot beam, for scale",
+          "diameter_km": 300,
+          "aim": [12.5, 41.9],
+          "aim_words": "Rome, as an example only",
+          "source": "Eutelsat's own 2012 presentation gives about 300 km across for each spot; another technical page gives 0.5 degrees",
+          "source_url": "https://en.wikipedia.org/wiki/KA-SAT",
+          "date": "2026-11-23",
+          "uncertainty": "A round published figure with no gain level; sources give 250 to 300 km. The aim point is an example, not a real beam centre, so this shows the size of a spot and nothing about its place."
+        },
+        {
+          "id": "est-envelope",
+          "method": "area",
+          "label": "Whole service area, from the words 'Europe and the Mediterranean Basin'",
+          "area_words": "the mainland and nearby islands of 48 European and Mediterranean countries (between 12 west and 45 east, 27 and 72 north), as Orbit read the phrase",
+          "box": [-12, 27, 45, 72],
+          "countries": ["PT", "ES", "FR", "IE", "GB", "BE", "NL", "LU", "DE", "CH", "AT", "IT", "MT", "DK", "NO", "SE", "FI", "EE", "LV", "LT", "PL", "CZ", "SK", "HU", "SI", "HR", "BA", "RS", "ME", "AL", "MK", "GR", "BG", "RO", "MD", "UA", "BY", "TR", "CY", "LB", "IL", "PS", "JO", "EG", "LY", "TN", "DZ", "MA"],
+          "source": "Service area in words from public descriptions of KA-SAT; the country list is Orbit's reading",
+          "source_url": "https://en.wikipedia.org/wiki/KA-SAT",
+          "date": "2026-11-23",
+          "uncertainty": "An outline around named countries. Spot-beam satellites leave gaps inside such an outline (sea, desert, unserved countries), which this cannot show. Not checked against any published contour."
+        }
+      ],
+      "notes": [
+        "Sources give 82 or 83 spot beams; two of the beams are said to be alternatives to each other.",
+        "KA-SAT was Eutelsat's and is now owned by Viasat (through Euro Broadband Infrastructure). Blackout's register reaches it through Skylogic's networks, which run its gateways. A network number therefore does not name the satellite's owner.",
+        "On a spot-beam satellite a user's outage can come from one spot or one gateway. Neither can be placed from public data without the operator's beam map.",
+        "No contour for this satellite was found in a public filing: it is not US-licensed, and ITU's beam data needs a login that Orbit does not use."
+      ]
+    },
+    {"id": "geo-hts-jupiter3", "class": "high-throughput GEO", "title": "High-throughput GEO: Jupiter 3 (EchoStar XXIV)", "norad": 57479, "summary": "Hughes's Ka-band satellite at 95.2 degrees west. Its FCC filing gives contours for only four representative beams, a gateway beam in Utah and three user beams (one aimed at Brazil), under the rule that lets an applicant with many identical spot beams file one of each kind. The rest of its spots are not in the public record.", "line_of_sight_deg": [5, 0], "published": [{"id": "u101", "file": "SAT-LOA-20170621-00092/UT1R.txt", "label": "User beam U101, downlink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOA-20170621-00092, attachment UT1R.txt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOA-20170621-00092", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}, {"id": "u331", "file": "SAT-LOA-20170621-00092/UT3R.txt", "label": "User beam U331, downlink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOA-20170621-00092, attachment UT3R.txt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOA-20170621-00092", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}, {"id": "glin", "file": "SAT-LOA-20170621-00092/GT1R.txt", "label": "Gateway beam GLIN, downlink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOA-20170621-00092, attachment GT1R.txt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOA-20170621-00092", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}], "estimates": [{"id": "est-u101", "method": "gain", "label": "User beam U101 as a circle", "aim_from": "u101", "level_db": -4, "source": "Peak gain 59.63 dBi and boresight as filed in the beam's GXT file", "date": "2026-11-24", "check": ["u101", -4]}, {"id": "est-u331", "method": "gain", "label": "User beam U331 as a circle", "aim_from": "u331", "level_db": -4, "source": "Peak gain 50.01 dBi and boresight as filed in the beam's GXT file", "date": "2026-11-24", "check": ["u331", -4]}, {"id": "est-glin", "method": "gain", "label": "Gateway beam GLIN as a circle", "aim_from": "glin", "level_db": -4, "source": "Peak gain 57.65 dBi and boresight as filed in the beam's GXT file", "date": "2026-11-24", "check": ["glin", -4]}], "notes": ["The filing's GXT files put the beam's absolute peak gain on the boresight line (for example 59.63 dBi) rather than 0 dB; the contours stay relative to it.", "Each beam is filed four times (U and V transmit files, left and right polarisation) with the same outline; one is drawn.", "A 0 dB outline named 'HNS 95W isoline' in the same filing is not drawn: the filing does not say in this file what it bounds."]},
+    {"id": "geo-hts-viasat2", "class": "high-throughput GEO", "title": "High-throughput GEO: ViaSat-2", "norad": 42740, "summary": "Viasat's Ka-band satellite at 69.9 degrees west, licensed by the UK and given US market access. Unlike Jupiter 3 its filing gives a contour file for every beam, 229 of them: user and gateway spots, each up and down and in both polarisations, plus wide beams.", "line_of_sight_deg": [5, 0], "published": [{"id": "u26", "file": "SAT-LOI-20130319-00040/gxt/U26UR.gxt", "label": "User beam U26, uplink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOI-20130319-00040, attachment U26UR.gxt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOI-20130319-00040", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}, {"id": "g12", "file": "SAT-LOI-20130319-00040/gxt/G12DR.gxt", "label": "Gateway beam G12, downlink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOI-20130319-00040, attachment G12DR.gxt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOI-20130319-00040", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}, {"id": "bcn", "file": "SAT-LOI-20130319-00040/gxt/BCNR.gxt", "label": "Wide beam BCN, downlink", "levels_db": [-2, -4], "source": "FCC filing SAT-LOI-20130319-00040, attachment BCNR.gxt (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-LOI-20130319-00040", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch."}], "estimates": [{"id": "est-u26", "method": "gain", "label": "User beam U26 as a circle", "aim_from": "u26", "level_db": -4, "source": "Peak gain 53.6 dBi from the filing's Schedule S (beam U26U); boresight from the GXT file", "date": "2026-11-24", "peak_gain_dbi": 53.6, "check": ["u26", -4]}, {"id": "est-g12", "method": "gain", "label": "Gateway beam G12 as a circle", "aim_from": "g12", "level_db": -4, "source": "Peak gain 52.4 dBi from the filing's Schedule S (beam G12D); boresight from the GXT file", "date": "2026-11-24", "peak_gain_dbi": 52.4, "check": ["g12", -4]}], "score_line_of_sight": ["bcn", -4], "notes": ["Schedule S lists 154 beams with peak and edge gains; the GXT files add the polarisation (L or R) to each beam's name.", "The wide beam BCN reaches the Earth's edge as the satellite sees it, so its contours are closed along that edge before scoring."]},
+    {"id": "geo-wide-galaxy34", "class": "wide-beam GEO", "title": "Wide-beam GEO: Galaxy 34 (C-band)", "norad": 54027, "summary": "Intelsat's C-band satellite at 129 degrees west, launched in 2022 for the C-band transition. One shaped beam covers North America, Alaska, Hawaii, Central America and the Caribbean. The filing carries its contours inside an ITU database rather than as text, which Orbit decodes.", "line_of_sight_deg": [5, 0], "fit": "los", "published": [{"id": "cahd", "file": "SAT-RPL-20210325-00039/blobs/diagram_1_data_block.bin", "label": "Beam CAHD, downlink, horizontal", "levels_db": [-2, -4], "source": "FCC filing SAT-RPL-20210325-00039, attachment diagram_1_data_block.bin (credit: Federal Communications Commission; contour data are the applicant's)", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-RPL-20210325-00039", "date": "2026-11-24", "uncertainty": "As filed with the FCC. A filing shows the antenna as designed, not a measurement, and may predate launch.", "beam_id": "CAHD", "emi_rcp": "E", "format": "gims_block"}], "estimates": [{"id": "est-cahd", "method": "gain", "label": "Beam CAHD as a circle", "aim_from": "cahd", "level_db": -4, "source": "Peak gain 29.3 dBi from the filing's Schedule S; boresight from the filed diagram", "date": "2026-11-24", "peak_gain_dbi": 29.3, "check": ["cahd", -4]}, {"id": "est-cahd-area", "method": "area", "label": "Beam CAHD from its service area in words", "area_words": "North America with Alaska and Hawaii, Central America and the Caribbean (countries wholly between 5 and 72 north, 180 and 50 west), as Orbit read the filing's words", "box": [-180, 5, -50, 72], "countries": ["US", "CA", "MX", "GT", "BZ", "SV", "HN", "NI", "CR", "PA", "CU", "JM", "HT", "DO", "PR", "BS", "TT", "BB", "LC", "VC", "GD", "AG", "KN", "DM"], "source": "Service area as the filing's Schedule S words it; the country list is Orbit's reading", "source_url": "https://fccprod.servicenowservices.com/icfs?id=ibfs_application_summary&number=SAT-RPL-20210325-00039", "date": "2026-11-24", "check": ["cahd", -4], "uncertainty": "A service area named in words has no gain level, and a shaped beam is not an ellipse."}], "score_line_of_sight": ["cahd", -4], "notes": ["The beam is filed as four diagrams (CAHD, CAHU, CAVD, CAVU: down and up, horizontal and vertical); the two downlink outlines differ by under a degree.", "The database layout was inferred from this filing; every diagram decoded to its last byte."]},
+    {
+      "id": "leo-starlink",
+      "class": "LEO constellation",
+      "title": "LEO constellation: Starlink",
+      "summary": "A low-orbit constellation has no fixed footprint. From orbits alone, the only thing that can be computed is how many satellites stand high enough in the sky at each latitude. Where service is actually sold and switched on is set by licences, gateways and the operator, and has to come from what the operator publishes or from terminals seen in use.",
+      "tle_file": "starlink.tle",
+      "tle_source": "CelesTrak, Starlink group (element sets from the 18th Space Defense Squadron)",
+      "tle_url": "https://celestrak.org/NORAD/elements/",
+      "tle_date": "2026-11-23",
+      "min_elevation_deg": 25,
+      "min_elevation_north": {"from_lat": 62, "deg": 5},
+      "min_alt_km": 425,
+      "max_alt_km": 600,
+      "hours": 24,
+      "step_s": 300,
+      "band_deg": 2,
+      "measured_file": "ripe_atlas_as14593.json",
+      "measured": {
+        "label": "Terminals seen in use: RIPE Atlas probes connected through Starlink's network (AS14593), at the places their hosts report",
+        "source": "RIPE Atlas probe API (RIPE NCC)",
+        "source_url": "https://atlas.ripe.net/probes/",
+        "date": "2026-11-23",
+        "uncertainty": "A lower bound from volunteers, mostly in North America and Europe. Places are reported by each host and may be offset on purpose. No probe says nothing about no service."
+      },
+      "notes": [
+        "Service angles as the FCC authorised them: user terminals work down to 25 degrees above the horizon below 62 degrees north, and down to 5 degrees at and above it (FCC DA 24-1193). SpaceX has asked for 20 degrees on its 400 to 500 km shells; no grant was found.",
+        "Serving satellites are taken as those between 425 and 600 km on near-circular orbits. The FCC's January 2026 order (DA 26-36) also authorises shells at 340 to 365 km, and the element sets hold about 800 satellites near 350 to 375 km. Whether those are serving or still raising cannot be told from the orbits, so they are left out and counted under Other.",
+        "Starlink's IP geolocation feed is not drawn. It lists 238 countries and territories, including ones where Starlink has no licence, and SpaceX does not say what a row means, so it is not a service-area map.",
+        "Not shown, because it is not geometry: which countries have service (the operator's availability map says), where gateways are, and how much capacity a cell has."
+      ]
+    }
+  ]
+}
