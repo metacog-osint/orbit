@@ -724,7 +724,8 @@ On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#mov
    between the last two sets held until 4.5 deg a day (just above Luch 2's fastest, 4.42 in May 2023), then
    coasting; only with 3 moving sets whose rates rise in turn, so two sets give the coast case only. Neither case
    includes braking. On Luch 2's three long moves braking took 10.2-11.8 days from full speed to the stop, so once
-   an object brakes, dates further along come later than shown; the note says so beside every table.
+   an object brakes, dates further along come later than shown; the note says so once at the top of the section,
+   and each table has a one-line reminder (from `orbit-2.28`).
 5. **Pass-by table.** Station-kept active objects ahead in the drift direction, grouped into slots 0.3 deg wide, to
    45 days at the coast rate and under one turn of the belt, at most 40 slots; a date for each case. Slots the coast
    case has already passed by the build time are counted, not listed. Dropped once a stop is projected.
@@ -751,3 +752,29 @@ On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#mov
    object page: newest set, now, departure and estimated start, a steady stop projection, and a link to the GEO
    page. Built in the update run by `tools/geo_page.py` (`movers`); a failure there leaves the belt board as it was
    and says the section was not built.
+
+## GEO movers: chart, summary and phone tables (`orbit-2.28`, 24 Nov 2026; ideas#321)
+
+Page only: no new computation beyond the chart's set list, no feed change, and Tom's wording for the tracker (item 9
+above) stands.
+1. **Summary.** A row per mover at the top of "Listed satellites on the move": name (linking to its card,
+   `#movers-<norad>`), now (extrapolated) or "no position" for a stale entry, drift, the newest set's age, and its
+   state: moving east or west, braking seen, braking with a steady stop projection, or no public set for over
+   3 days. On a phone the rows stack.
+2. **One caveat.** The not-a-forecast note, the two cases, the braking note and the 3-day rule appear once, under
+   the summary; each card keeps a one-line note on its own case, the slots passed or left out, and "No braking
+   included".
+3. **Chart.** For each mover with a current set, longitude against time: `geo_tracker` adds `track`, the sets from
+   7 days before the last held set (or the last 30 days when Orbit's sets show no stop) to the newest, at most 160,
+   thinned evenly. Dots are the sets, joined only where the sets are under 2 days apart; a gap of 2 days or more is
+   shaded "no public set" (labelled when the label fits inside it); the estimated start of the move is a dotted
+   line (a band between the two estimates). From the newest set, the newest rate is carried forward dashed to now
+   (a ring, "now") and 7 days on; with a steady stop projection, a dashed level line at the projected stop instead.
+   Station-kept satellites passed at that rate are ticks on the dashed line, the nearest at most 4 named. Longitudes
+   are unwrapped across 180 deg; east is up; axis dates are UTC days. A label that would touch a mark, a line or
+   another label is left out (Tom's figure rule: nothing touches); the table lists every slot. Drawn as SVG at
+   the box's own width (redrawn on resize), so text stays 12 px on a phone; no inline styles.
+4. **Times and owners in the pass-by table.** Each time is shown in the viewer's zone with the zone named, date and
+   time on two lines on a phone; a tap swaps it with UTC and back. Owner codes carry CelesTrak's full name on hover,
+   and a closed list under each table names every code in it. On a phone the "Degrees ahead" column is hidden (the
+   longitude gives it).

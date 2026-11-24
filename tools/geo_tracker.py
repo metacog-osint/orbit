@@ -25,6 +25,9 @@ Arithmetic on the last public element sets, not a forecast. For every object wit
                ones fell up to 2 deg short in a two-stage brake (2025).
   stops        the object's stop history in Orbit's sets, each with the nearest station-kept objects at the stop's
                departure (or now, for a current stop).
+  track        for the page's chart (ideas#321): the sets from TRACK_LEAD_DAYS before the last held set (or the last
+               TRACK_DAYS when Orbit holds no stop) to the newest, at most TRACK_MAX (thinned evenly, newest kept);
+               none for a stale entry.
 Standard library only; low-inclination longitudes (RAAN + argument of perigee + mean anomaly - GMST). Never says
 why an object moves, where it is going, or how likely anything is.
 """
@@ -47,6 +50,9 @@ MAX_AGE_DAYS = M.STALE_DAYS
 MAX_PASSES = 40
 STOP_NEAR_DEG = 2.0
 NEIGHBOURS = 3
+TRACK_LEAD_DAYS = 7
+TRACK_DAYS = 30
+TRACK_MAX = 160
 BRAKING_NOTE = ("Neither case includes braking. On Luch (Olymp) 2's three long moves (2023-2025) braking took "
                 "10.2 to 11.8 days from full speed to the stop, so once an object brakes, dates further "
                 "along come later than shown (docs/validation/luch2-relocations.md).")
@@ -256,6 +262,13 @@ def track(o, rws, objs, elsets, role, now):
                      "sets": s["sets"], "kind": s["kind"], "current": not moving and s is st[-1],
                      "neighbours": _neighbours_at(s["lon"], when, objs, elsets, {o["norad"]})})
     out["stops"] = hist
+    if not stale:
+        start = (_t(last_stop["departure"]) - timedelta(days=TRACK_LEAD_DAYS)) if last_stop else t_new - timedelta(days=TRACK_DAYS)
+        pts = [[r["t"], round(r["lon"], 3)] for r in rws if _t(r["t"]) >= start]
+        if len(pts) > TRACK_MAX:
+            step = (len(pts) - 1) / (TRACK_MAX - 1)
+            pts = [pts[round(k * step)] for k in range(TRACK_MAX)]
+        out["track"] = {"from": _iso(start), "sets": pts}
     return out
 
 

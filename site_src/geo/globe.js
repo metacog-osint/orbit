@@ -1379,11 +1379,186 @@ function main() {
   const when = (s) => esc(bothTxt(epochMs(s.replace("Z", "")), true));
   const hoursTxt = (h) => (h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days");
   const heightTxt = (km) => (Math.abs(km) < 1 ? "at geostationary altitude" : "about " + fmtN(Math.round(Math.abs(km))) + " km " + (km > 0 ? "above" : "below") + " geostationary altitude");
-  const ownTag = (o) => (o ? ' <span class="small muted">' + esc(o) + "</span>" : "");
+  const ownName = (o) => (S.owners[o] ? String(S.owners[o]) : "");
+  const ownTag = (o) => (o ? ' <abbr class="small muted" title="' + esc(ownName(o) || o) + '">' + esc(o) + "</abbr>" : "");
   const namesTxt = (os) => os.map((x) => pick([x.norad], x.name) + ownTag(x.owner)).join(", ");
   const nearTxt = (xs) => xs.map((x) => pick([x.norad], x.name) + " (" + x.deg.toFixed(2) + "°)").join(", ");
+  const tms = (s) => epochMs(String(s).replace("Z", ""));
+  // a pass-by time on a phone: the viewer's zone only, full UTC on hover or tap (ideas#321)
+  function shortParts(ms) {
+    if (TZ === "UTC" || !LT) { const u = utcTxt(ms, false).split(", "); return [u[0] + ",", u[1]]; }
+    const x = {};
+    LT.formatToParts(new Date(ms)).forEach((q) => { x[q.type] = q.value; });
+    return [+x.day + " " + MON[+x.month - 1] + ",", x.hour + ":" + x.minute + (x.dayPeriod ? " " + x.dayPeriod : "") + " " + x.timeZoneName];
+  }
+  const twoLines = (p) => '<span class="mv-nw">' + esc(p[0]) + '</span> <span class="mv-nw">' + esc(p[1]) + "</span>";
+  const timeCell = (s) => { const ms = tms(s), u = utcTxt(ms, true); return '<td><button type="button" class="mv-tt" title="' + esc(u) + '" data-alt="' + esc(twoLines(u.split(", ").map((x, k) => (k ? x : x + ",")))) + '">' + twoLines(shortParts(ms)) + "</button></td>"; };
+  function ownerKey(ps) {
+    const codes = [...new Set(ps.flatMap((p) => p.objects.map((x) => x.owner)).filter(Boolean))].sort();
+    if (!codes.length) return "";
+    return '<details class="globe-more"><summary>Owner codes in this table (' + fmtN(codes.length) + ')</summary><p class="small">' +
+      codes.map((c) => "<strong>" + esc(c) + "</strong> " + esc(ownName(c) || "not in CelesTrak's list")).join("; ") + ".</p></details>";
+  }
+  function moverState(m) {
+    if (m.stale) return "No public set for over 3 days";
+    const b = m.brake || {};
+    if (b.state === "steady") return "Braking: stop projected near " + lonTxt(b.projected_lon);
+    if (b.state === "braking seen") return "Braking seen";
+    return "Moving " + m.direction;
+  }
+  function moverSummary(ms) {
+    return table(["Satellite", "Now", "Drift", "Newest set", "State"], ms.map((m) => '<tr><td><a href="#movers-' + m.norad + '">' + esc(m.name) + "</a></td>" +
+      '<td class="num" data-l="Now">' + (m.stale ? "no position" : lonTxt(m.now.lon) + ' <span class="small muted">extrapolated</span>') + '</td><td class="num" data-l="Drift">' + esc(rateTxt(m.newest.drift)) +
+      '</td><td data-l="Newest set">' + esc(hoursTxt(m.newest.age_h)) + ' old</td><td data-l="State">' + esc(moverState(m)) + "</td></tr>")).replace("<table>", '<table class="mv-sum">');
+  }
+  // the longitude-against-time chart (ideas#321): sets as dots, gaps without a public set shaded, the newest rate
+  // carried forward dashed to "now" and 7 days on, station-kept satellites ahead marked. Labels that would touch a
+  // mark or another label are left out; the table below the chart lists every slot.
+  const DAY = 864e5;
+  const wrap180 = (x) => ((((x + 180) % 360) + 360) % 360) - 180;
+  const axLon = (x, dp) => { const w = wrap180(x), a = Math.abs(w); return a.toFixed(dp) + "°" + (a < 1e-9 || Math.abs(a - 180) < 1e-9 ? "" : w < 0 ? "W" : "E"); };
+  const mvStep = (span, n) => { const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((k) => k * p).find((s) => s >= raw); };
+  const f1 = (x) => x.toFixed(1);
+  function moverChart(m, W) {
+    const tr = m.track;
+    if (m.stale || !m.now || !tr || !(tr.sets || []).length) return "";
+    const fs = 12, cw = fs * 0.6, H = W < 520 ? 230 : 260, L = 46, R = 10, T = 8, B = 24;
+    const pw = W - L - R, ph = H - T - B;
+    if (pw < 120) return "";
+    const pts = tr.sets.map((p) => ({ t: tms(p[0]), lon: p[1] }));
+    pts.forEach((p, k) => { p.u = k ? pts[k - 1].u + wrap180(p.lon - pts[k - 1].lon) : p.lon; });
+    const nw = pts[pts.length - 1], U = (lon) => nw.u + wrap180(lon - nw.lon);
+    const v = m.newest.drift, tN = tms(m.newest.t), tNow = tms(m.now.at), t0 = Math.min(tms(tr.from), pts[0].t), t1 = tNow + 7 * DAY;
+    const b = m.brake || {}, steady = b.state === "steady", atT = (t) => nw.u + (v * (t - tN)) / DAY;
+    const ys = pts.map((p) => p.u).concat([steady ? U(b.projected_lon) : atT(t1)]).concat(m.departure ? [U(m.departure.lon)] : []);
+    let y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const pad = Math.max(0.3, (y1 - y0) * 0.06);
+    y0 -= pad; y1 += pad;
+    const X = (t) => L + ((t - t0) / (t1 - t0)) * pw, Y = (lon) => T + ((y1 - lon) / (y1 - y0)) * ph;
+    const boxes = [], hit = (a) => boxes.some((q) => a[0] < q[2] + 2 && a[2] + 2 > q[0] && a[1] < q[3] + 2 && a[3] + 2 > q[1]);
+    const mark = (x, y, r) => boxes.push([x - r, y - r, x + r, y + r]);
+    const markSeg = (xa, ya, xb, yb) => { const n = Math.max(1, Math.ceil(Math.hypot(xb - xa, yb - ya) / 6)); for (let k = 0; k <= n; k++) mark(xa + ((xb - xa) * k) / n, ya + ((yb - ya) * k) / n, 1.5); };
+    const labels = [];
+    const place = (cands, cls, title) => {                        // the first candidate that touches nothing, else none
+      for (const c of cands) {
+        const w = c.text.length * cw, x0 = c.anchor === "end" ? c.x - w : c.anchor === "middle" ? c.x - w / 2 : c.x, a = [x0, c.y - fs * 0.8, x0 + w, c.y + fs * 0.2];
+        if (a[0] < 0 || a[2] > W || a[1] < 0 || a[3] > H || hit(a)) continue;
+        boxes.push(a);
+        labels.push('<text class="' + cls + '" x="' + f1(c.x) + '" y="' + f1(c.y) + '"' + (c.anchor !== "start" ? ' text-anchor="' + c.anchor + '"' : "") + ">" +
+          (title ? "<title>" + esc(title) + "</title>" : "") + esc(c.text) + "</text>");
+        return true;
+      }
+      return false;
+    };
+    const o = [];
+    // grid and axes
+    const st = mvStep(y1 - y0, Math.max(3, Math.floor(ph / 36))), dp = st < 1 ? 1 : 0;
+    for (let y = Math.ceil(y0 / st) * st; y <= y1 + 1e-9; y += st) {
+      const yy = f1(Y(y));
+      o.push('<line class="mv-grid" x1="' + L + '" x2="' + (L + pw) + '" y1="' + yy + '" y2="' + yy + '"/>');
+      labels.push('<text class="mv-ax" x="' + (L - 6) + '" y="' + f1(Y(y) + fs * 0.35) + '" text-anchor="end">' + esc(axLon(y, dp)) + "</text>");
+    }
+    const span = (t1 - t0) / DAY, need = (64 / pw) * span, stepD = [1, 2, 3, 5, 7, 14, 28, 56].find((s) => s >= need) || 91;
+    for (let d = Math.ceil(Math.ceil(t0 / DAY) / stepD) * stepD; d * DAY <= t1; d += stepD) {
+      const x = X(d * DAY), dt = new Date(d * DAY), txt = dt.getUTCDate() + " " + MON[dt.getUTCMonth()];
+      if (x - (txt.length * cw) / 2 < 0 || x + (txt.length * cw) / 2 > W) continue;
+      o.push('<line class="mv-axis" x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (T + ph) + '" y2="' + (T + ph + 4) + '"/>');
+      labels.push('<text class="mv-ax" x="' + f1(x) + '" y="' + (T + ph + 4 + fs) + '" text-anchor="middle">' + esc(txt) + "</text>");
+    }
+    o.push('<line class="mv-axis" x1="' + L + '" x2="' + (L + pw) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>');
+    boxes.push([0, T + ph, W, H]);                               // the axis labels' band
+    boxes.push([0, 0, L, H]);
+    // gaps with no public set
+    const west = v < 0, depEdgeY = west ? T + fs + 2 : T + ph - 6, freeEdgeY = west ? T + ph - 6 : T + fs + 2, gapLab = [];
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], c = pts[k];
+      if (c.t - a.t < 2 * DAY) continue;
+      const xa = X(a.t), xc = X(c.t);
+      o.push('<rect class="mv-gap" x="' + f1(xa) + '" y="' + T + '" width="' + f1(xc - xa) + '" height="' + ph + '"><title>No public element set for ' + esc(hoursTxt((c.t - a.t) / 36e5)) + "</title></rect>");
+      const g = "no public set, " + hoursTxt((c.t - a.t) / 36e5);
+      if (g.length * cw + 8 <= xc - xa) gapLab.push([(xa + xc) / 2, g]);       // only a label that fits inside its gap
+    }
+    // estimated start of the move
+    const est = ((m.departure || {}).estimated_start || []).map((e) => tms(e.t)).sort((p, q) => p - q);
+    if (est.length) {
+      const xa = X(est[0]), xb = X(est[est.length - 1]);
+      if (xb - xa > 1) o.push('<rect class="mv-startband" x="' + f1(xa) + '" y="' + T + '" width="' + f1(xb - xa) + '" height="' + ph + '"/>');
+      [xa, xb].forEach((x) => o.push('<line class="mv-start" x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + T + '" y2="' + (T + ph) + '"/>'));
+      boxes.push([xa - 1, T, xb + 1, T + ph]);
+    }
+    // the sets and the lines between them (none across a gap)
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], c = pts[k];
+      if (c.t - a.t >= 2 * DAY) continue;
+      o.push('<line class="mv-line" x1="' + f1(X(a.t)) + '" y1="' + f1(Y(a.u)) + '" x2="' + f1(X(c.t)) + '" y2="' + f1(Y(c.u)) + '"/>');
+      markSeg(X(a.t), Y(a.u), X(c.t), Y(c.u));
+    }
+    pts.forEach((p) => { o.push('<circle class="mv-set" cx="' + f1(X(p.t)) + '" cy="' + f1(Y(p.u)) + '" r="3"><title>' + esc(utcTxt(p.t, true) + ": " + lonTxt(p.lon)) + "</title></circle>"); mark(X(p.t), Y(p.u), 3); });
+    // carried forward: the newest rate to now and 7 days on, or the steady stop projection
+    const passTicks = [];
+    if (steady) {
+      const ys2 = Y(U(b.projected_lon));
+      o.push('<line class="mv-stopline" x1="' + f1(X(tN)) + '" x2="' + (L + pw) + '" y1="' + f1(ys2) + '" y2="' + f1(ys2) + '"/>');
+      markSeg(X(tN), ys2, L + pw, ys2);
+    } else {
+      o.push('<line class="mv-coast" x1="' + f1(X(tN)) + '" y1="' + f1(Y(nw.u)) + '" x2="' + (L + pw) + '" y2="' + f1(Y(atT(t1))) + '"/>');
+      markSeg(X(tN), Y(nw.u), L + pw, Y(atT(t1)));
+      const xn = X(tNow), yn = Y(atT(tNow));
+      o.push('<circle class="mv-now" cx="' + f1(xn) + '" cy="' + f1(yn) + '" r="4"><title>' + esc("Now, extrapolated: " + lonTxt(m.now.lon)) + "</title></circle>");
+      mark(xn, yn, 4);
+      (m.passes || []).forEach((p) => {
+        const tc = tms(p.coast);
+        if (tc > t1) return;
+        const x = X(tc), y = Y(U(p.lon));
+        o.push('<line class="mv-pass" x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + f1(y - 4) + '" y2="' + f1(y + 4) + '"/>');
+        mark(x, y, 4);
+        passTicks.push({ x: x, y: y, p: p });
+      });
+    }
+    // labels, most useful first
+    if (!steady) {
+      const xn = X(tNow), yn = Y(atT(tNow)), at = (txt) => (west ? [{ x: xn + 7, y: yn - 8, anchor: "start", text: txt }, { x: xn - 7, y: yn + 16, anchor: "end", text: txt }, { x: xn, y: yn + 18, anchor: "middle", text: txt }]
+        : [{ x: xn + 7, y: yn + 16, anchor: "start", text: txt }, { x: xn - 7, y: yn - 8, anchor: "end", text: txt }, { x: xn, y: yn - 10, anchor: "middle", text: txt }]);
+      if (!place(at("now (extrapolated)"), "mv-lab")) place(at("now"), "mv-lab");
+    } else {
+      const ys2 = Y(U(b.projected_lon)), txt = "stop projected near " + lonTxt(b.projected_lon);
+      place([{ x: L + pw - 4, y: ys2 - 6, anchor: "end", text: txt }, { x: L + pw - 4, y: ys2 + 15, anchor: "end", text: txt }], "mv-lab");
+    }
+    if (est.length) {
+      const xa = X(est[0]), xb = X(est[est.length - 1]), txt = "move began (estimated)";
+      place([{ x: xa - 4, y: freeEdgeY, anchor: "end", text: txt }, { x: xb + 4, y: freeEdgeY, anchor: "start", text: txt },
+             { x: xa - 4, y: depEdgeY, anchor: "end", text: txt }, { x: xb + 4, y: depEdgeY, anchor: "start", text: txt }], "mv-lab");
+    }
+    gapLab.forEach((g) => place([{ x: g[0], y: depEdgeY, anchor: "middle", text: g[1] }, { x: g[0], y: freeEdgeY, anchor: "middle", text: g[1] }], "mv-lab"));
+    let named = 0;
+    passTicks.forEach((s) => {                                   // nearest first, at most 4 named
+      if (named >= 4) return;
+      const os = s.p.objects, full = os.map((x) => x.name).join(", ") + " at " + lonTxt(s.p.lon);
+      let txt = os[0].name + (os.length > 1 ? " +" + (os.length - 1) : "");
+      if (txt.length > 22) txt = txt.slice(0, 21) + "…";
+      const c = west ? [{ x: s.x + 6, y: s.y - 5, anchor: "start", text: txt }, { x: s.x - 6, y: s.y + 14, anchor: "end", text: txt }]
+        : [{ x: s.x + 6, y: s.y + 14, anchor: "start", text: txt }, { x: s.x - 6, y: s.y - 5, anchor: "end", text: txt }];
+      if (place(c, "mv-slot", full)) named += 1;
+    });
+    const aria = "Longitude of " + m.name + " against time: public element sets from " + utcTxt(pts[0].t, true) + " to " + utcTxt(tN, true) +
+      (steady ? ", then a steady stop projection near " + lonTxt(b.projected_lon) : ", then the newest rate carried forward to " + utcTxt(t1, true) + ", marked extrapolated") + ".";
+    return '<svg class="mv-chart" viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="' + esc(aria) + '">' + o.join("") + labels.join("") + "</svg>" +
+      '<p class="small muted mv-key"><span class="mv-k mv-k-set"></span>public element set <span class="mv-k mv-k-gap"></span>no public set' +
+      (est.length ? ' <span class="mv-k mv-k-start"></span>move began (estimated)' : "") +
+      (steady ? ' <span class="mv-k mv-k-coast"></span>stop projected at constant braking'
+        : ' <span class="mv-k mv-k-coast"></span>at the last measured rate (extrapolated) <span class="mv-k mv-k-now"></span>now <span class="mv-k mv-k-pass"></span>station-kept satellites passed at that rate (dates in the table; not every one is named)') +
+      ". Axis dates are UTC days; east is up.</p>";
+  }
+  function drawMoverCharts() {
+    document.querySelectorAll("#geo-movers .mv-chartbox").forEach((box) => {
+      const m = (S.movers || []).find((x) => String(x.norad) === box.dataset.norad);
+      if (m) box.innerHTML = moverChart(m, Math.max(300, Math.floor(box.clientWidth || 700)));
+    });
+  }
+  let moverResize = null;
+  window.addEventListener("resize", () => { clearTimeout(moverResize); moverResize = setTimeout(drawMoverCharts, 200); });
   function moverCard(m) {
-    const n = m.newest, out = ["<h3>" + pick([m.norad], m.name) + roleTag(m.role) + ownTag(m.owner) + "</h3>"];
+    const n = m.newest, out = ['<h3 class="mv-h" id="movers-' + m.norad + '">' + pick([m.norad], m.name) + roleTag(m.role) + ownTag(m.owner) + "</h3>"];
     out.push("<p><strong>Newest element set:</strong> " + when(n.t) + ", " + hoursTxt(n.age_h) + " old: " + lonTxt(n.lon) + ", drifting " + esc(rateTxt(n.drift)) + ", " + heightTxt(n.dh_km) + ".");
     if (m.stale) {
       out.push(" No public set for over 3 days, so Orbit shows no position now and no dates.</p>");
@@ -1403,6 +1578,7 @@ function main() {
     } else {
       out.push("<p>Orbit’s element sets show no stop for it: it drifts in every set Orbit holds (" + fmtN(m.moving_sets) + ").</p>");
     }
+    out.push('<div class="mv-chartbox" data-norad="' + m.norad + '"></div>');
     const b = m.brake || {};
     if (b.state === "steady") {
       out.push("<p><strong>Braking:</strong> the drift is falling. At a constant rate of braking it would stop at about <strong>" + lonTxt(b.projected_lon) + "</strong> (the set of " + when(b.at) +
@@ -1415,8 +1591,9 @@ function main() {
     out.push("<h4>At the last measured rate</h4>");
     if (ps.length) {
       const head = ["Longitude", "Satellites there", "Degrees ahead", "At the last measured rate"].concat(accel ? ["Still speeding up"] : []);
-      out.push(foldTable(head, ps.map((p) => '<tr><td class="num">' + lonTxt(p.lon) + "</td><td>" + namesTxt(p.objects) + '</td><td class="num">' + p.deg_ahead.toFixed(1) + "°</td><td>" + when(p.coast) + "</td>" +
-        (accel ? "<td>" + (p.speeding_up ? when(p.speeding_up) : "–") + "</td>" : "") + "</tr>")));
+      out.push(foldTable(head, ps.map((p) => '<tr><td class="num mv-t">' + lonTxt(p.lon) + "</td><td>" + namesTxt(p.objects) + '</td><td class="num">' + p.deg_ahead.toFixed(1) + "°</td>" + timeCell(p.coast) +
+        (accel ? (p.speeding_up ? timeCell(p.speeding_up) : "<td>–</td>") : "") + "</tr>")).replace("<table data-tic-fold>", '<table data-tic-fold class="mv-pass-t">'));
+      out.push(ownerKey(ps));
     } else {
       out.push("<p>No station-kept satellite ahead within 45 days at this rate.</p>");
     }
@@ -1424,9 +1601,9 @@ function main() {
     if (m.passed_since_newest) notes.push(fmtN(m.passed_since_newest) + (m.passed_since_newest > 1 ? " slots" : " slot") + " passed at this rate since the newest set, not listed.");
     if (m.passes_more) notes.push(fmtN(m.passes_more) + " more slots within 45 days, not listed.");
     notes.push(accel ? "Two cases: the newest rate held, and the rate still rising as between the last two sets (" + esc(String(m.speeding_up.rate_change)) + "° a day per day), to at most 4.5° a day."
-      : "One case: the newest rate held. The still-speeding-up case needs three moving sets whose rates rise in turn.");
-    notes.push(esc(m.braking_note));
-    notes.push(esc(m.note));
+      : m.moving_sets < 3 ? "One case: the newest rate held (" + fmtN(m.moving_sets) + (m.moving_sets === 1 ? " moving set" : " moving sets") + " so far; the still-speeding-up case needs 3 whose rates rise in turn)."
+        : "One case: the newest rate held (the rates of its last 3 sets do not rise in turn).");
+    notes.push("Times in your zone; tap one for UTC. No braking included (see the note at the top of this section).");
     out.push('<p class="small">' + notes.join(" ") + "</p>");
     return out.join("") + stopsTable(m);
   }
@@ -1443,9 +1620,22 @@ function main() {
     if (!$("geo-movers")) return;
     if (!t || t.error) { $("geo-movers").textContent = "Not built in the last update" + (t && t.error ? " (" + t.error + ")" : "") + "."; return; }
     const ms = (t.movers || []).slice().sort((a, b) => (a.stale === b.stale ? 0 : a.stale ? 1 : -1));
-    $("geo-movers").innerHTML = (ms.length ? ms.map(moverCard).join("") : "<p>No satellite with a listed role is drifting along the belt.</p>") +
+    S.movers = ms;
+    const r = t.rules || {};
+    const caveat = '<p class="small mv-caveat"><strong>How to read this section.</strong> ' + esc(t.note) + " Dates come in up to two cases: at the last measured rate, and, with " +
+      fmtN(r.min_accel_sets || 3) + " moving sets whose rates rise in turn, still speeding up (to at most " + (r.peak_cap || 4.5) + "° a day). " + esc(t.braking_note) +
+      " A newest set more than " + fmtN(r.max_age_days || 3) + " days old gives no position and no dates.</p>";
+    $("geo-movers").innerHTML = (ms.length ? moverSummary(ms) + caveat + ms.map(moverCard).join("") : "<p>No satellite with a listed role is drifting along the belt.</p>") +
       '<p class="small">At ' + when(t.at_utc) + ". " + esc(t.attribution) + "</p>";
+    drawMoverCharts();
   }
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button.mv-tt");
+    if (!t) return;
+    const alt = t.dataset.alt;
+    t.dataset.alt = t.innerHTML;
+    t.innerHTML = alt;
+  });
   document.addEventListener("click", (e) => {
     const b = e.target.closest("button[data-pick]");
     if (!b) return;
