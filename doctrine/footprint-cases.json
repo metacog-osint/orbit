@@ -6,7 +6,7 @@
       "class": "wide-beam GEO",
       "title": "Wide-beam GEO: Arabsat 7B (Badr-8)",
       "norad": 56757,
-      "summary": "A broadcast and trunking satellite at 26 degrees east with a few large shaped beams. Its line of sight is exact. Its beams are only estimated here from their names, because the operator's own contour files could not be read by an automated client and no reuse terms were found.",
+      "summary": "A broadcast and trunking satellite at 26 degrees east with a few large shaped beams. Its line of sight is exact. Three of its beams are drawn from Arabsat's own downlink EIRP contours, read on 24 Nov 2026 and redrawn with credit; two beams are also estimated from their names and scored against those contours.",
       "line_of_sight_deg": [5, 0],
       "fit": "los",
       "published": [{"id": "mena", "file": "arabsat-badr8/BADR8_MENA_FSS_DL-EIRP.kml", "format": "kml", "label": "Ku-band FSS MENA beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "nwa", "file": "arabsat-badr8/BADR8_NWA_DL-EIRP.kml", "format": "kml", "label": "Ku-band North West Africa beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "cglobal", "file": "arabsat-badr8/BADR8_C_Gloabl.kml", "format": "kml", "label": "C-band global beam", "levels_db": [38], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}],
@@ -22,7 +22,7 @@
           "source_url": "https://www.airbus.com/en/newsroom/news/2023-05-airbus-eurostar-neo-arabsat-badr-8-telecoms-satellite-shipped-to-launch-site",
           "date": "2026-11-23",
           "check": ["mena", 43],
-          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Scored below against Arabsat's 43 dBW contour of the same beam; expect errors of hundreds of km."
         },
         {
           "id": "est-nwa",
@@ -30,15 +30,15 @@
           "label": "Ku-band 'North West Africa' beam, from its name",
           "area_words": "the UN's Northern Africa without Egypt and Sudan, plus its Western Africa",
           "countries": ["DZ", "LY", "MA", "TN", "EH", "MR", "BJ", "BF", "CV", "CI", "GM", "GH", "GN", "GW", "LR", "ML", "NE", "NG", "SN", "SL", "TG"],
-          "source": "Beam name as in Arabsat's own contour file names (seen in search results only, not opened); the country list is Orbit's reading of the name",
+          "source": "Beam name as in Arabsat's own contour file names; the country list is Orbit's reading of the name",
           "date": "2026-11-23",
           "check": ["nwa", 43],
-          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
+          "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Scored below against Arabsat's 43 dBW contour of the same beam; expect errors of hundreds of km."
         }
       ],
       "notes": [
         "Airbus, which built the satellite, says it provides connectivity over Europe, the Middle East, Africa and central Asia, in C and Ku band. That is nearly everything in its line of sight, which is why the line of sight alone says little about where a beam points.",
-        "Arabsat appears to host contour files for this satellite on its own site (KML, downlink EIRP in dBW, for a C-band global beam and a North West Africa beam). Its site refused automated requests, so they were not opened, and no reuse terms were found. If a person saves them and Tom allows their use, the two estimates here can be scored against them.",
+        "Arabsat publishes contour files for this satellite behind the Badr-8 page of its website (KML, downlink EIRP in dBW: six Ku-band beams and a C-band global beam). They were read on 24 Nov 2026 for where the contours run, and are redrawn here with credit; no file is copied. Arabsat's terms ask that its site not be linked without consent, so it is credited by name only.",
         "Uplink and downlink beams are different shapes on most satellites. Only downlink beams are named in the public material found."
       ]
     },

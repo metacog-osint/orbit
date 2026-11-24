@@ -137,8 +137,10 @@ async function main() {
     $("fp-fallback").textContent = "The footprint file is not on this site yet (" + e.message + "). Build it with tools/footprints.py.";
     return;
   }
-  const when = new Date(doc.generated_at);
-  $("fp-asof").textContent = "Built " + (window.TicTime ? window.TicTime.format(when) : when.toISOString().slice(0, 16).replace("T", " ") + " UTC") + ".";
+  // A <time> element, so tic-time.js re-renders it in the viewer's zone when the time settings change.
+  const t = el("time", { datetime: doc.generated_at, "data-tic": "datetime" }, doc.generated_at.slice(0, 16).replace("T", " ") + " UTC");
+  $("fp-asof").replaceChildren("Built ", t, ".");
+  if (window.TicTime) { window.TicTime.renderAll($("fp-asof")); window.TicTime.onChange(() => window.TicTime.renderAll($("fp-asof"))); }
   map = new ml.Map({ container: "fp-map", style: style(), center: [0, 20], zoom: 1, dragRotate: false, pitchWithRotate: false,
     cooperativeGestures: true, renderWorldCopies: true, attributionControl: { compact: true, customAttribution: "Land: Natural Earth" } });
   map.touchZoomRotate.disableRotation();
