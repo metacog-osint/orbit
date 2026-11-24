@@ -144,6 +144,16 @@ class Scores(unittest.TestCase):
         # a geostationary satellite sees about 42.4% of the Earth's surface (216 million km2)
         self.assertAlmostEqual(got["published_km2"] / 510.07e6, 0.424, delta=0.006)
 
+    def test_a_small_offset_ring_does_not_cut_the_line_of_sight(self):
+        # before 24 Nov 2026 the cap was centred between the two rings and stopped at 90 degrees, so a contour far
+        # from the sub-satellite point cut a fifth off the line of sight it was scored against (Galaxy 34)
+        sat = fp.geo_position(-129.0)
+        los = fp.los_contour(sat, 0.0, n=180)
+        spot = fp.beam_contour(sat, 45, -100, 2.0, n=90)
+        got = fp.overlap(los, spot, samples=20000)
+        self.assertAlmostEqual(got["estimate_km2"] / 510.07e6, 0.424, delta=0.008)
+        self.assertGreater(got["covered"], 0.98)
+
     def test_rings_across_the_antimeridian(self):
         sat = fp.geo_position(180.0)
         a, b = fp.beam_contour(sat, 10, 178, 1.0, n=120), fp.beam_contour(sat, 10, -178, 1.0, n=120)
@@ -226,6 +236,10 @@ class GimsBlock(unittest.TestCase):
         self.assertEqual(got[0][0], len(filler))
         beam = fp.parse_gims_block(got[1][1])
         self.assertAlmostEqual(beam["boresights"][0]["point"][0], -74.3, places=3)
+
+    def test_carve_refuses_latitudes_past_the_pole(self):
+        bad = gims_block([(0.0, -39.3, -5.2)], [(-2.0, [[-40.0, 100.0], [-38.0, -5.0], [-39.0, -3.0]])])
+        self.assertEqual(fp.carve_gims_blocks(bytes(64) + bad + bytes(64)), [])
 
     def test_carve_finds_nothing_in_noise(self):
         self.assertEqual(fp.carve_gims_blocks(bytes(range(256)) * 64), [])

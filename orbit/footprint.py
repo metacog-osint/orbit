@@ -451,10 +451,11 @@ def carve_gims_blocks(data, max_bores=20, max_conts=60):
             p += 4
             for _ in range(nc):
                 g, n = struct.unpack_from("<fi", data, p)
-                if not (-60.0 <= g <= 70.0 and 3 <= n <= 8000):
+                if not (-60.0 <= g <= 70.0 and 1 <= n <= 8000):
                     return None
                 pts = struct.unpack_from(f"<{2 * n}f", data, p + 8)
-                if any(not abs(v) <= 3.2 for v in pts):        # also refuses NaN
+                # latitude then longitude, in radians; `not <=` also refuses NaN
+                if any(not abs(v) <= (1.6 if i % 2 == 0 else 3.2) for i, v in enumerate(pts)):
                     return None
                 p += 8 + 8 * n
             return p
@@ -605,12 +606,23 @@ def _inside(poly, x, y):
 def overlap(estimate, published, samples=40000):
     """How well two rings agree in area, by equal-area sampling of the cap around both. Returns the shares:
     `iou` (shared area over combined area), `covered` (share of the published area inside the estimate) and
-    `excess` (share of the estimate outside the published area), with both areas in km2. Valid for rings that fit
-    in one hemisphere. Sampling error is about 1/sqrt(points inside)."""
+    `excess` (share of the estimate outside the published area), with both areas in km2. The sampled cap is
+    centred where it is smallest of three tries (each ring's own centre and the joint one), so a small contour
+    does not pull the cap off a large ring such as a line of sight; before 24 Nov 2026 the joint centre and a
+    90-degree cap cut up to a fifth off a line-of-sight ring. Valid for rings within 170 degrees of that centre
+    (the azimuthal-equidistant view has no folds short of the antipode). Sampling error is about
+    1/sqrt(points inside)."""
     a, b = densify(estimate), densify(published)
-    vecs = [_vec(*p) for p in a + b]
-    centre = _unit((sum(v[0] for v in vecs), sum(v[1] for v in vecs), sum(v[2] for v in vecs)))
-    rho = min(max(math.acos(max(-1.0, min(1.0, _dot(centre, v)))) for v in vecs) + 0.01, math.pi / 2 * 0.999)
+    va, vb = [_vec(*p) for p in a], [_vec(*p) for p in b]
+    vecs = va + vb
+
+    def mean(vs):
+        return _unit((sum(v[0] for v in vs), sum(v[1] for v in vs), sum(v[2] for v in vs)))
+
+    def reach(c):
+        return max(math.acos(max(-1.0, min(1.0, _dot(c, v)))) for v in vecs)
+    centre = min((mean(va), mean(vb), mean(vecs)), key=reach)
+    rho = min(reach(centre) + 0.01, math.radians(170))
     e1, e2 = _plane(centre)
     pa = [_project(_vec(*p), centre, e1, e2) for p in a]
     pb = [_project(_vec(*p), centre, e1, e2) for p in b]

@@ -5,9 +5,10 @@
 
 Three cases, each outline labelled published, computed or estimated (orbit/footprint.py says what those mean):
 a wide-beam GEO satellite, a high-throughput GEO satellite and a LEO constellation. The cases and every assumption
-are in doctrine/footprint-cases.json. Published contours are read from --published and are NOT committed: whether
-filed contours may be redrawn on a public page is Tom's decision. Without --published the estimates are still
-drawn, with no score.
+are in doctrine/footprint-cases.json. A fourth kind, measured, marks terminals seen in use (the LEO case).
+Published contours are read from --published and are NOT committed (Tom, 24 Nov 2026: filed contours may be
+redrawn on the page with credit; the files stay out of the repository until the page is approved). Without
+--published the estimates are still drawn, with no score, and a case note says which files were missing.
 
 Build-time only, like the GEO callouts: numpy and sgp4 (tools/requirements-callouts.txt). No request to
 Space-Track, CelesTrak or any operator: positions come from files the caller already holds.
@@ -27,7 +28,8 @@ from orbit import footprint as fp  # noqa: E402
 CASES = ROOT / "doctrine" / "footprint-cases.json"
 KINDS = {"published": "A contour the operator filed or published, drawn as given.",
          "computed": "Exact geometry from the satellite's position.",
-         "estimated": "A beam drawn from stated assumptions; error unknown unless scored against a published contour."}
+         "estimated": "A beam drawn from stated assumptions; error unknown unless scored against a published contour.",
+         "measured": "Places where a terminal on the network was seen in use: a lower bound; no point shows nothing."}
 MU = 398600.4418            # km3/s2
 R_SPHERE = 6371.0088        # km: the LEO view test uses a spherical Earth (error under 0.2 deg of arc)
 
@@ -266,10 +268,13 @@ def geo_case(case, day_file, published_dir, when):
                        "source": pos_src, "date": info["elements_epoch"][:10], "on": e == case.get("line_of_sight_deg", [5])[0],
                        "uncertainty": "Position to a few km; the outline to well under 0.1 degree. Terrain and buildings not included.",
                        "geojson": {"type": "FeatureCollection", "features": [feature(polygon(ring), elevation_deg=e)]}})
-    published, beams = {}, {}
+    published, beams, left_out = {}, {}, []
     for b in case.get("published", []):
         path = pathlib.Path(published_dir or "") / b["file"] if published_dir else None
         if not path or not path.exists():
+            if published_dir:                          # named but not found: say so on the page, never drop it quietly
+                left_out.append(f"The published contour file for {b['label']} ({b['file']}) was not found for this build, "
+                                "so it is not drawn and nothing is scored against it.")
             continue
         beam = read_published(path, b)
         beams[b["id"]] = beam
@@ -295,9 +300,15 @@ def geo_case(case, day_file, published_dir, when):
             if est.get("aim_from"):                    # the filed boresight of a published beam
                 src = beams.get(est["aim_from"])
                 if not src or not src["boresights"]:
+                    if published_dir:
+                        left_out.append(f"The estimate '{est['label']}' is not drawn: it is aimed at a published beam's "
+                                        "boresight, and that beam was not read.")
                     continue
                 aim = src["boresights"][0]["point"]
             peak = est.get("peak_gain_dbi") or (beams.get(est.get("aim_from")) or {}).get("peak_dbi")
+            if peak is None:
+                left_out.append(f"The estimate '{est['label']}' is not drawn: no peak gain was filed or given for it.")
+                continue
             width = fp.beamwidth_from_gain(peak, est.get("efficiency", 0.6))
             ring = fp.beam_contour(sat, aim[1], aim[0], fp.half_angle_at(width, abs(est["level_db"])))
             how = (f"circular beam of {width:.2f} degrees at -3 dB, from the filed peak gain of {peak:g} dBi "
@@ -334,9 +345,11 @@ def geo_case(case, day_file, published_dir, when):
                 scores.append({"estimate": f"Line of sight, {e:g} degrees (computed, shown for scale)",
                                "published": (f"operator's contour, {level:g} dBW" if beams[bid].get("unit") == "dBW" else f"filed contour, {level:g} dB"),
                                **fp.overlap(los, pub), **fp.contour_distance(los, pub)})
-    notes = list(case.get("notes", []))
-    if not published:
+    notes = left_out + list(case.get("notes", []))
+    if not published and case.get("published"):
         notes.insert(0, "No published contour was supplied to this build, so the estimates carry no score.")
+    elif not published:
+        notes.insert(0, "No published contour exists here to check the estimates against, so they carry no score.")
     return {"id": case["id"], "title": case["title"], "class": case["class"], "summary": case["summary"], "satellite": info,
             "layers": layers, "scores": scores, "notes": notes, "bounds": bounds(rings_all[:1] if case.get("fit") == "los" or not est_rings else est_rings, pad=6.0)}
 
