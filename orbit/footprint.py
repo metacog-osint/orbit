@@ -11,6 +11,7 @@ Geometry is on the WGS84 ellipsoid at sea level. Rings are lists of [lon, lat] i
 repeated). Standard library only.
 """
 import math
+import struct
 
 A = 6378.137                      # WGS84 semi-major axis, km
 F = 1 / 298.257223563
@@ -300,13 +301,18 @@ def parse_gxt(text):
     Regulations Preface, section III chapter 2: INI-style sections, points as `longitude;latitude` in degrees east
     and north, contour gains in dB relative to the beam's peak, so negative).
 
-    Returns {"sat_name", "long_nom", "beams": [{"beam_id", "emi_rcp" (E transmit, R receive), "polar",
-    "boresights": [{"gain_db", "point": [lon, lat]}], "contours": [{"gain_db", "closed", "ring": [[lon, lat], ...]}]}]}.
-    An open contour starts and ends on the Earth's edge as the satellite sees it and is kept as a line.
+    Returns {"sat_name", "long_nom", "adm", "format_ver", "ntc_id", "beams": [{"beam_id", "emi_rcp" (E transmit,
+    R receive), "polar", "reason", "peak_dbi", "boresights": [{"gain_db", "point": [lon, lat]}],
+    "contours": [{"gain_db", "closed", "ring": [[lon, lat], ...]}]}]}.
+    An open contour starts and ends on the Earth's edge as the satellite sees it and is kept as a line
+    (`close_on_horizon` closes it).
 
-    WRITTEN FROM THE FORMAT DESCRIPTION, 23 Nov 2026: no real filed file had been read when this was written, so
-    treat the first real file as the test."""
-    doc = {"sat_name": None, "long_nom": None, "beams": []}
+    Checked on 24 Nov 2026 against 258 filed files (FCC SAT-LOI-20130319-00040 ViaSat-2, SAT-LOA-20170621-00092
+    EchoStar XXIV): declared n_cont, n_point and n_bore matched every file. What real files do that the
+    description does not say: keys may be upper case (`P1=`); `[GeoMain]` may carry an `ntc_id`; `n_bore` may be 0
+    (a service-area outline at 0 dB); and some filers put the absolute peak gain in dBi on the boresight instead
+    of 0 dB, while the contours stay relative. A positive boresight gain is kept as `peak_dbi`."""
+    doc = {"sat_name": None, "long_nom": None, "adm": None, "format_ver": None, "ntc_id": None, "beams": []}
     section, beam, item = None, None, None
 
     def point(value):
@@ -321,7 +327,8 @@ def parse_gxt(text):
             section = line[1:-1].strip()
             name = section.lower()
             if name == "coheader":
-                beam = {"beam_id": None, "emi_rcp": None, "polar": None, "boresights": [], "contours": []}
+                beam = {"beam_id": None, "emi_rcp": None, "polar": None, "reason": None, "peak_dbi": None,
+                        "boresights": [], "contours": []}
                 doc["beams"].append(beam)
                 item = None
             elif beam is not None and name[:1] == "b" and name[1:].isdigit():
@@ -337,13 +344,15 @@ def parse_gxt(text):
             continue
         key, value = (x.strip() for x in line.split("=", 1))
         key, name = key.lower(), section.lower()
-        if name == "geomain":
-            if key == "sat_name":
-                doc["sat_name"] = value
+        if name == "formatinfo" and key == "format_ver" and value:
+            doc["format_ver"] = int(float(value))
+        elif name == "geomain":
+            if key in ("sat_name", "adm", "ntc_id"):
+                doc[key] = value
             elif key == "long_nom" and value:
                 doc["long_nom"] = float(value)
         elif name == "coheader" and beam is not None:
-            if key in ("beam_id", "emi_rcp"):
+            if key in ("beam_id", "emi_rcp", "reason"):
                 beam[key] = value
             elif key == "polar_disc":
                 beam["polar"] = value
@@ -355,10 +364,109 @@ def parse_gxt(text):
             elif key[:1] == "p" and key[1:].isdigit() and "ring" in item:
                 item["ring"].append(point(value))
     for b in doc["beams"]:
-        for c in b["contours"]:
-            r = c["ring"]
-            c["closed"] = len(r) >= 4 and abs(r[0][0] - r[-1][0]) < 1e-6 and abs(r[0][1] - r[-1][1]) < 1e-6
+        _finish_beam(b)
     return doc
+
+
+def _finish_beam(b):
+    for c in b["contours"]:
+        r = c["ring"]
+        c["closed"] = len(r) >= 4 and abs(r[0][0] - r[-1][0]) < 1e-6 and abs(r[0][1] - r[-1][1]) < 1e-6
+    peaks = [x["gain_db"] for x in b["boresights"] if x["gain_db"] is not None and x["gain_db"] > 0]
+    b["peak_dbi"] = max(peaks) if peaks else b.get("peak_dbi")
+
+
+def parse_gims_block(data, beam_id=None, emi_rcp=None, polar=None):
+    """Gain contours from one diagram's `data_block` in a GIMS database (.mdb, table `diagram`), the form a
+    filing takes when the ITU database itself is attached instead of GXT text. Same beam dict as `parse_gxt`;
+    the beam's name, direction and polarisation come from the same table row, so the caller passes them.
+
+    Layout (little-endian), not documented by the ITU and inferred on 24 Nov 2026 from Galaxy 34's filing
+    (FCC SAT-RPL-20210325-00039): int32 boresight count; per boresight float32 gain, latitude, longitude; int32
+    contour count; per contour float32 gain, int32 point count, then float32 latitude, longitude pairs. Angles are
+    in radians. All four of that filing's diagrams were consumed to the last byte, and the outlines fall where
+    the satellite serves (the continental US, Alaska and a separate Hawaii contour). A block that does not
+    decode exactly raises ValueError."""
+    o = 0
+
+    def take(fmt):
+        nonlocal o
+        try:
+            v = struct.unpack_from(fmt, data, o)
+        except struct.error as e:
+            raise ValueError(f"GIMS block ends early at byte {o}") from e
+        o += struct.calcsize(fmt)
+        return v
+
+    beam = {"beam_id": beam_id, "emi_rcp": emi_rcp, "polar": polar, "reason": None, "peak_dbi": None,
+            "boresights": [], "contours": []}
+    (nb,) = take("<i")
+    if not 0 <= nb <= 99:
+        raise ValueError(f"implausible boresight count {nb}")
+    for _ in range(nb):
+        g, lat, lon = take("<3f")
+        beam["boresights"].append({"gain_db": round(g, 2), "point": [round(lon * DEG, 4), round(lat * DEG, 4)]})
+    (nc,) = take("<i")
+    if not 0 <= nc <= 999:
+        raise ValueError(f"implausible contour count {nc}")
+    for _ in range(nc):
+        g, n = take("<fi")
+        if not 0 < n <= 8000:
+            raise ValueError(f"implausible point count {n}")
+        pts = take(f"<{2 * n}f")
+        ring = [[round(pts[i + 1] * DEG, 4), round(pts[i] * DEG, 4)] for i in range(0, 2 * n, 2)]
+        beam["contours"].append({"gain_db": round(g, 2), "closed": False, "ring": ring})
+    if o != len(data):
+        raise ValueError(f"GIMS block has {len(data) - o} bytes left over")
+    _finish_beam(beam)
+    return beam
+
+
+def close_on_horizon(sat, lines, inside, n=1440):
+    """Open filed contours of one level (each starts and ends on the Earth's edge as the satellite sees it) joined
+    along that edge into the ring that holds `inside` ([lon, lat], normally the beam's boresight). One level can
+    be bounded by several open pieces, so all of them are passed. Worked in the satellite's view, where the
+    visible Earth is a disc, so the antimeridian does not matter. Tries both ways round the edge and both piece
+    orientations; returns None when no joined ring holds `inside`."""
+    lat0, lon0, _ = geodetic(sat)
+    frame = _frame(sat, lat0, lon0)
+    edge = los_contour(sat, 0.0, n)[:-1]
+
+    def view(p):
+        return view_angles(sat, frame, p[1], p[0])
+
+    def theta(p):
+        e, nn = view(p)
+        return math.atan2(nn, e)
+
+    t_edge = [theta(p) for p in edge]
+    target = view(inside)
+
+    def arc(t_from, t_to, sign):
+        span = (sign * (t_to - t_from)) % (2 * math.pi)
+        picks = [((sign * (t - t_from)) % (2 * math.pi), p) for p, t in zip(edge, t_edge)]
+        return [list(p) for d, p in sorted(picks) if 0 < d < span]
+
+    for pieces in (lines, [list(reversed(x)) for x in lines]):
+        for sign in (1, -1):
+            todo = list(range(1, len(pieces)))
+            ring, cur = [list(p) for p in pieces[0]], 0
+            for _ in range(len(pieces)):
+                t_end = theta(ring[-1])
+                # the next piece to start going round the edge this way, or back to the first piece
+                cands = [(sign * (theta(pieces[k][0]) - t_end)) % (2 * math.pi) for k in todo] + \
+                        [(sign * (theta(pieces[0][0]) - t_end)) % (2 * math.pi)]
+                pick = min(range(len(cands)), key=cands.__getitem__)
+                nxt = todo[pick] if pick < len(todo) else 0
+                ring += arc(t_end, theta(pieces[nxt][0]), sign)
+                if nxt == 0:
+                    break
+                todo.remove(nxt)
+                ring += [list(p) for p in pieces[nxt]]
+            ring.append(list(ring[0]))
+            if _inside([view(p) for p in ring], *target):
+                return ring
+    return None
 
 
 # ---------------------------------------------------------------- scoring an estimate against a published contour

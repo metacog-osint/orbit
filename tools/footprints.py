@@ -219,6 +219,38 @@ def area_rings(countries_file, codes, box=None):
     return rings
 
 
+def read_published(path, b):
+    """One filed beam from a GXT text file or a GIMS database block saved as .bin (see orbit.footprint)."""
+    if b.get("format") == "gims_block" or path.suffix.lower() == ".bin":
+        return fp.parse_gims_block(path.read_bytes(), b.get("beam_id"), b.get("emi_rcp"), b.get("polar"))
+    doc = fp.parse_gxt(path.read_bytes().decode("cp1252"))
+    want = [x for x in doc["beams"] if not b.get("beam_id") or (x["beam_id"] or "").strip() == b["beam_id"]]
+    if not want:
+        raise SystemExit(f"{path}: no beam {b.get('beam_id')}")
+    return want[0]
+
+
+def level_rings(sat, beam, level, bore):
+    """The contours of one level: the main ring (the one holding the boresight, with open parts joined along the
+    Earth's edge), every ring to draw, and whether any part was joined."""
+    got = [c for c in beam["contours"] if c["gain_db"] is not None and abs(c["gain_db"] - level) < 0.01]
+    closed = [c["ring"] for c in got if c["closed"]]
+    open_ = [c["ring"] for c in got if not c["closed"] and len(c["ring"]) >= 2]
+    joined = fp.close_on_horizon(sat, open_, bore) if open_ and bore else None
+    rings = closed + ([joined] if joined else [])
+    if not rings:
+        return None, [], False
+    main = joined
+    if main is None and bore:
+        for r in closed:
+            v = fp._vec(*bore)
+            e1, e2 = fp._plane(v)
+            if fp._inside([fp._project(fp._vec(*p), v, e1, e2) for p in r], 0.0, 0.0):
+                main = r
+                break
+    return main or max(rings, key=len), rings, joined is not None
+
+
 def geo_case(case, day_file, published_dir, when):
     sat, info = geo_object(day_file, case["norad"], when)
     pos_src = "Orbit's GEO day file (element sets: Space-Track.org, USSPACECOM)"
@@ -230,30 +262,40 @@ def geo_case(case, day_file, published_dir, when):
                        "source": pos_src, "date": info["elements_epoch"][:10], "on": e == case.get("line_of_sight_deg", [5])[0],
                        "uncertainty": "Position to a few km; the outline to well under 0.1 degree. Terrain and buildings not included.",
                        "geojson": {"type": "FeatureCollection", "features": [feature(polygon(ring), elevation_deg=e)]}})
-    published = {}
+    published, beams = {}, {}
     for b in case.get("published", []):
         path = pathlib.Path(published_dir or "") / b["file"] if published_dir else None
         if not path or not path.exists():
             continue
-        doc = fp.parse_gxt(path.read_text(encoding="utf-8", errors="replace"))
+        beam = read_published(path, b)
+        beams[b["id"]] = beam
+        bore = beam["boresights"][0]["point"] if beam["boresights"] else None
         for level in b.get("levels_db", []):
-            got = [c for c in doc["contours"] if abs(c["gain_db"] - level) < 0.01]
-            rings = [r for c in got for r in c["rings"] if len(r) >= 4]
-            if not rings:
+            main, rings, joined = level_rings(sat, beam, level, bore)
+            if not main:
                 continue
             lid = f"pub-{b['id']}-{abs(level):g}"
-            published[(b["id"], level)] = max(rings, key=len)
+            published[(b["id"], level)] = main
             rings_all += rings
+            note = " Parts that reach the Earth's edge as the satellite sees it are closed along that edge." if joined else ""
             layers.append({"id": lid, "kind": "published", "label": f"{b['label']}: filed contour at {level:g} dB from the beam's peak",
                            "source": b["source"], "source_url": b.get("source_url"), "date": b.get("date"),
-                           "uncertainty": b.get("uncertainty", "As filed. A filing shows the design, not a measurement, and may predate launch."),
-                           "geojson": {"type": "FeatureCollection", "features": [feature(polygon(r), gain_db=level, beam=doc.get("beam")) for r in rings]}})
+                           "uncertainty": b.get("uncertainty", "As filed. A filing shows the design, not a measurement, and may predate launch.") + note,
+                           "geojson": {"type": "FeatureCollection", "features": [feature(polygon(r), gain_db=level, beam=beam.get("beam_id"),
+                                                                                         emi_rcp=beam.get("emi_rcp")) for r in rings]}})
     for est in case.get("estimates", []):
         if est["method"] == "gain":
-            width = fp.beamwidth_from_gain(est["peak_gain_dbi"], est.get("efficiency", 0.6))
-            ring = fp.beam_contour(sat, est["aim"][1], est["aim"][0], fp.half_angle_at(width, abs(est["level_db"])))
-            how = (f"circular beam of {width:.2f} degrees at -3 dB, from the filed peak gain of {est['peak_gain_dbi']:g} dBi "
-                   f"at {est.get('efficiency', 0.6):g} efficiency, aimed at {est['aim'][1]:g}, {est['aim'][0]:g}")
+            aim = est.get("aim")
+            if est.get("aim_from"):                    # the filed boresight of a published beam
+                src = beams.get(est["aim_from"])
+                if not src or not src["boresights"]:
+                    continue
+                aim = src["boresights"][0]["point"]
+            peak = est.get("peak_gain_dbi") or (beams.get(est.get("aim_from")) or {}).get("peak_dbi")
+            width = fp.beamwidth_from_gain(peak, est.get("efficiency", 0.6))
+            ring = fp.beam_contour(sat, aim[1], aim[0], fp.half_angle_at(width, abs(est["level_db"])))
+            how = (f"circular beam of {width:.2f} degrees at -3 dB, from the filed peak gain of {peak:g} dBi "
+                   f"at {est.get('efficiency', 0.6):g} efficiency, aimed at {aim[1]:.2f}, {aim[0]:.2f}, drawn at {est['level_db']:g} dB")
             unc = "Assumes an unshaped circular beam. The width is good to about 10% for the efficiency alone."
         elif est["method"] == "spot_km":
             aim = fp.ecef(est["aim"][1], est["aim"][0])
