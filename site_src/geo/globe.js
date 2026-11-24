@@ -1379,6 +1379,26 @@ function main() {
   const when = (s) => esc(bothTxt(epochMs(s.replace("Z", "")), true));
   const hoursTxt = (h) => (h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days");
   const heightTxt = (km) => (Math.abs(km) < 1 ? "at geostationary altitude" : "about " + fmtN(Math.round(Math.abs(km))) + " km " + (km > 0 ? "above" : "below") + " geostationary altitude");
+  // terms in place (ideas#322): why a height off geostationary means a drift, in the direction it does
+  const heightWhy = (km) => (Math.abs(km) < 1 ? "" : ' <span class="small muted">(' + (km > 0 ? "Higher than geostationary, an orbit takes longer than the Earth's turn, so the satellite slips west"
+    : "Lower than geostationary, an orbit is quicker than the Earth's turn, so the satellite slips east") + ": about 0.013° a day for each km.)</span>");
+  const fromNow = (s) => { const h = (tms(s) - Date.now()) / 36e5; return h < 0 ? "passed" : h < 48 ? "in " + Math.max(1, Math.round(h)) + " h" : "in " + (h / 24).toFixed(1) + " days"; };
+  function lastDayTxt(m) {
+    const d = m.last_day;
+    if (!d) return "";
+    const BW = { none: "no braking", "braking seen": "braking seen", steady: "a steady stop projection" };
+    const parts = [];
+    if (!d.new_sets) parts.push("no new public set");
+    else {
+      parts.push(fmtN(d.new_sets) + (d.new_sets === 1 ? " new public set" : " new public sets"));
+      if (d.drift_before != null && Math.abs(Math.abs(d.drift_before) - Math.abs(m.newest.drift)) >= 0.01)
+        parts.push("drift " + esc(rateTxt(d.drift_before)) + " in the set before them, " + esc(rateTxt(m.newest.drift)) + " now");
+      else if (d.drift_before != null) parts.push("drift unchanged");
+    }
+    const b = (m.brake || {}).state;
+    if (d.brake_before && b && b !== d.brake_before) parts.push((BW[d.brake_before] || d.brake_before) + " before, " + (BW[b] || b) + " now");
+    return '<p class="small"><strong>Last 24 hours:</strong> ' + parts.join("; ") + ".</p>";
+  }
   const ownName = (o) => (S.owners[o] ? String(S.owners[o]) : "");
   const ownTag = (o) => (o ? ' <abbr class="small muted" title="' + esc(ownName(o) || o) + '">' + esc(o) + "</abbr>" : "");
   const namesTxt = (os) => os.map((x) => pick([x.norad], x.name) + ownTag(x.owner)).join(", ");
@@ -1392,7 +1412,8 @@ function main() {
     return [+x.day + " " + MON[+x.month - 1] + ",", x.hour + ":" + x.minute + (x.dayPeriod ? " " + x.dayPeriod : "") + " " + x.timeZoneName];
   }
   const twoLines = (p) => '<span class="mv-nw">' + esc(p[0]) + '</span> <span class="mv-nw">' + esc(p[1]) + "</span>";
-  const timeCell = (s) => { const ms = tms(s), u = utcTxt(ms, true); return '<td><button type="button" class="mv-tt" title="' + esc(u) + '" data-alt="' + esc(twoLines(u.split(", ").map((x, k) => (k ? x : x + ",")))) + '">' + twoLines(shortParts(ms)) + "</button></td>"; };
+  const timeCell = (s, rel) => { const ms = tms(s), u = utcTxt(ms, true); return '<td><button type="button" class="mv-tt" title="' + esc(u) + '" data-alt="' + esc(twoLines(u.split(", ").map((x, k) => (k ? x : x + ",")))) + '">' + twoLines(shortParts(ms)) + "</button>" +
+    (rel ? '<span class="mv-fn small muted">' + esc(rel) + "</span>" : "") + "</td>"; };
   function ownerKey(ps) {
     const codes = [...new Set(ps.flatMap((p) => p.objects.map((x) => x.owner)).filter(Boolean))].sort();
     if (!codes.length) return "";
@@ -1559,12 +1580,12 @@ function main() {
   window.addEventListener("resize", () => { clearTimeout(moverResize); moverResize = setTimeout(drawMoverCharts, 200); });
   function moverCard(m) {
     const n = m.newest, out = ['<h3 class="mv-h" id="movers-' + m.norad + '">' + pick([m.norad], m.name) + roleTag(m.role) + ownTag(m.owner) + "</h3>"];
-    out.push("<p><strong>Newest element set:</strong> " + when(n.t) + ", " + hoursTxt(n.age_h) + " old: " + lonTxt(n.lon) + ", drifting " + esc(rateTxt(n.drift)) + ", " + heightTxt(n.dh_km) + ".");
+    out.push("<p><strong>Newest element set:</strong> " + when(n.t) + ", " + hoursTxt(n.age_h) + " old: " + lonTxt(n.lon) + ", drifting " + esc(rateTxt(n.drift)) + ", " + heightTxt(n.dh_km) + "." + heightWhy(n.dh_km));
     if (m.stale) {
-      out.push(" No public set for over 3 days, so Orbit shows no position now and no dates.</p>");
+      out.push(" No public set for over 3 days, so Orbit shows no position now and no dates.</p>" + lastDayTxt(m));
       return out.join("");
     }
-    out.push(" <strong>Now:</strong> about " + lonTxt(m.now.lon) + " at " + when(m.now.at) + ", <em>extrapolated</em> at that rate.</p>");
+    out.push(" <strong>Now:</strong> about " + lonTxt(m.now.lon) + " at " + when(m.now.at) + ", <em>extrapolated</em> at that rate.</p>" + lastDayTxt(m));
     const d = m.departure;
     if (d) {
       const est = d.estimated_start || [], ts = est.map((e) => epochMs(e.t.replace("Z", ""))).sort((a, b) => a - b);
@@ -1590,8 +1611,8 @@ function main() {
     const ps = m.passes || [], accel = (m.cases || []).indexOf("speeding up") >= 0;
     out.push("<h4>At the last measured rate</h4>");
     if (ps.length) {
-      const head = ["Longitude", "Satellites there", "Degrees ahead", "At the last measured rate"].concat(accel ? ["Still speeding up"] : []);
-      out.push(foldTable(head, ps.map((p) => '<tr><td class="num mv-t">' + lonTxt(p.lon) + "</td><td>" + namesTxt(p.objects) + '</td><td class="num">' + p.deg_ahead.toFixed(1) + "°</td>" + timeCell(p.coast) +
+      const head = ["Longitude", "Satellites there", "Degrees ahead", "At the last measured rate", "From now"].concat(accel ? ["Still speeding up"] : []);
+      out.push(foldTable(head, ps.map((p) => '<tr><td class="num mv-t">' + lonTxt(p.lon) + "</td><td>" + namesTxt(p.objects) + '</td><td class="num">' + p.deg_ahead.toFixed(1) + "°</td>" + timeCell(p.coast, fromNow(p.coast)) + '<td class="mv-nw">' + esc(fromNow(p.coast)) + "</td>" +
         (accel ? (p.speeding_up ? timeCell(p.speeding_up) : "<td>–</td>") : "") + "</tr>")).replace("<table data-tic-fold>", '<table data-tic-fold class="mv-pass-t">'));
       out.push(ownerKey(ps));
     } else {
@@ -1610,10 +1631,11 @@ function main() {
   function stopsTable(m) {
     const st = m.stops || [];
     if (!st.length) return "";
-    return '<details class="globe-more"><summary>Stops in Orbit’s element sets (' + fmtN(st.length) + ")</summary>" +
+    return '<h4>Stops in Orbit’s element sets (' + fmtN(st.length) + ")</h4>" +
       table(["Longitude", "From", "To", "Days", "Nearest station-kept satellites then"], st.map((s) => '<tr><td class="num">' + lonTxt(s.lon) + (s.kind === "turnaround" ? " (turned)" : "") +
         "</td><td>" + when(s.arrival) + "</td><td>" + when(s.departure) + '</td><td class="num">' + s.days.toFixed(1) + "</td><td>" + nearTxt(s.neighbours) + "</td></tr>")) +
-      '<p class="small">Orbit’s GEO element sets start on 1 July 2026, so the first stop listed may have begun earlier.</p></details>';
+      '<p class="small">A stop is a run of sets drifting under 0.1° a day for 2 days or more, or “(turned)” where the drift reversed; the nearest station-kept satellites are placed by their own sets at the time the stop ended (now, for a current one). ' +
+      "Orbit’s GEO element sets start on 1 July 2026, so the first stop listed may have begun earlier.</p>";
   }
   const foldTable = (head, rows) => table(head, rows).replace("<table>", "<table data-tic-fold>");
   function moverCards(t) {
@@ -1622,7 +1644,8 @@ function main() {
     const ms = (t.movers || []).slice().sort((a, b) => (a.stale === b.stale ? 0 : a.stale ? 1 : -1));
     S.movers = ms;
     const r = t.rules || {};
-    const caveat = '<p class="small mv-caveat"><strong>How to read this section.</strong> ' + esc(t.note) + " Dates come in up to two cases: at the last measured rate, and, with " +
+    const caveat = '<p class="small mv-caveat"><strong>How to read this section.</strong> An element set is a published fit of a satellite’s orbit at one moment (its epoch); ' +
+      "for these satellites Space-Track publishes them at irregular intervals, sometimes weeks apart. " + esc(t.note) + " Dates come in up to two cases: at the last measured rate, and, with " +
       fmtN(r.min_accel_sets || 3) + " moving sets whose rates rise in turn, still speeding up (to at most " + (r.peak_cap || 4.5) + "° a day). " + esc(t.braking_note) +
       " A newest set more than " + fmtN(r.max_age_days || 3) + " days old gives no position and no dates.</p>";
     $("geo-movers").innerHTML = (ms.length ? moverSummary(ms) + caveat + ms.map(moverCard).join("") : "<p>No satellite with a listed role is drifting along the belt.</p>") +
