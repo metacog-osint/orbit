@@ -215,6 +215,24 @@ class GimsBlock(unittest.TestCase):
             fp.parse_gims_block(good[:-3])
 
 
+class EirpKml(unittest.TestCase):
+    def test_reads_levels_and_polygons(self):
+        # made up, in the shape of an operator's footprint KML: a label point, a polygon, a multi-polygon
+        kml = """<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+        <name>TEST_DL EIRP.kml</name>
+        <Placemark><name>43 dBW</name><Point><coordinates>10,20,0</coordinates></Point></Placemark>
+        <Placemark><name>Contour 43 dBW</name><Polygon><outerBoundaryIs><LinearRing><coordinates>
+          0,10,0 20,10,0 20,30,0 0,30,0 0,10,0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+        <Placemark><name>Contour 48 dBW</name><MultiGeometry>
+          <Polygon><outerBoundaryIs><LinearRing><coordinates>5,15,0 10,15,0 10,20,0</coordinates></LinearRing></outerBoundaryIs></Polygon>
+          <Polygon><outerBoundaryIs><LinearRing><coordinates>12,22,0 14,22,0 14,24,0 12,22,0</coordinates></LinearRing></outerBoundaryIs></Polygon>
+        </MultiGeometry></Placemark></Document></kml>"""
+        beam = fp.parse_eirp_kml(kml)
+        self.assertEqual((beam["beam_id"], beam["unit"], beam["emi_rcp"]), ("TEST_DL EIRP.kml", "dBW", "E"))
+        self.assertEqual([(c["gain_db"], len(c["ring"]), c["closed"]) for c in beam["contours"]], [(43.0, 5, True), (48.0, 4, True), (48.0, 4, True)])
+        self.assertEqual(beam["contours"][1]["ring"][0], beam["contours"][1]["ring"][-1])   # closed when the file left it open
+
+
 class Horizon(unittest.TestCase):
     def setUp(self):
         self.sat = fp.geo_position(0.0)

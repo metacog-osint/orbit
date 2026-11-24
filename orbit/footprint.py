@@ -422,6 +422,36 @@ def parse_gims_block(data, beam_id=None, emi_rcp=None, polar=None):
     return beam
 
 
+def parse_eirp_kml(text, beam_id=None):
+    """Contours from an operator's KML footprint file, where each Placemark named like "Contour 43 dBW" holds one
+    or more polygons (read 24 Nov 2026 from Arabsat's Badr-8 files: downlink EIRP in dBW, Polygon or
+    MultiGeometry, coordinates `lon,lat,alt`). Returns the beam dict `parse_gxt` gives, with `unit` "dBW" and
+    each contour's level in `gain_db`, so callers treat both alike. Placemarks without a level (the labels)
+    are skipped. Inner rings (holes) are not used."""
+    import re
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(text.encode("utf-8") if isinstance(text, str) else text)
+    tag = lambda e: e.tag.rsplit("}", 1)[-1]
+    doc_name = next((e.text for e in root.iter() if tag(e) == "name"), None)
+    beam = {"beam_id": beam_id or doc_name, "emi_rcp": "E", "polar": None, "reason": None, "peak_dbi": None,
+            "unit": "dBW", "boresights": [], "contours": []}
+    for pm in (e for e in root.iter() if tag(e) == "Placemark"):
+        name = next((c.text or "" for c in pm if tag(c) == "name"), "")
+        m = re.search(r"(-?\d+(?:\.\d+)?)\s*dBW", name)
+        polys = [e for e in pm.iter() if tag(e) == "Polygon"]
+        if not m or not polys:
+            continue
+        for poly in polys:
+            outer = next((e for e in poly.iter() if tag(e) == "outerBoundaryIs"), poly)
+            coords = next((e.text for e in outer.iter() if tag(e) == "coordinates"), "") or ""
+            ring = [[float(x.split(",")[0]), float(x.split(",")[1])] for x in coords.split()]
+            if len(ring) >= 3:
+                if ring[0] != ring[-1]:
+                    ring.append(list(ring[0]))
+                beam["contours"].append({"gain_db": float(m.group(1)), "closed": True, "ring": ring})
+    return beam
+
+
 def close_on_horizon(sat, lines, inside, n=1440):
     """Open filed contours of one level (each starts and ends on the Earth's edge as the satellite sees it) joined
     along that edge into the ring that holds `inside` ([lon, lat], normally the beam's boresight). One level can
