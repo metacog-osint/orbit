@@ -221,6 +221,8 @@ def area_rings(countries_file, codes, box=None):
 
 def read_published(path, b):
     """One filed beam from a GXT text file or a GIMS database block saved as .bin (see orbit.footprint)."""
+    if b.get("format") == "kml" or path.suffix.lower() == ".kml":
+        return fp.parse_eirp_kml(path.read_bytes(), b.get("beam_id"))
     if b.get("format") == "gims_block" or path.suffix.lower() == ".bin":
         return fp.parse_gims_block(path.read_bytes(), b.get("beam_id"), b.get("emi_rcp"), b.get("polar"))
     doc = fp.parse_gxt(path.read_bytes().decode("cp1252"))
@@ -241,6 +243,8 @@ def level_rings(sat, beam, level, bore):
     if not rings:
         return None, [], False
     main = joined
+    if main is None and not bore:              # no boresight (an operator's KML): the largest ring by area
+        main = max(rings, key=lambda r: fp.overlap(r, r, 2000)["published_km2"])
     if main is None and bore:
         for r in closed:
             v = fp._vec(*bore)
@@ -278,7 +282,9 @@ def geo_case(case, day_file, published_dir, when):
             published[(b["id"], level)] = main
             rings_all += rings
             note = " Parts that reach the Earth's edge as the satellite sees it are closed along that edge." if joined else ""
-            layers.append({"id": lid, "kind": "published", "label": f"{b['label']}: filed contour at {level:g} dB from the beam's peak",
+            what = (f"operator's contour at {level:g} dBW downlink EIRP, redrawn" if beam.get("unit") == "dBW"
+                    else f"filed contour at {level:g} dB from the beam's peak")
+            layers.append({"id": lid, "kind": "published", "label": f"{b['label']}: {what}",
                            "source": b["source"], "source_url": b.get("source_url"), "date": b.get("date"),
                            "uncertainty": b.get("uncertainty", "As filed. A filing shows the design, not a measurement, and may predate launch.") + note,
                            "geojson": {"type": "FeatureCollection", "features": [feature(polygon(r), gain_db=level, beam=beam.get("beam_id"),
@@ -320,12 +326,13 @@ def geo_case(case, day_file, published_dir, when):
         key = tuple(est["check"]) if est.get("check") else None
         if key and (key[0], key[1]) in published:
             pub = published[(key[0], key[1])]
-            scores.append({"estimate": est["label"], "published": f"filed contour, {key[1]:g} dB", **fp.overlap(ring, pub), **fp.contour_distance(ring, pub)})
+            scores.append({"estimate": est["label"], "published": (f"operator's contour, {key[1]:g} dBW" if beams[key[0]].get("unit") == "dBW" else f"filed contour, {key[1]:g} dB"), **fp.overlap(ring, pub), **fp.contour_distance(ring, pub)})
     for e, lid in ((x, f"los{x}") for x in case.get("line_of_sight_deg", [])[:1]):
         for (bid, level), pub in published.items():
             if case.get("score_line_of_sight") and (bid, level) == tuple(case["score_line_of_sight"]):
                 los = fp.los_contour(sat, e)
-                scores.append({"estimate": f"Line of sight, {e:g} degrees (computed, shown for scale)", "published": f"filed contour, {level:g} dB",
+                scores.append({"estimate": f"Line of sight, {e:g} degrees (computed, shown for scale)",
+                               "published": (f"operator's contour, {level:g} dBW" if beams[bid].get("unit") == "dBW" else f"filed contour, {level:g} dB"),
                                **fp.overlap(los, pub), **fp.contour_distance(los, pub)})
     notes = list(case.get("notes", []))
     if not published:

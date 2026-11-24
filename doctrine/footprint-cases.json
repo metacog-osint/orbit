@@ -9,7 +9,8 @@
       "summary": "A broadcast and trunking satellite at 26 degrees east with a few large shaped beams. Its line of sight is exact. Its beams are only estimated here from their names, because the operator's own contour files could not be read by an automated client and no reuse terms were found.",
       "line_of_sight_deg": [5, 0],
       "fit": "los",
-      "published": [],
+      "published": [{"id": "mena", "file": "arabsat-badr8/BADR8_MENA_FSS_DL-EIRP.kml", "format": "kml", "label": "Ku-band FSS MENA beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "nwa", "file": "arabsat-badr8/BADR8_NWA_DL-EIRP.kml", "format": "kml", "label": "Ku-band North West Africa beam", "levels_db": [43, 48], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}, {"id": "cglobal", "file": "arabsat-badr8/BADR8_C_Gloabl.kml", "format": "kml", "label": "C-band global beam", "levels_db": [38], "source": "Arabsat's own downlink EIRP contours for Badr-8 (KML behind the coverage map on the Badr-8 page of arabsat.com), read 24 Nov 2026 and redrawn as facts with credit: the operator's file is not copied", "date": "2026-11-24", "uncertainty": "As the operator publishes it, with no date or method stated. Downlink only; the uplink beam is not published."}],
+      "score_line_of_sight": ["cglobal", 38],
       "estimates": [
         {
           "id": "est-mena",
@@ -20,6 +21,7 @@
           "source": "Beam name from third-party listings of Badr-8's beams; the country list is Orbit's reading of the name",
           "source_url": "https://www.airbus.com/en/newsroom/news/2023-05-airbus-eurostar-neo-arabsat-badr-8-telecoms-satellite-shipped-to-launch-site",
           "date": "2026-11-23",
+          "check": ["mena", 43],
           "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
         },
         {
@@ -30,6 +32,7 @@
           "countries": ["DZ", "LY", "MA", "TN", "EH", "MR", "BJ", "BF", "CV", "CI", "GM", "GH", "GN", "GW", "LR", "ML", "NE", "NG", "SN", "SL", "TG"],
           "source": "Beam name as in Arabsat's own contour file names (seen in search results only, not opened); the country list is Orbit's reading of the name",
           "date": "2026-11-23",
+          "check": ["nwa", 43],
           "uncertainty": "A beam name is not a contour: no gain level, and a shaped beam is not an ellipse. Not checked against any published contour. Expect errors of hundreds of km."
         }
       ],
