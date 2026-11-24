@@ -166,6 +166,85 @@ class Gxt(unittest.TestCase):
     def test_empty_text_gives_no_beams(self):
         self.assertEqual(fp.parse_gxt("")["beams"], [])
 
+    def test_quirks_of_filed_files(self):
+        # Made up, in the shape of real FCC attachments read 24 Nov 2026: upper-case point keys, an ntc_id,
+        # format 2, the absolute peak gain on the boresight, CR LF line ends.
+        text = ("[FormatInfo]\r\nformat_ver=2\r\n[GeoMain]\r\nntc_id=1\r\nadm=G  \r\nsat_name=TEST-2\r\nlong_nom=-95.20 \r\n"
+                "n_diag=1\r\n[COHeader]\r\nbeam_id=U1   \r\nemi_rcp=E\r\npolar_disc=C\r\nreason=C\r\nn_bore=1\r\nn_cont=1\r\n"
+                "[B1]\r\ngain=59.63\r\np=-86.0;36.5\r\n[C1]\r\ngain=-2\r\nn_point=4\r\n"
+                "P1=-86.5;36.0\r\nP2=-85.5;36.0\r\nP3=-86.0;37.0\r\nP4=-86.5;36.0\r\n")
+        doc = fp.parse_gxt(text)
+        self.assertEqual((doc["format_ver"], doc["ntc_id"], doc["adm"], doc["long_nom"]), (2, "1", "G", -95.2))
+        beam = doc["beams"][0]
+        self.assertEqual((beam["beam_id"], beam["reason"], beam["peak_dbi"]), ("U1", "C", 59.63))
+        self.assertEqual([(c["gain_db"], c["closed"], len(c["ring"])) for c in beam["contours"]], [(-2.0, True, 4)])
+
+    def test_relative_boresight_has_no_peak(self):
+        self.assertIsNone(fp.parse_gxt(GXT)["beams"][0]["peak_dbi"])
+
+
+def gims_block(bores, conts, extra=b""):
+    """A GIMS database data_block in the layout parse_gims_block reads: radians, latitude before longitude."""
+    import struct
+    out = struct.pack("<i", len(bores))
+    for g, lon, lat in bores:
+        out += struct.pack("<3f", g, math.radians(lat), math.radians(lon))
+    out += struct.pack("<i", len(conts))
+    for g, pts in conts:
+        out += struct.pack("<fi", g, len(pts))
+        for lon, lat in pts:
+            out += struct.pack("<2f", math.radians(lat), math.radians(lon))
+    return out + extra
+
+
+class GimsBlock(unittest.TestCase):
+    def test_reads_boresight_and_contours(self):
+        ring = [[-100.0, 30.0], [-90.0, 30.0], [-95.0, 40.0], [-100.0, 30.0]]
+        beam = fp.parse_gims_block(gims_block([(0.0, -95.0, 35.0)], [(-2.0, ring), (-4.0, ring[:3])]), "CAHD", "E", "C")
+        self.assertEqual((beam["beam_id"], beam["emi_rcp"], beam["peak_dbi"]), ("CAHD", "E", None))
+        self.assertEqual(beam["boresights"][0]["gain_db"], 0.0)
+        self.assertAlmostEqual(beam["boresights"][0]["point"][0], -95.0, places=3)
+        self.assertAlmostEqual(beam["boresights"][0]["point"][1], 35.0, places=3)
+        self.assertEqual([(c["gain_db"], c["closed"], len(c["ring"])) for c in beam["contours"]], [(-2.0, True, 4), (-4.0, False, 3)])
+
+    def test_left_over_or_short_bytes_are_refused(self):
+        good = gims_block([(0.0, -95.0, 35.0)], [(-2.0, [[-100.0, 30.0], [-90.0, 30.0]])])
+        with self.assertRaises(ValueError):
+            fp.parse_gims_block(good + b"\x00\x00\x00\x00")
+        with self.assertRaises(ValueError):
+            fp.parse_gims_block(good[:-3])
+
+
+class Horizon(unittest.TestCase):
+    def setUp(self):
+        self.sat = fp.geo_position(0.0)
+        edge = fp.los_contour(self.sat, 0.0, n=360)
+        north, south = edge[0], edge[180]           # bearings 0 and 180 from the sub-satellite point
+        self.line = [north, [40.0, 40.0], [40.0, 0.0], [40.0, -40.0], south]
+
+    def _holds(self, ring, p):
+        v = fp._vec(*p)
+        e1, e2 = fp._plane(v)
+        return fp._inside([fp._project(fp._vec(*q), v, e1, e2) for q in ring], 0.0, 0.0)
+
+    def test_closes_on_the_side_of_the_boresight(self):
+        east = fp.close_on_horizon(self.sat, [self.line], [60.0, 0.0])
+        west = fp.close_on_horizon(self.sat, [self.line], [-40.0, 0.0])
+        self.assertTrue(self._holds(east, [60.0, 0.0]) and not self._holds(east, [-40.0, 0.0]))
+        self.assertTrue(self._holds(west, [-40.0, 0.0]) and not self._holds(west, [60.0, 0.0]))
+        a, b = fp.overlap(east, east, 6000)["published_km2"], fp.overlap(west, west, 6000)["published_km2"]
+        self.assertLess(a, b)                       # the eastern slice is the smaller one
+
+    def test_two_pieces_of_one_level(self):
+        # a band between two open lines: the region holding the point lies between them
+        edge = fp.los_contour(self.sat, 0.0, n=360)
+        a = [edge[60], [20.0, 20.0], [-20.0, 20.0], edge[300]]
+        b = [edge[240], [-20.0, -20.0], [20.0, -20.0], edge[120]]
+        ring = fp.close_on_horizon(self.sat, [a, b], [0.0, 0.0])
+        self.assertTrue(self._holds(ring, [0.0, 0.0]))
+        self.assertFalse(self._holds(ring, [0.0, 45.0]))
+        self.assertFalse(self._holds(ring, [0.0, -45.0]))
+
 
 if __name__ == "__main__":
     unittest.main()
