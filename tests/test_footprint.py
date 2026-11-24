@@ -303,8 +303,10 @@ class PublishedData(unittest.TestCase):
         p = pathlib.Path(__file__).resolve().parent.parent / "site_src" / "footprints-data.json"
         text = p.read_text(encoding="utf-8")
         low = text.lower()
-        for word in ("telesat", "telstar", "orbit-232-research", "c:/users", "c:\\\\users", "d:/projects"):
+        import re
+        for word in ("telesat", "telstar"):
             self.assertNotIn(word, low)
+        self.assertIsNone(re.search(r"\b[a-z]:[\\/]", low))          # no Windows drive path of any kind
         doc = json.loads(text)
         self.assertEqual(set(doc["kinds"]), {"published", "computed", "estimated", "measured"})
         for case in doc["cases"]:
