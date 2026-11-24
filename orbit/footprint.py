@@ -422,6 +422,59 @@ def parse_gims_block(data, beam_id=None, emi_rcp=None, polar=None):
     return beam
 
 
+def carve_gims_blocks(data, max_bores=20, max_conts=60):
+    """Diagram data blocks found by scanning a whole GIMS database file, for a filing whose .mdb the Access engine
+    will not open (user-level security; for example FCC SAT-PPL-20160225-00020, Telstar 19 VANTAGE, read 24 Nov
+    2026). Such files are locked, not encrypted. Only a block that fits in one database page (4,096 bytes, so a
+    few hundred contour points) is stored in one piece and can be found: Access splits a longer one across pages
+    (Galaxy 34's 20 KB blocks, SAT-RPL-20210325-00039, are not found), so a filing's larger, shaped beams can be
+    missing from the result. A candidate must decode in
+    `parse_gims_block`'s layout with plausible values: boresight gains -10 to 70 dB, every angle within the
+    Earth's range in radians, and at least one contour. Returns [(offset, bytes)], each block once (copies of a
+    block, which Access keeps, are dropped). The beam's name, direction and polarisation sit in other table rows
+    that this does not read, so a caller matches blocks to beams by boresight, for example against the filing's
+    service-area files."""
+    def plausible_end(o):
+        try:
+            (nb,) = struct.unpack_from("<i", data, o)
+            if not 1 <= nb <= max_bores:
+                return None
+            p = o + 4
+            for _ in range(nb):
+                g, la, lo = struct.unpack_from("<3f", data, p)
+                if not (-10.0 <= g <= 70.0 and abs(la) <= 1.6 and abs(lo) <= 3.2):
+                    return None
+                p += 12
+            (nc,) = struct.unpack_from("<i", data, p)
+            if not 1 <= nc <= max_conts:
+                return None
+            p += 4
+            for _ in range(nc):
+                g, n = struct.unpack_from("<fi", data, p)
+                if not (-60.0 <= g <= 70.0 and 3 <= n <= 8000):
+                    return None
+                pts = struct.unpack_from(f"<{2 * n}f", data, p + 8)
+                if any(not abs(v) <= 3.2 for v in pts):        # also refuses NaN
+                    return None
+                p += 8 + 8 * n
+            return p
+        except struct.error:
+            return None
+
+    out, seen, o = [], set(), 0
+    while o < len(data) - 16:
+        end = plausible_end(o)
+        if end is None:
+            o += 1
+            continue
+        block = bytes(data[o:end])
+        if block not in seen:
+            seen.add(block)
+            out.append((o, block))
+        o = end
+    return out
+
+
 def parse_eirp_kml(text, beam_id=None):
     """Contours from an operator's KML footprint file, where each Placemark named like "Contour 43 dBW" holds one
     or more polygons (read 24 Nov 2026 from Arabsat's Badr-8 files: downlink EIRP in dBW, Polygon or

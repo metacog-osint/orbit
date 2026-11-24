@@ -214,6 +214,22 @@ class GimsBlock(unittest.TestCase):
         with self.assertRaises(ValueError):
             fp.parse_gims_block(good[:-3])
 
+    def test_carves_blocks_from_a_whole_file_once_each(self):
+        # made up: two blocks among filler bytes, the first stored twice, as a locked database keeps copies
+        ring = [[-40.0, -5.0], [-38.0, -5.0], [-39.0, -3.0], [-40.0, -5.0]]
+        a = gims_block([(0.0, -39.3, -5.2)], [(-2.0, ring), (-4.0, ring)])
+        b = gims_block([(0.0, -74.3, 4.8)], [(-2.0, [[-75.0, 4.0], [-73.0, 4.0], [-74.0, 6.0]])])
+        filler = bytes(range(7, 250, 3)) * 4
+        data = filler + a + filler + b + filler + a + filler
+        got = fp.carve_gims_blocks(data)
+        self.assertEqual([blk for _, blk in got], [a, b])
+        self.assertEqual(got[0][0], len(filler))
+        beam = fp.parse_gims_block(got[1][1])
+        self.assertAlmostEqual(beam["boresights"][0]["point"][0], -74.3, places=3)
+
+    def test_carve_finds_nothing_in_noise(self):
+        self.assertEqual(fp.carve_gims_blocks(bytes(range(256)) * 64), [])
+
 
 class EirpKml(unittest.TestCase):
     def test_reads_levels_and_polygons(self):
