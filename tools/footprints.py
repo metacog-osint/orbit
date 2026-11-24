@@ -1,4 +1,5 @@
-"""Footprints prototype (ideas#232): builds data/footprints.json for site_src/footprints.html.
+"""Footprints prototype (ideas#232): builds the data for site_src/footprints.html. Published as
+site_src/footprints-data.json (Tom, 24 Nov 2026: publish), built here from the research folder and committed.
 
     python tools/footprints.py build --day-file DAY.geo-region.json --tle-dir DIR [--published DIR] --out FILE
     python tools/footprints.py preview --json FILE --dir FOLDER      a small standalone copy of the page to serve
@@ -387,7 +388,7 @@ def cmd_preview(a):
     shutil.copytree(src / "vendor" / "maplibre-gl", dst / "vendor" / "maplibre-gl", dirs_exist_ok=True)
     countries = json.loads((ROOT / "doctrine" / "kit" / "geo" / "countries.json").read_text(encoding="utf-8"))
     (dst / "data" / "world.geojson").write_text(json.dumps(orbit_cli.world_shapes(countries), separators=(",", ":")), encoding="utf-8")
-    shutil.copy2(a.json, dst / "data" / "footprints.json")
+    shutil.copy2(a.json, dst / "footprints-data.json")
     print("preview folder:", dst)
 
 
