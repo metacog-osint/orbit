@@ -1240,7 +1240,7 @@ def main(argv=None) -> int:
         h = snap.get("hygiene") or {}
         print(f"Collected {len(snap['launches'])} launches (30 days), {len(snap['reentries'])} reentries (30 days), "
               f"{len(snap['upcoming'])} scheduled launches (14 days); "
-              f"{len((snap.get('navwarn') or {}).get('areas') or [])} launch hazard areas in force; "
+              f"{len((snap.get('navwarn') or {}).get('areas') or [])} NGA launch warnings in force; "
               f"{len((snap.get('counterspace') or {}).get('tests') or [])} ASAT tests in SWF's sheet "
               f"({len((snap.get('counterspace') or {}).get('new_since_last') or [])} new since the last reading); "
               f"{h.get('in_orbit', 0)} objects in orbit. "
