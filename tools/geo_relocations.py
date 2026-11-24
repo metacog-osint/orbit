@@ -10,14 +10,17 @@ run on Luch (Olymp) 2's full history (ideas#256, the `luch2` case of `tools/orbi
               A turnaround is a stop too: the drift changes direction between two sets both under TURN_DRIFT
               (0.5 deg a day), outside any stop; the stop spans the sets under TURN_DRIFT around it, longitude at the
               set of least drift (Luch 2's checkout at 78 deg E, 21-24 Mar 2023 in Marco Langbroek's table).
-  relocation  the sets between two stops: longitude moved, peak drift and when, days speeding up (departure to
-              peak) and braking (peak to arrival), the largest gap between sets.
+  relocation  the sets between two stops: longitude moved, peak drift and when, the largest gap between sets, and
+              three phases: speeding up (departure to the first set within NEAR_PEAK, 2%, of the peak drift),
+              coasting (first to last such set) and braking (last such set to arrival). Until 25 Nov 2026 speeding
+              up ran to the peak set itself, which put a long coast's slow creep in it (16.8 days for 2025).
   brake       from the peak on, at each set the drift is compared with a set at least RATE_DT_DAYS (0.5) earlier; when
               the drift fell by BRAKE_MIN (0.05 deg a day) or more, constant braking at that measured rate gives a
               projected stop longitude (lon + v * v / 2b, in the direction of drift). Reported: the first projection
               and the first one within NEAR_DEG (1 deg) of the stop, each with its lead before arrival. A live
               detector cannot know the stop, so `steady` is the first projection within NEAR_DEG of the one before
-              it: the one a tracker could publish.
+              it, with no set between them that showed no fall: the one a tracker could publish (geo_tracker.py
+              uses the same rule).
 Arithmetic on public element sets: not a forecast, and no statement of why an object moved. Low-inclination orbits
 only (longitude = RAAN + argument of perigee + mean anomaly - GMST, orbit/maneuver.py). Standard library only.
 
@@ -42,6 +45,7 @@ TURN_DRIFT = 0.5
 MERGE_LON, MERGE_GAP_DAYS = 0.2, 7.0
 RATE_DT_DAYS = 0.5
 BRAKE_MIN = 0.05
+NEAR_PEAK = 0.02
 NEAR_DEG = 1.0
 DEFAULT_CASE = os.path.join(ROOT, "data", "state", "spacetrack", "case_luch2_2023.json.gz")
 
@@ -139,6 +143,7 @@ def _brake(moving, stop_lon, arrival):
             continue
         fall = abs(p["drift"]) - abs(q["drift"])
         if fall < BRAKE_MIN or p["drift"] * q["drift"] <= 0:
+            prev = None                               # a pause in braking: the next projection starts afresh
             continue
         b = fall / _days(p["t"], q["t"])              # deg a day, per day
         v = abs(q["drift"])
@@ -171,9 +176,11 @@ def relocations(rows, st):
                "max_gap_days": round(gap, 1) if gap is not None else None}
         if moving:
             pk = max(moving, key=lambda r: abs(r["drift"]))
+            top = [r for r in moving if abs(r["drift"]) >= (1 - NEAR_PEAK) * abs(pk["drift"])]
             rec.update({"peak_drift": pk["drift"], "peak_at": pk["t"], "peak_dh_km": pk["dh_km"],
-                        "speeding_up_days": round(_days(a["departure"], pk["t"]), 1),
-                        "braking_days": round(_days(pk["t"], b["arrival"]), 1),
+                        "speeding_up_days": round(_days(a["departure"], top[0]["t"]), 1),
+                        "coast_days": round(_days(top[0]["t"], top[-1]["t"]), 1),
+                        "braking_days": round(_days(top[-1]["t"], b["arrival"]), 1),
                         "brake": _brake(moving, b["lon"], b["arrival"])})
         out.append(rec)
     return out
@@ -186,7 +193,7 @@ def build(records, now=None):
             "last": rows[-1]["t"] if rows else None, "stops": st, "relocations": relocations(rows, st),
             "rules": {"drift_kept": DRIFT_KEPT, "min_stop_days": MIN_STOP_DAYS, "turn_drift": TURN_DRIFT, "merge_lon": MERGE_LON,
                       "merge_gap_days": MERGE_GAP_DAYS, "rate_dt_days": RATE_DT_DAYS, "brake_min": BRAKE_MIN,
-                      "near_deg": NEAR_DEG},
+                      "near_deg": NEAR_DEG, "near_peak": NEAR_PEAK},
             "attribution": maneuver.ATTRIBUTION}
 
 
@@ -206,7 +213,7 @@ def print_report(doc):
                 f" to {r['arrival'][:10]} ({r['days']} d, {r['sets']} sets, gap max {r['max_gap_days']} d)")
         if "peak_drift" in r:
             line += (f"  peak {r['peak_drift']:+.3f}/d at {r['peak_at'][:10]} ({r['peak_dh_km']:+.0f} km)"
-                     f"  up {r['speeding_up_days']} d, braking {r['braking_days']} d")
+                     f"  up {r['speeding_up_days']} d, coast {r['coast_days']} d, braking {r['braking_days']} d")
             br = r.get("brake") or {}
             for key, label in (("first", "first brake"), ("steady", "steady"), ("within_1deg", "within 1 deg")):
                 b = br.get(key)
