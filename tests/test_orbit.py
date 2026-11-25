@@ -796,7 +796,8 @@ class Registers(unittest.TestCase):
             if row:  # a row link (#launch-...): the page that holds that row prefix
                 self.assertEqual(table[card + "-"], path or "index")
             else:
-                self.assertTrue('id="%s"' % card in pages[pg], (path, card))
+                html = pages.get(pg) or (ROOT / "site_src" / pg).read_text(encoding="utf-8")   # geo.html (orbit-2.30)
+                self.assertTrue('id="%s"' % card in html, (path, card))
         lead_src = (ROOT / "orbit" / "lead.py").read_text(encoding="utf-8")
         for card in re.findall(r'"href": "#([a-z-]+)"', lead_src):
             self.assertIn(card, table, card)

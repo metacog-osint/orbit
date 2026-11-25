@@ -8,7 +8,10 @@ of its own readings yet, so nothing is called an anomaly (see doctrine/method.md
   - catalog changes since Orbit's previous reading: new objects from launches more than 30 days old (one item
     per launch), and owner or state changes (one item);
   - orbit changes in watched objects listed on the page (Space-Track element sets, last 30 days; one item each,
-    off-map), kind "maneuver" (Tom, 14 Nov 2026). COP's gate holds this kind as military context.
+    off-map), kind "maneuver" (Tom, 14 Nov 2026). COP's gate holds this kind as military context;
+  - GEO relocations of listed-role objects (orbit-2.30, ideas#323): one item per move, updated in place, off-map,
+    from the GEO page's tracker (tools/geo_tracker.py). tools/geo_page.py adds them to site/data/feed.geojson after
+    the tracker runs, since the tracker is built after the feed in the same run (relocation_features below).
 """
 from __future__ import annotations
 
@@ -408,6 +411,111 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
         "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],
     }
     return {"type": "Feature", "geometry": None, "properties": props}
+
+
+RELOCATION_METHOD = "orbit-2.30"
+RELOCATION_PREFIX = "orbit:relocation:"
+RELOCATION_NOTE = ("Arithmetic on the last public element sets, at the last measured rate: not a forecast, and no "
+                   "statement of why the satellite moves or where it is going.")
+
+
+def _start(m: dict) -> dict | None:
+    """The estimate a move's identity rests on: the first moving set's distance and rate, fixed once that set
+    exists (the rate-change estimate needs a second set and would move the id)."""
+    est = ((m.get("departure") or {}).get("estimated_start")) or []
+    return est[0] if est else None
+
+
+def _relocation_item(m: dict, generated: str, read_at: str, attribution: str, stopped: bool) -> dict | None:
+    dep = m.get("departure") or {}
+    start = _start(m)
+    if not start:
+        return None                          # no held stop in Orbit's sets: not a move this item can date
+    new = m["newest"]
+    t = lambda x: x[:16].replace("T", " ")
+    role = m.get("role") or "listed"
+    owner = m.get("owner") or "unknown owner"
+    steps = {"move_began": {"estimated": start["t"], "basis": start["basis"],
+                            "sets": [dep["last_held_set"], *start["sets"]]}}
+    change = ("new", start["sets"][0])
+    title_what = f"moving {m['direction']} at {abs(new['drift']):.2f} deg/day from {_lon(dep['lon'])}"
+    parts = [f"{m['name']} (catalog {m['norad']}, owner {owner}, listed role on Orbit's GEO page: {role}) left its "
+             f"stop at {_lon(dep['lon'])}. The move began about {start['t'][:10]} (estimated from the "
+             f"{start['basis']}, assuming it sped up evenly from rest); its last held set is dated "
+             f"{t(dep['last_held_set'])} UTC and its first moving set {t(start['sets'][0])} UTC."]
+    brake = m.get("brake") or {}
+    if stopped:
+        stop = m["stop"]
+        steps["stopped"] = {"at": stop["arrival"], "sets": stop["sets"]}
+        change = ("ended", stop["arrival"])
+        title_what = f"stopped at {_lon(stop['lon'])} after moving {m['direction']} from {_lon(dep['lon'])}"
+        parts.append(f"It stopped at {_lon(stop['lon'])}: drift under 0.1 deg/day for 2 days or more, from the set "
+                     f"dated {t(stop['arrival'])} UTC ({stop['sets']} sets so far).")
+    elif m.get("stale"):
+        pass                                 # said after the newest set, below
+    elif brake.get("state") in ("braking seen", "steady"):
+        steps["braking"] = {"state": brake["state"], "at": brake["at"], "sets": brake.get("sets")}
+        if brake["state"] == "steady":
+            change = ("changed", brake["at"])
+            title_what = f"braking while moving {m['direction']} from {_lon(dep['lon'])}"
+        parts.append("Braking is seen: its drift fell between sets"
+                     + ("; the stop projection from constant braking at the measured rate has held steady "
+                        "(the GEO page shows it)." if brake["state"] == "steady"
+                        else "; no steady stop projection yet."))
+    if not stopped:
+        parts.append(f"Newest set: {t(new['t'])} UTC, {new['age_h']:g} hours old at this build, at "
+                     f"{_lon(new['lon'])} drifting {new['drift']:+.3f} deg/day."
+                     + (" That set is too old to give a position now." if m.get("stale") else ""))
+    parts.append(RELOCATION_NOTE + " " + attribution)
+    ident = f"{RELOCATION_PREFIX}{m['norad']}:{start['t'][:10]}"
+    props = {
+        **_base(generated),
+        "method_version": RELOCATION_METHOD,
+        "id": ident,
+        "subject_id": ident,                  # one move of one object, updated in place
+        "event_start": _floor(start["t"], "day"),
+        "event_time_precision": "day",
+        **({"event_end": _floor(m["stop"]["arrival"], "day")} if stopped else {}),
+        **_change(change[0], change[1], generated),
+        "title": f"GEO relocation: {m['name']} ({role}, {owner}): {title_what}",
+        "summary": " ".join(parts),
+        "data_as_of": new["t"],
+        "countries": [],
+        "requirement_ids": ["OR-PIR-1", "OR-EEI-1"],
+        "coverage_fraction": 1.0,
+        "precision_class": "none",
+        "steps": steps,
+        "measures": {"from_lon_deg": dep["lon"], "drift_deg_day": new["drift"], "newest_set_age_h": new["age_h"],
+                     "moving_sets": m.get("moving_sets"),
+                     **({"stop_lon_deg": m["stop"]["lon"]} if stopped else {})},
+        "visual": {"type": "table", "url": f"{SITE}/geo#movers"},
+        "sources": [{**SRC_ST, "licence": attribution, "accessed_at": read_at}],
+    }
+    return {"type": "Feature", "geometry": None, "properties": props}
+
+
+def relocation_features(tracker: dict, generated: str) -> list[dict]:
+    """Relocation items from the GEO tracker's output (movers and arrivals); none when it failed."""
+    if not tracker or "error" in tracker:
+        return []
+    read_at, attribution = tracker.get("at_utc") or generated, tracker.get("attribution") or ""
+    out = [_relocation_item(m, generated, read_at, attribution, False) for m in tracker.get("movers") or []]
+    out += [_relocation_item(m, generated, read_at, attribution, True) for m in tracker.get("arrived") or []]
+    return [f for f in out if f]
+
+
+def merge_relocations(feed_doc: dict, tracker: dict) -> dict:
+    """The feed with this run's relocation items in place of any earlier ones."""
+    keep = [f for f in feed_doc.get("features") or []
+            if not str((f.get("properties") or {}).get("id", "")).startswith(RELOCATION_PREFIX)]
+    items = relocation_features(tracker, feed_doc["generated_at"])
+    feed_doc["features"] = keep + items
+    if items and "Space-Track" not in feed_doc.get("attribution", ""):
+        feed_doc["attribution"] += (". Satellite element sets from Space-Track.org, United States Space Command "
+                                    "(USSPACECOM), 18th Space Defense Squadron; relocation arithmetic is Orbit's own")
+        feed_doc["licence"] += ("; Space-Track element sets redistributed under USSPACECOM's blanket approval for "
+                                "basic SSA data, with citation")
+    return feed_doc
 
 
 # Each item's first source id and the collect lane that reads it. A lane that fails keeps its last good copy in the

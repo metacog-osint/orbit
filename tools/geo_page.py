@@ -276,7 +276,22 @@ def build(release, site, now=None, snapshot=None):
     mv = (doc["belt"] or {}).get("movers") if "error" not in (doc["belt"] or {}) else {"error": doc["belt"]["error"]}
     with open(os.path.join(out_dir, "movers.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(mv or {"error": "not built"}, f, separators=(",", ":"), ensure_ascii=False)
+    add_relocations(site, mv)
     return doc
+
+
+def add_relocations(site, tracker):
+    """Put the relocation items (orbit-2.30, ideas#323) into the feed the build wrote; the check step lints it next."""
+    path = os.path.join(site, "data", "feed.geojson")
+    if not os.path.exists(path):
+        return
+    sys.path.insert(0, ROOT)                           # the orbit package before tools/orbit.py
+    from orbit import feed
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    feed.merge_relocations(doc, tracker or {})
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
 
 
 def main():

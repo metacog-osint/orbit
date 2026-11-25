@@ -791,3 +791,25 @@ above) stands.
    newest set before them, and the brake state as of 24 hours ago. The card says how many new public sets came,
    whether the drift changed (by 0.01 deg a day or more), and whether the brake state changed. From the element
    sets themselves; no stored copy of yesterday's page.
+
+## GEO relocation feed items (`orbit-2.30`, 24 Nov 2026; ideas#323)
+
+Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in place.
+
+1. **Identity.** `orbit:relocation:<norad>:<estimated start day>`, the same as `subject_id`. The day is the start
+   estimated from the first moving set's distance and rate (`geo_tracker.start_estimates`), fixed once that set
+   exists; the estimate from the rate change needs a second set and would move the id. A move needs a held stop
+   in Orbit's own sets before it: with none, no item.
+2. **Steps** (`steps`, each with the sets it rests on): `move_began` (the last held set and the first moving set;
+   `last_change` `new` at the first moving set); `braking` (`braking seen`, or `steady` once the stop projection
+   holds, which sets `last_change` `changed` at that set); `stopped` (drift under 0.1 deg a day for 2 days, the
+   tracker's stop rule; `last_change` `ended` at the stop's first set, `event_end` that day). A stopped move stays
+   in the feed for 7 days after its stop began (`geo_tracker.ARRIVED_DAYS`).
+3. **Form.** `observation`, `routine`, `geometry` null (off COP's maps, like orbit changes), `event_start` the
+   estimated day (`event_time_precision` day). The summary gives the departure longitude, the newest set's time,
+   age and drift "at the last measured rate", and the tracker's note. It names no destination: no stop
+   projection longitude and no neighbouring satellite. No likelihood words.
+4. **Wiring.** The tracker runs after the feed is built, so `tools/geo_page.py` replaces the feed's relocation
+   items with this run's (`orbit/feed.merge_relocations`) before the check step lints the feed. A failed tracker
+   adds none. Whether a relocation earns a tier above routine is a separate contract question; listed-role objects
+   only, nothing from the private watch list.
