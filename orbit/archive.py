@@ -6,7 +6,8 @@ in Orbit's own readings, so Orbit keeps them day by day and gives them baselines
   maneuver  the listed orbit changes in the watch list, each keyed by NORAD number and start, on the days a run
             read Space-Track (lane ok, or waiting out the hour with its last read);
   navwarn   the launch, debris and reentry warning areas in force, each by Orbit's area key, with the newest
-            memorandum date, so a day read from stale memoranda says so;
+            memorandum date, so a day read from stale memoranda says so. Days to 25 Nov 2026 only: the lane
+            retired in orbit-2.32 (ideas#69); those days stay as they are and nothing new is added;
   catalog   each new GCAT reading's changes (objects added, late additions, removals, owner changes, newly
             numbered), keyed by GCAT's own file stamp: GCAT keeps no date of cataloging, so a reading's
             changes are dated by the day Orbit read them;
