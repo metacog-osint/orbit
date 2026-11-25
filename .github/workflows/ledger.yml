@@ -3,8 +3,8 @@ name: ledger
 # Launch Library 2 itself (launch.theintelligence.company; its release `ledger`, ll2-ledger.json). Orbit's last
 # launch-ledger.json stays on this repository's release `ledger`, frozen, with a "moved to Launch" note.
 #
-# This file stays, doing nothing, only until the hub's tic-dispatch Worker stops starting it (its two Orbit
-# ledger.yml jobs move to Launch: a hub change Tom approves on its own). Then delete it. No schedule of its own.
+# It has no schedule of its own and does nothing; it remains while the suite's tic-dispatch Worker still starts
+# it at :45 past the hour.
 on:
   workflow_dispatch:
 permissions:
