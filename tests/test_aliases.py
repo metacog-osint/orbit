@@ -30,7 +30,7 @@ GOOD = """- norad: 40258
 class AliasFile(unittest.TestCase):
     def test_the_real_file_reads_with_its_objects(self):
         got = {e.get("norad") or e.get("program") for e in ENTRIES}
-        self.assertEqual(got, {55841, 40258, 43917, 40208, 33459, "GSSAP"})
+        self.assertEqual(got, {55841, 40258, 43917, 40208, 33459, 36101, 28924, 29270, "GSSAP"})
         gssap = next(e for e in ENTRIES if e.get("program") == "GSSAP")
         self.assertEqual(gssap["members"], [40099, 40100, 41744, 41745, 51280, 51281, 67759, 67760])
         self.assertTrue(all(e["evidence"] for e in ENTRIES))
@@ -96,7 +96,8 @@ class CatalogAliases(unittest.TestCase):
             self.assertEqual(o["40099"]["program"][0]["value"], "GSSAP")
         self.assertEqual(sorted(c["not_in_catalog"]),
                          sorted(k for k in ("40258", "55841", "40208", "43917", "40099", "40100", "41744", "41745",
-                                            "51280", "51281", "67759", "67760", "33459", "33459") if k not in o))
+                                            "51280", "51281", "67759", "67760", "33459", "33459", "36101", "28924",
+                                            "29270") if k not in o))
 
     def test_name_index_rows(self):
         row = next(r for r in NAMES["objects"] if r[0] == "55841")
