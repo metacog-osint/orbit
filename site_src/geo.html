@@ -200,7 +200,8 @@
     ignores spacing and reads "West" and "East" as W and E, so "12WG" finds "Eutelsat 12 West G". A name states a
     position only in naming schemes that hold one: "&lt;number&gt; West" or "East" in any name, Eutelsat's short
     forms ("Eutelsat 36B" is 36° E, "Eutelsat 117W A" 117° W), Eutelsat's "Hot Bird 13" names (13° E) and Hispasat's
-    "30W-6" (30° W). Series letters such as Intelsat's "37e" or Astra's "2E" are never read as positions. A stated
+    "30W-6" (30° W). Names give the slot only to the whole degree: Eutelsat's "12 West" slot is at 12.5° W and
+    "7 West A" at 7.3° W, so a name within 1° of the satellite counts as fitting. Series letters such as Intelsat's "37e" or Astra's "2E" are never read as positions. A stated
     position is compared with the newest public element set's longitude, on the card at the time shown and in the
     belt board's table at the time the page data was built (code:
     <a href="https://github.com/metacog-osint/orbit/blob/main/orbit/namepos.py">orbit/namepos.py</a>).</li>
