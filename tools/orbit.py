@@ -726,7 +726,90 @@ SHARDS_URL = f"https://github.com/{geo_region.REPO}/releases/download/{stcat.REL
 SEARCH_URL = "https://orbit.theintelligence.company/data/catalog/search.json"
 
 
-def find_name(query: str, index: str | None = None, limit: int = 10, getter=None) -> int:
+GEO_URL = "https://orbit.theintelligence.company/data/geo/globe.json"
+
+
+def _slot_objects(globe: dict, search: dict) -> list[dict]:
+    """The GEO page's objects (longitude now, region, drift) with every catalog name, plus every other catalog object
+    (no longitude: not near GEO, or gone) so names that state a slot are found wherever their object is."""
+    from orbit import namepos
+    cols = globe.get("cols") or []
+    idx = {str(r.get("key")): r for r in namepos.rows(search)}
+    out, near = [], set()
+    for row in globe.get("objects") or []:
+        o = dict(zip(cols, row))
+        r = idx.get(str(o["norad"])) or {}
+        extra = list((globe.get("names") or {}).get(str(o["norad"])) or [])
+        names = [n for n in [r.get("name")] + list(r.get("other_names") or []) + extra if n and n != o["name"]]
+        out.append({"norad": o["norad"], "name": o["name"], "names": names, "lon": o.get("lon"), "region": o.get("region"),
+                    "drift": namepos.drift_of(o["n"]), "active": bool(o.get("active")), "gone": False})
+        near.add(str(o["norad"]))
+    for k, r in idx.items():
+        if k in near or not k.isdigit():
+            continue
+        out.append({"norad": int(k), "name": r.get("name") or k, "names": list(r.get("other_names") or []), "lon": None,
+                    "region": None, "drift": None, "active": False, "gone": bool(r.get("gone"))})
+    return out
+
+
+def find_slot(slot: float, query: str, search: dict, geo: str | None = None, window: float | None = None,
+              getter=None) -> int:
+    """`orbit.py find 12.5W`: who is within `window` of a GEO slot now (the GEO page's longitudes at its build time),
+    who carries a name that states the slot, and who held it since the GEO element history starts (ideas#366)."""
+    from orbit import namepos
+    window = namepos.WINDOW_DEG if window is None else window
+    if geo:
+        raw, gwhere = Path(geo).read_bytes(), geo
+    else:
+        raw, gwhere = (getter or fetch.get)(GEO_URL), GEO_URL
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    globe = json.loads(raw.decode("utf-8"))
+    if "lon" not in (globe.get("cols") or []):
+        print(f"{gwhere} has no longitudes yet (built before ideas#366): names only.")
+    held = globe.get("held") or {}
+    res = namepos.at_slot(_slot_objects(globe, search), slot, window, held=held.get("rows"))
+    lt, rw = namepos.lon_txt, namepos.REGION_WORD
+    print(f"Slot {lt(slot)} (read from {query!r}); GEO page {gwhere} built {globe.get('built_utc')}, catalog read {search.get('read')}.")
+    print(f"There now, within {window:g}° ({len(res['there'])}):")
+    for o in res["there"]:
+        mv = ("holding its longitude" if abs(o["drift"]) < 0.1 else
+              f"drifting {abs(o['drift']):.2f}° a day {'west' if o['drift'] < 0 else 'east'}")
+        act = ", active (CelesTrak)" if o["active"] else ""
+        print(f"  {o['norad']:>7}  {o['name']:<34} {lt(o['lon']):>8}  {rw.get(o['region'], o['region'] or '')}, {mv}{act}")
+    if not res["there"]:
+        print("  none")
+    print(f"Named for it, within {res['named_tol']:g}° ({len(res['named'])}); a name is not a position, and most such "
+          "names are former names:")
+    for o in res["named"]:
+        if o["lon"] is not None:
+            now = (f"now at {lt(o['lon'])}, " + ("there now" if o["there_now"] else f"{namepos.apart(o['lon'], slot):.1f}° away") +
+                   f" ({rw.get(o['region'], o['region'] or '')})")
+        else:
+            now = "left orbit" if o["gone"] else "not near GEO on the GEO page"
+        print(f"  {o['norad']:>7}  {o['name']:<34} {'; '.join(o['slot_names'])} -> {now}")
+    if not res["named"]:
+        print("  none")
+    if "rows" in held:
+        print(f"Held it since {held['from']} ({len(res['held'])}): payloads holding a longitude within {held['hold_deg']:g}° "
+              f"for {held['min_days']} days or more, mean longitude within {window:g}° of the slot; the record ends {held['to']}:")
+        for s in res["held"]:
+            to = "now" if s["to"] == held["to"] else s["to"]
+            print(f"  {s['norad']:>7}  {s['name']:<34} {s['from']} to {to}, at {lt(s['lon'])}")
+        if not res["held"]:
+            print("  none")
+    else:
+        print("Held it: not on the GEO page yet" + (f" ({held['error']})" if held.get("error") else "") + ".")
+    if "." not in query:
+        print("Names round a slot to the whole degree (Eutelsat's \"12 West\" is 12.5° W), so a whole-degree query may "
+              "mean the half degree beside it: widen with --window 1.")
+    print("Object pages: https://orbit.theintelligence.company/object.html?n=<NORAD>; the GEO page's search takes the same "
+          "slot forms.")
+    return 0 if res["there"] or res["named"] or res["held"] else 1
+
+
+def find_name(query: str, index: str | None = None, limit: int = 10, getter=None, geo: str | None = None,
+              window: float | None = None) -> int:
     """`orbit.py find`: every name from every source in the catalog's search index, matched loosely
     (orbit/namepos.py), so a session looks here before the web. The hand-kept alias file is only the reviewed links;
     the index holds Space-Track's, GCAT's, CelesTrak's, Wikidata's, WMO OSCAR's and the aliases' names."""
@@ -744,6 +827,9 @@ def find_name(query: str, index: str | None = None, limit: int = 10, getter=None
     if raw[:2] == b"\x1f\x8b":
         raw = gzip.decompress(raw)
     doc = json.loads(raw.decode("utf-8"))
+    slot = namepos.parse_slot(query)
+    if slot is not None:
+        return find_slot(slot, query, doc, geo, window, getter)
     hits = namepos.find(doc, query, limit)
     print(f"{len(hits)} match{'es' if len(hits) != 1 else ''} for {query!r} in {where} (catalog read {doc.get('read')}):")
     for h in hits:
@@ -1211,11 +1297,13 @@ def main(argv=None) -> int:
     od = sub.add_parser("object-data", help="object pages: the catalog's shards and search index from release "
                                            "`catalog` into site/data/catalog/ (one request; update.yml)")
     od.add_argument("--site", default=str(ROOT / "site"))
-    fd = sub.add_parser("find", help="look a satellite up by any name from any source, NORAD number or COSPAR ID in "
+    fd = sub.add_parser("find", help="look a satellite up by any name from any source, NORAD number, COSPAR ID or GEO slot (12.5W) in "
                                      "TIC's catalog search index (one request to the live site; ideas#359)")
     fd.add_argument("query", nargs="+")
     fd.add_argument("--index", help="a search.json (or .json.gz) to read instead of the live site's")
     fd.add_argument("--limit", type=int, default=10)
+    fd.add_argument("--geo", help="a globe.json to read instead of the live GEO page's (slot queries)")
+    fd.add_argument("--window", type=float, default=None, help="degrees either side of a slot query (default 0.5)")
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
                                               "BeiDou-2 G2), iss (2024 reboosts and the May storm) or luch2 (Luch (Olymp) 2, 2023-2026)")
@@ -1307,7 +1395,7 @@ def main(argv=None) -> int:
     if args.cmd == "object-data":
         return object_data(Path(args.site))
     if args.cmd == "find":
-        return find_name(" ".join(args.query), args.index, args.limit)
+        return find_name(" ".join(args.query), args.index, args.limit, geo=args.geo, window=args.window)
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

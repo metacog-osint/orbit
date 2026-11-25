@@ -813,3 +813,23 @@ Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in
    items with this run's (`orbit/feed.merge_relocations`) before the check step lints the feed. A failed tracker
    adds none. Whether a relocation earns a tier above routine is a separate contract question; listed-role objects
    only, nothing from the private watch list.
+
+## GEO slot search and who held a slot (`orbit-2.31`, 25 Nov 2026; ideas#366)
+
+1. **A slot query.** `orbit.py find`, the GEO page's search box and the object search read "12.5W", "12.5° W",
+   "12.5 W", "12 West", "36E", "36 East" or signed degrees east ("-12.5", "+36") as a GEO slot
+   (`orbit/namepos.parse_slot`; the page scripts carry the same two patterns, checked by a test). The whole query
+   must be the slot, so "Intelsat 37e" or "Astra 2E" stay name searches; a bare number stays a NORAD number.
+2. **There now.** Objects within 0.5° of the slot (`--window` on the CLI), short way round, so 179.5° E and
+   179.5° W are 1° apart. The CLI reads each object's longitude at the GEO page's build time (`globe.json` column
+   `lon`, from its newest set; no SGP4 in the CLI); the page uses the time shown. Each with its region and drift.
+3. **Named for it.** Names that state a position within 1° of the slot (`TOLERANCE_DEG`; naming schemes as in
+   `orbit/namepos.py`), with where the object is now. A name is not a position: most such names are former names.
+   Names round the slot to the whole degree, so a whole-degree query says so.
+4. **Held it.** `globe.json` `held`: payloads that held a longitude, from every element set Orbit holds (the GEO
+   history starts 1 Jul 2026; at most about a year is read). One sample a day at 12:00 UTC from the set in force,
+   skipped when that set is over 10 days old or drifts 0.1° a day or more; a stay is a run of such days no more
+   than 3 days apart, each within 0.5° of its first day, 7 days or longer. A slot lists the stays whose mean
+   longitude is within the window. Librating objects with slow drift can show short stays; payloads only.
+5. **The object search** answers a slot query with a link to the GEO page rather than its own list: positions and
+   stays are in the GEO page's data, with its time control, and the name rules stay in one place.
