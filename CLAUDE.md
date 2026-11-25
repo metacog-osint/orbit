@@ -73,8 +73,8 @@ End-of-run blocks: `tip_check` (TIP against GCAT's reentry), `lead` (`lead.py`),
 `observation`, `routine`, `us_person_data: organizations`. Kinds: launches of the last 7 days at the GCAT site
 (precision `approximate`), scheduled launches at the pad, one reentry summary (off-map), catalog changes for two
 days, listed orbit changes (`geometry` null; OR-PIR-1, OR-EEI-1, OR-EEI-2 for `gap`), breakups (`orbit:breakup:<jcat>`,
-OR-EEI-5, at most 10, link `/#breakups`). COP's gate lists `orbit:maneuver` as military context. On COP Orbit's mark
-is launch pads only; ground tracks go only on the 3D globe; manoeuvres, reentries and catalog changes stay off maps.
+OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orbit-2.30, added by geo_page). COP's gate lists
+`orbit:maneuver` as military context. COP marks launch pads only; tracks only on the 3D globe; the rest is off-map.
 
 ## Source rules
 - **Space-Track** (account shared by the update run and `geo.yml`; Noisefloor makes no GP query from 18 Nov 2026): GP at most once an hour, off :57-:03 and :27-:33
