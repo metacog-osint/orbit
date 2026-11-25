@@ -6,6 +6,11 @@
   var index = null, loading = null;
 
   function norm(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  /* As orbit/namepos.py's compact(): no spaces, "west"/"east" as "w"/"e", so "12WG" finds "Eutelsat 12 West G"
+     (ideas#359). Used only when the plain match finds nothing better. */
+  function compact(s) {
+    return norm(s).split(" ").map(function (w) { return w === "west" ? "w" : w === "east" ? "e" : w; }).join("");
+  }
   function load() {
     if (index) return Promise.resolve(index);
     if (loading) return loading;
@@ -18,7 +23,8 @@
       index = { types: d.types || {}, read: d.read, rows: (d.objects || []).map(function (r) {
         var others = r[at.other_names] || [];
         return { key: String(r[at.key]), name: r[at.name] || "", others: others, cospar: r[at.cospar] || "",
-          type: r[at.type], gone: !!r[at.gone], n: norm(r[at.name]), o: others.map(norm) };
+          type: r[at.type], gone: !!r[at.gone], n: norm(r[at.name]), o: others.map(norm),
+          c: [compact(r[at.name])].concat(others.map(compact)) };
       }) };
       return index;
     });
@@ -45,12 +51,13 @@
         if (c === up && !launch) out.push([1, r]); else if (c.indexOf(up) === 0) out.push([2, r]);
       });
     }
-    var n = norm(s);
+    var n = norm(s), cn = compact(s);
     if (n.length >= 2 && !/^\d+$/.test(n)) {
       rows.forEach(function (r) {
         var best = 9;
         [r.n].concat(r.o).forEach(function (x, i) {
-          var sc = x === n ? 3 : x.indexOf(n) === 0 ? 4 : (" " + x).indexOf(" " + n) >= 0 ? 5 : x.indexOf(n) >= 0 ? 6 : 9;
+          var sc = x === n ? 3 : x.indexOf(n) === 0 ? 4 : (" " + x).indexOf(" " + n) >= 0 ? 5 : x.indexOf(n) >= 0 ? 6 :
+            cn.length >= 3 && r.c[i].indexOf(cn) >= 0 ? 7 : 9;
           if (i && sc < 9) sc += 0.5;  // the display name before other names
           if (sc < best) best = sc;
         });
@@ -93,7 +100,10 @@
           var li = el("li"), a = el("a", "", o.name || o.key);
           a.href = href(o.key);
           li.appendChild(a);
+          var qn = norm(q), qc = compact(q);
+          var hit = function (x) { return norm(x).indexOf(qn) >= 0 || (qc.length >= 3 && compact(x).indexOf(qc) >= 0); };
           var others = o.others.filter(function (x) { return norm(x) !== o.n; });
+          others = others.filter(hit).concat(others.filter(function (x) { return !hit(x); }));  // the name that matched first
           var bits = [(/^\d+$/.test(o.key) ? "NORAD " : "GCAT ") + o.key, o.cospar, index.types[o.type] || "",
             o.gone ? "reentered" : ""].filter(Boolean);
           li.appendChild(el("span", "pl", bits.join(" · ") + (others.length ? " · also " + others.slice(0, 2).join(", ") : "")));

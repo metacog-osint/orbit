@@ -98,6 +98,7 @@ OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orb
 - **Catalog**: every value is {value, source, ref, read, basis} (the file leaves out defaults, `catshards`); NORAD keys from satcat/satcat100k only (auxcat's
   Satcat cell is not a claim); operator codes and TBD/UNKN never compared; alias `swap` entries refused until built.
   WMO OSCAR joins only through hand-reviewed link entries (no NORAD or COSPAR id in its API); read weekly.
+- **Name lookups**: `python tools/orbit.py find "<name>"` searches every source's names (live index); aliases.yml is only reviewed links.
 
 ## Page rules
 - Country marks: flag + code + colour bar (flag-icons 7.6.0, MIT). SU gets its own mark, never Russia's flag;
