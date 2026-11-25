@@ -110,3 +110,67 @@
   note: "Former name: held at 12.5° W from 19 Jun 2023 until the move to 50.3° W declared operational on 19 Dec 2025."
   added_by: tic-analyst
   added: 2026-11-25
+
+# 25 Nov 2026, ideas#366: the active satellites in the GEO page's "Names that state another position" table.
+# Eutelsat URD 2025-26 (23 Oct 2026, printed page numbers; PDF page = printed + 2):
+#   https://www.eutelsat.com/system/files/2026-10/DOC_EUTELSAT_Universal-Registration-Document_2025-26_EN_231026.pdf
+# Eutelsat URD 2024-25 (30 Oct 2025):
+#   https://www.eutelsat.com/system/files/2026-10/DOC_Investors_Universal-Registration-Document_FY24-25_EN_301025.pdf
+# Positions: Orbit's GEO element record from 1 Jul 2026 (geo.html "held it", orbit-2.31).
+# Reviewed, no entry (unresolved, 25 Nov 2026):
+# - 37836 EUTELSAT 16A: at 16 deg E in the URD 2025-26 fleet table (30 Jun 2026, p. 28); Orbit's sets hold 16.0 deg E
+#   to 25 Sep 2026, then drift west about 0.9 deg a day (40.5 deg W on 25 Nov). No Eutelsat statement found on a
+#   retirement, move or new name (URD 2025-26 events p. 24; H1 2025-26 report); eutelsat.com news pages refused (403).
+# - 39163 EUTELSAT 7B: Eutelsat's 7B (7 deg E, launched May 2013: URD 2025-26 p. 28; 7B brochure Jan 2026). Orbit's
+#   sets hold 7.0 deg E to 2 Sep 2026 and 16.0 deg E from 13 Sep. No Eutelsat name for it at 16 deg E found; the
+#   catalog's 'Eutelsat 16D' and 'EUTE 3D' are not in any Eutelsat document read (3D appears only in a list of launch
+#   authorisations, URD 2025-26 PDF p. 240, with no link to 7B).
+# - 39612 EXPRESS AT1: RSCC, 6 Mar 2026 (rscc.ru/news/1430/): failed at 56 deg E on 4 Mar and "can be considered
+#   lost". Orbit's sets: drifting east about 0.12 deg a day, 85.6 deg E on 25 Nov. 'EUTELSAT 56A' was Eutelsat's
+#   capacity name; Eutelsat ended the lease on 12 Mar 2026 (Eutelsat press release, 12 Mar 2026). Former name.
+# - 39613 EXPRESS AT2: RSCC's page 'Ekspress-AT2 (56 deg E)' (rscc.ru/infrastructure/satellites/ekspress-at2-56-vd/);
+#   in service at 56 deg E from 8 Apr 2026 in AT1's place (RSCC via Telesputnik, 8 Apr 2026); Orbit's sets hold 56.0
+#   deg E. 'EUTELSAT 140A' was Eutelsat's capacity name at 140 deg E, lease ended 12 Mar 2026. Former name.
+# No source read puts the AT1 and AT2 numbers the other way round.
+
+- norad: 36101
+  name: "Eutelsat 50A"
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat URD 2024-25, p. 24 and accounts note; URD 2025-26, p. 24 and fleet table p. 28"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'On 11 December 2024: the satellite EUTELSAT 50A (previously EUTELSAT 36B) has been relocated and declared operational at 50.5° East for the benefit of a third-party Operator' (URD 2024-25 p. 24)"
+    - "Eutelsat: 'On 1 January 2026: the satellite EUTELSAT 50A, deployed at 50.5° East in December 2024, is now operated in inclined orbit' (URD 2025-26 p. 24); fleet table, 30 June 2026: EUTELSAT 50A, 50.5° East, launched November 2009 (p. 28)"
+    - "Space-Track SATNAME of 36101 (2009-065A, launched 24 Nov 2009) is 'EUTE 36B (EUTE W7)'; Orbit's GEO sets hold it at 50.5-50.6° E every day from 1 Jul to 25 Nov 2026"
+  note: "Current name. Former names Eutelsat 36B and Eutelsat W7."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 28924
+  name: "Eutelsat 174A"
+  basis: attributed
+  source: operator-pages
+  source_ref: "Eutelsat URD 2025-26, fleet table p. 28 and PDF pp. 329, 347"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat's fleet table, 30 June 2026: EUTELSAT 174A, 174° East, launched December 2005; no EUTELSAT 172A listed (URD 2025-26 p. 28)"
+    - "Eutelsat: 'GE-23 satellite (renamed EUTELSAT 172A)' (URD 2025-26 PDF p. 329); 28924 (2005-052A, launched 29 Dec 2005) is GE 23 / AMC 23 in Space-Track ('EUTE 172A (GE 23)')"
+    - "Orbit's GEO sets hold 28924 at 173.9-174.2° E from 2 Jul to 25 Nov 2026"
+  note: "Attributed: Eutelsat names the 174° E satellite but does not state the rename from 172A; the link rests on the launch date, the position and 172A's absence from the fleet table."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 29270
+  name: "Eutelsat 33F"
+  basis: attributed
+  source: operator-pages
+  source_ref: "Eutelsat URD 2025-26, fleet table p. 28; URD 2024-25, p. 24"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat's fleet table, 30 June 2026: EUTELSAT 33F, 33.1° East, launched August 2006 (URD 2025-26 p. 28)"
+    - "Eutelsat: 'the satellite EUTELSAT 33F, deployed at 33° East in September 2023, is now operated in inclined orbit' (URD 2024-25 p. 24)"
+    - "29270 (2006-032A, launched 4 Aug 2006) is Hot Bird 8 / Hot Bird 13B in Space-Track ('EUTE HOT BIRD 13B (HB 8)'); Orbit's GEO sets hold it at 33.1° E from 1 Jul to 25 Nov 2026"
+  note: "Attributed: Eutelsat's documents do not name Hot Bird 13B as 33F; the link rests on the launch month and the position."
+  added_by: tic-analyst
+  added: 2026-11-25
