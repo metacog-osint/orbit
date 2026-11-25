@@ -1,4 +1,4 @@
-"""Footprints prototype (ideas#232): builds the data for site_src/footprints.html. Published as
+"""Footprints page (ideas#232): builds the data for site_src/footprints.html. Published as
 site_src/footprints-data.json (Tom, 24 Nov 2026: publish), built here from the research folder and committed.
 
     python tools/footprints.py build --day-file DAY.geo-region.json --tle-dir DIR [--published DIR] --out FILE
@@ -478,7 +478,7 @@ def cmd_build(a):
         if gw:
             add_gateways(case, out[-1], gw, datetime.now(timezone.utc).date())
         print(case["id"], "layers:", [l["id"] for l in out[-1]["layers"]], "scores:", len(out[-1].get("scores", [])))
-    doc = {"schema": "orbit-footprints/0", "prototype": True, "generated_at": iso(datetime.now(timezone.utc)), "positions_at": iso(when),
+    doc = {"schema": "orbit-footprints/0", "generated_at": iso(datetime.now(timezone.utc)), "positions_at": iso(when),
            "kinds": KINDS, "cases": out}
     path = pathlib.Path(a.out)
     path.parent.mkdir(parents=True, exist_ok=True)
