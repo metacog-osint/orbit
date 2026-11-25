@@ -188,8 +188,21 @@ function main() {
     return S.ownerColor[o.owner] || OTHER;
   }
   const shown = (o) => S.regions.has(o.region) && S.types.has(o.tk) && (!S.activeOnly || o.active);
-  let terms = [];
-  const matches = (o) => !terms.length || terms.every((t) => o.key.indexOf(t) >= 0);
+  let terms = [], slot = null;
+  // a GEO slot typed in the search box, as orbit/namepos.py's parse_slot (ideas#366): "12.5W", "12.5° W", "12 West",
+  // "36E", "-12.5" (degrees east). The whole query must be the slot: "Intelsat 37e" stays a name search.
+  const SLOT_WIN = 0.5;
+  function parseSlot(q) {
+    let m = /^\s*(\d{1,3}(?:\.\d+)?)\s*(?:°|º|deg(?:rees?)?)?\s*(w|west|e|east)\s*$/i.exec(q || ""), lon;
+    if (m) lon = (m[2][0].toLowerCase() === "w" ? -1 : 1) * +m[1];
+    else { m = /^\s*([+-]\s*\d{1,3}(?:\.\d+)?)\s*(?:°|º)?\s*$/.exec(q || ""); if (!m) return null; lon = +m[1].replace(/\s/g, ""); }
+    if (Math.abs(lon) > 180) return null;
+    return lon === -180 ? 180 : lon + 0;
+  }
+  const lonOf = (o) => (o.p ? geodetic(o.p).lon : o.lon);              // at the time shown; else the build's
+  const atSlot = (o) => { const l = lonOf(o); return l != null && shortWay(l, slot) <= SLOT_WIN; };
+  const namedSlot = (o) => (S.namePos.get(o.norad) || []).filter((x) => shortWay(x.stated, slot) <= S.nameTol);
+  const matches = (o) => (slot != null ? atSlot(o) || namedSlot(o).length > 0 : !terms.length || terms.every((t) => o.key.indexOf(t) >= 0));
   // a name reduced for loose matching, as orbit/namepos.py's compact(): "Eutelsat 12 West G" -> "eutelsat12wg" (ideas#359)
   const compact = (s) => (String(s || "").toLowerCase().match(/[a-z0-9]+/g) || []).map((w) => (w === "west" ? "w" : w === "east" ? "e" : w)).join("");
   // a stated position as the name gives it: whole degrees unless the name has a decimal
@@ -1063,7 +1076,7 @@ function main() {
     S.rel = null; S.near = null;
     const el = $("g-panel"), sel = S.sel.map((id) => S.byId.get(id)).filter(Boolean);
     if (!sel.length) {
-      el.innerHTML = '<p class="small">Click a dot to see what it is. Shift-click adds to the selection; Shift-drag a box selects every dot inside it. Search finds names, catalogue numbers, owners and countries.</p>' +
+      el.innerHTML = '<p class="small">Click a dot to see what it is. Shift-click adds to the selection; Shift-drag a box selects every dot inside it. Search finds names, catalogue numbers, owners and countries, or a slot such as 12.5W: what is there, what is named for it and what held it.</p>' +
         coRecent() + (S.place ? lookTable() : '<p class="small">Pick a place under "Look from" to list what can be seen from it.</p>');
       return;
     }
@@ -1169,13 +1182,42 @@ function main() {
   const results = $("g-results");
   function searchChanged() {
     terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
+    slot = parseSlot(S.q);
     rebuildDots(); if (S.trails === "all") drawTrails(); writeHash();
     if (!terms.length) { results.hidden = true; return; }
+    if (slot != null) { slotResults(); return; }
     const hits = S.objs.filter(matches);
     results.innerHTML = '<li class="globe-res-head">' + fmtN(hits.length) + " match" + (hits.length === 1 ? "" : "es") +
       (hits.length ? ' <button type="button" class="linkish" data-all="1">Select all</button>' : "") + "</li>" +
       hits.slice(0, 40).map((o) => { const via = viaNames(o); return '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " +
         (via.length ? '<span class="small muted">also ' + esc(via.join(", ")) + "</span> " : "") + esc(o.owner || "") + " · " + esc(TYPE_WORD[o.type] || o.type || "") + "</li>"; }).join("");
+    results.hidden = false;
+  }
+  // A slot query's list (ideas#366): within SLOT_WIN of the slot at the time shown, named for it (a name is not a
+  // position), and the payloads that held it since the element history starts (geo_page.held_stays).
+  function slotResults() {
+    const regionWord = (r) => ((REGIONS.find((x) => x[0] === r) || [])[1] || r || "").toLowerCase();
+    const item = (o, txt) => '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " + txt + "</li>";
+    const there = S.objs.filter(atSlot).map((o) => [o, shortWay(lonOf(o), slot)]).sort((a, b) => a[1] - b[1]);
+    const named = S.objs.filter((o) => namedSlot(o).length);
+    const H = (S.globe && S.globe.held) || {};
+    const held = (H.rows || []).filter((r) => shortWay(r[3], slot) <= SLOT_WIN && S.byId.has(r[0]))
+      .sort((a, b) => (b[2] < a[2] ? -1 : b[2] > a[2] ? 1 : b[1] < a[1] ? -1 : 1));
+    const n = S.objs.filter(matches).length;
+    let h = '<li class="globe-res-head">Slot ' + esc(statedTxt(slot) || "0°") + ": " + fmtN(there.length) + " within " + SLOT_WIN + "° at the time shown" +
+      (n ? ' <button type="button" class="linkish" data-all="1">Select all</button>' : "") + "</li>";
+    h += there.slice(0, 40).map(([o]) => item(o, esc(lonTxt(lonOf(o))) + " · " + esc(regionWord(o.region)) + " · " +
+      (Math.abs(o.drift) < 0.1 ? "holding its longitude" : esc(rateTxt(o.drift))) + (o.active ? " · active" : ""))).join("");
+    h += '<li class="globe-res-head">Named for it, within ' + S.nameTol + "° (" + fmtN(named.length) + '): <span class="small muted">a name is not a position; most such names are former names</span></li>';
+    h += named.map((o) => { const l = lonOf(o), d = l == null ? null : shortWay(l, slot);
+      return item(o, "“" + esc(namedSlot(o).map((x) => x.name).join("”, “")) + "” · " + (d == null ? "no position" : d <= SLOT_WIN ? "there now" : "now " + esc(lonTxt(l)) + ", " + d.toFixed(1) + "° away")); }).join("");
+    if (H.rows) {
+      h += '<li class="globe-res-head">Held it, ' + esc(H.from) + " to " + esc(H.to) + " (UTC days; " + fmtN(held.length) + '): <span class="small muted">payloads holding a longitude within ' +
+        H.hold_deg + "° for " + H.min_days + " days or more</span></li>";
+      h += held.slice(0, 40).map((r) => item(S.byId.get(r[0]), esc(r[1]) + " to " + (r[2] === H.to ? "now" : esc(r[2])) + " · " + esc(lonTxt(r[3])))).join("");
+    }
+    if (String(S.q).indexOf(".") < 0) h += '<li class="small muted">Names round a slot to the whole degree (Eutelsat’s “12 West” is 12.5° W): try the half degree too.</li>';
+    results.innerHTML = h;
     results.hidden = false;
   }
   let qTimer = null;

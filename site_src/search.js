@@ -32,6 +32,17 @@
     return loading;
   }
   function href(key) { return "object.html?" + (/^\d+$/.test(key) ? "n=" : "j=") + encodeURIComponent(key); }
+  /* A GEO slot ("12.5W", "12.5° W", "12 West", "36E", "-12.5"), as orbit/namepos.py's parse_slot (ideas#366). Slot
+     queries go to the GEO page: positions and the "held it" record live in its data, with its time control, and the
+     name rules stay in one place (the build), so this page loads nothing for them. */
+  function slotOf(q) {
+    var m = /^\s*(\d{1,3}(?:\.\d+)?)\s*(?:°|º|deg(?:rees?)?)?\s*(w|west|e|east)\s*$/i.exec(q || ""), lon;
+    if (m) lon = (m[2].charAt(0).toLowerCase() === "w" ? -1 : 1) * Number(m[1]);
+    else { m = /^\s*([+-]\s*\d{1,3}(?:\.\d+)?)\s*(?:°|º)?\s*$/.exec(q || ""); if (!m) return null; lon = Number(m[1].replace(/\s/g, "")); }
+    if (Math.abs(lon) > 180) return null;
+    return lon === -180 ? 180 : lon + 0;
+  }
+  function geoHref(q) { return "geo.html#g=" + encodeURIComponent("q:" + q.trim().replace(/;/g, " ")); }
 
   /* Ranked matches: exact number or JCAT id, then COSPAR ID (a whole launch for "1998-067"), then names: exact,
      starting with, a word starting with, containing; payloads before other objects, in orbit before reentered. */
@@ -90,6 +101,15 @@
       list.textContent = "";
       if (!q.trim()) { list.hidden = true; return; }
       list.hidden = false;
+      var slot = slotOf(q);
+      if (slot != null) {
+        var li = el("li"), a = el("a", "", "See who is at " + Math.abs(slot) + "° " + (slot < 0 ? "W" : "E") + " on the GEO page");
+        a.href = geoHref(q);
+        li.appendChild(a);
+        li.appendChild(el("span", "pl", "“" + q.trim() + "” reads as a GEO slot: the GEO page lists the objects there now, those named for it and those that held it."));
+        list.appendChild(li);
+        return;
+      }
       if (!index) { list.appendChild(el("li", "muted", "Loading the catalog's search index (about 1 MB, once)…")); }
       load().then(function () {
         if (input.value !== q) return;
@@ -125,6 +145,7 @@
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var q = input.value;
+      if (slotOf(q) != null) { location.href = geoHref(q); return; }
       load().then(function () {
         var r = find(q, 1);
         if (r.hits.length) location.href = href(r.hits[0].key); else show(q);
@@ -135,6 +156,6 @@
     });
   }
 
-  window.OrbitSearch = { attach: attach, load: load, find: find, href: href };
+  window.OrbitSearch = { attach: attach, load: load, find: find, href: href, slotOf: slotOf };
   document.querySelectorAll("form.obj-search").forEach(attach);
 })();

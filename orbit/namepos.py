@@ -107,6 +107,77 @@ def positions(names: list[str], lon: float | None) -> list[dict]:
     return out
 
 
+# ---------------------------------------------------------------------------------------------- slots (ideas#366)
+# A GEO slot typed as a query: "12.5W", "12.5° W", "12.5 W", "12 West", "36E", "36 east", or signed degrees east
+# ("-12.5", "+36"). The whole query must be the slot, so "Intelsat 37e" or "Astra 2E" stay name searches. A bare
+# number is a NORAD number, never a slot.
+WINDOW_DEG = 0.5      # objects within this of the slot now count as there
+SIDEREAL = 360.98564736629
+_SLOT_DIR = re.compile(r"^\s*(\d{1,3}(?:\.\d+)?)\s*(?:°|º|deg(?:rees?)?)?\s*(w|west|e|east)\s*$", re.I)
+_SLOT_SIGNED = re.compile(r"^\s*([+-]\s*\d{1,3}(?:\.\d+)?)\s*(?:°|º)?\s*$")
+REGION_WORD = {"zone": "protected zone", "graveyard": "graveyard", "crossing": "crossing the zone",
+               "inclined": "inclined", "below": "below the zone"}
+
+
+def parse_slot(query: str) -> float | None:
+    """A slot query as degrees east, -180 < lon <= 180, or None when the query is not a slot."""
+    q = (query or "").strip()
+    m = _SLOT_DIR.match(q)
+    if m:
+        deg, west = float(m[1]), m[2].lower().startswith("w")
+        lon = -deg if west else deg
+    else:
+        m = _SLOT_SIGNED.match(q)
+        if not m:
+            return None
+        lon = float(m[1].replace(" ", ""))
+        deg = abs(lon)
+    if deg > 180:
+        return None
+    return 180.0 if lon == -180.0 else lon + 0.0   # + 0.0: no "-0.0"
+
+
+def drift_of(n: float) -> float:
+    """Degrees a day of longitude drift from mean motion (revolutions a day); east positive."""
+    return n * 360.0 - SIDEREAL
+
+
+def at_slot(objects: list[dict], slot: float, window: float = WINDOW_DEG, named_tol: float = TOLERANCE_DEG,
+            held: list[list] | None = None) -> dict:
+    """Who is at a slot and who is named for it.
+    objects: dicts with norad, name, names (other names), lon (degrees east now, or None), region, drift, active,
+      gone; objects not near GEO have no lon or region.
+    held: the GEO page's stays [norad, first day, last day, mean lon, min lon, max lon] (geo_page.held_stays).
+    Returns {"slot", "window", "named_tol", "there": objects within `window` now, nearest first; "named": names that
+    state a position within `named_tol` of the slot, each with where its object is now; "held": stays whose mean
+    longitude is within `window`, newest last day first}."""
+    by = {o["norad"]: o for o in objects}
+    there = []
+    for o in objects:
+        if o.get("lon") is None:
+            continue
+        d = apart(o["lon"], slot)
+        if d <= window:
+            there.append({**o, "apart_deg": round(d, 2)})
+    there.sort(key=lambda o: (o["apart_deg"], o["norad"]))
+    named = []
+    for o in objects:
+        hits = [p for p in positions([o.get("name") or ""] + list(o.get("names") or []), o.get("lon"))
+                if apart(p["stated_lon"], slot) <= named_tol]
+        if hits:
+            named.append({**o, "slot_names": [p["name"] for p in hits], "stated_lon": hits[0]["stated_lon"],
+                          "there_now": o.get("lon") is not None and apart(o["lon"], slot) <= window})
+    named.sort(key=lambda o: (not o["there_now"], o.get("lon") is None, o["norad"]))
+    stays = []
+    for s in held or []:
+        if apart(s[3], slot) <= window:
+            o = by.get(s[0]) or {}
+            stays.append({"norad": s[0], "name": o.get("name") or str(s[0]), "from": s[1], "to": s[2], "lon": s[3],
+                          "lo": s[4], "hi": s[5]})
+    stays.sort(key=lambda s: (s["to"], s["from"]), reverse=True)
+    return {"slot": slot, "window": window, "named_tol": named_tol, "there": there, "named": named, "held": stays}
+
+
 # ---------------------------------------------------------------------------------------------- lookup
 
 def rows(search_doc: dict) -> list[dict]:
