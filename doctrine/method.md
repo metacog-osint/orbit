@@ -835,19 +835,19 @@ Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in
 5. **The object search** answers a slot query with a link to the GEO page rather than its own list: positions and
    stays are in the GEO page's data, with its time control, and the name rules stay in one place.
 
-## Launch lanes retired (`orbit-2.32`, 25 Nov 2026; ideas#69, decision 2 of the space reorg)
+## Launch lanes retired (`orbit-2.32`, 25 Nov 2026; ideas#69)
 Launch Library 2's schedule, the launch news, the launch ledger and the launch closure areas are the suite's Launch
-program's (launch.theintelligence.company), which reads Launch Library 2 and the closure notices itself. Tom's yes:
-17 Nov (the move), 19 Nov (freeze the old ledger URL, two days side by side), 24 Nov (the comparison passed, 23
-rows, 0 unexplained; Orbit retires its lanes).
+program's (launch.theintelligence.company), which reads Launch Library 2 and the closure notices itself. Before the lanes retired, Orbit's and Launch's
+readings of Launch Library 2 ran side by side for two days (19-21 Nov 2026) and matched: 23 comparison rows, none
+with an unexplained difference.
 1. **Retired lanes:** `upcoming`, `news`, `ledger`, `navwarn` and `pairs`, with their modules. A collect makes no
    request to Launch Library 2, the Spaceflight News API, NGA or Launch; the snapshot has none of their keys.
 2. **Feed:** no `orbit:upcoming:*` items, and the health block no longer names `ll2-thespacedevs`. Launch's feed
    carries scheduled launches as `launch:upcoming:*` (LA-PIR-3); COP ends Orbit's old items when Orbit is read.
    OR-PIR-3 stays in the register, noted, so older items still resolve.
 3. **Ledger:** Orbit's last `launch-ledger.json` stays on its release `ledger`, frozen, with a "moved to Launch"
-   note in the release text; the private archive keeps its dated copies. `ledger.yml` no longer runs on a schedule
-   and does nothing; it is deleted once the hub's dispatcher stops starting it (a hub change, asked separately).
+   note in the release text; the private archive keeps its dated copies. `ledger.yml` has no schedule and does nothing
+   when started; it remains while the suite's dispatcher still starts it.
 4. **Launches page:** the map and globe draw GCAT's launches of the last 7 days (each with its payloads and their
    orbits, and their paths on the globe); pads, hazard areas, ledger history and Launch's lines are gone. A card
    under the old ids `#upcoming`, `#hazards` and `#ledger` points to Launch, so older links still land.

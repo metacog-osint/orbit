@@ -41,8 +41,8 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
 - `update.yml`: tests, state from the Actions cache, collect, build, check, GEO page data, save state, deploy to
   Pages. **Runs on every push to `main`, so a push deploys.** Cron `41 */6`; the hub's `tic-dispatch` starts it at :55
   past 00/06/12/18 UTC (the cron is the fallback). Timeout 22 min (Space-Track wait).
-- `ledger.yml`: retired stub (orbit-2.32), no cron, does nothing; delete it once the hub's tic-dispatch stops
-  starting it (:45, :55 at 01/05/09/13/17/21 UTC; a still-ask hub change). Release `ledger` is frozen.
+- `ledger.yml`: retired stub (orbit-2.32), no cron, does nothing when the hub's tic-dispatch starts it.
+  Release `ledger` is frozen.
 - `geo.yml`: GEO region at 03:15 and 15:15 UTC by tic-dispatch, own cron :17 (skips if today's file is under an hour
   old); releases `geo-YYYY`. `geo-import.yml`: one-off copy of Noisefloor's history.
 - `catalog.yml`: cron 17:23, 19:23, 21:23 UTC, also started by the hub's tic-dispatch (17:30 UTC on 18 Nov);
@@ -110,7 +110,7 @@ OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orb
 ## Program boundaries (Tom, 16-17 Nov 2026)
 - The GEO belt is Orbit's; Noisefloor keeps signals, sun outages and space weather.
 - Decision 2 (17 Nov): Launch Library 2 schedule, ledger and news moved to Launch; Orbit's launch lanes and map
-  layers retired in orbit-2.32 (25 Nov). The old ledger URL is frozen, not a forward copy (Tom, 19 Nov).
+  layers retired in orbit-2.32 (25 Nov). The old ledger URL is frozen, not a forward copy.
 
 ## Not built, with the reason
 ITU (permission first); CSIS (rights); maneuver-detect labels (its reading of Space-Track's terms conflicts
@@ -128,4 +128,4 @@ with USSPACECOM's citation clause); pass predictions.
 - Don't pop the stash labelled "line-ending-only copies of site/tic-nav.*".
 - No material from other work here; reused older code needs names stripped and no key files copied.
 - Times stored UTC; the page shows the viewer's zone, named (`tic-time.js`).
-- Emails to ITU stay drafts until Tom sends them.
+- Emails to ITU stay drafts; no session sends them.
