@@ -1,4 +1,4 @@
-// Footprints prototype (ideas#232): draws footprints-data.json, written by tools/footprints.py (committed beside this file). Every outline keeps
+// Footprints page (ideas#232): draws footprints-data.json, written by tools/footprints.py (committed beside this file). Every outline keeps
 // its kind (published, computed, estimated), source, date and uncertainty beside it; kinds differ by line pattern,
 // not colour. No inline styles or scripts (CSP).
 import * as ml from "./vendor/maplibre-gl/maplibre-gl.mjs";

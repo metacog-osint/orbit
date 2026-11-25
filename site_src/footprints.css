@@ -1,4 +1,4 @@
-/* Footprints prototype (ideas#232). Kinds are told apart by line pattern, not colour: Orbit's palette is fixed. */
+/* Footprints page (ideas#232). Kinds are told apart by line pattern, not colour: Orbit's palette is fixed. */
 .fp-stage { position: relative; }
 .fp-map { width: 100%; height: min(68vh, 620px); min-height: 340px; border: 1px solid var(--border); border-radius: 6px; }
 .fp-cases { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
