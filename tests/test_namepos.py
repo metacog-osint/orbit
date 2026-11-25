@@ -47,6 +47,11 @@ class StatedLongitude(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertIsNone(N.stated_lon(name))
 
+    def test_named_slot_text_keeps_the_name_s_precision(self):
+        self.assertEqual(N.named_txt(-12.0), "12° W")
+        self.assertEqual(N.named_txt(7.5), "7.5° E")
+        self.assertEqual(N.named_txt(0.0), "0°")
+
     def test_apart_goes_the_short_way(self):
         self.assertAlmostEqual(N.apart(-12.0, -50.32), 38.32)
         self.assertAlmostEqual(N.apart(179.0, -179.0), 2.0)

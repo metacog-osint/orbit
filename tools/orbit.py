@@ -754,7 +754,9 @@ def find_name(query: str, index: str | None = None, limit: int = 10, getter=None
             print(f"           also: {'; '.join(others)}")
         stated = [p for p in namepos.positions([h.get("name") or ""] + others, None)]
         if stated:
-            print("           names stating a position: " + "; ".join(f"{p['name']} = {namepos.lon_txt(p['stated_lon'])}" for p in stated))
+            print("           names that state a slot: " + "; ".join(f"{p['name']} = named for {namepos.named_txt(p['stated_lon'])}" for p in stated))
+    if any(namepos.positions([h.get("name") or ""] + list(h.get("other_names") or []), None) for h in hits):
+        print("Names give a slot to the whole degree (Eutelsat's \"12 West\" is 12.5° W); a slot name is often a former name.")
     if hits:
         print("Each object's page lists which source gives which name: https://orbit.theintelligence.company/object.html?n=<NORAD>")
     return 0 if hits else 1

@@ -20,7 +20,10 @@ catalog index of 24 Nov 2026 (tests/test_namepos.py):
 - Hispasat's "<number>W-<n>" ("HISPASAT 30W-6").
 Nothing else: "Intelsat 37e" (Epic), "Astra 2E", "Fengyun 2E" and the like are series letters, never positions.
 A stated position is what the name says, not a claim by Orbit; a name differing from the measured position is
-most often a former name.
+most often a former name. Names give the slot only to the whole degree: Eutelsat's "12 West" slot is at 12.5° W
+(12 West A, B, E and G all sat there; Eutelsat URD 2022-23 fleet table) and "7 West A" at 7.3° W. So a stated
+position is shown as the name gives it ("named for 12° W"), never as a measured longitude, and a name within
+TOLERANCE_DEG of the satellite counts as fitting.
 """
 from __future__ import annotations
 
@@ -78,6 +81,11 @@ def apart(a: float, b: float) -> float:
 
 def lon_txt(lon: float) -> str:
     return f"{abs(lon):.1f}° {'W' if lon < 0 else 'E'}" if abs(lon) >= 0.05 else "0.0°"
+
+
+def named_txt(lon: float) -> str:
+    """A stated position as the name gives it: "12° W", "7.5° E"; never with a decimal the name does not have."""
+    return f"{abs(lon):g}° {'W' if lon < 0 else 'E'}" if lon else "0°"
 
 
 def positions(names: list[str], lon: float | None) -> list[dict]:

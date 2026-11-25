@@ -1338,10 +1338,10 @@ function main() {
     const lon = g ? g.lon : null;
     const parts = list.map((x) => {
       const d = lon == null ? null : shortWay(x.stated, lon);
-      return "“" + esc(x.name) + "” states " + statedTxt(x.stated) + (d == null ? "" : d <= S.nameTol ? ", its position now" : ", " + d.toFixed(1) + "° from here");
+      return "“" + esc(x.name) + "” is named for " + statedTxt(x.stated) + (d == null ? "" : d <= S.nameTol ? ", its slot now" : ", about " + d.toFixed(1) + "° from here");
     });
     const off = lon != null && list.some((x) => shortWay(x.stated, lon) > S.nameTol);
-    return [["Name and position", parts.join("; ") + (off ? '<br><span class="small muted">A name that states another position is most often a former name: operators rename a satellite when they move it, and catalogues may keep the old name.</span>' : "")]];
+    return [["Name and position", parts.join("; ") + (off ? '<br><span class="small muted">A name that states another position is most often a former name: operators rename a satellite when they move it, and catalogues may keep the old name. Names give the slot only to the whole degree (Eutelsat’s “12 West” is 12.5° W).</span>' : "")]];
   }
   // The belt board's table: satellites CelesTrak lists as active with a name more than the tolerance from where they are.
   function nameTable(g) {
@@ -1359,7 +1359,7 @@ function main() {
         "</td><td>" + (m.length ? esc(m.join(", ")) : "none in the catalogue") + "</td></tr>";
     })) : "<p>None.</p>") +
       '<p class="small">Names from every source in TIC’s satellite catalogue; positions from each satellite’s newest public element set at ' + esc(bothTxt(Date.parse(np.at_utc.replace("Z", ":00Z")), true)) +
-      ". A name is listed when it states a longitude more than " + tol + "° from the satellite. " + fmtN(rest.size) + " objects not listed as active (most in the graveyard band) also carry such names; their cards show them.</p>";
+      ". A name is listed when it states a longitude more than " + tol + "° from the satellite; names give the slot only to the whole degree (Eutelsat’s “12 West” is 12.5° W), so distances are to the named degree. " + fmtN(rest.size) + " objects not listed as active (most in the graveyard band) also carry such names; their cards show them.</p>";
   }
   // ---------------------------------------------------------------- belt board (tools/geo_belt.py; from Noisefloor's board, step 5)
   const ROLE_WORD = { inspection: "inspection-capable", servicing: "servicing" };
