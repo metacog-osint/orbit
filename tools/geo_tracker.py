@@ -27,6 +27,9 @@ Arithmetic on the last public element sets, not a forecast. For every object wit
                departure (or now, for a current stop).
   last_day     (ideas#322) the sets of the 24 hours before the build: how many, the drift of the newest set before
                them, and the brake state as of 24 hours ago, so the page can say what changed since yesterday.
+  arrived      (ideas#323) listed-role objects that are no longer drifting and whose current stop began within
+               ARRIVED_DAYS (7) of the build, after a move from an earlier stop: the stop they left, the start
+               estimates, and the stop they reached. The feed's relocation items read movers and arrivals.
   track        for the page's chart (ideas#321): the sets from TRACK_LEAD_DAYS before the last held set (or the last
                TRACK_DAYS when Orbit holds no stop) to the newest, at most TRACK_MAX (thinned evenly, newest kept);
                none for a stale entry.
@@ -55,6 +58,7 @@ NEIGHBOURS = 3
 TRACK_LEAD_DAYS = 7
 TRACK_DAYS = 30
 TRACK_MAX = 160
+ARRIVED_DAYS = 7.0
 BRAKING_NOTE = ("Neither case includes braking. On Luch (Olymp) 2's three long moves (2023-2025) braking took "
                 "10.2 to 11.8 days from full speed to the stop, so once an object brakes, dates further "
                 "along come later than shown (docs/validation/luch2-relocations.md).")
@@ -172,6 +176,46 @@ def steady_projection(moving):
     return seen or {"state": "none"}
 
 
+def start_estimates(last_stop, moving):
+    """When the move from `last_stop` began, estimated from the first moving sets (assuming the object sped up
+    uniformly from rest), each clamped to the last held set and naming the sets it rests on."""
+    held = _t(last_stop["departure"])
+    est = []
+    m0 = moving[0] if moving else None
+    if m0 and abs(m0["drift"]) > 0:
+        d = abs(M._wrap180(m0["lon"] - last_stop["lon"]))
+        t0 = max(held, _t(m0["t"]) - timedelta(days=2 * d / abs(m0["drift"])))
+        est.append({"basis": "distance and rate of the first moving set", "sets": [m0["t"]], "t": _iso(t0)})
+    if len(moving) >= 2 and abs(moving[1]["drift"]) > abs(moving[0]["drift"]):
+        m1 = moving[1]
+        a = (abs(m1["drift"]) - abs(m0["drift"])) / _days(_t(m0["t"]), _t(m1["t"]))
+        t0 = max(held, _t(m0["t"]) - timedelta(days=abs(m0["drift"]) / a))
+        est.append({"basis": "rate change between the first two moving sets", "sets": [m0["t"], m1["t"]],
+                    "t": _iso(t0)})
+    return est
+
+
+def arrival(o, rws, role, now):
+    """The move a no-longer-drifting object finished within ARRIVED_DAYS, or None."""
+    st = GR.stops(rws)
+    if len(st) < 2:
+        return None
+    here, before = st[-1], st[-2]
+    if any(_t(r["t"]) > _t(here["departure"]) for r in rws) or _days(_t(here["arrival"]), now) > ARRIVED_DAYS:
+        return None                                   # moving again, or the stop is older than the window
+    moving = [r for r in rws if _t(before["departure"]) < _t(r["t"]) < _t(here["arrival"])]
+    if not moving:
+        return None
+    newest = rws[-1]
+    return {"norad": o["norad"], "name": o["name"], "owner": o.get("owner"), "role": role,
+            "departure": {"lon": before["lon"], "last_held_set": before["departure"],
+                          "estimated_start": start_estimates(before, moving)},
+            "moving_sets": len(moving), "direction": "east" if moving[-1]["drift"] > 0 else "west",
+            "stop": {"lon": here["lon"], "arrival": here["arrival"], "sets": here["sets"], "days": here["days"]},
+            "newest": {"t": newest["t"], "lon": newest["lon"], "drift": newest["drift"],
+                       "age_h": round(_days(_t(newest["t"]), now) * 24, 1)}}
+
+
 def track(o, rws, objs, elsets, role, now):
     """The tracker entry for one drifting object, from its positions `rws`."""
     st = GR.stops(rws)
@@ -196,18 +240,7 @@ def track(o, rws, objs, elsets, role, now):
         held = _t(last_stop["departure"])
         dep = {"lon": last_stop["lon"], "last_held_set": last_stop["departure"],
                "gap_to_first_moving_h": round(_days(held, _t(moving[0]["t"])) * 24, 1) if moving else None}
-        est = []
-        m0 = moving[0] if moving else None
-        if m0 and abs(m0["drift"]) > 0:
-            d = abs(M._wrap180(m0["lon"] - last_stop["lon"]))
-            t0 = max(held, _t(m0["t"]) - timedelta(days=2 * d / abs(m0["drift"])))
-            est.append({"basis": "distance and rate of the first moving set", "sets": [m0["t"]], "t": _iso(t0)})
-        if len(moving) >= 2 and abs(moving[1]["drift"]) > abs(moving[0]["drift"]):
-            m1 = moving[1]
-            a = (abs(m1["drift"]) - abs(m0["drift"])) / _days(_t(m0["t"]), _t(m1["t"]))
-            t0 = max(held, _t(m0["t"]) - timedelta(days=abs(m0["drift"]) / a))
-            est.append({"basis": "rate change between the first two moving sets", "sets": [m0["t"], m1["t"]],
-                        "t": _iso(t0)})
+        est = start_estimates(last_stop, moving)
         dep["estimated_start"] = est
         out["departure"] = dep
     accel = None
@@ -286,17 +319,20 @@ def track(o, rws, objs, elsets, role, now):
 def build(objs, elsets, roles, now):
     """Tracker entries for listed-role objects classed drifting. `objs` carry `class` (geo_belt.build sets it),
     `elsets` {norad: [element-file rows]}, `roles` {str(norad): role}."""
-    out = []
+    out, arrived = [], []
     for o in objs:
         role = roles.get(str(o["norad"]))
-        if not role or o.get("class") != "drifting":
+        if not role:
             continue
         rws = rows(elsets.get(o["norad"], []), now)
         if not rws:
             continue
-        out.append(track(o, rws, objs, elsets, role, now))
+        if o.get("class") == "drifting":
+            out.append(track(o, rws, objs, elsets, role, now))
+        elif (a := arrival(o, rws, role, now)) is not None:
+            arrived.append(a)
     return {"at_utc": _iso(now), "note": NOTE, "braking_note": BRAKING_NOTE,
             "rules": {"drift_kept": GR.DRIFT_KEPT, "max_age_days": MAX_AGE_DAYS, "peak_cap": PEAK_CAP, "min_accel_sets": MIN_ACCEL_SETS,
                       "slot_deg": SLOT_DEG, "pass_days": PASS_DAYS, "stop_near_deg": STOP_NEAR_DEG,
                       "brake_min": GR.BRAKE_MIN, "rate_dt_days": GR.RATE_DT_DAYS, "steady_deg": GR.NEAR_DEG},
-            "movers": out, "attribution": M.ATTRIBUTION}
+            "movers": out, "arrived": arrived, "attribution": M.ATTRIBUTION}
