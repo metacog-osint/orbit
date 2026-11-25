@@ -119,6 +119,12 @@
   <div id="geo-changes"><p class="small">Loading…</p></div>
   <h3 id="belt-drift">Drifting</h3>
   <div id="geo-drift"><p class="small">Loading…</p></div>
+  <h3 id="belt-names">Names that state another position</h3>
+  <p class="small muted">Operators often put the slot in a satellite's name ("Eutelsat 12 West G", "Eutelsat 36B",
+    "Hot Bird 13C", "Hispasat 30W-6") and rename it when they move it, while catalogues may keep the old name. These
+    are the active satellites with a name, from any source, that states a longitude more than 1° from where the
+    satellite is. Most such names are former names; the last column gives a name that does fit, where one exists.</p>
+  <div id="geo-names"><p class="small">Loading…</p></div>
 </section>
 
 <section class="card" id="movers" aria-labelledby="movers-h">
@@ -189,6 +195,16 @@
     ("GEO relocation tracker") and
     <a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/luch2-relocations.md">luch2-relocations.md</a>.</li>
   <li><strong>Callouts.</strong> Automatic highlights of behaviour worth a look, from the last 14 days: C1 close to another owner's satellite (under 100 km on some hour of a day), C2 approaching (three daily falls, ending under 200 km), C3 parked beside another owner (stopped after a manoeuvre within 0.5° of a station-kept satellite of another owner), C4 heading for an occupied slot, C5 an orbit change by an object with a listed role, C6 arrived in the protected zone, C7 retired to the graveyard, C8 went quiet. Each rule was frozen in writing with a list of published cases before it was run, then scored on four months of history and seven older cases (<a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/geo-callouts.md">the validation file</a>). C3 to C7 show by default; C1, C2 and C8 stay off unless you switch them on. <strong>C5 uses Orbit's orbit-change rule</strong> (from 17 Nov 2026): a change between two element sets counts when it stands 8 robust deviations above the object's own noise and is at least 0.25 m/s at GEO. On the same history it found 6 of the 6 published cases C5 was scored on (C5 itself found 5); most of C5's extra marks were station-keeping, a drifting object and natural inclination drift. An object with fewer than 10 pairs of element sets is not judged, so a rarely published object's move can be missed.</li>
+  <li><strong>Names.</strong> The globe shows Space-Track's name. Search and each object's card also use every other
+    name TIC's satellite catalogue gives it (GCAT, CelesTrak, Wikidata, WMO OSCAR and reviewed aliases), and search
+    ignores spacing and reads "West" and "East" as W and E, so "12WG" finds "Eutelsat 12 West G". A name states a
+    position only in naming schemes that hold one: "&lt;number&gt; West" or "East" in any name, Eutelsat's short
+    forms ("Eutelsat 36B" is 36° E, "Eutelsat 117W A" 117° W), Eutelsat's "Hot Bird 13" names (13° E) and Hispasat's
+    "30W-6" (30° W). Names give the slot only to the whole degree: Eutelsat's "12 West" slot is at 12.5° W and
+    "7 West A" at 7.3° W, so a name within 1° of the satellite counts as fitting. Series letters such as Intelsat's "37e" or Astra's "2E" are never read as positions. A stated
+    position is compared with the newest public element set's longitude, on the card at the time shown and in the
+    belt board's table at the time the page data was built (code:
+    <a href="https://github.com/metacog-osint/orbit/blob/main/orbit/namepos.py">orbit/namepos.py</a>).</li>
   <li><strong>Owners</strong> are CelesTrak's codes: CIS is Russia and the former Soviet states, PRC China, ITSO Intelsat, EUTE Eutelsat, SES SES.</li>
 </ul>
 <p class="small">Orbital data: USSPACECOM (space-track.org), basic SSA data, redistributed with citation; active list from <a href="https://celestrak.org/">CelesTrak</a>. RPO pairs: Secure World Foundation, Global Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>, <a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>), CC BY-NC 4.0. Libraries: three.js 0.185.0 (<a href="vendor/three/LICENSE">MIT</a>) and satellite.js 7.1.0 (<a href="vendor/satellite.js/LICENSE.md">MIT</a>), self-hosted; coastlines and places from Natural Earth (public domain). Code: <a href="https://github.com/metacog-osint/orbit/blob/main/tools/geo_page.py">tools/geo_page.py</a>, <a href="https://github.com/metacog-osint/orbit/blob/main/tools/geo_callouts.py">tools/geo_callouts.py</a>.</p>
