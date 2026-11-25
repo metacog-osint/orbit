@@ -723,6 +723,43 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
 SHARDS_URL = f"https://github.com/{geo_region.REPO}/releases/download/{stcat.RELEASE}/{objpage.ASSET}"
 
 
+SEARCH_URL = "https://orbit.theintelligence.company/data/catalog/search.json"
+
+
+def find_name(query: str, index: str | None = None, limit: int = 10, getter=None) -> int:
+    """`orbit.py find`: every name from every source in the catalog's search index, matched loosely
+    (orbit/namepos.py), so a session looks here before the web. The hand-kept alias file is only the reviewed links;
+    the index holds Space-Track's, GCAT's, CelesTrak's, Wikidata's, WMO OSCAR's and the aliases' names."""
+    from orbit import namepos
+    try:
+        sys.stdout.reconfigure(errors="replace")  # a Windows console cannot print every name
+    except AttributeError:
+        pass
+    if index:
+        raw = Path(index).read_bytes()
+        where = index
+    else:
+        raw = (getter or fetch.get)(SEARCH_URL)
+        where = SEARCH_URL
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    doc = json.loads(raw.decode("utf-8"))
+    hits = namepos.find(doc, query, limit)
+    print(f"{len(hits)} match{'es' if len(hits) != 1 else ''} for {query!r} in {where} (catalog read {doc.get('read')}):")
+    for h in hits:
+        others = list(h.get("other_names") or [])
+        gone = " (left orbit)" if h.get("gone") else ""
+        print(f"  {h['key']:>7}  {h.get('cospar') or '':<10}  {h.get('name')}{gone}")
+        if others:
+            print(f"           also: {'; '.join(others)}")
+        stated = [p for p in namepos.positions([h.get("name") or ""] + others, None)]
+        if stated:
+            print("           names stating a position: " + "; ".join(f"{p['name']} = {namepos.lon_txt(p['stated_lon'])}" for p in stated))
+    if hits:
+        print("Each object's page lists which source gives which name: https://orbit.theintelligence.company/object.html?n=<NORAD>")
+    return 0 if hits else 1
+
+
 def object_data(site_dir: Path, getter=None) -> int:
     """Object pages (orbit-2.20): the catalog's shards, search index and rules note from the public release
     `catalog` (one GitHub request) into site/data/catalog/. A missing or refused archive leaves the folder as it
@@ -1172,6 +1209,11 @@ def main(argv=None) -> int:
     od = sub.add_parser("object-data", help="object pages: the catalog's shards and search index from release "
                                            "`catalog` into site/data/catalog/ (one request; update.yml)")
     od.add_argument("--site", default=str(ROOT / "site"))
+    fd = sub.add_parser("find", help="look a satellite up by any name from any source, NORAD number or COSPAR ID in "
+                                     "TIC's catalog search index (one request to the live site; ideas#359)")
+    fd.add_argument("query", nargs="+")
+    fd.add_argument("--index", help="a search.json (or .json.gz) to read instead of the live site's")
+    fd.add_argument("--limit", type=int, default=10)
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
                                               "BeiDou-2 G2), iss (2024 reboosts and the May storm) or luch2 (Luch (Olymp) 2, 2023-2026)")
@@ -1262,6 +1304,8 @@ def main(argv=None) -> int:
         return 0
     if args.cmd == "object-data":
         return object_data(Path(args.site))
+    if args.cmd == "find":
+        return find_name(" ".join(args.query), args.index, args.limit)
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

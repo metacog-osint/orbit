@@ -190,6 +190,14 @@ function main() {
   const shown = (o) => S.regions.has(o.region) && S.types.has(o.tk) && (!S.activeOnly || o.active);
   let terms = [];
   const matches = (o) => !terms.length || terms.every((t) => o.key.indexOf(t) >= 0);
+  // a name reduced for loose matching, as orbit/namepos.py's compact(): "Eutelsat 12 West G" -> "eutelsat12wg" (ideas#359)
+  const compact = (s) => (String(s || "").toLowerCase().match(/[a-z0-9]+/g) || []).map((w) => (w === "west" ? "w" : w === "east" ? "e" : w)).join("");
+  // a stated position as the name gives it: whole degrees unless the name has a decimal
+  const statedTxt = (x) => (Math.abs(x) % 1 ? Math.abs(x).toFixed(1) : Math.abs(x).toFixed(0)) + "°" + (x < 0 ? "W" : x > 0 ? "E" : "");
+  const shortWay = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+  // the other names a search matched, when the shown name alone does not match every term
+  const viaNames = (o) => (!terms.length || terms.every((t) => o.name.toLowerCase().indexOf(t) >= 0) ? [] :
+    o.others.filter((n) => { const l = n.toLowerCase(), c = compact(n); return terms.some((t) => l.indexOf(t) >= 0 || c.indexOf(t) >= 0); }).slice(0, 2));
 
   // ---------------------------------------------------------------- positions
   function satrecOf(o) {
@@ -1063,7 +1071,8 @@ function main() {
       (sel.length === 1 ? ' <button type="button" data-act="focus" data-id="' + sel[0].norad + '">Fly to it</button>' : ' <button type="button" data-act="home">Whole belt</button>') + "</p>";
     if (sel.length === 1) {
       const o = sel[0], g = o.p ? geodetic(o.p) : null, [pe, ap] = altitudes(o), age = (nowMs() - epochMs(o.epoch)) / 86400000;
-      const rows = [
+      const rows = [].concat(o.others.length ? [["Other names", esc(o.others.join(", ")) + ' <span class="small">(<a href="object.html?n=' + o.norad + '">which source gives which</a>)</span>']] : [])
+        .concat(namePosRow(o, g)).concat([
         ["Owner", esc(S.owners[o.owner] ? S.owners[o.owner] + " (" + o.owner + ")" : o.owner || "unknown")],
         ["Type", esc(TYPE_WORD[o.type] || o.type || "unknown") + (o.active ? ", listed as active" : "")],
         ["Where", esc(WHERE[o.region] || o.region)],
@@ -1074,7 +1083,7 @@ function main() {
         ["Elements", esc(bothTxt(epochMs(o.epoch), true)) + ', <span id="g-age">' + (age < 1 ? Math.round(age * 24) + " hours" : age.toFixed(1) + " days") + " before the time shown</span>"],
         ["Launched", esc(o.launch || "unknown")], ["Radar size", esc(o.rcs || "not given")],
         ["Sunlight", '<span id="g-sunlit">' + esc(sunlitTxt(o)) + "</span>"],
-      ].concat(S.place ? [["From " + esc(placeName()), '<span id="g-look">' + esc(lookTxt(o)) + "</span>"]] : []).concat(coFor(o)).concat(boardFor(o));
+      ]).concat(S.place ? [["From " + esc(placeName()), '<span id="g-look">' + esc(lookTxt(o)) + "</span>"]] : []).concat(coFor(o)).concat(boardFor(o));
       el.innerHTML = "<h3>" + esc(o.name) + '</h3><p class="small">Catalogue ' + o.norad + (o.cospar ? " · " + esc(o.cospar) : "") +
         ' · <a href="https://celestrak.org/satcat/table-satcat.php?CATNR=' + o.norad + '">CelesTrak record</a></p><dl class="globe-dl">' +
         rows.map((r) => "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>").join("") + "</dl>" +
@@ -1165,7 +1174,8 @@ function main() {
     const hits = S.objs.filter(matches);
     results.innerHTML = '<li class="globe-res-head">' + fmtN(hits.length) + " match" + (hits.length === 1 ? "" : "es") +
       (hits.length ? ' <button type="button" class="linkish" data-all="1">Select all</button>' : "") + "</li>" +
-      hits.slice(0, 40).map((o) => '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " + esc(o.owner || "") + " · " + esc(TYPE_WORD[o.type] || o.type || "") + "</li>").join("");
+      hits.slice(0, 40).map((o) => { const via = viaNames(o); return '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " +
+        (via.length ? '<span class="small muted">also ' + esc(via.join(", ")) + "</span> " : "") + esc(o.owner || "") + " · " + esc(TYPE_WORD[o.type] || o.type || "") + "</li>"; }).join("");
     results.hidden = false;
   }
   let qTimer = null;
@@ -1318,6 +1328,38 @@ function main() {
     })) : "<p>None.</p>";
     beltTables(g.belt);
     moverCards(g.belt && g.belt.movers);
+    nameTable(g);
+  }
+  // ---------------------------------------------------------------- names that state a position (orbit/namepos.py, ideas#361)
+  // The card row: each name that states a longitude, against the position at the time shown.
+  function namePosRow(o, g) {
+    const list = S.namePos.get(o.norad) || [];
+    if (!list.length) return [];
+    const lon = g ? g.lon : null;
+    const parts = list.map((x) => {
+      const d = lon == null ? null : shortWay(x.stated, lon);
+      return "“" + esc(x.name) + "” states " + statedTxt(x.stated) + (d == null ? "" : d <= S.nameTol ? ", its position now" : ", " + d.toFixed(1) + "° from here");
+    });
+    const off = lon != null && list.some((x) => shortWay(x.stated, lon) > S.nameTol);
+    return [["Name and position", parts.join("; ") + (off ? '<br><span class="small muted">A name that states another position is most often a former name: operators rename a satellite when they move it, and catalogues may keep the old name.</span>' : "")]];
+  }
+  // The belt board's table: satellites CelesTrak lists as active with a name more than the tolerance from where they are.
+  function nameTable(g) {
+    const el = $("geo-names"); if (!el) return;
+    const np = g.name_positions || {};
+    if (np.error) { el.innerHTML = "<p>Not built this run (" + esc(np.error) + ").</p>"; return; }
+    const tol = np.tolerance_deg || 1, off = (np.rows || []).filter((r) => r[3] != null && r[4] > tol);
+    const isAct = (k) => (S.byId.get(k) || {}).active;
+    const act = [...new Set(off.filter((r) => isAct(r[0])).map((r) => r[0]))], rest = new Set(off.filter((r) => !isAct(r[0])).map((r) => r[0]));
+    const fits = (k) => (S.namePos.get(k) || []).filter((x) => x.apart != null && x.apart <= tol).map((x) => x.name);
+    el.innerHTML = (act.length ? foldTable(["Satellite", "Owner", "Where it is", "Drift", "Names that state another position", "A name that fits"], act.map((k) => {
+      const o = S.byId.get(k), m = fits(k), mine = off.filter((r) => r[0] === k);
+      return "<tr><td>" + pick([k], o.name) + "</td><td>" + esc(o.owner || "") + '</td><td class="num">' + lonTxt(mine[0][3]) + '</td><td class="num">' +
+        (Math.abs(o.drift) < 0.1 ? "none" : esc(rateTxt(o.drift))) + "</td><td>" + mine.map((r) => esc(r[1]) + " (" + statedTxt(r[2]) + ", " + r[4].toFixed(1) + "° away)").join("; ") +
+        "</td><td>" + (m.length ? esc(m.join(", ")) : "none in the catalogue") + "</td></tr>";
+    })) : "<p>None.</p>") +
+      '<p class="small">Names from every source in TIC’s satellite catalogue; positions from each satellite’s newest public element set at ' + esc(bothTxt(Date.parse(np.at_utc.replace("Z", ":00Z")), true)) +
+      ". A name is listed when it states a longitude more than " + tol + "° from the satellite. " + fmtN(rest.size) + " objects not listed as active (most in the graveyard band) also carry such names; their cards show them.</p>";
   }
   // ---------------------------------------------------------------- belt board (tools/geo_belt.py; from Noisefloor's board, step 5)
   const ROLE_WORD = { inspection: "inspection-capable", servicing: "servicing" };
@@ -1680,11 +1722,16 @@ function main() {
     const board = { roles: g.roles || {}, region: g.region || {}, rpo: g.rpo || {} };
     S.globe = g; S.board = board; S.owners = g.owners || {}; S.cite = g.source;
     const cols = g.cols, roleIds = new Set(Object.keys((board || {}).roles || {}).map(Number));
+    const npos = g.name_positions || {};
+    S.namePos = new Map(); S.nameTol = npos.tolerance_deg || 1;
+    (npos.rows || []).forEach((r) => { if (!S.namePos.has(r[0])) S.namePos.set(r[0], []); S.namePos.get(r[0]).push({ name: r[1], stated: r[2], lon: r[3], apart: r[4] }); });
     S.objs = g.objects.map((row) => {
       const o = {}; cols.forEach((c, k) => { o[c] = row[k]; });
       o.tk = typeKey(o.type); o.drift = o.n * 360 - SIDEREAL; o.sr = satrecOf(o);
+      o.others = (g.names || {})[String(o.norad)] || [];
       const role = roleIds.has(o.norad) ? board.roles[String(o.norad)].role : "";
-      o.key = [o.name, o.norad, o.cospar, o.owner, S.owners[o.owner], TYPE_WORD[o.type], o.region, role, o.active ? "active" : ""].join(" ").toLowerCase();
+      o.key = [o.name, o.norad, o.cospar, o.owner, S.owners[o.owner], TYPE_WORD[o.type], o.region, role, o.active ? "active" : ""]
+        .concat(o.others, [o.name].concat(o.others).map(compact)).join(" ").toLowerCase();
       return o;
     });
     S.objs.forEach((o) => S.byId.set(o.norad, o));

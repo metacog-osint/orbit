@@ -230,6 +230,55 @@ def movers(objs, elsets, rmap, now):
         return {"error": f"{type(e).__name__}: {e}"}
 
 
+def catalog_names(site, objs):
+    """Other names of each object from the TIC catalog's search index, which the update run unpacks into
+    site/data/catalog/ in the step before this one (orbit.py object-data; no request here). {norad: [names]}, only
+    objects with another name; {} when the index is missing, so the page builds without them (ideas#360)."""
+    sys.path.insert(0, ROOT)
+    from orbit import names, namepos
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+    except (OSError, ValueError) as e:
+        print(f"geo page: no catalog search index ({type(e).__name__}); other names left out")
+        return {}
+    want = {o[0]: o[1] for o in objs}
+    out = {}
+    for r in namepos.rows(doc):
+        k = str(r.get("key") or "")
+        if not k.isdigit() or int(k) not in want:
+            continue
+        also = names.others(want[int(k)], {"display": r.get("name"), "names": list(r.get("other_names") or [])})
+        if also:
+            out[int(k)] = also
+    return out
+
+
+def name_positions(region, objs, other, now):
+    """Names that state a longitude ("Eutelsat 12 West G", "EUTE 36B"), each with the object's longitude from its
+    newest set at the build time (ideas#361; orbit/namepos.py). Rows [norad, name, stated lon, lon now, degrees
+    apart]; lon now None when SGP4 fails."""
+    sys.path.insert(0, ROOT)
+    from orbit import namepos
+    cols = region["object_cols"]
+    by = {r[cols.index("norad")]: dict(zip(cols, r)) for r in region["objects"]}
+    rows = []
+    for o in objs:
+        every = [o[1]] + list(other.get(o[0]) or [])
+        if not any(namepos.stated_lon(n) for n in every):
+            continue
+        lon = None
+        try:
+            p = earth_fixed(satrec(by[o[0]]), now)
+            lon = round(p[0], 2) if p else None
+        except Exception as e:  # noqa: BLE001: one object's failure leaves its longitude out, not the page
+            print(f"geo page: no longitude for {o[0]} ({type(e).__name__})")
+        for rec in namepos.positions(every, lon):
+            rows.append([o[0], rec["name"], rec["stated_lon"], lon, rec.get("apart_deg")])
+    return {"tolerance_deg": namepos.TOLERANCE_DEG, "at_utc": now.strftime("%Y-%m-%dT%H:%MZ"),
+            "cols": ["norad", "name", "stated_lon", "lon", "apart_deg"], "rows": rows}
+
+
 def build(release, site, now=None, snapshot=None):
     now = (now or datetime.now(timezone.utc)).replace(tzinfo=None, second=0, microsecond=0)
     region = newest(glob.glob(os.path.join(release, "*.geo-region.json")), lambda d: "objects" in d)
@@ -264,12 +313,19 @@ def build(release, site, now=None, snapshot=None):
         owners = {o[4]: names[o[4]] for o in objs if o[4] in names}
     except (OSError, ValueError, KeyError):
         pass
+    other = catalog_names(site, objs)
+    try:
+        namepos_block = name_positions(region, objs, other, now)
+    except Exception as e:  # noqa: BLE001: reported on the page and in the log
+        print(f"geo page: name positions skipped: {e!r}")
+        namepos_block = {"error": f"{type(e).__name__}: {e}"}
     doc = {"built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "region_day": region["day"], "owners": owners,
            "elements_fetched_utc": region.get("fetched_utc"), "active_from": region.get("day") if active else None,
            "source": CITE, "definitions": region.get("definitions"), "counts": region.get("counts"),
            "cols": OBJ_COLS, "objects": objs, "tracks": meta, "roles": roles(),
            "region": region_events(release, region["day"]), "rpo": rpo_pairs(snapshot, objs),
-           "belt": belt(region, active, elsets, now)}
+           "belt": belt(region, active, elsets, now),
+           "names": {str(k): v for k, v in sorted(other.items())}, "name_positions": namepos_block}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
     # the relocation tracker alone, small, for the object pages (method orbit-2.27)
@@ -312,6 +368,10 @@ def main():
         print(f"geo page: no snapshot at {snap_path}; RPO pairs left out")
     d = build(args[1], site, snapshot=snapshot)
     sizes = {k: os.path.getsize(os.path.join(site, "data", "geo", v["file"])) // 1024 for k, v in d["tracks"].items()}
+    npb = d.get("name_positions") or {}
+    print(f"names: {len(d['names'])} objects with other names; {len(npb.get('rows') or [])} names state a longitude, "
+          f"{sum(1 for r in npb.get('rows') or [] if r[4] is not None and r[4] > npb.get('tolerance_deg', 1))} of them "
+          f"more than {npb.get('tolerance_deg')}° from the object")
     print(f"geo page: {len(d['objects'])} objects; tracks KB by window (days): {sizes}; "
           f"{len(d['region']['events'])} events in {EVENT_DAYS} days; {len(d['rpo']['pairs'])} RPO pairs")
     b = d.get("belt") or {}
