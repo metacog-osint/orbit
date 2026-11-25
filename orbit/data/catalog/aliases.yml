@@ -75,3 +75,38 @@
     - "SWF's row 'Jul 2014 - Present' starts with the launch of GSSAP 1 and 2 (2014-043, 2014-07-28)"
   added_by: tic-analyst
   added: 2026-11-17
+
+# 25 Nov 2026: Eutelsat 12 West G (looked up by that name). Space-Track and CelesTrak still name 33459
+# 'EUTELSAT HOTBIRD 13C' and GCAT keeps 'Hot Bird 9', so a name search found nothing. Operator declarations below.
+# Disagreement kept on record: Advanced Television (Chris Forrester, 3 Feb 2026, "Intelsat eyes Eutelsat satellite")
+# gives '50 WA' the history of Eutelsat W2M (48B, 28B, Afghansat 1), the satellite launched with Hot Bird 9 on the
+# same Ariane 5 (2008-065B, 33460, now in the graveyard band in Orbit's GEO record); Eutelsat's own documents tie 50 WA
+# to 12 West G and so to Hot Bird 13C.
+
+- norad: 33459
+  name: "Eutelsat 50 West A"
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat Universal Registration Document 2025-26 (23 Oct 2026), section 1.3.1 p. 26, fleet table p. 30, accounts note p. 268"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'On 19 December 2025: the satellite EUTELSAT 50WA (previously EUTELSAT 12WG) has been relocated and declared operational at 50.3° West for the benefit of a third-party Operator' (URD 2025-26 p. 26)"
+    - "Fleet table, 30 June 2026: EUTELSAT 50 WEST A, 50.3° West, Americas, 55 Ku, launched December 2008 (URD 2025-26 p. 30)"
+    - "Space-Track/CelesTrak elements of 33459 put it at 50.3° W every day of Orbit's GEO record from 27 Oct to 25 Nov 2026, inclination 3.3-3.4°; Intelsat plans inclined-orbit operation there (Advanced Television, 3 Feb 2026)"
+  note: "Third-party operator per Eutelsat; Intelsat (SES) asked the FCC to relicense it to US control (Advanced Television, 3 Feb 2026). Approval not confirmed."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 33459
+  name: "Eutelsat 12 West G"
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat Group Universal Registration Document 2022-23 (30 Jun 2023), p. 26 and fleet table p. 31"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'the satellite EUTELSAT HOTBIRD 13C (HB9) was relocated to 12.5° West under the name EUTELSAT 12 WEST G and commissioned at this position on 19 June 2023' (URD 2022-23 p. 26)"
+    - "Space-Track SATNAME and CelesTrak OBJECT_NAME of 33459 (2008-065A) are 'EUTELSAT HOTBIRD 13C'; GCAT names it 'Hot Bird 9'"
+    - "Wikidata Q1378836 'Eutelsat 12 West G' carries P377 33459, with aliases 'Hot Bird 13C' and 'Hot Bird 9'"
+  note: "Former name: held at 12.5° W from 19 Jun 2023 until the move to 50.3° W declared operational on 19 Dec 2025."
+  added_by: tic-analyst
+  added: 2026-11-25
