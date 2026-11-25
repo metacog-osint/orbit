@@ -60,7 +60,8 @@
       "question": "Which launches are scheduled in the next 14 days, from which pads, by which providers, to which orbits?",
       "series": [
         "ll2_upcoming"
-      ]
+      ],
+      "note": "Answered by Launch from orbit-2.32 (25 Nov 2026, ideas#69; Launch's LA-PIR-3, items launch:upcoming:*). Orbit no longer reads Launch Library 2 or puts items under this requirement; kept so that older orbit:upcoming items still resolve."
     },
     {
       "id": "OR-EEI-3",

@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import celestrak, counterspace, feed, fetch, gcat, launches, launchpairs, maneuver, navwarn, news, rpo, spacetrack  # noqa: E402
+from orbit import celestrak, counterspace, feed, fetch, gcat, maneuver, rpo, spacetrack  # noqa: E402
 from tic_doctrine import contract, registers  # noqa: E402
 import importlib.util  # noqa: E402
 
@@ -38,25 +38,6 @@ FILES = {"satcat": "satcat.tsv", "satcat100k": "satcat100k.tsv", "auxcat": "auxc
 
 def body(name: str) -> bytes:
     return (FIX / name).read_bytes()
-
-
-def api_doc_from_memos() -> dict:
-    """The 13 Nov memoranda recast in the API's broadcast-warn form (navArea code, msgNumber, msgYear, issueDate
-    "DDHHMMZ MON YYYY", text), so the API path is tested on the same real warnings as the memo path."""
-    codes = {v: k for k, v in navwarn.NGA_AREA_CODES.items()}
-    out = []
-    for area, url in navwarn.NGA_MEMOS.items():
-        lines = (FIX / "navwarn" / url.rsplit("/", 1)[1]).read_bytes().decode("utf-8", "replace").replace(
-            "\r", "").split("\n")
-        starts = [i for i in range(len(lines) - 1)
-                  if navwarn.DTG.match(lines[i].strip()) and navwarn.MSG_ID.match(lines[i + 1].strip())]
-        for k, i in enumerate(starts):
-            dd, hh, nn, mon, yy = navwarn.DTG.match(lines[i].strip()).groups()
-            _, num, _yy = navwarn.MSG_ID.match(lines[i + 1].strip()).groups()
-            end = starts[k + 1] if k + 1 < len(starts) else len(lines)
-            out.append({"navArea": codes[area], "msgNumber": int(num), "msgYear": 2000 + int(yy),
-                        "issueDate": f"{dd}{hh}{nn}Z {mon} 20{yy}", "text": "\n".join(lines[i + 2:end]).strip()})
-    return {"broadcast-warn": out}
 
 
 def tables() -> dict:
@@ -209,27 +190,6 @@ class Catalog(unittest.TestCase):
             gcat.parse_tsv(b"<html>maintenance</html>")
 
 
-class Upcoming(unittest.TestCase):
-    def test_parse_and_window(self):
-        rows = launches.parse(body("ll2_upcoming.json"))
-        self.assertEqual(len(rows), 4)
-        soyuz = next(r for r in rows if r["name"].startswith("Soyuz 2.1b/Fregat-M"))
-        self.assertEqual(soyuz["pad_country"], "RU")
-        self.assertEqual(soyuz["provider_countries"], ["RU"])
-        electron = next(r for r in rows if r["name"].startswith("Electron"))
-        self.assertEqual((electron["provider_countries"], electron["pad_country"]), (["US"], "NZ"))
-        self.assertIsNotNone(soyuz["lat"])
-        self.assertTrue(all(r["net"] for r in rows))
-        later = launches.within(rows, datetime(2026, 11, 30, tzinfo=timezone.utc))
-        self.assertEqual(later, [])
-        self.assertIn("net__lte=2026-11-27", launches.url(NOW))
-        self.assertIn("mode=detailed", launches.url(NOW))
-
-    def test_bad_reply(self):
-        with self.assertRaises(ValueError):
-            launches.parse(b'{"detail": "Request was throttled."}')
-
-
 class EndToEnd(unittest.TestCase):
     """collect -> build -> check on a temporary copy, with every network call answered from fixtures."""
 
@@ -240,7 +200,6 @@ class EndToEnd(unittest.TestCase):
         self.calls = []
         self.stamp = "Fri, 13 Nov 2026 00:23:02 GMT"
         self.fail = False
-        self.api_doc = None
         self.celestrak_403 = False
         self.asat = body("swf_asat.csv")
         by_url = {u: FILES[name] for name, u in gcat.URLS.items()}
@@ -251,24 +210,8 @@ class EndToEnd(unittest.TestCase):
                 raise OSError("network down")
             if url in by_url:
                 return body(by_url[url])
-            if url.startswith(launches.API):
-                return body("ll2_upcoming.json")
-            if url.startswith(news.API):
-                return body("snapi_articles.json")
-            if url == navwarn.NGA_API:
-                if self.api_doc is None:
-                    raise OSError("HTTP Error 503: Service Unavailable")
-                return json.dumps(self.api_doc).encode("utf-8")
-            if url.startswith(navwarn.NGA_BASE):
-                return body("navwarn/" + url.rsplit("/", 1)[1])
-            if "disp_warnings.cgi" in url:
-                return body("navwarn/jcg_" + url.rsplit("TANA=", 1)[1].split("&")[0] + ".html")
-            if "/warnings.cgi" in url:
-                return body("navwarn/jcg_list.xml")
             if url == counterspace.URL:
                 return self.asat
-            if url == launchpairs.URL:
-                return body("launch_snapshot.json")
             if url == celestrak.URL:
                 if self.celestrak_403:
                     raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
@@ -282,7 +225,6 @@ class EndToEnd(unittest.TestCase):
         self.getter = getter
         self.header = lambda url: self.stamp
         self.patches = [mock.patch.object(gcat, "today_utc", return_value=TODAY),
-                        mock.patch.object(launches, "now_utc", return_value=NOW),
                         mock.patch.object(fetch, "now_utc", return_value="2026-11-13T18:00:00Z"),
                         mock.patch.object(cli.spacetrack, "credentials", return_value=None)]
         for p in self.patches:
@@ -310,17 +252,18 @@ class EndToEnd(unittest.TestCase):
     def test_full_cycle(self):
         snap = self.run_collect()
         self.assertEqual(snap["lanes"]["catalog"]["status"], "ok")
-        self.assertEqual(snap["lanes"]["upcoming"]["status"], "ok")
-        self.assertEqual(snap["lanes"]["navwarn"]["status"], "ok")
         self.assertEqual(snap["lanes"]["rpo"]["status"], "ok")
-        self.assertEqual(snap["lanes"]["pairs"]["status"], "ok")
         self.assertEqual(snap["lanes"]["paths"]["status"], "ok")
         self.assertEqual(snap["payload_sets"]["objects_in_group"], 5)
-        self.assertEqual(len(snap["launch_pairs"]["matches"]), 11)  # 14 rows, 11 launch-area pairs
         self.assertEqual(snap["rpo"]["counts"], {"commercial": 14, "military": 44, "planned": 4})
-        self.assertEqual(snap["navwarn"]["sources"]["jcg"]["status"], "off")  # robots.txt disallows /TUHO/
-        self.assertFalse([u for u in self.calls if "kaiho.mlit.go.jp" in u])
-        self.assertTrue(snap["navwarn"]["areas"])
+        # orbit-2.32 (ideas#69): the launch lanes are Launch's. No lane, no snapshot key, no request.
+        for lane in ("upcoming", "news", "ledger", "navwarn", "pairs"):
+            self.assertNotIn(lane, snap["lanes"])
+        for key in ("upcoming", "news", "ledger", "navwarn", "launch_pairs"):
+            self.assertNotIn(key, snap)
+        self.assertFalse([u for u in self.calls if any(h in u for h in (
+            "thespacedevs.com", "spaceflightnewsapi", "msi.nga.mil", "kaiho.mlit.go.jp", "launch.theintelligence",
+            "releases/download/ledger"))])
         self.assertEqual(snap["catalog_changes"], {})  # first reading only sets the baseline
         cs = snap["counterspace"]
         self.assertEqual(snap["lanes"]["counterspace"]["status"], "ok")
@@ -350,14 +293,12 @@ class EndToEnd(unittest.TestCase):
         ids = [f["properties"]["id"] for f in doc["features"]]
         self.assertEqual(len(ids), len(set(ids)))
         self.assertTrue(any(i.startswith("orbit:launch:") for i in ids))
-        self.assertTrue(any(i.startswith("orbit:upcoming:") for i in ids))
+        self.assertFalse(any(i.startswith("orbit:upcoming:") for i in ids))
         for f in doc["features"]:
             p = f["properties"]
             self.assertEqual(p["kind"], "observation")
             self.assertEqual(p["tier"], "routine")
             self.assertNotIn("probability", p)
-        ariane = next(f for f in doc["features"] if "Ariane" in f["properties"]["title"])
-        self.assertEqual(ariane["properties"]["countries"], ["FR"])  # Kourou: French Guiana, drawn as France
 
     def test_failed_lane_keeps_last_good_copy(self):
         good = self.run_collect()
@@ -367,7 +308,6 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["catalog"]["status"], "failed")
         self.assertTrue(snap["lanes"]["catalog"]["from_previous"])
         self.assertEqual(snap["launches"], good["launches"])
-        self.assertEqual(snap["lanes"]["upcoming"]["status"], "failed")
         self.assertEqual(snap["lanes"]["counterspace"]["status"], "failed")
         self.assertEqual(snap["counterspace"], good["counterspace"])
 
@@ -405,26 +345,9 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(snap["lanes"]["catalog"]["status"], "failed")
         self.assertIn("short reading", snap["lanes"]["catalog"]["error"])
 
-    def test_nga_api_first_then_memoranda(self):
-        snap = self.run_collect()  # API answers 503: the memoranda are read
-        nga = snap["navwarn"]["sources"]["nga"]
-        self.assertEqual((nga["form"], nga["status"]), ("memoranda", "ok"))
-        self.assertIn("503", nga["api_error"])
-        n_memo = len(snap["navwarn"]["areas"])
-        self.api_doc, self.calls[:] = api_doc_from_memos(), []
-        snap = self.run_collect()  # API back and fresh: it alone is read
-        nga = snap["navwarn"]["sources"]["nga"]
-        self.assertEqual((nga["form"], nga["status"]), ("api", "ok"))
-        self.assertFalse([u for u in self.calls if u.startswith(navwarn.NGA_BASE)])
-        self.assertEqual(len(snap["navwarn"]["areas"]), n_memo)
-
     def test_build_refuses_without_snapshot(self):
         with self.assertRaises(SystemExit):
             cli.build_site(self.tmp)
-
-
-NW = FIX / "navwarn"
-NOW_NW = datetime(2026, 11, 13, 23, 0, tzinfo=timezone.utc)
 
 
 class PayloadSets(unittest.TestCase):
@@ -453,127 +376,6 @@ class PayloadSets(unittest.TestCase):
         self.assertEqual((got["unusable"], got["sets"]), (1, 2))
         with self.assertRaises(ValueError):
             celestrak.parse(b'{"error": "maintenance"}', self.LAUNCHES)
-
-
-class LaunchPairs(unittest.TestCase):
-    """Launch's place check on Orbit's areas: its snapshot as published 16 Nov 2026 03:58 UTC (matches only)."""
-
-    def test_best_row_per_pair_and_only_orbit_areas(self):
-        doc = json.loads(body("launch_snapshot.json"))
-        got = launchpairs.parse(body("launch_snapshot.json"))
-        self.assertEqual(got["generated_at"], "2026-11-16T03:58:13Z")
-        pairs = {(m["launch"], m["area"]) for m in doc["matches"]}
-        self.assertEqual({(m["launch"], m["area"]) for m in got["matches"]}, pairs)
-        two = [m for m in doc["matches"] if (m["launch"], m["area"]) == (got["matches"][0]["launch"], got["matches"][0]["area"])]
-        if len(two) > 1:  # several polygons: the nearest is kept when the levels agree
-            self.assertEqual(got["matches"][0]["distance_nm"], min(m["distance_nm"] for m in two))
-        # Synthetic, built here: a place match outranks a time-only row; an FAA TFR row is not Orbit's.
-        extra = dict(doc["matches"][0], level="time and place", distance_nm=900)
-        tfr = dict(doc["matches"][0], area_source="faa-tfr", area="FDC 6/1234")
-        doc["matches"] += [extra, tfr]
-        got = launchpairs.parse(json.dumps(doc).encode())
-        row = next(m for m in got["matches"] if (m["launch"], m["area"]) == (extra["launch"], extra["area"]))
-        self.assertEqual((row["level"], row["distance_nm"]), ("time and place", 900))
-        self.assertFalse([m for m in got["matches"] if m["area"] == "FDC 6/1234"])
-
-    def test_not_launchs_snapshot(self):
-        with self.assertRaises(ValueError):
-            launchpairs.parse(b'{"html": "maintenance"}')
-
-
-class NavWarnings(unittest.TestCase):
-    """Real NGA memoranda and NAVAREA XI messages, 13 Nov 2026."""
-
-    def all_warnings(self):
-        out = []
-        for area, url in navwarn.NGA_MEMOS.items():
-            out += navwarn.parse_memo((NW / url.rsplit("/", 1)[1]).read_bytes(), area, NOW_NW)["warnings"]
-        for it in navwarn.jcg_wanted(navwarn.parse_jcg_list((NW / "jcg_list.xml").read_bytes())):
-            w = navwarn.parse_jcg_message((NW / f"jcg_{it['tana']}.html").read_bytes(), it)
-            if w:
-                out.append(w)
-        return out
-
-    def test_memo_header_and_launch_filter(self):
-        memo = navwarn.parse_memo((NW / "DailyMemPAC.txt").read_bytes(), "HYDROPAC", NOW_NW)
-        self.assertEqual(memo["as_of"], "2026-11-13T17:05:00Z")
-        ids = {w["id"] for w in memo["warnings"]}
-        self.assertIn("HYDROPAC 3315/26", ids)  # India, rocket launching
-        self.assertNotIn("HYDROPAC 3316/26", ids)  # the India hazardous-operations box with no launch words
-        for w in memo["warnings"]:
-            self.assertRegex(w["hazard"], "rocket|space|reentry")
-
-    def test_explicit_single_window_and_expiry(self):
-        w = next(x for x in self.all_warnings() if x["id"] == "HYDROPAC 3315/26")
-        self.assertEqual(w["windows"], [{"start": "2026-11-18T05:30:00Z", "end": "2026-11-18T07:00:00Z"}])
-        self.assertEqual(w["window_mode"], "single")
-        self.assertEqual(w["expires"], "2026-11-18T08:00:00Z")
-        self.assertEqual(w["regions"], ["EASTERN INDIAN OCEAN", "INDIA"])
-        self.assertEqual(len(w["areas"][0]["coords"]), 8)
-        self.assertAlmostEqual(w["areas"][0]["coords"][0][1], 8 + 31.98 / 60, places=3)
-
-    def test_daily_windows_cross_midnight(self):
-        w = next(x for x in self.all_warnings() if x["id"] == "HYDROPAC 3251/26")  # 2215Z TO 0700Z DAILY 13 THRU 26
-        self.assertEqual(w["window_mode"], "daily")
-        self.assertEqual(len(w["windows"]), 14)
-        self.assertEqual(w["windows"][0], {"start": "2026-11-13T22:15:00Z", "end": "2026-11-14T07:00:00Z"})
-
-    def test_alternates_and_lettered_areas(self):
-        w = next(x for x in self.all_warnings() if x["id"] == "NAVAREA IV 1078/26")
-        self.assertEqual(w["window_mode"], "alternates")
-        self.assertEqual(w["windows"][0]["start"], "2026-11-13T17:54:00Z")
-        self.assertEqual(len(w["windows"]), 7)
-        self.assertEqual([a["label"] for a in w["areas"]], ["A", "B", "C"])
-        x = next(x for x in self.all_warnings() if x["id"] == "NAVAREA XII 801/26")  # windows per area
-        self.assertEqual(len(x["windows"]), 7)  # areas opening together are one window
-        self.assertEqual(x["windows"][0], {"start": "2026-11-18T03:14:00Z", "end": "2026-11-18T07:57:00Z"})
-        self.assertEqual(x["cancels"], ["NAVAREA XII 785/26"])
-
-    def test_navarea_xi_message_jst_and_cancellation(self):
-        ws = {w["id"]: w for w in self.all_warnings()}
-        w = ws["NAVAREA XI 0504/26"]
-        self.assertEqual(w["issued"], "2026-11-09T12:00:00Z")  # 21:00 JST
-        self.assertEqual(w["windows"][0], {"start": "2026-11-14T01:30:00Z", "end": "2026-11-14T05:01:00Z"})
-        self.assertEqual(ws["NAVAREA XI 0511/26"]["hazard"], "rocket launching suspended")
-        self.assertEqual(ws["NAVAREA XI 0511/26"]["cancels"], ["NAVAREA XI 0508/26"])
-
-    def test_area_across_the_antimeridian_stays_one_shape(self):
-        w = next(x for x in self.all_warnings() if x["id"] == "NAVAREA XI 0504/26")
-        lons = [c[0] for c in w["areas"][0]["coords"]]
-        self.assertTrue(all(abs(a - b) < 180 for a, b in zip(lons, lons[1:])))
-        self.assertGreater(max(lons), 180)
-
-    def test_rebroadcasts_group_and_vertex_differences_are_counted(self):
-        groups = navwarn.group(navwarn.current(self.all_warnings(), NOW_NW))
-        ids = [[b["id"] for b in g["broadcasts"]] for g in groups]
-        self.assertIn(["NAVAREA XI 0504/26", "NAVAREA XII 788/26", "HYDROPAC 3257/26"], ids)
-        micronesia = next(g for g in groups if g["broadcasts"][0]["id"] == "NAVAREA XI 0507/26")
-        self.assertEqual(micronesia["vertex_differences"], 1)  # 178-12E in NAVAREA XI, 178-21E in NGA's copies
-        self.assertEqual(len(ids), len({i for g in ids for i in g}) - 5)  # 25 warnings, 20 areas
-
-    def test_api_form_matches_memoranda(self):
-        api = navwarn.parse_api(api_doc_from_memos(), NOW_NW)
-        for area, url in navwarn.NGA_MEMOS.items():
-            memo = navwarn.parse_memo((NW / url.rsplit("/", 1)[1]).read_bytes(), area, NOW_NW)
-            got = api["memos"][area]
-            self.assertEqual(got["in_force"], memo["in_force"], area)
-            strip = lambda ws: [(w["id"], w["windows"], w["areas"], w["cancels"]) for w in ws]  # noqa: E731
-            self.assertEqual(strip(got["warnings"]), strip(memo["warnings"]), area)
-
-    def test_stale_or_empty_api_is_refused(self):
-        doc = api_doc_from_memos()
-        for w in doc["broadcast-warn"]:
-            w["issueDate"] = w["issueDate"][:-4] + "2024"  # the frozen May 2024 set NGA served before the outage
-        with self.assertRaisesRegex(ValueError, "stale"):
-            navwarn.parse_api(doc, NOW_NW)
-        with self.assertRaisesRegex(ValueError, "no warnings"):
-            navwarn.parse_api({"broadcast-warn": []}, NOW_NW)
-
-    def test_current_drops_cancelled_warnings(self):
-        later = datetime(2026, 11, 25, 0, 0, tzinfo=timezone.utc)
-        left = {w["id"] for w in navwarn.current(self.all_warnings(), later)}
-        self.assertNotIn("HYDROPAC 3315/26", left)
-        self.assertIn("HYDROPAC 3251/26", left)
 
 
 class Counterspace(unittest.TestCase):
@@ -717,26 +519,28 @@ class Registers(unittest.TestCase):
         by_id = {s["id"]: s for s in doc["sources"]}
         # excluded sources stay out; the catalog's CelesTrak SATCAT and Wikidata (build step 4) are ingested but
         # feed no page lane yet, so the page, which lists sources by lane, does not show them
-        self.assertEqual(set(by_id), {"gcat-mcdowell", "ll2-thespacedevs", "snapi-thespacedevs", "nga-msi",
-                                      "swf-counterspace", "swf-rpo", "space-track", "tic-launch", "celestrak-gp", "celestrak-gp-active",
-                                      "celestrak-satcat", "wikidata", "wmo-oscar-space"})
+        # orbit-2.32: Launch Library 2, the Spaceflight News API, NGA and Launch are no longer read (ideas#69)
+        self.assertEqual(set(by_id), {"gcat-mcdowell", "swf-counterspace", "swf-rpo", "space-track", "celestrak-gp",
+                                      "celestrak-gp-active", "celestrak-satcat", "wikidata", "wmo-oscar-space"})
         self.assertEqual(by_id["wikidata"]["lanes"], [])
         self.assertEqual(by_id["gcat-mcdowell"]["grade"], "A2")
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
-        self.assertEqual(by_id["ll2-thespacedevs"]["grade"], "B2")
-        self.assertEqual(by_id["ll2-thespacedevs"]["credibility"], "Probably true")
+        self.assertEqual(by_id["swf-rpo"]["grade"], "B2")
+        self.assertEqual(by_id["swf-rpo"]["credibility"], "Probably true")
         held = set() if maneuver.PUBLISH else {"maneuver"}  # held until Tom approves the Space-Track disclaimer
         self.assertEqual({lane for s in doc["sources"] for lane in s["lanes"]}, set(cli.LANE_FIELDS) - held)
         self.assertTrue(all(s["grade"] for s in doc["sources"]))
 
-    def test_feed_items_lint(self):
-        snap = json.loads((FIX / "ll2_upcoming.json").read_text(encoding="utf-8"))
-        rows = launches.parse(json.dumps(snap).encode())
-        doc = feed.build_feed({"generated_at": "2026-11-13T18:00:00Z", "upcoming": rows, "lanes": {}})
-        regs = registers.ids(ROOT / "doctrine")
-        for f in doc["features"]:
-            errs = [m for _, sev, m in contract.check(f, regs) if sev == "error"]
-            self.assertEqual(errs, [], f["properties"]["id"])
+    def test_scheduled_launches_left_the_feed(self):
+        """orbit-2.32 (ideas#69): an old snapshot's schedule makes no item and names no Launch Library 2 source;
+        Launch's feed carries scheduled launches as launch:upcoming:*."""
+        row = {"id": "x", "name": "Falcon 9 | Test", "net": "2026-11-14T00:00:00Z", "status": "Go", "lat": 28.5,
+               "lon": -80.6}
+        doc = feed.build_feed({"generated_at": "2026-11-13T18:00:00Z", "upcoming": [row],
+                               "lanes": {"upcoming": {"status": "ok", "fetched_at": "2026-11-13T18:00:00Z"}}})
+        self.assertEqual(doc["features"], [])
+        self.assertNotIn("ll2-thespacedevs", doc["health"])
+        self.assertNotIn("Launch Library", doc["licence"] + doc["attribution"])
 
     def test_breakups_are_feed_items_under_or_eei_5(self):
         b = {"jcat": "S2", "norad": 99002, "name": "TEST S2", "type": "rocket stage", "launch_tag": "2020-001",
@@ -826,55 +630,6 @@ class Registers(unittest.TestCase):
         regs = registers.ids(ROOT / "doctrine")
         self.assertEqual([m for _, sev, m in contract.check(f, regs) if sev == "error"], [])
         self.assertNotIn("Space-Track", feed.build_feed({**snap, "maneuvers": {}})["attribution"])
-
-
-class News(unittest.TestCase):
-    """Spaceflight News API headlines (orbit-2.5): links only, filtered to the scheduled launches."""
-    IDS = [r["id"] for r in json.loads(body("ll2_upcoming.json"))["results"]]
-
-    def test_fixture_keeps_headline_outlet_time_and_link_only(self):
-        doc = news.parse(body("snapi_articles.json"), self.IDS)
-        self.assertEqual(len(doc["articles"]), 4)  # 6 results; one link listed twice is kept once; 3 newest a launch
-        for a in doc["articles"]:
-            self.assertEqual(set(a), {"title", "site", "url", "published_at", "launches"})
-            self.assertTrue(a["url"].startswith("https://"))
-            self.assertTrue(set(a["launches"]) <= set(self.IDS))
-        self.assertEqual(sorted(i[:8] for i in doc["by_launch"]), ["0f867f0c", "7bdc412b", "db3500ac"])
-        dates = [a["published_at"] for a in doc["articles"]]
-        self.assertEqual(dates, sorted(dates, reverse=True))
-
-    def test_bad_links_duplicates_and_other_launches_are_dropped_and_each_launch_keeps_three(self):
-        mine, other = "0f867f0c-0000-0000-0000-000000000000", "ffffffff-0000-0000-0000-000000000000"
-        rows = [{"title": f"Story {n}", "url": f"https://example.org/{n}", "news_site": "Outlet",
-                 "published_at": f"2026-11-{10 + n:02d}T12:00:00Z", "launches": [{"launch_id": mine}]} for n in range(7)]
-        rows += [{"title": "Dup", "url": "https://example.org/3", "news_site": "X", "published_at": "2026-11-20T00:00:00Z",
-                  "launches": [{"launch_id": mine}]},
-                 {"title": "Script", "url": "javascript:alert(1)", "news_site": "X", "published_at": "2026-11-20T00:00:00Z",
-                  "launches": [{"launch_id": mine}]},
-                 {"title": "Not ours", "url": "https://example.org/x", "news_site": "X",
-                  "published_at": "2026-11-20T00:00:00Z", "launches": [{"launch_id": other}]}]
-        doc = news.parse(json.dumps({"count": len(rows), "results": rows}).encode(), [mine])
-        titles = [a["title"] for a in doc["articles"]]
-        self.assertEqual(titles, ["Story 6", "Story 5", "Story 4"])  # newest three; Dup lost to Story 3, Script dropped
-        self.assertEqual(doc["by_launch"][mine], [0, 1, 2])
-
-    def test_one_request_for_all_scheduled_launches_and_none_when_nothing_is_scheduled(self):
-        calls = []
-
-        def getter(url, timeout=60):
-            calls.append(url)
-            return body("snapi_articles.json")
-        out, recs, _ = cli._lane_news(None, {}, getter, upcoming=[{"id": i} for i in self.IDS])
-        self.assertEqual(len(calls), 1)
-        self.assertTrue(all(i in calls[0] for i in self.IDS))
-        self.assertEqual(len(out["news"]["articles"]), 4)
-        calls.clear()
-        out, recs, _ = cli._lane_news(None, {}, getter, upcoming=[])
-        self.assertEqual((calls, recs, out["news"]["articles"]), ([], [], []))
-
-    def test_a_response_without_results_fails_the_lane(self):
-        with self.assertRaises(ValueError):
-            news.parse(b'{"detail": "throttled"}', self.IDS)
 
 
 NOW_M = datetime(2026, 11, 14, 6, 0, tzinfo=timezone.utc)

@@ -1,8 +1,8 @@
 // Orbit's globe (orbit-2.11, Tom's decisions 4 and 7, 15 Nov 2026: Cesium ion; ground tracks only here, pads stay
 // COP's mark). CesiumJS 1.146.0 and satellite.js 7.1.0 are self-hosted in vendor/ like MapLibre (licences there).
-// It draws the flat map's layers (launches of the last 7 days, scheduled launches, ledger history at each pad,
-// hazard and debris areas, Launch's time-and-place lines) on a globe, plus the satellites whose orbit changes Orbit
-// lists: each one's place now and its path over one orbit (a day at GEO), propagated with SGP4 from the newest
+// It draws the flat map's launches of the last 7 days on a globe (the scheduled launches, ledger history, hazard
+// areas and Launch's lines it drew until orbit-2.32 are Launch's now, ideas#69), plus the satellites whose orbit
+// changes Orbit lists: each one's place now and its path over one orbit (a day at GEO), propagated with SGP4 from the newest
 // Space-Track element set Orbit holds, drag left out. A drawing for orientation, not a tracking product.
 // Imagery: Cesium ion (Bing Maps aerial, asset 2) with the site's public token (data/cesium.json, written by the
 // build from the repository variable CESIUM_ION_TOKEN, restricted to Orbit's hosts); without a token, or if ion
@@ -118,7 +118,7 @@ export async function createGlobe(container, model, { onPick }) {
   widget.scene.globe.enableLighting = false;
   widget.camera.setView({ destination: C.Cartesian3.fromDegrees(150, 20, 2.4e7) });
   widget.canvas.setAttribute("aria-label",
-    "Globe of launch sites, pads, hazard areas and the paths of satellites with listed orbit changes. " +
+    "Globe of the launch sites of the last 7 days and the paths of satellites with listed orbit changes. " +
     "Every item on it is also listed in the tables on this page.");
   if (!base.ion) {
     const p = document.createElement("p");
@@ -134,41 +134,15 @@ export async function createGlobe(container, model, { onPick }) {
   const ink = () => col("--text");
   const E = widget.entities;
   const keyOf = new Map(); // entity id -> page key
-  let selected = null, history = model.history;
+  let selected = null;
 
   const add = (key, spec) => { const e = E.add(spec); keyOf.set(e.id, key); return e; };
   const lonlat = (c) => C.Cartesian3.fromDegrees(c[0], c[1]);
 
-  function areas() {
-    for (const f of model.areas.features) {
-      const ring = f.geometry.coordinates[0].map(lonlat);
-      const k = f.properties.key;
-      add(k, { polygon: { hierarchy: ring, material: ink().withAlpha(0.08), height: 0 }, properties: { key: k, area: true } });
-      add(k, { polyline: { positions: ring, width: 1.6, clampToGround: false, arcType: C.ArcType.GEODESIC,
-        material: f.properties.debris ? new C.PolylineDashMaterialProperty({ color: ink().withAlpha(0.75), dashLength: 10 })
-          : ink().withAlpha(0.85) }, properties: { key: k, outline: true } });
-    }
-  }
   function points() {
-    for (const f of history.features) {
-      const n = f.properties.n || 1;
-      add(f.properties.key, { position: lonlat(f.geometry.coordinates), point: { pixelSize: 6 + 3.2 * Math.sqrt(n),
-        color: actor(f.properties.group, 0.32), outlineColor: actor(f.properties.group, 0.7), outlineWidth: 1 },
-        properties: { hist: true } });
-    }
-    for (const f of model.pads.features) {
-      add(f.properties.key, { position: lonlat(f.geometry.coordinates), point: { pixelSize: 11,
-        color: col("--panel"), outlineColor: actor(f.properties.group), outlineWidth: 2.6 } });
-    }
     for (const f of model.launches.features) {
       add(f.properties.key, { position: lonlat(f.geometry.coordinates), point: { pixelSize: 11,
         color: actor(f.properties.group), outlineColor: ink(), outlineWidth: 1 } });
-    }
-  }
-  function pairs() {
-    for (const f of model.pairs.features) {
-      add(f.properties.key, { polyline: { positions: f.geometry.coordinates.map(lonlat), width: 2,
-        arcType: C.ArcType.GEODESIC, material: new C.PolylineDashMaterialProperty({ color: ink().withAlpha(0.9), dashLength: 6 }) } });
     }
   }
   const drawn = { tracks: 0, without: 0, launches: Object.keys(model.payloadTracks || {}).length,
@@ -215,7 +189,7 @@ export async function createGlobe(container, model, { onPick }) {
   function draw() {
     E.removeAll();
     keyOf.clear();
-    areas(); points(); pairs(); tracks(); reentry();
+    points(); tracks(); reentry();
     highlight();
     widget.scene.requestRender();
   }
@@ -235,9 +209,8 @@ export async function createGlobe(container, model, { onPick }) {
     const hit = widget.scene.pick(pos);
     return hit && hit.id ? keyOf.get(hit.id.id) || null : null;
   };
-  // A click takes everything under the pointer and prefers a recent launch, then a listed change, a scheduled
-  // launch, an area and last the ledger's history dot, which sits under a launch at the same pad and is larger.
-  const RANK = [["launch-", 0], ["re-", 1], ["mv-", 1], ["up-", 2], ["nw-", 3], ["hist-", 5]];
+  // A click takes everything under the pointer and prefers a recent launch, then a listed change or reentry.
+  const RANK = [["launch-", 0], ["re-", 1], ["mv-", 1]];
   const rank = (k) => (RANK.find(([p]) => k.startsWith(p)) || [null, 4])[1];
   const clickKey = (pos) => {
     const keys = widget.scene.drillPick(pos, 10).map((h) => (h && h.id ? keyOf.get(h.id.id) : null)).filter(Boolean);
@@ -251,7 +224,6 @@ export async function createGlobe(container, model, { onPick }) {
     drawn,
     ion: base.ion,
     resize: () => { widget.resize(); widget.scene.requestRender(); },
-    setHistory(fc) { history = fc; draw(); },
     select(key) { selected = key || null; highlight(); },
     showReentry(key) {
       const k = key && (model.reentryTracks || {})[key] ? key : null;
@@ -266,14 +238,7 @@ export async function createGlobe(container, model, { onPick }) {
       payloadKey = k; draw();
     },
     flyTo(key) {
-      const area = model.areas.features.filter((x) => x.properties.key === key);
-      if (area.length) {
-        const pts = area.flatMap((x) => x.geometry.coordinates[0].map(lonlat));
-        const bs = C.BoundingSphere.fromPoints(pts);
-        widget.camera.flyToBoundingSphere(bs, { duration: 0.8, offset: new C.HeadingPitchRange(0, -Math.PI / 2, Math.max(bs.radius * 3.2, 8e5)) });
-        return;
-      }
-      const p = [...model.launches.features, ...model.pads.features, ...history.features].find((x) => x.properties.key === key);
+      const p = model.launches.features.find((x) => x.properties.key === key);
       if (p) widget.camera.flyTo({ destination: C.Cartesian3.fromDegrees(p.geometry.coordinates[0], p.geometry.coordinates[1], 3.5e6), duration: 0.8 });
     },
     destroy() { handler.destroy(); widget.destroy(); },

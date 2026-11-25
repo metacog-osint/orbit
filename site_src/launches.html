@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Launches · Orbit · The Intelligence Company</title>
-<meta name="description" content="Orbital launches of the last 7 days, scheduled launches, launch hazard warnings and the launch ledger, from GCAT, Launch Library 2 and NGA.">
+<meta name="description" content="Orbital launches of the last 7 days from GCAT, with each launch's payloads and their orbits.">
 <link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tic-time.css">
@@ -40,8 +40,9 @@
   <noscript><p class="noscript">This page needs JavaScript to draw its tables and maps.</p></noscript>
   <section class="hero hero-sub">
     <h1>Launches</h1>
-    <p class="lede">Launch sites, scheduled launches, hazard warnings and the launch ledger. These cards are moving to
-      the suite's <a href="https://launch.theintelligence.company">Launch</a> program. <span id="asof"></span></p>
+    <p class="lede">Orbital launches of the last 7 days from GCAT, with each launch's payloads and their orbits.
+      Scheduled launches, launch closures and the launch ledger are on the suite's
+      <a href="https://launch.theintelligence.company">Launch</a> program. <span id="asof"></span></p>
     <p class="legend small muted" aria-label="Country colours">
       <span><span class="sw g-us"></span>United States</span>
       <span><span class="sw g-cn"></span>China</span>
@@ -52,32 +53,18 @@
 
   <section class="card" id="map-card" aria-labelledby="map-h">
     <div class="card-head">
-      <h2 id="map-h">Launch sites, pads and hazard areas</h2>
-      <p class="muted small">Launches of the last 7 days at their GCAT launch site, scheduled launches at their pad, and
-        the launch hazard and space-debris areas in navigational warnings now in force. Pale dots are every launch
-        since 1 Jan 2024 at its pad, from Orbit's launch ledger (Launch Library 2), sized by count. A dotted line joins
-        a scheduled launch's pad to a hazard area where the suite's Launch program finds the two coincide in time and
-        place: a coincidence, not an attribution. Select a launch dot for its payloads and their orbits, a pale dot
-        for that pad's launches. Ctrl and scroll (or two fingers) to zoom.</p>
+      <h2 id="map-h">Launch sites, last 7 days</h2>
+      <p class="muted small">Launches of the last 7 days at their GCAT launch site. Select a launch dot for its
+        payloads and their orbits; on the globe, their paths. Ctrl and scroll (or two fingers) to zoom.</p>
     </div>
     <p class="map-ctl small">
       <span class="view-pick" role="group" aria-label="Map view"><button type="button" id="view-flat" aria-pressed="true">Flat map</button><button
         type="button" id="view-globe" aria-pressed="false">Globe (3D)</button></span>
-      <label><input type="checkbox" id="hist-on" checked> Launch history (ledger)</label>
-      <label>Year <select id="hist-year"><option value="">All</option></select></label>
-      <label>Provider <select id="hist-who"><option value="">Everyone</option><option value="us">United States</option>
-        <option value="cn">China</option><option value="ru">Russia</option><option value="other">Everyone else</option></select></label>
-      <span class="muted" id="hist-n" aria-live="polite"></span>
     </p>
     <div class="map-stage"><div id="map" class="map"></div><div id="globe" class="map globe" hidden></div></div>
     <p class="small muted" id="globe-note" aria-live="polite" hidden></p>
     <p class="legend small muted" aria-label="Map key">
       <span><span class="mk dot"></span>Launch, last 7 days (colour: launching country)</span>
-      <span><span class="mk ring"></span>Scheduled launch (colour: provider's country)</span>
-      <span><span class="mk area"></span>Rocket launching area</span>
-      <span><span class="mk area dash"></span>Space-debris area</span>
-      <span><span class="mk hist"></span>Launches since 2024 at a pad (ledger)</span>
-      <span><span class="mk pair"></span>Time and place, as Launch checks it</span>
     </p>
     <p class="small" id="map-info" aria-live="polite"></p>
   </section>
@@ -92,52 +79,27 @@
   </section>
 
   <section class="card" id="upcoming" aria-labelledby="up-h">
+    <span id="hazards"></span><span id="ledger"></span>
     <div class="card-head">
-      <h2 id="up-h">Scheduled launches, next 14 days</h2>
-      <p class="muted small">From Launch Library 2. Scheduled times are the provider's or the press's and often
-        move; some military launches are listed late or not at all. Countdowns run on your device's clock to the
-        listed NET, refresh each minute, and are never finer than the NET's own precision; the status is Launch
-        Library 2's when Orbit last read it. Headlines under a launch come from the Spaceflight News API and link to
-        each outlet's own page; Orbit shows the headline only and has not checked the reporting.</p>
+      <h2 id="up-h">Scheduled launches, closures and the launch ledger: on Launch</h2>
+      <p class="muted small">These cards moved to the suite's Launch program in November 2026 (Orbit method
+        <code>orbit-2.32</code>). Launch reads Launch Library 2 and the official closure notices itself and keeps the
+        launch ledger.</p>
     </div>
-    <div class="tbl-wrap" id="upcoming-table"></div>
-  </section>
-
-  <section class="card" id="hazards" aria-labelledby="hz-h">
-    <div class="card-head">
-      <h2 id="hz-h">Launch hazard and space-debris warnings in force</h2>
-      <p class="muted small">Navigational warnings that name rocket launching, space debris or reentry, from NGA's
-        daily in-force memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and XII). NAVAREA XI (the Japan Coast
-        Guard's area, including the waters off China) appears only where NGA rebroadcasts it. Windows and areas are the issuer's; the same area broadcast by
-        more than one coordinator is one row. A scheduled launch is shown against a warning only when its NET falls
-        in a window of four hours or less, or up to an hour before one opens. Under each, the suite's Launch program
-        says whether the area also lies along a bearing and at a distance seen in that pad's closure history (time
-        and place) or not (time only), with the distance, azimuth and the inclination the azimuth implies. Either way
-        it is a coincidence, not an attribution. Not for navigation:
-        mariners use the official broadcasts.</p>
-    </div>
-    <div class="tbl-wrap" id="hazard-table"></div>
-  </section>
-
-  <section class="card" id="ledger" aria-labelledby="lg-h">
-    <div class="card-head">
-      <h2 id="lg-h">Launch ledger</h2>
-      <p class="muted small">Orbit's own record of every launch since 1 Jan 2024 from Launch Library 2, built 14
-        launches an hour and checked each hour; the map's pale dots are drawn from it. Launches after GCAT's newest
-        launch date are listed here, since the launches table above waits for GCAT.</p>
-    </div>
-    <div id="ledger-body"></div>
+    <ul class="plain small">
+      <li><a href="https://launch.theintelligence.company/#live">Scheduled launches and the launch closures in force</a></li>
+      <li><a href="https://launch.theintelligence.company/#history">Launch history and the launch ledger</a></li>
+      <li>Orbit's own ledger as it stood when it stopped:
+        <a href="https://github.com/metacog-osint/orbit/releases/download/ledger/launch-ledger.json">launch-ledger.json</a>
+        (frozen, kept)</li>
+    </ul>
   </section>
 </main>
 
 <footer class="wrap foot small muted">
   <p>Orbit (<span id="method"></span>), The Intelligence Company. Data from GCAT (J. McDowell,
-    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0, and from Launch Library 2
-    (<a href="https://thespacedevs.com/llapi">The Space Devs</a>); headlines from the
-    <a href="https://www.spaceflightnewsapi.net/">Spaceflight News API</a>, linked to their outlets. Navigational warnings from NGA Maritime Safety
-    Information (<a href="https://msi.nga.mil/NavWarnings">msi.nga.mil</a>),
-    regrouped and reformatted by Orbit; place checks from the suite's
-    <a href="https://launch.theintelligence.company">Launch</a> program. Anti-satellite test history from Secure World Foundation, Global
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0. Scheduled launches, launch
+    closures and the launch ledger are the suite's <a href="https://launch.theintelligence.company">Launch</a> program's. Anti-satellite test history from Secure World Foundation, Global
     Counterspace Capabilities (2026) (<a href="https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report">report</a>,
     <a href="https://docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48/">sheet</a>),
     CC BY-NC 4.0, reformatted by Orbit, and rendezvous and proximity operations from the same report's

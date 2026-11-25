@@ -20,10 +20,10 @@ makes no warnings.
 | Lane | Source | What Orbit takes |
 |---|---|---|
 | `catalog` | GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0: `satcat`, `satcat100k`, `auxcat`, `tmpcat`, `launch`, `sites`, `orgs` | Orbital launches in the last 30 days (feed: 7), reentries dated in the last 30 days (feed: 7), catalog changes between two readings, owner-code counts |
-| `upcoming` | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
-| `ledger` (`orbit-2.9`) | Orbit's launch ledger from Launch Library 2, on Orbit's public release | Every launch since 1 Jan 2024, checked hourly; the launches GCAT hasn't listed yet |
-| `pairs` (`orbit-2.10`) | The suite's Launch program (launch.theintelligence.company), its published snapshot | Launch's place check on Orbit's own hazard areas and scheduled launches: time and place, grouped, or time only, with azimuth, distance and implied inclination |
-| `navwarn` (`orbit-2.2`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
+| `upcoming` (retired `orbit-2.32`) | Launch Library 2 (The Space Devs), detailed mode | Launches scheduled in the next 14 days, with the provider's country |
+| `ledger` (`orbit-2.9`) (retired `orbit-2.32`) | Orbit's launch ledger from Launch Library 2, on Orbit's public release | Every launch since 1 Jan 2024, checked hourly; the launches GCAT hasn't listed yet |
+| `pairs` (`orbit-2.10`) (retired `orbit-2.32`) | The suite's Launch program (launch.theintelligence.company), its published snapshot | Launch's place check on Orbit's own hazard areas and scheduled launches: time and place, grouped, or time only, with azimuth, distance and implied inclination |
+| `navwarn` (`orbit-2.2`) (retired `orbit-2.32`) | NGA Maritime Safety Information, in-force daily memoranda (HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV, NAVAREA XII). Japan Coast Guard NAVAREA XI not read since 14 Nov 2026 (robots.txt) | Navigational warnings in force that name rocket launching, space debris or reentry: areas, windows, cancel times |
 | `counterspace` (`orbit-2.3`) | Secure World Foundation, "History of ASAT Testing in Space" sheet (Global Counterspace Capabilities 2026, CC BY-NC 4.0), CSV export | Every anti-satellite test in space SWF lists since 1959, with debris created, re-entered and still on orbit; tests new since Orbit's last reading |
 | `decay` (`orbit-2.13`) | Space-Track.org TIP messages (USSPACECOM, 18th Space Defense Squadron), class `tip` | The newest reentry prediction for each object messaged in the last 5 days: predicted time, window, the object's place at that time, next report |
 | `rpo` (`orbit-2.7`, matching `orbit-2.16`) | Secure World Foundation, "History of Robotic Rendezvous and Proximity Operations in Space" sheet (same report, CC BY-NC 4.0), CSV export of three data tabs and the About tab | Every rendezvous and proximity operation SWF lists (Commercial/Civil, Military/Intelligence, Planned), in SWF's words, with Orbit's reading of each date and GCAT matches |
@@ -509,7 +509,8 @@ snapshot and the daily archive, no request, at the end of each run (`_archive_ru
 A lane that fails keeps its last good copy in the feed, so a reader can't tell a kept item from a fresh one by the
 item alone. The feed carries the doctrine kit's per-source `health` block (the form Headwind, Blackout and Elements
 use), one entry per source id the items name, from the snapshot's lane records (`feed.source_health`):
-`gcat-mcdowell` from `catalog`, `ll2-thespacedevs` from `upcoming`, `space-track` from `maneuver`.
+`gcat-mcdowell` from `catalog`, `space-track` from `maneuver` (`ll2-thespacedevs` from `upcoming` until
+`orbit-2.32`).
 1. **Read on this run** (`state: up`, `last_ok` equal to `checked_at`): the lane was fetched, or GCAT said its files
    had not changed, and it was not carried from an earlier run (the archive's `_fresh` rule). Otherwise, in the kit's
    `health_state` words (feed contract revision 2.1): a failed lane is `failing` with its error; one fetched only on
@@ -566,8 +567,8 @@ Tom, 19 Nov 2026: every tab is its own page within the program. Orbit's one long
 one header, one row of page links (the current page marked) and one script, `app.js`, which draws only the cards on
 the page it runs on:
 - `/` Map: the daily lead, tiles, object search and the satellite map (`orbit-2.24`).
-- `/launches`: the launch map and cards (launches of the last 7 days, scheduled launches, hazard warnings, the
-  ledger), a temporary page until the Ascent move (ideas#69) retires them.
+- `/launches`: the launch map, globe and table of GCAT's launches of the last 7 days, and a card pointing to
+  Launch for scheduled launches, closures and the ledger (`orbit-2.32`).
 - `/reentries`: reentries of the last 7 days, predicted reentries (TIP) and TIP against the reentry. "Track on the
   globe" opens the launch page's globe with `launches.html?track=re-<NORAD>`.
 - `/catalog`: catalog changes and owner codes, breakups and collisions, the 30-day baseline and archive note.
@@ -833,3 +834,23 @@ Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in
    longitude is within the window. Librating objects with slow drift can show short stays; payloads only.
 5. **The object search** answers a slot query with a link to the GEO page rather than its own list: positions and
    stays are in the GEO page's data, with its time control, and the name rules stay in one place.
+
+## Launch lanes retired (`orbit-2.32`, 25 Nov 2026; ideas#69, decision 2 of the space reorg)
+Launch Library 2's schedule, the launch news, the launch ledger and the launch closure areas are the suite's Launch
+program's (launch.theintelligence.company), which reads Launch Library 2 and the closure notices itself. Tom's yes:
+17 Nov (the move), 19 Nov (freeze the old ledger URL, two days side by side), 24 Nov (the comparison passed, 23
+rows, 0 unexplained; Orbit retires its lanes).
+1. **Retired lanes:** `upcoming`, `news`, `ledger`, `navwarn` and `pairs`, with their modules. A collect makes no
+   request to Launch Library 2, the Spaceflight News API, NGA or Launch; the snapshot has none of their keys.
+2. **Feed:** no `orbit:upcoming:*` items, and the health block no longer names `ll2-thespacedevs`. Launch's feed
+   carries scheduled launches as `launch:upcoming:*` (LA-PIR-3); COP ends Orbit's old items when Orbit is read.
+   OR-PIR-3 stays in the register, noted, so older items still resolve.
+3. **Ledger:** Orbit's last `launch-ledger.json` stays on its release `ledger`, frozen, with a "moved to Launch"
+   note in the release text; the private archive keeps its dated copies. `ledger.yml` no longer runs on a schedule
+   and does nothing; it is deleted once the hub's dispatcher stops starting it (a hub change, asked separately).
+4. **Launches page:** the map and globe draw GCAT's launches of the last 7 days (each with its payloads and their
+   orbits, and their paths on the globe); pads, hazard areas, ledger history and Launch's lines are gone. A card
+   under the old ids `#upcoming`, `#hazards` and `#ledger` points to Launch, so older links still land.
+5. **Daily archive:** `navwarn` days to 25 Nov 2026 stay as they are; no new ones are added.
+6. **Sources:** `ll2-thespacedevs`, `snapi-thespacedevs`, `nga-msi` and `tic-launch` are `excluded`, each noted
+   `retired: orbit-2.32`. Orbit still reads GCAT's launch list, and Launch still reads Orbit's GCAT `launches`.

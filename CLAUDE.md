@@ -1,7 +1,7 @@
 # Orbit
 
-The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches,
-scheduled launches, reentries and TIP predictions, catalog changes, breakups, orbit changes in watched satellites,
+The space layer of The Intelligence Company (`tic-feed/2`, program id `orbit`, prefix `OR`): orbital launches
+(GCAT), reentries and TIP predictions, catalog changes, breakups, orbit changes in watched satellites,
 RPO and ASAT history, the GEO belt, a globe, a daily archive and a daily lead, plus the TIC satellite catalog.
 Observations only: no probabilities, no warnings. Repo `metacog-osint/orbit` (**public**); live at
 https://orbit.theintelligence.company (Cloudflare Pages project `orbit`, `orbit-q2t.pages.dev`).
@@ -31,7 +31,7 @@ python -m unittest discover -s tests       # offline tests
 python tools/serve.py                      # http://127.0.0.1:8761 with _headers (CSP)
 python tools/orbit.py catalog | spacetrack-catalog | catalog-sources   # the TIC catalog (local)
 python tools/orbit.py geo [--day] [--out data/geo] [--upload]           # GEO region
-python tools/orbit.py ledger | maneuver-report | maneuver-case
+python tools/orbit.py maneuver-report | maneuver-case
 python tools/orbit.py object-data         # object pages: catalog shards into site/data/catalog (method.md)
 ```
 GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `tools/geo_callouts.py` and
@@ -41,37 +41,33 @@ GEO callouts and page: `pip install -r tools/requirements-callouts.txt`, then `t
 - `update.yml`: tests, state from the Actions cache, collect, build, check, GEO page data, save state, deploy to
   Pages. **Runs on every push to `main`, so a push deploys.** Cron `41 */6`; the hub's `tic-dispatch` starts it at :55
   past 00/06/12/18 UTC (the cron is the fallback). Timeout 22 min (Space-Track wait).
-- `ledger.yml`: hourly Launch Library 2 ledger on release `ledger` (`launch-ledger.json`, `orbit-ledger/1`; dated daily copy in private `tic-archive`);
-  dispatched at :45 (:55 at 01/05/09/13/17/21 UTC), own cron `45 * * * *`.
+- `ledger.yml`: retired stub (orbit-2.32), no cron, does nothing; delete it once the hub's tic-dispatch stops
+  starting it (:45, :55 at 01/05/09/13/17/21 UTC; a still-ask hub change). Release `ledger` is frozen.
 - `geo.yml`: GEO region at 03:15 and 15:15 UTC by tic-dispatch, own cron :17 (skips if today's file is under an hour
   old); releases `geo-YYYY`. `geo-import.yml`: one-off copy of Noisefloor's history.
 - `catalog.yml`: cron 17:23, 19:23, 21:23 UTC, also started by the hub's tic-dispatch (17:30 UTC on 18 Nov);
   release `catalog` (its assets: `doctrine/catalog.md`).
 - State (`data/snapshot.json`, `data/state/`) lives in the private Actions cache, or every run is a first run.
-  Release-held stores (decay store, ledger) are never rebuilt from scratch: a release that holds a file the job cannot
+  Release-held stores (decay store) are never rebuilt from scratch: a release that holds a file the job cannot
   download stops the job.
 
 ## Lanes (rules and thresholds in `doctrine/method.md`)
 | Lane | Module | Source (grade) | Notes |
 |---|---|---|---|
 | `catalog` | `gcat.py` | GCAT, CC BY 4.0 (A2) | Last-Modified first, nothing downloaded when unchanged; under 90% of last reading's objects fails. `satcat.tsv` stops at 69999: later objects in `satcat100k`, unnumbered in `tmpcat`. Baselines from GCAT's history (`#baseline`) |
-| `upcoming` | `launches.py` | Launch Library 2 detailed (B2) | One request a run (free limit 15/h). NET countdowns never finer than LL2's precision |
-| `news` | `news.py` | Spaceflight News API (B3) | Headline, outlet, date, link only; not in the feed |
-| `pairs` | `launchpairs.py` | Launch's snapshot (`tic-launch`, B2) | Its place check on Orbit's areas |
-| `ledger` | `ledger.py` | Orbit's own ledger release | One GitHub request, no LL2 request |
-| `navwarn` | `navwarn.py` | NGA `broadcast-warn` API first, else daily memoranda | NAVAREA XI only by HYDROPAC / XII rebroadcast. Time coincidence is time, not place. Not in the feed (COP shows Cordon's copies) |
 | `counterspace` | `counterspace.py` | SWF ASAT sheet, CC BY-NC 4.0 (B2) | Under 50 tests or a moved header fails. Not in the feed |
 | `rpo` | `rpo.py` | SWF RPO sheet (B2, Tom: "I trust SWF") | Five requests; matched on catalog names plus alias pins |
 | `paths` | `celestrak.py` | CelesTrak last-30-days GP (A2, same 18 SDS data) | Paths of new payloads only; a 403 keeps previous sets, no retry |
 | `decay` | `tip.py` | Space-Track TIP | Card only, not in the feed; runs before `maneuver` |
 | `maneuver` | `maneuver.py`, `spacetrack.py` | Space-Track GP, private watch list | Published with the disclaimer; feed items `orbit:maneuver:*` |
-End-of-run blocks: `tip_check` (TIP against GCAT's reentry), `lead` (`lead.py`), `archive` (`archive.py`,
+Retired in orbit-2.32 (ideas#69): `upcoming`, `news`, `pairs`, `ledger`, `navwarn`; Launch owns the schedule,
+news, ledger and closures. End-of-run blocks: `tip_check` (TIP against GCAT's reentry), `lead` (`lead.py`), `archive` (`archive.py`,
 `orbit-archive/1`, every day kept, published at `/data/archive.json`). A failed lane keeps its last good copy
 (`from_previous`); a failed, off or carried lane leaves no archive count that day, never a zero.
 
 ## Feed
 `observation`, `routine`, `us_person_data: organizations`. Kinds: launches of the last 7 days at the GCAT site
-(precision `approximate`), scheduled launches at the pad, one reentry summary (off-map), catalog changes for two
+(precision `approximate`), one reentry summary (off-map), catalog changes for two
 days, listed orbit changes (`geometry` null; OR-PIR-1, OR-EEI-1, OR-EEI-2 for `gap`), breakups (`orbit:breakup:<jcat>`,
 OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orbit-2.30, added by geo_page). COP's gate lists
 `orbit:maneuver` as military context. COP marks launch pads only; tracks only on the 3D globe; the rest is off-map.
@@ -91,8 +87,6 @@ OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orb
 - **GCAT**: never `--force` in a schedule (Jonathan McDowell's own server). Republishes about daily at no fixed time.
 - **CelesTrak**: one download per 2-hour update; SATCAT only when `jsonDir.php` shows a new FILE_MTIME. **Wikidata**:
   one SPARQL query a week, UA names the repo. Any non-200 puts a catalog source on hold (`--clear-hold` by a person) and stops `sats` (clear: method.md).
-- **Launch Library 2**: free to use and republish with credit (Tom, 15 Nov 2026); images never used (own licences).
-- **Japan Coast Guard NAVAREA XI: not read** (robots.txt disallows `/TUHO/`; Tom, 14 Nov). `navwarn.JCG_READ = False`.
 - **ITU**: TIES is closed to TIC; never use a government-affiliated TIES account. BR IFIC zips only after written
   permission from ITU's legal office. **CSIS**: all rights reserved, not used.
 - **Catalog**: every value is {value, source, ref, read, basis} (the file leaves out defaults, `catshards`); NORAD keys from satcat/satcat100k only (auxcat's
@@ -115,12 +109,11 @@ OR-EEI-5, max 10, link `/#breakups`), GEO relocations (`orbit:relocation:*`, orb
 
 ## Program boundaries (Tom, 16-17 Nov 2026)
 - The GEO belt is Orbit's; Noisefloor keeps signals, sun outages and space weather.
-- Decision 2 (17 Nov): Launch Library 2 schedule, ledger and news move to Launch, and Orbit retires its launch map
-  layers and `pairs` lane, keeping the old ledger URL as a forward copy for a while. Not started; see the reorg plan.
+- Decision 2 (17 Nov): Launch Library 2 schedule, ledger and news moved to Launch; Orbit's launch lanes and map
+  layers retired in orbit-2.32 (25 Nov). The old ledger URL is frozen, not a forward copy (Tom, 19 Nov).
 
 ## Not built, with the reason
-ITU (permission first); NAVAREA XI direct (robots.txt), China MSA (403, list unknown), NautoShark (login, bars AI
-crawlers), KHOA (robots.txt); CSIS (rights); maneuver-detect labels (its reading of Space-Track's terms conflicts
+ITU (permission first); CSIS (rights); maneuver-detect labels (its reading of Space-Track's terms conflicts
 with USSPACECOM's citation clause); pass predictions.
 
 ## Rules
@@ -135,4 +128,4 @@ with USSPACECOM's citation clause); pass predictions.
 - Don't pop the stash labelled "line-ending-only copies of site/tic-nav.*".
 - No material from other work here; reused older code needs names stripped and no key files copied.
 - Times stored UTC; the page shows the viewer's zone, named (`tic-time.js`).
-- Emails to The Space Devs, ITU and the Japan Coast Guard stay drafts until Tom sends them.
+- Emails to ITU stay drafts until Tom sends them.

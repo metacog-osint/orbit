@@ -1,7 +1,7 @@
 """Orbit CLI: collect, build, and check.
 
     python tools/orbit.py collect            # fetch every live lane, write data/snapshot.json
-    python tools/orbit.py collect --only upcoming
+    python tools/orbit.py collect --only catalog
     python tools/orbit.py collect --force    # read GCAT even if its files have not changed
     python tools/orbit.py build              # build site/ from data/snapshot.json
     python tools/orbit.py check              # validate the registers and lint the feed
@@ -9,15 +9,12 @@
 collect never falls back to made-up data. A lane that fails keeps its last good copy (marked
 from_previous) or stays empty, and the snapshot's "lanes" block says which.
 
-Lanes (method orbit-2.7):
+Lanes (method orbit-2.7; launch lanes retired in orbit-2.32):
   catalog   GCAT: satcat, satcat100k, auxcat, tmpcat, launch list and launch sites. GCAT republishes once a
             day (about 00:20 UTC), so a run first asks each file's Last-Modified date and downloads nothing
             if none has changed. About 37 MB when it does.
-  upcoming  Launch Library 2: launches scheduled in the next 14 days. One request.
-  navwarn   Launch hazard and space-debris navigational warnings in force: NGA's five daily memoranda and
-            NAVAREA XI (Japan Coast Guard), a list and one request per launch-related warning.
-  pairs     Launch's place check on Orbit's own hazard areas and scheduled launches (time and place, grouped,
-            or time only), from Launch's published snapshot: one request, no outside source.
+  (The upcoming, news, ledger, navwarn and pairs lanes retired in orbit-2.32: scheduled launches, launch news,
+  the launch ledger and launch closures are the suite's Launch program's, launch.theintelligence.company.)
   counterspace  Secure World Foundation's "History of ASAT Testing in Space" sheet (CSV export, CC BY-NC 4.0):
             every test with its debris counts, totals by country, and tests new since the last reading.
   rpo       Secure World Foundation's "History of Robotic Rendezvous and Proximity Operations in Space" sheet
@@ -48,17 +45,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
-from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, satmap, counterspace, feed, fetch, gcat, geo_region, launches, launchpairs, lead, ledger, maneuver, names, navwarn, notable, objpage,  # noqa: E402
-                   news, oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
+from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, satmap, counterspace, feed, fetch, gcat, geo_region, lead, maneuver, names, notable, objpage,  # noqa: E402
+                   oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
     "catalog": ["gcat_updated", "launches", "reentries", "breakups", "hygiene", "catalog_changes", "baseline"],
-    "upcoming": ["upcoming"],
-    "ledger": ["ledger"],
-    "news": ["news"],
-    "navwarn": ["navwarn"],
-    "pairs": ["launch_pairs"],
     "paths": ["payload_sets"],
     "counterspace": ["counterspace"],
     "rpo": ["rpo"],
@@ -66,9 +58,8 @@ LANE_FIELDS = {
     "decay": ["decay"],
     "sats": ["sats"],
 }
-EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {}, "upcoming": [],
-         "ledger": {},
-         "news": {}, "navwarn": {}, "launch_pairs": {}, "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "reentry_sets": {}, "decay": {}, "sats": {}}
+EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {},
+         "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "reentry_sets": {}, "decay": {}, "sats": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -81,9 +72,7 @@ TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".
 ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
-LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "upcoming": ["ll2-thespacedevs"], "ledger": ["ll2-thespacedevs"],
-               "news": ["snapi-thespacedevs"],
-               "navwarn": ["nga-msi"], "pairs": ["tic-launch"], "paths": ["celestrak-gp"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
+LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "paths": ["celestrak-gp"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
                "maneuver": ["space-track"], "decay": ["space-track"], "sats": ["celestrak-gp-active"]}
 
 
@@ -143,92 +132,6 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
     _write_index(data_dir, {"read_at": recs[0]["fetched_at"], "gcat_updated": result["gcat_updated"],
                             "objects": gcat.build_index(objs)})
     return result, recs, stamps
-
-
-def _lane_upcoming(raw_dir: Path, prev: dict, getter, **_):
-    now = launches.now_utc()
-    body, rec = fetch.fetch("ll2-upcoming", launches.url(now), raw_dir, "json", getter=getter)
-    return {"upcoming": launches.within(launches.parse(body), now)}, [rec], None
-
-
-def _lane_news(raw_dir: Path, prev: dict, getter, upcoming=None, **_):
-    """Spaceflight News API headlines for this run's scheduled launches (links only): one request, none when
-    nothing is scheduled."""
-    ids = [u["id"] for u in upcoming or [] if u.get("id")]
-    if not ids:
-        return {"news": {"read_at": fetch.now_utc(), "articles": [], "by_launch": {}, "note": "no scheduled launches"}}, [], None
-    body, rec = fetch.fetch("snapi-articles", news.url(ids), raw_dir, "json", getter=getter)
-    doc = news.parse(body, ids)
-    return {"news": {"read_at": rec["fetched_at"], "source": news.SITE, **doc}}, [rec], None
-
-
-def _lane_navwarn(raw_dir: Path, prev: dict, getter, **_):
-    """Launch hazard and space-debris warnings in force: NGA's daily memoranda and NAVAREA XI (Japan Coast
-    Guard). Each source is read on its own; the lane fails only if both do, and says which one failed."""
-    now = launches.now_utc()
-    warnings, recs, sources = [], [], {}
-    nga = {"status": "ok", "memos": {}}
-    try:  # NGA's API first; down (503) since at least 6 Nov 2026, frozen at May 2024 before that
-        body, rec = fetch.fetch("nga-api", navwarn.NGA_API, raw_dir, "json", getter=getter)
-        recs.append(rec)
-        api = navwarn.parse_api(json.loads(body), now)
-        nga.update({"form": "api", "newest": api["newest"]})
-        for area, memo in api["memos"].items():
-            warnings += memo["warnings"]
-            nga["memos"][area] = {"as_of": navwarn._iso(now), "in_force": memo["in_force"], "launch_related": len(memo["warnings"])}
-    except Exception as exc:  # then the daily in-force memoranda, each read on its own
-        nga.update({"form": "memoranda", "api_error": f"{type(exc).__name__}: {exc}"[:200]})
-        for area, url in navwarn.NGA_MEMOS.items():
-            slug = area.lower().replace(" ", "")
-            try:
-                body, rec = fetch.fetch(f"nga-{slug}", url, raw_dir, "txt", getter=getter)
-                recs.append(rec)
-                memo = navwarn.parse_memo(body, area, now)
-                warnings += memo["warnings"]
-                nga["memos"][area] = {"as_of": memo["as_of"], "in_force": memo["in_force"],
-                                      "launch_related": len(memo["warnings"])}
-            except Exception as exc2:  # one memo failing leaves the others
-                nga["memos"][area] = {"error": f"{type(exc2).__name__}: {exc2}"[:200]}
-    bad = [a for a, m in nga["memos"].items() if "error" in m]
-    if bad:
-        nga["status"] = "failed" if len(bad) == len(navwarn.NGA_MEMOS) else "partial"
-    sources["nga"] = nga
-    jcg = {"status": "ok"}
-    try:
-        if not navwarn.JCG_READ:
-            raise navwarn.SourceOff(navwarn.JCG_OFF)
-        items = []
-        for year in sorted({now.year, (now - timedelta(days=45)).year}):
-            body, rec = fetch.fetch("jcg-navarea11-list", navwarn.JCG_LIST.format(year=year), raw_dir, "xml",
-                                    getter=getter)
-            recs.append(rec)
-            items += navwarn.parse_jcg_list(body)
-        wanted = navwarn.jcg_wanted(items)
-        jcg.update({"listed": len(items), "launch_titles": len(wanted)})
-        bad = []
-        for it in wanted:  # one unreadable message is skipped and named, not the whole source
-            try:
-                body, rec = fetch.fetch("jcg-navarea11-msg", navwarn.JCG_MSG.format(tana=it["tana"]), raw_dir,
-                                        "html", getter=getter)
-                recs.append(rec)
-                w = navwarn.parse_jcg_message(body, it)
-            except Exception as exc:
-                bad.append(f"{it['tana']}: {type(exc).__name__}: {exc}"[:160])
-                continue
-            if w:
-                warnings.append(w)
-        if bad:
-            jcg.update({"status": "partial" if len(bad) < len(wanted) else "failed", "errors": bad})
-    except navwarn.SourceOff as exc:
-        jcg = {"status": "off", "reason": str(exc)}
-    except Exception as exc:
-        jcg = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"[:200]}
-    sources["jcg"] = jcg
-    if nga["status"] == "failed" and jcg["status"] in ("failed", "off"):
-        raise RuntimeError("NGA failed and NAVAREA XI gave nothing: " + (jcg.get("error") or jcg.get("reason")
-                                                                         or "; ".join(jcg.get("errors", []))))
-    areas = navwarn.group(navwarn.current(warnings, now))
-    return {"navwarn": {"read_at": fetch.now_utc(), "sources": sources, "areas": areas}}, recs, None
 
 
 def _lane_counterspace(raw_dir: Path, prev: dict, getter, **_):
@@ -421,27 +324,6 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, reentry_norads=None, **_):
     return {"maneuvers": out, "reentry_sets": resets}, recs, None
 
 
-def _lane_ledger(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
-    """Orbit's own launch ledger, read back from its public release (written hourly by `orbit.py ledger`): its
-    counts and the launches GCAT hasn't listed yet. One request to GitHub, none to Launch Library 2."""
-    try:
-        body, rec = fetch.fetch("orbit-ledger", ledger.PUBLIC_URL, raw_dir, "json", getter=getter, gz=True)
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            raise spacetrack.NotReady("no ledger published yet (the hourly ledger workflow writes it)")
-        raise
-    doc = json.loads(body.decode("utf-8"))
-    dates = [x.get("date") for x in launches_30d or [] if x.get("date")]
-    return {"ledger": ledger.summary(doc, max(dates) if dates else None)}, [rec], None
-
-
-def _lane_pairs(raw_dir: Path, prev: dict, getter, **_):
-    """Launch's place check on Orbit's hazard areas and scheduled launches (orbit/launchpairs.py): one request to
-    Launch's published snapshot. Launch reads Orbit's areas, so its rows can be up to a run behind Orbit's."""
-    body, rec = fetch.fetch("tic-launch", launchpairs.URL, raw_dir, "json", getter=getter, gz=True)
-    return {"launch_pairs": launchpairs.parse(body)}, [rec], None
-
-
 def _lane_paths(raw_dir: Path, prev: dict, getter, launches_30d=None, **_):
     """CelesTrak's last-30-days GP group (orbit/celestrak.py): element sets for the payloads of GCAT's recent
     launches, for their paths on the globe. One request a run; CelesTrak's 403 for a repeat download inside one
@@ -501,8 +383,7 @@ def _lane_sats(raw_dir: Path, prev: dict, getter, **_):
     return {"sats": {**satmap.summary(doc), "bytes": path.stat().st_size}}, [rec], None
 
 
-LANES = {"catalog": _lane_catalog, "ledger": _lane_ledger, "paths": _lane_paths, "upcoming": _lane_upcoming, "news": _lane_news,
-         "navwarn": _lane_navwarn, "pairs": _lane_pairs,
+LANES = {"catalog": _lane_catalog, "paths": _lane_paths,
          "counterspace": _lane_counterspace, "rpo": _lane_rpo, "decay": _lane_decay,
          "maneuver": _lane_maneuver, "sats": _lane_sats}
 
@@ -529,9 +410,7 @@ def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None 
             continue
         try:
             kwargs = {"force": force, "header": header} if lane == "catalog" else {}
-            if lane == "news":  # reads this run's scheduled launches (upcoming runs first)
-                kwargs = {"upcoming": snap.get("upcoming")}
-            if lane in ("ledger", "paths"):  # read this run's GCAT launches (catalog runs first)
+            if lane == "paths":  # read this run's GCAT launches (catalog runs first)
                 kwargs = {"launches_30d": snap.get("launches")}
             if lane == "maneuver":  # this run's open TIP windows (decay runs first), soonest first
                 kwargs = {"reentry_norads": [o["norad"] for o in (snap.get("decay") or {}).get("objects") or []
@@ -968,42 +847,6 @@ def maneuver_case(root: Path = ROOT, name: str = "sj21") -> int:
     return 0
 
 
-def ledger_pull(path: Path, getter=None, raw_dir: Path | None = ROOT / "data" / "raw") -> int:
-    """One hourly pull (orbit/ledger.py). An error from Launch Library 2 (a 429 included) changes nothing and is
-    not retried: the next hour tries again. Writes changed=true to GITHUB_OUTPUT when the ledger changed."""
-    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else ledger.empty()
-    get = getter or fetch.get
-
-    def lookup(launch_id):
-        try:
-            return get(ledger.id_url(launch_id), 120)
-        except urllib.error.HTTPError as exc:
-            if exc.code == 404:
-                return None
-            raise
-
-    try:
-        body, _ = fetch.fetch("ll2-previous", ledger.next_url(doc), raw_dir, "json", getter=get, gz=True)
-        rep = ledger.step(doc, body, fetch.now_utc(), lookup)
-    except Exception as exc:
-        print(f"::warning::Launch Library 2 pull failed ({type(exc).__name__}: {str(exc)[:200]}); ledger unchanged, "
-              "next hour tries again")
-        return 0
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
-    changed = bool(rep["added"] or rep["changed"] or rep["verified"] in ("missing", "moved"))
-    rows = doc["launches"]
-    print(f"Ledger: {len(rows)} launches ({rows[0]['net'] if rows else '-'} to {rows[-1]['net'] if rows else '-'}); "
-          f"pulled {rep['pulled']}, added {rep['added']}, last saved launch {rep['verified']}, "
-          f"{len(rep['changed'])} changed, {rep['requests']} request(s); "
-          f"{'caught up' if doc['caught_up'] else 'catching up'}.")
-    out = os.environ.get("GITHUB_OUTPUT")
-    if out:
-        with open(out, "a", encoding="utf-8") as fh:
-            fh.write(f"changed={'true' if changed else 'false'}\n")
-    return 0
-
-
 def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     """The GEO region (orbit/geo_region.py; workflow geo.yml): one Space-Track gp query for every object near GEO,
     one CelesTrak request for its active GEO list, today's region file and the monthly element files, uploaded to
@@ -1311,8 +1154,6 @@ def main(argv=None) -> int:
     sub.add_parser("maneuver-report", help="print the held manoeuvre report (data/state/spacetrack/report.json)")
     sub.add_parser("archive-upload", help="this run's catalog-change files and daily archive to monthly releases "
                                           "(update.yml, after the deploy)")
-    lg = sub.add_parser("ledger", help="one Launch Library 2 pull into data/state/launch-ledger.json (hourly)")
-    lg.add_argument("--file", default=str(ROOT / "data" / "state" / ledger.ASSET))
     gp = sub.add_parser("geo", help="the GEO region: one Space-Track gp query, day file and element files (geo.yml)")
     gp.add_argument("--day", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     gp.add_argument("--out", default=str(ROOT / "data" / "geo"))
@@ -1370,9 +1211,7 @@ def main(argv=None) -> int:
             print(f"  {lane:12s} {st.get('status')}{' [last good copy]' if st.get('from_previous') else ''}{extra}")
         ch = snap.get("catalog_changes") or {}
         h = snap.get("hygiene") or {}
-        print(f"Collected {len(snap['launches'])} launches (30 days), {len(snap['reentries'])} reentries (30 days), "
-              f"{len(snap['upcoming'])} scheduled launches (14 days); "
-              f"{len((snap.get('navwarn') or {}).get('areas') or [])} NGA launch warnings in force; "
+        print(f"Collected {len(snap['launches'])} launches (30 days), {len(snap['reentries'])} reentries (30 days); "
               f"{len((snap.get('counterspace') or {}).get('tests') or [])} ASAT tests in SWF's sheet "
               f"({len((snap.get('counterspace') or {}).get('new_since_last') or [])} new since the last reading); "
               f"{h.get('in_orbit', 0)} objects in orbit. "
@@ -1381,8 +1220,6 @@ def main(argv=None) -> int:
         return 0 if any(s.get("status") in ("ok", "unchanged") for s in snap["lanes"].values()) else 1
     if args.cmd == "archive-upload":
         return archive_upload(ROOT / "data")
-    if args.cmd == "ledger":
-        return ledger_pull(Path(args.file))
     if args.cmd == "maneuver-case":
         return maneuver_case(ROOT, args.case)
     if args.cmd == "maneuver-report":
