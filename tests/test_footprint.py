@@ -245,6 +245,65 @@ class GimsBlock(unittest.TestCase):
         self.assertEqual(fp.carve_gims_blocks(bytes(range(256)) * 64), [])
 
 
+def jet_page(rows, page=4096):
+    """A made-up Jet 4 data page holding `rows`, stored from the page's end backwards."""
+    import struct
+    p = bytearray(page)
+    p[0], p[1] = 1, 1
+    struct.pack_into("<H", p, 12, len(rows))
+    end = page
+    for i, r in enumerate(rows):
+        end -= len(r)
+        p[end:end + len(r)] = r
+        struct.pack_into("<H", p, 14 + 2 * i, end)
+    return bytes(p)
+
+
+def jet_text(s):
+    return b"\xff\xfe" + s.encode("ascii")
+
+
+class GimsLongBlocks(unittest.TestCase):
+    """Made-up bytes in the layout read from Intelsat's locked GIMS databases on 25 Nov 2026."""
+
+    def build(self, name_text, flag=0, extra_pages=()):
+        import struct
+        ring = [[-100.0 + i * 0.01, 30.0 + (i % 7) * 0.1] for i in range(450)]  # with the -4 ring, over one page
+        block = gims_block([(0.0, -95.0, 35.0)], [(-2.0, ring), (-4.0, ring[:200])])
+        cut = 3000
+        piece2 = struct.pack("<I", 0) + block[cut:]
+        piece1 = struct.pack("<I", (3 << 8) | 0) + block[:cut]
+        desc = struct.pack("<I", len(block))[:3] + bytes([flag]) + struct.pack("<I", (2 << 8) | 0) + bytes(4)
+        owner = b"\x15\x00\x01\x00" + bytes(20) + name_text + desc + b"\x08\x00\xff\xff\x0a"
+        pages = [bytes(4096), jet_page([owner]), jet_page([piece1]), jet_page([piece2]), *extra_pages]
+        return b"".join(pages), block
+
+    def test_reads_a_block_spread_over_pages_with_its_names(self):
+        data, block = self.build(jet_text("CAHD") + b"\x00" + "ECCOCO".encode("utf-16-le"))
+        got = fp.gims_long_blocks(data)
+        self.assertEqual(len(got), 1)
+        self.assertEqual((got[0]["beam_id"], got[0]["emi_rcp"], got[0]["polar"]), ("CAHD", "E", "C"))
+        self.assertEqual(got[0]["block"], block)
+        beam = fp.parse_gims_block(got[0]["block"], "CAHD", "E", "C")
+        self.assertEqual([len(c["ring"]) for c in beam["contours"]], [450, 200])
+
+    def test_carving_misses_what_the_page_reader_finds(self):
+        data, _ = self.build(jet_text("CAHD") + b"\x00" + "ECCOCO".encode("utf-16-le"))
+        self.assertEqual(fp.carve_gims_blocks(data), [])
+
+    def test_unknown_name_text_keeps_the_block_without_names(self):
+        data, block = self.build(jet_text("XYZ"))
+        got = fp.gims_long_blocks(data)
+        self.assertEqual([(g["beam_id"], g["block"] == block) for g in got], [(None, True)])
+
+    def test_inline_flag_is_not_followed(self):
+        data, _ = self.build(jet_text("CAHD") + b"\x00" + "ECCOCO".encode("utf-16-le"), flag=0x80)
+        self.assertEqual(fp.gims_long_blocks(data), [])
+
+    def test_noise_gives_nothing(self):
+        self.assertEqual(fp.gims_long_blocks(bytes(range(256)) * 128), [])
+
+
 class EirpKml(unittest.TestCase):
     def test_reads_levels_and_polygons(self):
         # made up, in the shape of an operator's footprint KML: a label point, a polygon, a multi-polygon
