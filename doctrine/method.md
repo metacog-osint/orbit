@@ -977,3 +977,13 @@ now runs a second rule on those objects only.
    291 marked. On objects not judged at the time: USA 324's stop (found) and 10 marks in the first 8 days of the
    history, when every object had few sets. Luch (Olymp) 2's start across its 37-day gap is found by both rules
    from the same 21 Nov set. The page does not draw `belt.two_set` yet; the data is in `globe.json`.
+
+## Links between Orbit and Launch (`orbit-2.39`, 27 Nov 2026)
+A launch's own record (its time, site, vehicle, closures, schedule and history) is Launch's; what it put in orbit
+is Orbit's. Both name a launch by GCAT's tag (the COSPAR launch id, such as `2026-266`).
+1. **To Launch:** on the launches page, each row's GCAT tag and the map card's "Find it in Launch's history" open
+   that launch's record in Launch's history (`#history?st=launched&q=<tag>&sel=gcat:<tag>`).
+2. **From Launch:** `/?q=<text>` opens the home page with that object search run (at most 80 characters, decoded
+   once). Launch links `/?q=<tag>`, which lists every piece of the launch, and, for the last 7 days, the launch's row
+   on the launches page (`launches.html#launch-<tag>`).
+3. **Nothing read:** the links add no request to either program.
