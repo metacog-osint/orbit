@@ -208,6 +208,8 @@ function main() {
   // a stated position as the name gives it: whole degrees unless the name has a decimal
   const statedTxt = (x) => (Math.abs(x) % 1 ? Math.abs(x).toFixed(1) : Math.abs(x).toFixed(0)) + "°" + (x < 0 ? "W" : x > 0 ? "E" : "");
   const shortWay = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+  // a name TIC's alias file marks current or former, as orbit/namepos.py's status_txt (ideas#376); "" otherwise
+  const statusTxt = (x) => (x && x.status ? x.status + " name" + (x.until ? ", until " + dayTxt(x.until) : "") : "");
   // the other names a search matched, when the shown name alone does not match every term
   const viaNames = (o) => (!terms.length || terms.every((t) => o.name.toLowerCase().indexOf(t) >= 0) ? [] :
     o.others.filter((n) => { const l = n.toLowerCase(), c = compact(n); return terms.some((t) => l.indexOf(t) >= 0 || c.indexOf(t) >= 0); }).slice(0, 2));
@@ -1210,7 +1212,7 @@ function main() {
       (Math.abs(o.drift) < 0.1 ? "holding its longitude" : esc(rateTxt(o.drift))) + (o.active ? " · active" : ""))).join("");
     h += '<li class="globe-res-head">Named for it, within ' + S.nameTol + "° (" + fmtN(named.length) + '): <span class="small muted">a name is not a position; most such names are former names</span></li>';
     h += named.map((o) => { const l = lonOf(o), d = l == null ? null : shortWay(l, slot);
-      return item(o, "“" + esc(namedSlot(o).map((x) => x.name).join("”, “")) + "” · " + (d == null ? "no position" : d <= SLOT_WIN ? "there now" : "now " + esc(lonTxt(l)) + ", " + d.toFixed(1) + "° away")); }).join("");
+      return item(o, namedSlot(o).map((x) => "“" + esc(x.name) + "”" + (x.status ? " (" + esc(statusTxt(x)) + ")" : "")).join(", ") + " · " + (d == null ? "no position" : d <= SLOT_WIN ? "there now" : "now " + esc(lonTxt(l)) + ", " + d.toFixed(1) + "° away")); }).join("");
     if (H.rows) {
       h += '<li class="globe-res-head">Held it, ' + esc(H.from) + " to " + esc(H.to) + " (UTC days; " + fmtN(held.length) + '): <span class="small muted">payloads holding a longitude within ' +
         H.hold_deg + "° for " + H.min_days + " days or more</span></li>";
@@ -1380,7 +1382,7 @@ function main() {
     const lon = g ? g.lon : null;
     const parts = list.map((x) => {
       const d = lon == null ? null : shortWay(x.stated, lon);
-      return "“" + esc(x.name) + "” is named for " + statedTxt(x.stated) + (d == null ? "" : d <= S.nameTol ? ", its slot now" : ", about " + d.toFixed(1) + "° from here");
+      return "“" + esc(x.name) + "”" + (x.status ? " (" + esc(statusTxt(x)) + ")" : "") + " is named for " + statedTxt(x.stated) + (d == null ? "" : d <= S.nameTol ? ", its slot now" : ", about " + d.toFixed(1) + "° from here");
     });
     const off = lon != null && list.some((x) => shortWay(x.stated, lon) > S.nameTol);
     return [["Name and position", parts.join("; ") + (off ? '<br><span class="small muted">A name that states another position is most often a former name: operators rename a satellite when they move it, and catalogues may keep the old name. Names give the slot only to the whole degree (Eutelsat’s “12 West” is 12.5° W).</span>' : "")]];
@@ -1393,11 +1395,11 @@ function main() {
     const tol = np.tolerance_deg || 1, off = (np.rows || []).filter((r) => r[3] != null && r[4] > tol);
     const isAct = (k) => (S.byId.get(k) || {}).active;
     const act = [...new Set(off.filter((r) => isAct(r[0])).map((r) => r[0]))], rest = new Set(off.filter((r) => !isAct(r[0])).map((r) => r[0]));
-    const fits = (k) => (S.namePos.get(k) || []).filter((x) => x.apart != null && x.apart <= tol).map((x) => x.name);
+    const fits = (k) => (S.namePos.get(k) || []).filter((x) => x.apart != null && x.apart <= tol).map((x) => x.name + (x.status ? " (" + statusTxt(x) + ")" : ""));
     el.innerHTML = (act.length ? foldTable(["Satellite", "Owner", "Where it is", "Drift", "Names that state another position", "A name that fits"], act.map((k) => {
       const o = S.byId.get(k), m = fits(k), mine = off.filter((r) => r[0] === k);
       return "<tr><td>" + pick([k], o.name) + "</td><td>" + esc(o.owner || "") + '</td><td class="num">' + lonTxt(mine[0][3]) + '</td><td class="num">' +
-        (Math.abs(o.drift) < 0.1 ? "none" : esc(rateTxt(o.drift))) + "</td><td>" + mine.map((r) => esc(r[1]) + " (" + statedTxt(r[2]) + ", " + r[4].toFixed(1) + "° away)").join("; ") +
+        (Math.abs(o.drift) < 0.1 ? "none" : esc(rateTxt(o.drift))) + "</td><td>" + mine.map((r) => esc(r[1]) + " (" + statedTxt(r[2]) + ", " + r[4].toFixed(1) + "° away" + (r[5] ? "; " + esc(statusTxt({ status: r[5], until: r[6] })) : "") + ")").join("; ") +
         "</td><td>" + (m.length ? esc(m.join(", ")) : "none in the catalogue") + "</td></tr>";
     })) : "<p>None.</p>") +
       '<p class="small">Names from every source in TIC’s satellite catalogue; positions from each satellite’s newest public element set at ' + esc(bothTxt(Date.parse(np.at_utc.replace("Z", ":00Z")), true)) +
@@ -1766,7 +1768,7 @@ function main() {
     const cols = g.cols, roleIds = new Set(Object.keys((board || {}).roles || {}).map(Number));
     const npos = g.name_positions || {};
     S.namePos = new Map(); S.nameTol = npos.tolerance_deg || 1;
-    (npos.rows || []).forEach((r) => { if (!S.namePos.has(r[0])) S.namePos.set(r[0], []); S.namePos.get(r[0]).push({ name: r[1], stated: r[2], lon: r[3], apart: r[4] }); });
+    (npos.rows || []).forEach((r) => { if (!S.namePos.has(r[0])) S.namePos.set(r[0], []); S.namePos.get(r[0]).push({ name: r[1], stated: r[2], lon: r[3], apart: r[4], status: r[5] || "", until: r[6] || "" }); });
     S.objs = g.objects.map((row) => {
       const o = {}; cols.forEach((c, k) => { o[c] = row[k]; });
       o.tk = typeKey(o.type); o.drift = o.n * 360 - SIDEREAL; o.sr = satrecOf(o);

@@ -113,11 +113,14 @@ class GeoPageNames(unittest.TestCase):
         G.earth_fixed = lambda s, t: (lons[s], 0.0, 0.0) if s in lons else None
         try:
             other = G.catalog_names(self.site(), self.objs())
-            block = G.name_positions(region, self.objs(), other, datetime(2026, 11, 25, 18, 0))
+            status = {33459: {N.compact("Eutelsat 12 West G"): ("former", "2025-12-19")}}
+            block = G.name_positions(region, self.objs(), other, datetime(2026, 11, 25, 18, 0), status=status)
         finally:
             G.satrec, G.earth_fixed = old
         rows = {(r[0], r[1]): r for r in block["rows"]}
-        self.assertEqual(rows[(33459, "Eutelsat 12 West G")], [33459, "Eutelsat 12 West G", -12.0, -50.32, 38.3])
+        self.assertEqual(rows[(33459, "Eutelsat 12 West G")],
+                         [33459, "Eutelsat 12 West G", -12.0, -50.32, 38.3, "former", "2025-12-19"])
+        self.assertEqual(rows[(27508, "EUTELSAT 36 WEST A")][5:], ["", ""])
         self.assertEqual(rows[(27508, "EUTELSAT 36 WEST A")][4], 4.9)
         self.assertNotIn(99999, {r[0] for r in block["rows"]})
         self.assertEqual(block["at_utc"], "2026-11-25T18:00Z")

@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from orbit import aliases, catalog, gcat, rpo  # noqa: E402
+from orbit import aliases, catalog, catshards, gcat, namepos, rpo  # noqa: E402
 
 FIX = ROOT / "tests" / "fixtures"
 IDS = aliases.source_ids(ROOT)
@@ -72,6 +72,38 @@ class AliasFile(unittest.TestCase):
     def test_a_withdrawn_entry_stays_in_the_file_and_is_skipped(self):
         text = GOOD + "  withdrawn: 2026-11-18\n  reason: \"wrong object\"\n"
         self.assertEqual(check_live(text), [])
+
+
+class NameStatus(unittest.TestCase):
+    def test_status_and_until_are_checked(self):
+        self.assertEqual(check_live(GOOD + "  status: current\n")[0]["status"], "current")
+        e = check_live(GOOD + "  status: former\n  until: 2025-12-19\n")[0]
+        self.assertEqual((e["status"], e["until"]), ("former", "2025-12-19"))
+        for text in (GOOD + "  status: old\n", GOOD + "  until: 2025-12-19\n",
+                     GOOD + "  status: current\n  until: 2025-12-19\n",
+                     GOOD + "  status: former\n  until: 19 Dec 2025\n"):
+            with self.assertRaises(aliases.AliasError, msg=text):
+                check_live(text)
+
+    def test_the_real_file_marks_the_eutelsat_names(self):
+        got = {(e["norad"], e["name"]): (e["status"], e.get("until")) for e in ENTRIES if "status" in e}
+        self.assertEqual(got[(33459, "Eutelsat 50 West A")], ("current", None))
+        self.assertEqual(got[(33459, "Eutelsat 12 West G")], ("former", "2025-12-19"))
+        self.assertEqual(got[(36101, "Eutelsat 50A")], ("current", None))
+
+    def test_search_index_and_lookup_carry_it(self):
+        entry = next(e for e in ENTRIES if e.get("name") == "Eutelsat 12 West G")
+        obj = {"type": "payload", "name": "EUTELSAT HOTBIRD 13C", "names": [
+            {"value": "EUTELSAT HOTBIRD 13C", "source": "space-track", "basis": "attributed"},
+            {"value": "EUTELSAT 12 WEST G", "source": "wikidata", "basis": "attributed"},
+            aliases.name_record(entry)]}
+        doc = catshards.search_index({"read": "2026-11-26", "objects": {"33459": obj}, "unnumbered": {}})
+        self.assertEqual(doc["name_status"], {"33459": [["Eutelsat 12 West G", "former", "2025-12-19"]]})
+        known = namepos.statuses(doc)["33459"]
+        self.assertEqual(namepos.marked("EUTELSAT 12 WEST G", known),
+                         "EUTELSAT 12 WEST G (former name, until 2025-12-19)")
+        self.assertEqual(namepos.marked("EUTELSAT HOTBIRD 13C", known), "EUTELSAT HOTBIRD 13C")
+        self.assertEqual(namepos.statuses({}), {})
 
 
 def check_live(text):

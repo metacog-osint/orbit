@@ -1,7 +1,8 @@
 # TIC satellite catalog: hand-kept aliases (design note the private planning notes, section 3).
 # One claim per entry, reviewed by diff. Never edit an entry to change its number: add `withdrawn: <date>` and
 # `reason`, and add a new entry. Every link needs evidence beyond a name. Read by orbit/aliases.py (a YAML subset:
-# scalars, quoted strings, [flow lists] and block lists of strings).
+# scalars, quoted strings, [flow lists] and block lists of strings). A name entry may say `status: current` or
+# `status: former` (with `until: YYYY-MM-DD`, the day it stopped being the name).
 #
 # Build step 5 (17 Nov 2026): the five test objects of section 7. Evidence from the catalog built that day from
 # Space-Track SATCAT (18:09 UTC), GCAT of 15 Nov, CelesTrak SATCAT (file of 16 Nov 20:34 UTC) and Wikidata
@@ -85,6 +86,7 @@
 
 - norad: 33459
   name: "Eutelsat 50 West A"
+  status: current
   basis: declared
   source: operator-pages
   source_ref: "Eutelsat Universal Registration Document 2025-26 (23 Oct 2026), section 1.3.1 p. 26, fleet table p. 30, accounts note p. 268"
@@ -99,6 +101,8 @@
 
 - norad: 33459
   name: "Eutelsat 12 West G"
+  status: former
+  until: 2025-12-19
   basis: declared
   source: operator-pages
   source_ref: "Eutelsat Group Universal Registration Document 2022-23 (30 Jun 2023), p. 26 and fleet table p. 31"
@@ -135,6 +139,7 @@
 
 - norad: 36101
   name: "Eutelsat 50A"
+  status: current
   basis: declared
   source: operator-pages
   source_ref: "Eutelsat URD 2024-25, p. 24 and accounts note; URD 2025-26, p. 24 and fleet table p. 28"

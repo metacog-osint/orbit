@@ -854,3 +854,16 @@ with an unexplained difference.
 5. **Daily archive:** `navwarn` days to 25 Nov 2026 stay as they are; no new ones are added.
 6. **Sources:** `ll2-thespacedevs`, `snapi-thespacedevs`, `nga-msi` and `tic-launch` are `excluded`, each noted
    `retired: orbit-2.32`. Orbit still reads GCAT's launch list, and Launch still reads Orbit's GCAT `launches`.
+
+## Current and former names (`orbit-2.33`, 26 Nov 2026; ideas#376)
+
+1. **Where it comes from.** An alias-file name entry may say `status: current` or `status: former`, a former name
+   with `until`, the day it stopped being the name. The status is TIC's reading of the entry's evidence; an entry
+   without one says nothing either way.
+2. **Search index.** `search.json` (`tic-catalog-search/1`) gains `name_status`, {key: [[name, status, until]]},
+   holding only marked names; readers that ignore it are unaffected. The object shards carry `status` and `until`
+   on the alias file's name records.
+3. **Where it shows.** `orbit.py find` (name and slot queries), the object page's names table, and the GEO page:
+   the "Names that state another position" table, the object card and the slot search list (`globe.json`
+   `name_positions` columns `status` and `until`). Names match loosely (`namepos.compact`), so another source's
+   spelling of the same name takes the mark. A name without a status shows as before.

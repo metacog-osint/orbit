@@ -255,6 +255,19 @@ def catalog_names(site, objs):
     return out
 
 
+def catalog_status(site):
+    """{norad: {compact name: (status, until)}} for the names the alias file marks current or former, from the same
+    search index as catalog_names; {} when the index is missing or marks none."""
+    sys.path.insert(0, ROOT)
+    from orbit import namepos
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+        return {int(k): v for k, v in namepos.statuses(doc).items() if k.isdigit()}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
 def lons_now(region, now):
     """{norad: longitude in degrees east at `now`} from each object's newest set (the `lon` column of globe.json,
     ideas#366: slot search reads it, so the CLI needs no SGP4). An object whose set SGP4 refuses is left out."""
@@ -330,10 +343,11 @@ def held_block(release, region, elsets_all, now):
             "min_days": HOLD_MIN_DAYS, "cols": ["norad", "from", "to", "lon", "lo", "hi"], "rows": rows}
 
 
-def name_positions(region, objs, other, now, lons=None):
+def name_positions(region, objs, other, now, lons=None, status=None):
     """Names that state a longitude ("Eutelsat 12 West G", "EUTE 36B"), each with the object's longitude from its
     newest set at the build time (ideas#361; orbit/namepos.py). Rows [norad, name, stated lon, lon now, degrees
-    apart]; lon now None when SGP4 fails."""
+    apart, status, until]; lon now None when SGP4 fails, status and until "" unless the alias file marks the name
+    current or former (`status`: catalog_status)."""
     sys.path.insert(0, ROOT)
     from orbit import namepos
     if lons is None:
@@ -345,9 +359,10 @@ def name_positions(region, objs, other, now, lons=None):
             continue
         lon = lons.get(o[0])
         for rec in namepos.positions(every, lon):
-            rows.append([o[0], rec["name"], rec["stated_lon"], lon, rec.get("apart_deg")])
+            st, until = ((status or {}).get(o[0]) or {}).get(namepos.compact(rec["name"]), ("", ""))
+            rows.append([o[0], rec["name"], rec["stated_lon"], lon, rec.get("apart_deg"), st, until])
     return {"tolerance_deg": namepos.TOLERANCE_DEG, "at_utc": now.strftime("%Y-%m-%dT%H:%MZ"),
-            "cols": ["norad", "name", "stated_lon", "lon", "apart_deg"], "rows": rows}
+            "cols": ["norad", "name", "stated_lon", "lon", "apart_deg", "status", "until"], "rows": rows}
 
 
 def build(release, site, now=None, snapshot=None):
@@ -389,7 +404,7 @@ def build(release, site, now=None, snapshot=None):
         pass
     other = catalog_names(site, objs)
     try:
-        namepos_block = name_positions(region, objs, other, now, lons)
+        namepos_block = name_positions(region, objs, other, now, lons, catalog_status(site))
     except Exception as e:  # noqa: BLE001: reported on the page and in the log
         print(f"geo page: name positions skipped: {e!r}")
         namepos_block = {"error": f"{type(e).__name__}: {e}"}

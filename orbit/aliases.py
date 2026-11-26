@@ -5,7 +5,9 @@ Design: the private planning notes, section 3. One claim per entry, reviewed by 
 - a **name** for one object: `norad` (or `jcat` for an object with no number), `name`, `basis`, `source` (an id
   from doctrine/sources.json), `read`, `evidence` (a list: a link needs evidence beyond a name), and optionally
   `swf_key` (SWF's exact text) with `swf_date` (SWF's date text, when one name means different objects on
-  different rows: SWF's "Olymp" is 40258 on the Oct 2014 row and 55841 on the Mar 2023 row);
+  different rows: SWF's "Olymp" is 40258 on the Oct 2014 row and 55841 on the Mar 2023 row). `status` says whether
+  the name is the object's `current` or `former` name (left out when not established); a former name may carry
+  `until`, the day it stopped being the name;
 - a **program**: `swf_key`, `program`, `members` (NORAD numbers), `basis`, `source`, `read`, `evidence`.
 
 An entry is never edited to change a number: a wrong one gets `withdrawn: <date>` and `reason`, stays in the file,
@@ -24,8 +26,9 @@ from pathlib import Path
 PATH = Path(__file__).resolve().parent / "data" / "catalog" / "aliases.yml"
 SOURCE = "aliases"
 BASES = ("declared", "attributed", "catalog")
+STATUSES = ("current", "former")
 NAME_KEYS = {"norad", "jcat", "name", "basis", "source", "source_ref", "read", "evidence", "added_by", "added",
-             "swf_key", "swf_date", "withdrawn", "reason", "note"}
+             "swf_key", "swf_date", "withdrawn", "reason", "note", "status", "until"}
 PROGRAM_KEYS = {"swf_key", "program", "members", "basis", "source", "source_ref", "read", "evidence", "added_by",
                 "added", "withdrawn", "reason", "note"}
 _KEY = re.compile(r"^([a-z_][a-z0-9_]*):(?:\s+(.*))?$")
@@ -192,7 +195,7 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
         ev = e["evidence"]
         if not (isinstance(ev, list) and ev and all(isinstance(x, str) and x.strip() for x in ev)):
             raise AliasError(f"{where}: evidence must be a list of at least one statement")
-        for k in ("read", "added", "withdrawn"):
+        for k in ("read", "added", "withdrawn", "until"):
             _check_date(e, k, where)
         if "withdrawn" in e and not e.get("reason"):
             raise AliasError(f"{where}: a withdrawn entry needs a reason")
@@ -211,6 +214,10 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
                 raise AliasError(f"{where}: name must be text")
             if "swf_date" in e and "swf_key" not in e:
                 raise AliasError(f"{where}: swf_date needs swf_key")
+            if "status" in e and e["status"] not in STATUSES:
+                raise AliasError(f"{where}: status must be one of {STATUSES}")
+            if "until" in e and e.get("status") != "former":
+                raise AliasError(f"{where}: until needs status: former")
         if "withdrawn" in e:
             continue
         if not program:
@@ -249,4 +256,7 @@ def name_record(e: dict) -> dict:
            "basis": e["basis"], "cited": e["source"]}
     if e.get("source_ref"):
         out["cited_ref"] = e["source_ref"]
+    for k in ("status", "until"):
+        if k in e:
+            out[k] = e[k]
     return out
