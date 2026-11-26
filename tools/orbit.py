@@ -648,6 +648,7 @@ def find_slot(slot: float, query: str, search: dict, geo: str | None = None, win
         print(f"{gwhere} has no longitudes yet (built before ideas#366): names only.")
     held = globe.get("held") or {}
     res = namepos.at_slot(_slot_objects(globe, search), slot, window, held=held.get("rows"))
+    known = namepos.statuses(search)
     lt, rw = namepos.lon_txt, namepos.REGION_WORD
     print(f"Slot {lt(slot)} (read from {query!r}); GEO page {gwhere} built {globe.get('built_utc')}, catalog read {search.get('read')}.")
     print(f"There now, within {window:g}° ({len(res['there'])}):")
@@ -666,7 +667,8 @@ def find_slot(slot: float, query: str, search: dict, geo: str | None = None, win
                    f" ({rw.get(o['region'], o['region'] or '')})")
         else:
             now = "left orbit" if o["gone"] else "not near GEO on the GEO page"
-        print(f"  {o['norad']:>7}  {o['name']:<34} {'; '.join(o['slot_names'])} -> {now}")
+        said = "; ".join(namepos.marked(n, known.get(str(o["norad"]))) for n in o["slot_names"])
+        print(f"  {o['norad']:>7}  {o['name']:<34} {said} -> {now}")
     if not res["named"]:
         print("  none")
     if "rows" in held:
@@ -711,12 +713,14 @@ def find_name(query: str, index: str | None = None, limit: int = 10, getter=None
         return find_slot(slot, query, doc, geo, window, getter)
     hits = namepos.find(doc, query, limit)
     print(f"{len(hits)} match{'es' if len(hits) != 1 else ''} for {query!r} in {where} (catalog read {doc.get('read')}):")
+    known = namepos.statuses(doc)
     for h in hits:
         others = list(h.get("other_names") or [])
         gone = " (left orbit)" if h.get("gone") else ""
-        print(f"  {h['key']:>7}  {h.get('cospar') or '':<10}  {h.get('name')}{gone}")
+        mine = known.get(str(h["key"]))
+        print(f"  {h['key']:>7}  {h.get('cospar') or '':<10}  {namepos.marked(h.get('name') or '', mine)}{gone}")
         if others:
-            print(f"           also: {'; '.join(others)}")
+            print(f"           also: {'; '.join(namepos.marked(n, mine) for n in others)}")
         stated = [p for p in namepos.positions([h.get("name") or ""] + others, None)]
         if stated:
             print("           names that state a slot: " + "; ".join(f"{p['name']} = named for {namepos.named_txt(p['stated_lon'])}" for p in stated))

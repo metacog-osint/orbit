@@ -107,6 +107,24 @@ def positions(names: list[str], lon: float | None) -> list[dict]:
     return out
 
 
+def statuses(search_doc: dict) -> dict[str, dict[str, tuple[str, str]]]:
+    """The alias file's current and former names from the search index's `name_status`, matched loosely:
+    {key: {compact(name): (status, until or "")}}. An index without the block gives {}."""
+    return {str(k): {compact(name): (st, until or "") for name, st, until in v}
+            for k, v in (search_doc.get("name_status") or {}).items()}
+
+
+def status_txt(status: str, until: str = "") -> str:
+    """"current name", "former name" or "former name, until 2025-12-19"."""
+    return f"{status} name" + (f", until {until}" if until else "")
+
+
+def marked(name: str, known: dict | None) -> str:
+    """The name followed by its status in brackets, when `known` (one object's entry in `statuses`) has one."""
+    got = (known or {}).get(compact(name))
+    return f"{name} ({status_txt(*got)})" if got else name
+
+
 # ---------------------------------------------------------------------------------------------- slots (ideas#366)
 # A GEO slot typed as a query: "12.5W", "12.5° W", "12.5 W", "12 West", "36E", "36 east", or signed degrees east
 # ("-12.5", "+36"). The whole query must be the slot, so "Intelsat 37e" or "Astra 2E" stay name searches. A bare

@@ -438,6 +438,7 @@
     if ((R.fields || {}).name) box.appendChild(el("p", "small muted", R.fields.name));
     var rows = recs("names").sort(function (a, b) { return rankOf(a.source) - rankOf(b.source); }).map(function (x) {
       var nm = el("span", "", x.value + (x.uncertain ? " ?" : ""));
+      if (x.status) nm.appendChild(el("div", "pl", x.status + " name" + (x.until ? ", until " + day(x.until) : "")));
       if (x.qualifier) nm.appendChild(el("div", "pl", "qualifier " + x.qualifier + " (the source's own, kept as written)"));
       var src = el("span", "", label(x.source));
       if (x.field) { var f = el("div", "pl", x.field); f.title = NF[x.field] || ""; src.appendChild(f); }
