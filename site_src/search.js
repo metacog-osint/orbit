@@ -156,8 +156,19 @@
     document.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape") { list.hidden = true; }
     });
+    // ?q= opens the page with that search run, so other programs can link to it: Launch links a launch's COSPAR
+    // launch id ("2026-266"), which lists every piece of that launch.
+    var asked = queryOf(location.search);
+    if (asked) { input.value = asked; last = asked; show(asked); }
+  }
+  function queryOf(search) {
+    var m = /[?&]q=([^&]*)/.exec(search || "");
+    if (!m) return "";
+    var q;
+    try { q = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { return ""; }
+    return q.trim().slice(0, 80);
   }
 
-  window.OrbitSearch = { attach: attach, load: load, find: find, href: href, slotOf: slotOf };
+  window.OrbitSearch = { attach: attach, load: load, find: find, href: href, slotOf: slotOf, queryOf: queryOf };
   document.querySelectorAll("form.obj-search").forEach(attach);
 })();
