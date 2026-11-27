@@ -1141,6 +1141,16 @@ satellites with no recent public set" (`#set-gaps`); one line in the daily lead.
    Luch 2 only. Day file of 21 Nov (read 20:57Z): both come back after 37 days. Day file of 22 Nov: USA 324 and USA
    325 pass 7 days, as that file's "quiet" events also record. At 03:00Z on 27 Nov 2026, three are listed: USA 270
    (newest set 24.8 days old), USA 271 (24.6) and USA 325 (11.7).
+## The GEO role list: claim and status (`orbit-2.45`, 27 Nov 2026)
+`site_src/geo_roles.json` holds 20 objects (`docs/validation/geo-board.md`). Each entry carries, besides its role,
+basis and sources, a `claim` (`declared`: the operator's or the state's own description; `attributed`: an
+assessment by analysts, tracking firms or another government, named in the basis), a `status` (`active`,
+`retired` or `uncertain`), a `status_date` (YYYY-MM or YYYY-MM-DD: the date of the newest source behind the status)
+and a `status_note` saying who reports it. `uncertain` means no recent report was found, and the date is that of
+the newest source. The GEO page shows the claim and the status in the role table and on the object card.
+`check_roles` (`orbit/notable.py`) refuses an entry without a source as [label, https URL], a claim, a status,
+a status date (not after today) or a note; `orbit.py check` runs it and `tests/test_geo_roles.py` holds it. The
+status is the sources' word, never Orbit's reading of the element sets, except where the note says Orbit measured it.
 ## The GEO role list: sources that were opened (`orbit-2.48`, 27 Nov 2026)
 Every entry in `site_src/geo_roles.json` rests on a source that was opened and says what the basis says. A source
 the list cites but could not open (a paywall, an HTTP 403 to scripts) is written `[label, URL, "not opened"]`; the

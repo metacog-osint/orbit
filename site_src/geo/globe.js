@@ -1038,7 +1038,8 @@ function main() {
     if (rp.length) out.push(["RPO (SWF)", rp.map((p) => { const me = p.chaser[0] === o.norad, other = me ? p.target : p.chaser;
       return (me ? "Chaser of " : "Target of ") + esc(other[1]) + " · " + esc(p.when) + (p.mission ? " · " + esc(p.mission) : ""); }).join("<br>")]);
     const role = b.roles && b.roles[String(o.norad)];
-    if (role) out.push(["Listed role", esc(role.role) + ": " + esc(role.basis) + ". " + role.sources.map((s) => '<a href="' + esc(s[1]) + '">' + esc(s[0]) + "</a>").join(", ")]);
+    if (role) out.push(["Listed role", esc(role.role) + (role.claim ? " (" + esc(role.claim) + ")" : "") + ": " + esc(role.basis) + ". " +
+      (role.status ? "Status: " + esc(roleStatus(role)) + ". " : "") + role.sources.map((s) => '<a href="' + esc(s[1]) + '">' + esc(s[0]) + "</a>").join(", ")]);
     const close = (b.close_other_owner || []).filter((p) => p.a[0] === o.norad || p.b[0] === o.norad);
     if (close.length) out.push(["Close to another owner", close.map((p) => { const other = p.a[0] === o.norad ? p.b : p.a; return esc(other[1]) + " (" + esc(other[2]) + ") " + p.km + " km"; }).join("; ")]);
     const man = (b.manoeuvres || []).filter((m) => m.id === o.norad);
@@ -1363,6 +1364,12 @@ function main() {
                     "left down": "Lowered below the zone", left: "Left the zone", gone: "Dropped out of the list", quiet: "No new elements for over 7 days" };
   const pick = (ids, label) => '<button type="button" class="linkish" data-pick="' + ids.join(",") + '">' + esc(label) + "</button>";
   const dayTxt = (s) => { const x = new Date(s + "T00:00:00Z"); return x.getUTCDate() + " " + MON[x.getUTCMonth()] + " " + x.getUTCFullYear(); };
+  // A listed role's status in words: "active as of Feb 2026" or "retired as of 14 Aug 2023", then who says so.
+  function roleStatus(r) {
+    const d = String(r.status_date || ""), m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(d);
+    const when = m ? (m[3] ? +m[3] + " " : "") + MON[+m[2] - 1] + " " + m[1] : d;
+    return r.status + (when ? " as of " + when : "") + (r.status_note ? " (" + r.status_note + ")" : "");
+  }
   function table(head, rows) {
     return '<div class="tw"><table><thead><tr>' + head.map((h) => "<th>" + esc(h) + "</th>").join("") + "</tr></thead><tbody>" + rows.join("") + "</tbody></table></div>";
   }
@@ -1388,9 +1395,10 @@ function main() {
       "</td><td>" + esc(EV_WORD[e.kind] || e.kind) + "</td><td>" + esc(e.region || "") + "</td></tr>")) +
       '<p class="small">' + fmtN(evs.length) + " from " + esc(dayTxt(reg.from)) + " to " + esc(dayTxt(reg.to)) + ".</p>" : "<p>None from " + esc(dayTxt(reg.from || g.region_day)) + ".</p>";
     const roles = g.roles || {}, ids = Object.keys(roles);
-    if ($("geo-roles")) $("geo-roles").innerHTML = ids.length ? table(["Object", "Role", "Basis", "Sources"], ids.map((k) => {
+    if ($("geo-roles")) $("geo-roles").innerHTML = ids.length ? table(["Object", "Role", "Basis", "Status", "Sources"], ids.map((k) => {
       const r = roles[k], o = S.byId.get(+k);
-      return "<tr><td>" + (o ? pick([+k], o.name) : esc(k) + ' <span class="small muted">(not near GEO today)</span>') + "</td><td>" + esc(r.role) + "</td><td>" + esc(r.basis) + "</td><td>" +
+      return "<tr><td>" + (o ? pick([+k], o.name) : esc(k) + ' <span class="small muted">(not near GEO today)</span>') + "</td><td>" + esc(r.role) +
+        (r.claim ? '<br><span class="small muted">' + esc(r.claim) + "</span>" : "") + "</td><td>" + esc(r.basis) + "</td><td>" + (r.status ? esc(roleStatus(r)) : "") + "</td><td>" +
         (r.sources || []).map((x) => '<a href="' + esc(x[1]) + '">' + esc(x[0]) + "</a>").join(", ") + "</td></tr>";
     })) : "<p>None.</p>";
     beltTables(g.belt);
