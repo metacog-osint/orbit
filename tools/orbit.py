@@ -36,7 +36,10 @@ import gzip
 import hashlib
 import json
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -851,12 +854,41 @@ def maneuver_case(root: Path = ROOT, name: str = "sj21") -> int:
     return 0
 
 
+def _tic_archive(lane: str, src) -> None:
+    """A dated copy of the files in folder `src` in the private archive (tools/tic_archive.py: release
+    orbit-<lane>-YYYY-MM of metacog-osint/tic-archive, nothing replaced there), with the archive's own token
+    TIC_ARCHIVE_TOKEN. Raises ReleaseError when the copy fails."""
+    token = os.environ.get("TIC_ARCHIVE_TOKEN", "")
+    if not token:
+        raise geo_region.ReleaseError("secret TIC_ARCHIVE_TOKEN is not set, so nothing can go to the private archive")
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "tic_archive.py"), "put",
+                        "--program", "orbit", "--lane", lane, "--src", str(src)], env={**os.environ, "GH_TOKEN": token})
+    if r.returncode:
+        raise geo_region.ReleaseError(f"the copy to the private archive (lane {lane}) failed")
+
+
+GEO_ARCHIVE = _tic_archive  # (lane, folder) -> None, raises on failure; replaceable in tests
+
+
 def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     """The GEO region (orbit/geo_region.py; workflow geo.yml): one Space-Track gp query for every object near GEO,
     one CelesTrak request for its active GEO list, today's region file and the monthly element files, uploaded to
     the public release geo-YYYY. Skips, with a note and exit 0, when the shared account's hourly gp limit could be
-    broken (Orbit's update run) or today's file was pulled under an hour ago."""
+    broken (Orbit's update run) or today's file was pulled under an hour ago.
+
+    An upload never loses what the releases hold. Exit 1, with nothing uploaded, when a file a release holds does
+    not download whole, a past month's file is missing from its release, an upload would drop an element set the
+    release holds, or a copy to the private tic-archive fails: each gp reply goes there (lane geo-reply) before
+    anything else, and every release file before it is replaced (lane geo-release)."""
     out.mkdir(parents=True, exist_ok=True)
+    try:
+        return _geo_pull(day, out, upload, getter)
+    except geo_region.ReleaseError as exc:
+        print(f"::error::GEO region: {exc}. Nothing uploaded.")
+        return 1
+
+
+def _geo_pull(day: str, out: Path, upload: bool, getter) -> int:
     gh_out = os.environ.get("GITHUB_OUTPUT")
     if upload:
         geo_region.release_get([f"{day}.geo-region.json", f"{geo_region.yesterday(day)}.geo-region.json"], str(out))
@@ -870,6 +902,9 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     if not cred:
         print("::warning::GEO region: no Space-Track credentials (SPACETRACK_IDENTITY, SPACETRACK_PASSWORD); skipped")
         return 0
+    if upload and not os.environ.get("TIC_ARCHIVE_TOKEN"):
+        raise geo_region.ReleaseError("secret TIC_ARCHIVE_TOKEN is not set, so no release file could be archived "
+                                      "before it is replaced; Space-Track not read")
     ST_WAIT()
     busy = ST_SHARED(ST_NOW(), shared=spacetrack.FOR_GEO)  # after the wait, just before the query
     if busy:
@@ -882,7 +917,12 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     finally:
         client.logout()
     fetched = ST_NOW().strftime("%Y-%m-%dT%H:%MZ")
-    _st_raw(ROOT / "data" / "raw", "spacetrack-gp-geo", "gp", client.last_body)
+    raw = _st_raw(ROOT / "data" / "raw", "spacetrack-gp-geo", "gp", client.last_body)
+    if upload:  # the reply first, so a run stopped below still keeps its sets (private, as the update run's replies)
+        kept = ROOT / "data" / "raw" / "spacetrack-gp-geo" / f"{raw['sha256'][:12]}.json.gz"
+        with tempfile.TemporaryDirectory(prefix="geo-reply-") as tmp:
+            shutil.copyfile(kept, Path(tmp) / f"{ST_NOW():%Y%m%dT%H%MZ}-{kept.name}")
+            GEO_ARCHIVE("geo-reply", tmp)
     try:
         active = geo_region.active_ids((getter or fetch.get)(geo_region.ACTIVE_URL, 60))
     except Exception as exc:  # yesterday's list is used instead (geo_region.pull)
@@ -890,14 +930,16 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
         active = None
     months = sorted({r["EPOCH"][:7] for r in records if (r.get("EPOCH") or "") >= geo_region.HISTORY_START})
     if upload:
-        geo_region.release_get([geo_region.elements_name(m) for m in months], str(out))
+        held = geo_region.release_assets({geo_region.tag_for(geo_region.elements_name(m)) for m in months})
+        geo_region.check_new_months(months, held, day)
+        geo_region.release_get([geo_region.elements_name(m) for m in months], str(out), held=held)
     summary, paths = geo_region.pull(day, str(out), records, active, fetched)
     print(f"{day}: {summary['objects']} objects near GEO; zone {summary['zone']}, graveyard {summary['graveyard']}; "
           f"{summary['events']} events{' (first day: none)' if summary['first_day'] else ''}; "
           f"active list {summary['active_listed']}; element sets by month {summary['element_months']}; "
           f"{client.requests} Space-Track request(s)")
     if upload:
-        geo_region.release_put(paths)
+        geo_region.release_put(paths, archive=lambda folder: GEO_ARCHIVE("geo-release", folder))
         print(f"uploaded {len(paths)} file(s)")
     if gh_out:
         with open(gh_out, "a", encoding="utf-8") as fh:

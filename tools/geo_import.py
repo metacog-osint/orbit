@@ -9,6 +9,8 @@ Reads Noisefloor's public releases pnt-data-YYYY-MM (2026-07 on): every geo-elem
 No Space-Track request: Space-Track asks that gp_history be fetched once per object and stored, and Noisefloor
 already holds it. Needs pyarrow (pinned in .github/workflows/geo-import.yml); Orbit's live lanes stay standard
 library. --upload puts the files on Orbit's public releases geo-YYYY (a day file already there is not replaced).
+A month file already there is never replaced either: geo_region.release_put is given no archive, so it refuses
+any replace (orbit-2.36).
 """
 import argparse
 import glob

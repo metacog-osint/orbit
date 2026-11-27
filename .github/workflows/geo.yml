@@ -13,6 +13,13 @@ name: geo
 # and :55 past 00, 06, 12, 18 UTC). GitHub fires this account's schedules hours late, so the hub's tic-dispatch starts
 # this workflow at 03:15 and 15:15 UTC (from 17 Nov 2026); the cron below is the fallback, and a late start is still
 # safe, because of the checks above and because a run skips when today's file was pulled under an hour ago.
+#
+# An upload never loses what the releases hold (tools/orbit.py geo_pull, orbit/geo_region.py release_put): a file a
+# release holds that does not download whole, a past month's file missing from its release, an upload that would
+# drop any element set the release holds, or a failed copy to the private archive stops the run (exit 1) before
+# anything is uploaded. Each gp reply, and every release file before it is replaced, goes to the PRIVATE repo
+# metacog-osint/tic-archive (tools/tic_archive.py, lanes geo-reply and geo-release, dated, nothing replaced there).
+# Token: TIC_ARCHIVE_TOKEN, contents:write on tic-archive only, handed to tic_archive.py alone.
 on:
   schedule:
     - cron: "17 3,15 * * *"
@@ -39,4 +46,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
+          TIC_ARCHIVE_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
         run: python tools/orbit.py geo --upload
