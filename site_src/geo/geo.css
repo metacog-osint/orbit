@@ -52,8 +52,10 @@ button.linkish { font: inherit; font-size: var(--fs-sm); color: var(--acc); back
 .globe-tip { position: absolute; pointer-events: none; background: rgba(11, 14, 18, .92); color: #e7e9ed; border: 1px solid #2c3644; border-radius: var(--r-s);
   padding: .15rem .45rem; font-size: var(--fs-xs); white-space: nowrap; }
 .globe-box { position: absolute; border: 1px dashed #e7e9ed; background: rgba(231, 233, 237, .08); pointer-events: none; }
-.globe-legend { position: absolute; left: .6rem; bottom: .5rem; display: flex; flex-wrap: wrap; gap: .2rem .8rem; font-size: var(--fs-xs); color: #bac0ca;
-  max-width: calc(100% - 1.2rem); pointer-events: none; text-shadow: 0 0 3px #0b0e12; }
+/* The key sits under the canvas on the same dark ground, so no point, label or ring can pass beneath it */
+.globe-stage .globe-view { border-radius: var(--r) var(--r) 0 0; }
+.globe-legend { display: flex; flex-wrap: wrap; gap: .2rem .8rem; padding: .35rem .6rem .5rem; font-size: var(--fs-xs); color: #bac0ca;
+  background: #0b0e12; border-top: 1px solid #1a222d; border-radius: 0 0 var(--r) var(--r); }
 .globe-legend i { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .3rem; vertical-align: -1px; }
 .globe-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: .75rem .9rem; max-height: clamp(360px, 64vh, 720px);
   overflow: auto; box-sizing: border-box; font-size: var(--fs-sm); }

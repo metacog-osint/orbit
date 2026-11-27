@@ -93,6 +93,22 @@ class Page(unittest.TestCase):
         html = (ROOT / "site_src" / "geo.html").read_text(encoding="utf-8")
         self.assertIn("a second rule that needs only two sets", html)
 
+    def test_globe_point_colours_are_the_dark_owner_tokens(self):
+        # method orbit-2.46: every colour mode uses at most the three owner hues and the grey, at their dark values
+        # (the globe is a dark canvas in both themes); that set passes the validator with all pairs on #0b0e12
+        js = (ROOT / "site_src" / "geo" / "globe.js").read_text(encoding="utf-8")
+        css = (ROOT / "site_src" / "style.css").read_text(encoding="utf-8")
+        dark = css[css.index("prefers-color-scheme: dark"):]
+        token = {k: re.search(r"--g-%s:\s*(#[0-9a-f]{6})" % k, dark).group(1) for k in ("us", "cn", "ru", "other")}
+        hue = re.search(r'const HUE = \["(#\w+)", "(#\w+)", "(#\w+)"\], OTHER = "(#\w+)"', js)
+        self.assertIsNotNone(hue)
+        self.assertEqual(hue.groups(), (token["us"], token["cn"], token["ru"], token["other"]))
+        self.assertIn('const SPACE = "#0b0e12"', js)
+        self.assertIn("OWNER_HUE = { US: HUE[0], PRC: HUE[1], CIS: HUE[2] }", js)
+        mode = js[js.index("function colorOf(o)"):js.index("const shown =")]
+        self.assertNotIn("PAL", mode)                       # the five line colours never colour points
+        self.assertNotIn("ownerColor", js)                  # colour follows the owner, never its rank by count
+
     def test_vendored_three_and_no_inline_styles(self):
         three = ROOT / "site_src" / "vendor" / "three"
         for f in ("build/three.module.min.js", "build/three.core.min.js", "examples/jsm/controls/OrbitControls.js", "LICENSE"):

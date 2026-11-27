@@ -437,6 +437,33 @@ Tom's yes).
    with their last two sets (USA 324's drift 0.68 to 0.02 deg a day east between 22 Oct and 15 Nov). Routine
    station-keeping: Orbit 284 against Noisefloor's 135; Orbit's rule marks smaller changes between consecutive sets
    than fixed thresholds on daily snapshots.
+6. **The GEO globe's colours (`orbit-2.46`, 27 Nov 2026).** Points on the globe are compared with every other point,
+   so each colour mode has to pass the dataviz validator with all pairs (`--pairs all`). The globe is a dark canvas
+   in both page themes (`#0b0e12`), so its colours are checked once, in dark mode on that ground. The old palette of
+   seven hues and a grey failed: worst colour-blind pair magenta and aqua, Delta E 1.6 (deuteranopia); worst
+   normal-vision pair violet and blue, 9.8 (floor 15); the grey `#8e97a3` outside the lightness band. Of the
+   reference palette's eight dark hues, no four pass all pairs on `#0b0e12`, and only eight sets of three pass with
+   the grey `#616a75` (blue, orange and aqua among them). Each mode now uses at most the three owner hues and the
+   grey, at the site's dark token values (`--g-us`, `--g-cn`, `--g-ru`, `--g-other`): worst pair 9.4 colour-blind
+   (aqua and orange, deuteranopia) and 16.5 normal vision (grey and aqua), every colour at 3:1 or more on the ground.
+   The grey is neutral by design, so the chroma floor is not applied to it.
+   - **Owner:** US blue, PRC orange, CIS (Space-Track's code for Russia and the former USSR) aqua, all other owners
+     grey, as on the site's other maps. The earlier mode coloured the seven owners with the most objects, so a
+     colour followed a rank, not an owner. Any owner can still be found by typing its code in the search box, and
+     the selected object's details name it.
+   - **Where:** protected zone blue, graveyard orange, crossing the zone aqua; inclined and below the zone share the
+     grey (one key entry, "Inclined or below the zone"). The Where filter still shows either alone, and the
+     selected object's details name its region.
+   - **Type:** payload blue, rocket body orange, debris aqua, other or unknown grey. **Active:** active blue, not
+     listed as active orange.
+   - **Key and labels:** the key sits under the canvas on the same dark ground, not over it, so no point, label or
+     ring passes beneath it. A selected object's name takes the first spot (right, below, above or left of its
+     point) that keeps 2 px clear of every other name, every selected point and the view's edge; a name with no
+     clear spot is left off the globe, and the panel lists every selected object. With about 1,800 points in the
+     belt a name cannot keep clear of every point; its dark halo keeps it readable over them.
+   - **Not changed here:** the panel's line charts (up to five nearest objects, keyed by a numbered list) keep five
+     line colours, and the overlay rings (RPO pairs, arrivals and departures, callouts C1-C8) keep their own
+     colours; the rings are a second shape on the points, not a colour mode.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
