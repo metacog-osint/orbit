@@ -1089,6 +1089,8 @@ def catalog_sources(data_dir: Path, clear: str | None = None) -> int:
         if n.get("refused"):
             bad = True
             print(f"::error::{src} refused: {n['why']}. On hold (catsources.held); a person looks before clearing.")
+        elif n.get("unreachable"):
+            print(f"::warning::{src}: {n['why']}")
         else:
             print(f"{src}: " + (f"read, {n.get('rows')} rows" if n.get("read") else f"not read: {n['why']}"))
     return 1 if bad else 0

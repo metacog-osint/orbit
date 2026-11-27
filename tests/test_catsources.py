@@ -134,6 +134,22 @@ class Fetching(unittest.TestCase):
             self.assertIsNone(catsources.held(catsources.read_json(Path(d) / catsources.STATE, {})[CT],
                                               t("2026-11-20T18:00:00")))
 
+    def test_a_timeout_keeps_the_last_read_puts_nothing_on_hold_and_asks_again_next_start(self):
+        with tempfile.TemporaryDirectory() as d:
+            get, calls = self.fake([CT_DIR, TimeoutError("The read operation timed out"), CT_DIR, CT_BODY,
+                                    ConnectionResetError("reset")])
+            n = catsources.pull(Path(d), t("2026-11-20T17:30:00"), get, only=(CT,))[CT]
+            self.assertFalse(n["read"])
+            self.assertTrue(n["unreachable"])
+            self.assertNotIn("refused", n)
+            self.assertIn("TimeoutError", n["why"])
+            self.assertIsNone(catsources.held(catsources.read_json(Path(d) / catsources.STATE, {})[CT],
+                                              t("2026-11-20T23:10:00")))
+            self.assertTrue(catsources.pull(Path(d), t("2026-11-20T23:10:00"), get, only=(CT,))[CT]["read"])
+            n = catsources.pull(Path(d), t("2026-11-20T23:10:00"), get, only=(WD,))[WD]
+            self.assertTrue(n["unreachable"])
+            self.assertEqual(len(calls), 5)
+
     def test_a_server_error_holds_until_the_next_utc_day(self):
         st = {}
         catsources.hold(st, catsources.Refused(CT, catsources.CT_DIR_URL, 503), t("2026-11-17T18:00:00"))

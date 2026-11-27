@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import csv
 import gzip
+import http.client
 import io
 import json
 import urllib.error
@@ -101,6 +102,18 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 _OPENER = urllib.request.build_opener(_NoRedirect)
+
+
+# A source that does not answer, or stops part way (a timeout, a reset, a cut-off reply), has not refused anything:
+# nothing is put on hold, the last read is kept, and the next scheduled start asks again (20 Nov 2026: CelesTrak's
+# SATCAT file timed out twice and each time failed the whole catalog run with a traceback). Not retried in the run,
+# because CelesTrak asks for one download per update.
+UNREACHABLE = (OSError, http.client.HTTPException)
+
+
+def unreachable_note(source: str, exc: Exception, requests: int) -> dict:
+    return {"read": False, "unreachable": True, "requests": requests,
+            "why": f"{source} did not answer ({type(exc).__name__}: {exc}); kept the last read, asks again next start"}
 
 
 def get(source: str, url: str, accept: str = "*/*", timeout: int = 120) -> bytes:
@@ -204,6 +217,8 @@ def ct_pull(data_dir: Path, now: datetime, state: dict, get=get) -> dict:
     except Refused as exc:
         hold(st, exc, now)
         return {"read": False, "why": str(exc), "refused": exc.code}
+    except UNREACHABLE as exc:
+        return unreachable_note(CT, exc, 2 if "mtime" in locals() else 1)
     rows = ct_parse(body)
     if len(rows) < CT_MIN_ROWS or "NORAD_CAT_ID" not in (rows[0] if rows else {}):
         return {"read": False, "why": f"reply has {len(rows)} rows or lacks NORAD_CAT_ID; kept the last read",
@@ -268,6 +283,8 @@ def wd_pull(data_dir: Path, now: datetime, state: dict, get=get) -> dict:
     except Refused as exc:
         hold(st, exc, now)
         return {"read": False, "why": str(exc), "refused": exc.code}
+    except UNREACHABLE as exc:
+        return unreachable_note(WD, exc, 1)
     rows = wd_parse(body)
     if len(rows) < WD_MIN_ROWS:
         return {"read": False, "why": f"reply has {len(rows)} rows (7,518 items on 17 Nov 2026); kept the last read",
