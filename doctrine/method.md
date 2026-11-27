@@ -11,9 +11,9 @@ waits for Noisefloor's share of the Space-Track account, and adds baselines from
 the launch ledger; `orbit-2.10` adds each payload's orbit from GCAT, Launch's place check on Orbit's hazard areas,
 and the ledger's history and GCAT gap on the page; `orbit-2.11` starts Orbit's own daily archive and adds the globe.
 
-Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
-shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
-makes no warnings.
+Every item is an **observation** (measured or reported, no judgment). Most are tier **routine**; from `orbit-2.49`
+two kinds can be tier **anomaly**, each against a baseline from GCAT's own history (see "Anomalies against GCAT's
+history" below). Orbit makes no warnings.
 
 ## Lanes
 
@@ -224,6 +224,70 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    worded to Tom ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
    0.53 m/s eccentricity mark of 28 Apr 2024; the 1 m/s floor applies to eccentricity too, which is what gave the
    "drops all 9" result Tom approved.
+8. **Precession at each pair's own rate (`orbit-2.43`, 27 Nov 2026).** The node's J2 precession is removed first at
+   the rate each pair's own orbit gives (-1.5 n J2 (Re/p)^2 cos i, the mean of its two sets' rates), and the
+   object's median rate then takes only what is left (lunar and solar pull, higher zonal terms). One median rate
+   left a decaying low orbit's faster precession in long pairs: synthetic, no burn, 450 km and 51.6 deg decaying
+   36 m a day, a 4.5-day gap late in a 120-day history listed 2.5 m/s cross-track. With the change it lists nothing;
+   on the three known cases every listed change stays at the same span, totals move by 0.29 m/s at most, and the
+   ISS stays 5 of 5 with none outside NASA's list. Scaling noise by pair length was measured and not adopted (it
+   added a change outside NASA's list). What the known cases measure, detection and probable false listings
+   included: `docs/validation/maneuver-calibration.md`.
+9. **How soon a change is listed (measured 19-27 Nov 2026).** The lane reads Space-Track when an update run starts
+   and the account's hour allows: the hub's dispatch at :55 past 00, 06, 12 and 18 UTC, and every push to main (the
+   run's own cron is a late fallback). A change is listed in the run that first reads its set and goes live with
+   that run's deploy, about 3 minutes later. Of 84 new element sets of watched objects published in that span, the
+   first read came a median 1.6 hours after Space-Track created the set (its `CREATION_DATE`), 90% within 3.8
+   hours, longest 5.7 hours. Expect up to about 6 hours when nothing is pushed, and longer when a GEO run's query
+   takes the account's hour just before a dispatch: 9 of 112 update runs were held that way, two of them dispatch
+   runs (25 Nov 00:55 and 26 Nov 12:55 UTC; the second left 10 hours between reads). Luch (Olymp) 2's set of 21 Nov
+   15:41 UTC was created at 19:16 UTC. The run at 19:47 was held by the hour after the 18:56 read, and the run at
+   21:06 by the GEO run of 20:56. The change was listed at 00:57 UTC on 22 Nov. Its next set (22 Nov 15:37 UTC,
+   created 19:16) was listed at 20:05 UTC the same day.
+
+## GEO changes wait for a confirming set (`orbit-2.47`, 27 Nov 2026)
+One element set that lies off the orbit gives two marks: a change to that set and a change back from it, with
+opposite signs. On Luch (Olymp) 2's record (13 Mar 2023 to 22 Nov 2026) 42 of 176 listed changes came in 21 such
+pairs: two consecutive single-pair changes with the same main term, the first ending where the second begins,
+whose inclination (cross-track) or semi-major-axis (in-track) changes have opposite signs and cancel to within half
+of the larger.
+1. **The rule (`orbit/maneuver.py`, step 8; GEO only, `CONFIRM_REGIMES`):** a change is listed only once the set
+   after its first marked pair exists and confirms it: the pair from the set before the change to that next set is
+   marked again by the same rule (8 robust deviations of the object's own noise and 0.25 m/s). When it is not, the
+   set that ends the first marked pair alone made the change. That set is left out, counted as `one_set`, and the
+   rule runs again on the rest, so the return mark it gave goes too. A change whose first marked pair ends at the
+   newest set is counted as `awaiting_next_set` and listed when the next set confirms it. Each listed GEO change
+   carries `confirmed_by`, the confirming set's epoch. The card's "Counted, not listed" line gives both counts.
+2. **Why GEO only:** the pattern was measured at GEO. In low orbit the 1 m/s rule for cross-track and eccentricity
+   marks (`orbit-2.8`) already holds back fit noise, and the ISS case lists all five announced reboosts and nothing
+   outside NASA's list without this step.
+3. **What it costs:** a real change is listed one element set later, and the wait is the gap to that set. On the
+   records measured (item 4) the median wait is about 9 to 13 hours: 8.6 h across every judged GEO object, 11.7 h
+   on the SJ-21 case and 12.8 h on Luch 2. Where public sets are sparse it is longer: a median of 23.8 h on the GEO
+   role list, and as long as the next public set takes. The orbit-change page and the GEO page say so. Luch 2's departure from 62°E (first
+   seen in the set of 21 Nov 2026 15:41 UTC, listed at 00:57 UTC on 22 Nov) would have waited for the set of 22 Nov
+   15:37 UTC, listed at 20:05 UTC the same day, about 19 hours later. A real burn undone by a second burn before the
+   next set reads exactly like one set off the orbit and is not listed; the element sets cannot tell the two apart.
+4. **Measured on the record** (delay: the wait the rule adds, from the set before the confirming set to the
+   confirming set; the listing lag in item 9 of "Orbit changes in watched objects" comes on top):
+
+   | Record | Listed before | Listed after | Sets left out | Out-and-back pairs before / after | Delay median / 90% / longest |
+   |---|---|---|---|---|---|
+   | Luch (Olymp) 2 case, 1,349 days | 176 | 119 | 49 | 21 / 1 | 12.8 / 28.4 / 82.9 h |
+   | SJ-21 and BeiDou-2 G2 case, Dec 2021 to Feb 2022 | 17 | 15 | 1 | 1 / 0 | 11.7 / 29.4 / 30.7 h |
+   | The GEO role list (10 objects, 8 judged), Orbit's sets 1 Jul to 27 Nov 2026 | 35 | 27 (2 awaiting) | 6 | 2 / 1 | 23.8 / 88.6 / 119.7 h |
+   | Every judged GEO object in release `geo-2026` (1,748), same span | 8,399 | 6,528 (24 awaiting) | 2,295 | 648 / 104 | 8.6 / 24.1 / 742.7 h |
+
+   SJ-21's tow is still listed (BeiDou-2 G2 raised 1,716 km, SJ-21 raised 1,721 km and returned 1,765 km down); the
+   pair it loses is 27-28 Dec 2021 (0.40 m/s each way across a set 12 minutes after the one before). On Luch 2,
+   every departure and arrival in M. Langbroek's stop table (`docs/validation/luch2-relocations.md`) that had an
+   in-track change of 0.5 m/s or more listed within 2 days still has one (13 of 13; 4 of the 17 dates had none
+   before either). The ISS case is unchanged (5 of 5, 10 listed). Across every judged GEO object, 199 of 6,528
+   listed changes wait more than 48 hours, each because the object's next set came that much later.
+5. **Not measured:** how many of the changes no longer listed were real. No public burn list exists for these
+   objects; the rule removes marks that the next set does not support, which is not proof that nothing happened.
+   The belt board's orbit changes and the GEO callouts' listed-role changes use the same detector, so they follow
+   this rule too; the GEO two-set rule (`orbit-2.38`) is unchanged.
 
 ## Baselines from GCAT's history (`orbit-2.8`)
 Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
@@ -246,6 +310,39 @@ Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the c
 4. **Not from GCAT:** catalog additions by date of cataloging (GCAT keeps no such date) and Orbit's own counts
    (listed orbit changes per object, warnings per area). Those come from Orbit's own daily archive (below, from
    `orbit-2.11`), with baselines after 90 days of it.
+
+## Anomalies against GCAT's history (`orbit-2.49`, 27 Nov 2026)
+Tier anomaly means unusual against Orbit's own baseline, under the feed contract's revision 2.1 rule. It is a count
+or a record, never a warning, a prediction or a judgment of why. Two kinds:
+1. **A 30-day count outside every prior window.** A row of the GCAT baselines (above) whose last 30 days are above
+   or below all 24 windows of 30 days before them becomes one feed item, `orbit:baseline:<series>:<key>`, off-map,
+   linking `/catalog#baseline`. Its `signal` is the recent count against the prior median, with `baseline_n` 24 and
+   `exceedance` 1 in 25 (the smallest 24 windows can show).
+   - **Which side.** Launch attempts (all, by launching country, by GCAT agency) on either side. Payloads and
+     reentries only above: GCAT adds payloads and dates reentries as it learns of them, so a low recent window
+     there can be lag (item 3 above). A low launch count says GCAT lists launches one to three days late.
+   - **Small counts.** Above needs at least 3 in the recent window; below needs at least 3 in every prior window.
+   - **The rule's own flag rate.** `gcat.baseline` counts 24 more windows (four years in all). Each of the 24 prior
+     windows is tested against its own 24 before it, per side; the share that would have been flagged is the
+     row's `flag_rate` and the item's `baseline_ref.flag_rate`. A series the rule flagged on more than 5% of those
+     windows (more than 1 of 24) is not called an anomaly: the kit's cap for a series. A series that grows steadily
+     (most launchers' cadence) is above its past often, so this keeps it out.
+   - **Freshness.** Items are only made while the baseline's recent window ended within 72 hours of the build. GCAT
+     unchanged for longer leaves an old count, so the items drop out until GCAT's next copy.
+   - First measured on GCAT's 27 Nov 2026 copy: 90 rows; the rule fired on 3% of past windows above and 0.4% below,
+     and 11 rows above and 2 below are over the 5% cap. Three rows qualified: the US and SpaceX launch counts below
+     every prior window (8 against 9 to 18, and 7 against 9 to 18; Launch Library 2 also lists 7 SpaceX launches
+     for 29 Oct-27 Nov), and Roskosmos (GCAT agency FKA) above (3 against 0 to 2). Reentries (95 against 109 to
+     277) were below every window but are not flagged on that side.
+2. **A breakup or collision.** A GCAT object with status E (exploded) or C (collided) is rare in GCAT's record:
+   one dated in the 24 windows before 27 Nov 2026. Its feed item (`orbit:breakup:<jcat>`) is tier anomaly for 72
+   hours from the reading that first listed it, the kit's hold for an event, then routine. GCAT dates breakups late,
+   so the hold runs from Orbit's listing (`first_listed` in the snapshot, carried from run to run; `last_change_at`
+   is that listing), not from GCAT's breakup date, which stays the item's `event_start`. The item states how many
+   breakups GCAT dates in the 24 windows before. A first reading with no earlier one dates each by GCAT's breakup
+   date, so the whole record is not called new.
+
+COP reads the tier as it does every program's: an anomaly is unusual against that program's own baseline.
 
 ## Orbit's own daily archive (`orbit-2.11`, 16 Nov 2026)
 Decision 8's second half (Tom, 15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,
@@ -417,6 +514,33 @@ Tom's yes).
    with their last two sets (USA 324's drift 0.68 to 0.02 deg a day east between 22 Oct and 15 Nov). Routine
    station-keeping: Orbit 284 against Noisefloor's 135; Orbit's rule marks smaller changes between consecutive sets
    than fixed thresholds on daily snapshots.
+6. **The GEO globe's colours (`orbit-2.46`, 27 Nov 2026).** Points on the globe are compared with every other point,
+   so each colour mode has to pass the dataviz validator with all pairs (`--pairs all`). The globe is a dark canvas
+   in both page themes (`#0b0e12`), so its colours are checked once, in dark mode on that ground. The old palette of
+   seven hues and a grey failed: worst colour-blind pair magenta and aqua, Delta E 1.6 (deuteranopia); worst
+   normal-vision pair violet and blue, 9.8 (floor 15); the grey `#8e97a3` outside the lightness band. Of the
+   reference palette's eight dark hues, no four pass all pairs on `#0b0e12`, and only eight sets of three pass with
+   the grey `#616a75` (blue, orange and aqua among them). Each mode now uses at most the three owner hues and the
+   grey, at the site's dark token values (`--g-us`, `--g-cn`, `--g-ru`, `--g-other`): worst pair 9.4 colour-blind
+   (aqua and orange, deuteranopia) and 16.5 normal vision (grey and aqua), every colour at 3:1 or more on the ground.
+   The grey is neutral by design, so the chroma floor is not applied to it.
+   - **Owner:** US blue, PRC orange, CIS (Space-Track's code for Russia and the former USSR) aqua, all other owners
+     grey, as on the site's other maps. The earlier mode coloured the seven owners with the most objects, so a
+     colour followed a rank, not an owner. Any owner can still be found by typing its code in the search box, and
+     the selected object's details name it.
+   - **Where:** protected zone blue, graveyard orange, crossing the zone aqua; inclined and below the zone share the
+     grey (one key entry, "Inclined or below the zone"). The Where filter still shows either alone, and the
+     selected object's details name its region.
+   - **Type:** payload blue, rocket body orange, debris aqua, other or unknown grey. **Active:** active blue, not
+     listed as active orange.
+   - **Key and labels:** the key sits under the canvas on the same dark ground, not over it, so no point, label or
+     ring passes beneath it. A selected object's name takes the first spot (right, below, above or left of its
+     point) that keeps 2 px clear of every other name, every selected point and the view's edge; a name with no
+     clear spot is left off the globe, and the panel lists every selected object. With about 1,800 points in the
+     belt a name cannot keep clear of every point; its dark halo keeps it readable over them.
+   - **Not changed here:** the panel's line charts (up to five nearest objects, keyed by a numbered list) keep five
+     line colours, and the overlay rings (RPO pairs, arrivals and departures, callouts C1-C8) keep their own
+     colours; the rings are a second shape on the points, not a colour mode.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
@@ -605,6 +729,30 @@ DIGUI-nn; China SatNet's test satellites, HULIANWANG JISHU SHIYAN, are not count
 Guowang, 275 Qianfan. Published as `/data/sats.json` (`orbit-sats/1`: `fields` and `rows`, rounded to what SGP4 on a map needs);
 the snapshot keeps counts only. The map that draws it is the next step of ideas#71; until then the file is unused.
 
+## Rocket bodies and debris on the map (`orbit-2.51`, 27 Nov 2026)
+CelesTrak publishes no whole-catalog, rocket-body or debris GP group, so these come from Space-Track: **one GP query a
+UTC day** in `catalog.yml`'s run, its own step "Rocket bodies and debris (Space-Track GP, once a day)"
+(`orbit/debrismap.py`, `python tools/orbit.py debris-gp`). The query asks class `gp` for `OBJECT_TYPE` ROCKET BODY or
+DEBRIS, no decay date, an element set from the last 30 days, and only the columns the map draws (`predicates`); three
+requests (log in, the query, log out). It is the account's third GP query, so the hourly rule now holds across three:
+the update run's watch-list query and `geo.yml`'s GEO region query each also wait for this step, and this step waits
+for both (`spacetrack.FOR_MANEUVER`, `FOR_GEO`, `FOR_DEBRIS`; the check runs after the clear-minute wait, just before
+the query). A run that finds the day already read, or another GP query under an hour old, asks nothing; `catalog.yml`
+starts three times a day, so a skipped start is read at the next. A reply with no usable row keeps the last file.
+
+Rows take the map's own format (`orbit-sats/1`, the fields of `/data/sats.json`): type `R` or `D` in `type`;
+Space-Track's COUNTRY_CODE read through the catalog's code table (`stcat.COUNTRY_TO_STATE`) to GCAT's state and ISO
+code, so the owner groups and the owner search treat these rows as they treat payloads (CIS is the Russia/USSR group,
+shown as SU); a code the table lacks is kept as written, group `other`. Space-Track's own LAUNCH_DATE. No
+constellation. Published as `sats-rd.json.gz` on the public release `catalog`, with a dated copy a day on release
+`sats-rd-archive-YYYY-MM`; the update run copies it to `/data/sats-rd.json`. Credit: the disclaimer's citation
+(`doctrine/spacetrack-disclaimer.md` section 3), carried in the file and shown on the page when the rows are loaded.
+
+On the map, an **Object type** filter: Payloads (on), Rocket bodies and Debris (**off by default**). The second file is
+read only when Rocket bodies or Debris is on (link parameter `obj`, e.g. `?obj=p,r,d`); switching those on or off, or
+Reset with them on, reloads the page with the new link. The card gives each object's type; an owner Space-Track does
+not state reads "Not stated". Near-GEO rocket bodies and debris were already public in the GEO region files.
+
 ## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
 Public releases, one per month and kind, unique asset names, never clobbered (`orbit/retention.py`, `tests/test_retention.py`);
 only what is already public or open-licensed goes there. Nothing from Space-Track element sets or case reads.
@@ -615,6 +763,8 @@ only what is already public or open-licensed goes there. Nothing from Space-Trac
   owner changes, late groups; no 50-item cut) as `catalog-changes-<read time>.jsonl.gz` on release `catalog-changes-YYYY-MM`.
   The published lists keep their cut of 50.
 - TIC catalog: `catalog.yml` keeps `catalog-<Monday>.json.gz` once a week on release `catalog-archive-YYYY-MM`.
+- Map rocket bodies and debris (`orbit-2.51`): `catalog.yml` keeps `sats-rd-<day>.json.gz` for each day read on
+  release `sats-rd-archive-YYYY-MM` (Space-Track basic SSA data, published with the citation).
 - Ended NAVAREA warnings: Cordon is the record (it commits `data/navarea.json` hourly and logs changes in its history
   log); Orbit's `navwarn` lane keeps only the areas in force and the daily archive's area keys. No second store.
 - Needs a private store, not built (Space-Track data and the watch list may not go in a public repo): the element-set
@@ -636,12 +786,20 @@ the last-30-days group), with a finding only. Display: globe or flat map, the se
 track, labels on marked objects when zoomed in. Filters and display options are kept in the URL. A table lists the
 first 200 shown objects, those with a finding first. A missing file (Pages answers it with index.html) shows a note,
 and without WebGL the filters and the list still work.
-**Not built from the approved design:** colour by orbit class, and rocket bodies and debris (not in the active
-group). Colour by orbit class was dropped on 26 Nov 2026: points on a map are compared with every other colour, not
+**Not built from the approved design:** colour by orbit class. (Rocket bodies and debris, not in the active group,
+came in `orbit-2.51`: see "Rocket bodies and debris on the map" below.) Colour by orbit class was dropped on 26 Nov 2026: points on a map are compared with every other colour, not
 only a neighbour, so the palette has to pass the dataviz validator with all pairs (`--pairs all`), in light (white
 panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
 with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against
 magenta, violet or aqua in dark mode). The orbit class stays a filter and a column in the list.
+**The owner colours, all pairs (`orbit-2.44`, 27 Nov 2026).** The four owner tokens now pass `--pairs all` in both
+modes. The dark grey is `#616a75`, darker than the old `#7d8794`, which fell to 13.1 normal-vision and 5.2
+deuteranopia Delta E against the aqua `#199e70`. Dark, on `#131822`: worst pair 9.4 for colour-blind vision (aqua
+and orange) and 16.5 for normal vision (grey and aqua), every token at 3:1 or more. Light, on `#ffffff`, unchanged:
+worst 8.2 (grey and aqua, protanopia) and 16.1. The grey is neutral by design, so the validator's chroma floor is not
+applied to it. In light mode the aqua (2.8:1) and grey (2.3:1) sit under 3:1 on white; every owner chip carries its
+flag and code, and each map's list and selected-object details name the owner, which is the relief the validator
+asks for.
 Rocket bodies and debris have no CelesTrak source. CelesTrak's GP groups (its Current Data page and GP
 documentation, read 27 Nov 2026) hold no whole-catalog, rocket-body or debris group: the only debris groups are three
 single clouds (FENGYUN 1C, IRIDIUM 33, COSMOS 2251), and the special sets are the GEO protected zone and potential
@@ -824,7 +982,7 @@ above) stands.
 
 ## GEO relocation feed items (`orbit-2.30`, 24 Nov 2026; ideas#323)
 
-Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in place.
+One feed item per move of a listed-role GEO object, updated in place.
 
 1. **Identity.** `orbit:relocation:<norad>:<estimated start day>`, the same as `subject_id`. The day is the start
    estimated from the first moving set's distance and rate (`geo_tracker.start_estimates`), fixed once that set
@@ -932,8 +1090,16 @@ uploaded, when:
 
 1. **A file the release holds does not download whole:** an error, or a size other than the release lists. Absence
    is read from the release's own file list; a list that cannot be read stops the run too.
-2. **A past month's file is missing from its release.** A month file is started only in its own month (or later),
-   never rebuilt for a month that has passed.
+2. **A month's file is missing from its release when the month cannot be new.** A month file is started only in its
+   own month (or later), never rebuilt for a month that has passed. From `orbit-2.41` (27 Nov 2026), a missing file
+   of the current month stops the run too when the release holds a day file (`YYYY-MM-DD.geo-region.json`) of that
+   month: the run that wrote that day file also wrote the month's element sets, so the file was there and has gone.
+   Two ways there: `gh release upload --clobber` removes the old file before it uploads the new one, so an upload
+   that fails in between leaves the release without the file; or a file removed by hand. Before this, the next run
+   took the month as new and rebuilt it from its one reply (reproduced offline: November's 180 sets to 55, exit 0,
+   nothing archived because nothing was replaced). The run's message points to the private archive's copies (lanes
+   `geo-release` and `geo-reply`), from which a person restores the file before the next run. A month's first run,
+   with no day file of the month on the release yet, still starts its file.
 3. **An upload would drop an element set.** Before uploading, the release's copy is downloaded again, and a month
    file that would lose any (NORAD number, epoch) the release holds is refused.
 4. **The private archive copy fails.** Each gp reply goes to the private repository `metacog-osint/tic-archive`
@@ -977,3 +1143,84 @@ now runs a second rule on those objects only.
    291 marked. On objects not judged at the time: USA 324's stop (found) and 10 marks in the first 8 days of the
    history, when every object had few sets. Luch (Olymp) 2's start across its 37-day gap is found by both rules
    from the same 21 Nov set. The page does not draw `belt.two_set` yet; the data is in `globe.json`.
+
+## Gaps in public element sets (`orbit-2.40`, 27 Nov 2026)
+Space-Track's public data holds element sets for some listed-role GEO satellites days or weeks apart. Luch (Olymp) 2
+had none from 15 Oct to 21 Nov 2026 (37 days): the day files' "quiet" event of 22 Oct recorded the start, the GEO
+page showed nothing, and when its sets came back it had left 62 E. Module `tools/geo_gaps.py` (standard library,
+build time, no request), called by `tools/geo_page.py` into `globe.json`'s `set_gaps`; GEO page section "Listed
+satellites with no recent public set" (`#set-gaps`); one line in the daily lead.
+1. **Scope.** The objects with a listed role (`site_src/geo_roles.json`), in any region, whether or not CelesTrak
+   lists them as active. The day files' "quiet" event covers active payloads in the zone only: USA 271 (in the
+   graveyard) and SJ-21 and SJ-25 (crossing the zone) are outside it.
+2. **Listed.** An object whose newest set in Orbit's files is 7 days old or more at the page's build time
+   (`geo_region.QUIET_DAYS`, the age the "quiet" event uses), with the set's epoch, its age, the longitude and drift
+   it gives (low-inclination formula, as the tracker), the day of the GEO run whose day file first carried it, and
+   the object's earlier gaps of 7 days or more between consecutive sets in Orbit's files (how many, the longest).
+   Every listed-role object's newest set is in a closed list below.
+3. **A set again.** Each day file's newest epoch for the object is compared with the day file before it. A newer
+   set counts when the newest set before it was 7 days old or more at the new file's read time (`fetched_utc`):
+   when the list in item 2 would have held the object just before. That includes every gap of 7 days or more
+   between two epochs, and also a set that reached Orbit's files late: MEV-1's set of 22 Nov 2026 23:29Z was first
+   read on 24 Nov at 23:57Z, after its set of 16 Nov 18:43Z had passed 7 days old there; the two epochs are 6.2
+   days apart, so the entry is marked `late`. The pair shown is the widest between consecutive sets from that
+   newest set to the new file's. Listed for 30 days after the read. The day files imported from Noisefloor (to
+   26 Oct 2026) hold no read time; there only sets 7 days or more apart count.
+4. **Daily lead.** One line (kind `geo_sets`, after the notable lines, linked to `geo.html#set-gaps`) when, in the
+   24 hours before the lead's time, a listed object's newest set passed 7 days old, or a set again (item 3) was
+   first read; at most 3 names in each part, and the read time of Orbit's GEO files. The collect writes the lead
+   before the update run downloads the GEO release, so the GEO page's build adds the line to the site's
+   `snapshot.json` and to the day's lead in the daily archive (`data/state/daily_archive.json` and the site's
+   copy) when that lead is this run's. Until then the lead carries a line saying the check was not made, which
+   stays if the GEO step fails. GEO files read more than 36 hours before the lead give a line saying how old they
+   are instead.
+5. **Wording.** About the source, never the satellite: "no public set", never quiet, inactive or holding its slot,
+   and never why no set was published. No public set is not the same as no movement. Across their gaps in Orbit's
+   files, USA 325's longitude went from 154.76 E to 138.69 E (24.6 days), USA 324's from 108.54 E to 121.36 E
+   (24.1 days), SJ-17's from 45.68 E to 34.96 E (7.2 days) and Luch 2's from 62.00 E to 60.29 E (37 days). A test
+   holds the section, its note and the lead line free of "quiet", "inactive", "dormant" and likelihood words.
+6. **Checks** (`tests/test_geo_gaps.py`; fixture `geo_set_gaps_2026.json`, the ten listed objects' sets
+   1 Jul-26 Nov 2026 and their day-file entries from 1 Oct). Day file of 22 Oct: Luch 2 (newest set 15 Oct 15:56Z)
+   and SJ-25 (15 Oct 18:06Z) pass 7 days that day and are the lead's names; the day file's own "quiet" event has
+   Luch 2 only. Day file of 21 Nov (read 20:57Z): both come back after 37 days. Day file of 22 Nov: USA 324 and USA
+   325 pass 7 days, as that file's "quiet" events also record. At 03:00Z on 27 Nov 2026, three are listed: USA 270
+   (newest set 24.8 days old), USA 271 (24.6) and USA 325 (11.7).
+## The GEO role list: claim and status (`orbit-2.45`, 27 Nov 2026)
+`site_src/geo_roles.json` holds 20 objects (`docs/validation/geo-board.md`). Each entry carries, besides its role,
+basis and sources, a `claim` (`declared`: the operator's or the state's own description; `attributed`: an
+assessment by analysts, tracking firms or another government, named in the basis), a `status` (`active`,
+`retired` or `uncertain`), a `status_date` (YYYY-MM or YYYY-MM-DD: the date of the newest source behind the status)
+and a `status_note` saying who reports it. `uncertain` means no recent report was found, and the date is that of
+the newest source. The GEO page shows the claim and the status in the role table and on the object card.
+`check_roles` (`orbit/notable.py`) refuses an entry without a source as [label, https URL], a claim, a status,
+a status date (not after today) or a note; `orbit.py check` runs it and `tests/test_geo_roles.py` holds it. The
+status is the sources' word, never Orbit's reading of the element sets, except where the note says Orbit measured it.
+## The GEO role list: sources that were opened (`orbit-2.48`, 27 Nov 2026)
+Every entry in `site_src/geo_roles.json` rests on a source that was opened and says what the basis says. A source
+the list cites but could not open (a paywall, an HTTP 403 to scripts) is written `[label, URL, "not opened"]`; the
+page adds "(not opened)" to its label. An entry none of whose sources was opened is refused by `check_roles`
+(`orbit/notable.py`, run by `orbit.py check` and held by `tests/test_geo_role_sources.py`) and, should one reach
+the file, is left off the page and out of the notable rule. A role is never listed on a source nobody read.
+SJ-17 (41838): its earlier basis cited a SpacePolicyOnline article (5 Feb 2022) that covers SJ-21 and never names
+SJ-17. The basis now rests on SWF's fact sheet "Chinese Military and Intelligence Rendezvous and Proximity
+Operations" (June 2026): China declared the satellite a test of advanced technologies; SWF reports it circumnavigated
+ChinaSat-5A in Nov 2016, came within 1.5 km of ChinaSat-1C on 29 Jul 2018, and made RPO with ChinaSat-6B and
+Shijian-20 in 2020. The Space Review (Matthew Mowthorpe and Markos Trichas, 1 Aug 2022) and Defense One (David D.
+Chen and Peter W. Singer, 20 May 2024) report the same approaches.
+
+## Names registered with the United Nations (`orbit-2.50`, 27 Nov 2026)
+Source: the UN Register of Objects Launched into Outer Space, read through UNOOSA's Online Index
+(`orbit/unregister.py`). The UN's terms permit personal, non-commercial use and bar redistributing or compiling the
+Index, so Orbit publishes no register table and imports nothing in bulk.
+
+1. **Requests.** On a person's request only: one request per COSPAR id, at most 10 ids a call, 3 s apart. Replies are
+   kept a week in git-ignored `data/raw/unoosa/` and never published.
+2. **Declared name.** Only the Index's registered-name field counts, without square brackets, on a record marked
+   registered that carries a registration document. A name from the Index's other name field (information it did not
+   receive as a registration) is never a declared name. The official mark on the international designator concerns the
+   designator, not the name. The GSO location is kept only when marked official.
+3. **Review.** A person adds each entry to `orbit/data/catalog/un-register.yml` with `reviewed_by` and `reviewed`.
+   Only reviewed entries are written to `data/un-register.json`; a bad entry stops the build.
+4. **Display.** Object pages join on the COSPAR id and show the name as declared by the state of registry to the UN
+   Register, with the document symbol, a link to the document and the date read. It is the name at registration, never
+   shown as the current name, and it changes no catalog name or number.

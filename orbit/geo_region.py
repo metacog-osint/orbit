@@ -34,6 +34,7 @@ import gzip
 import json
 import math
 import os
+import shutil
 import subprocess
 import tempfile
 from datetime import datetime, timedelta
@@ -365,20 +366,36 @@ def element_keys(path):
 
 
 def check_new_months(months, held, day):
-    """A month file the release does not hold is started only for `day`'s month or a later one. A past month that
-    is not on the release is a lost file or a wrong listing, never a month to rebuild from one reply's sets."""
-    gone = [m for m in sorted(months) if elements_name(m) not in held and m < month_of(day)]
+    """A month file the release does not hold is started only for `day`'s month or a later one, and only while the
+    release holds no day file of that month. A past month that is not on the release is a lost file or a wrong
+    listing, never a month to rebuild from one reply's sets. So is a current month whose day files are on the
+    release: a run that wrote a day file of the month also wrote the month's element sets, so the file was there
+    and has gone (a replace that failed after the old file was removed, or a removal by hand)."""
+    missing = [m for m in sorted(months) if elements_name(m) not in held]
+    gone = [m for m in missing if m < month_of(day)]
     if gone:
         raise ReleaseError(f"{', '.join(map(elements_name, gone))} not on the release, though the month has passed; "
                            "a past month is never rebuilt from one reply")
+    started = {m: sorted(n for n in held if n.startswith(m + "-") and n.endswith(".geo-region.json"))
+               for m in missing}
+    lost = [m for m in missing if started[m]]
+    if lost:
+        days = "; ".join(f"{elements_name(m)}: {len(started[m])} day file(s) of the month, the last "
+                         f"{started[m][-1][:10]}" for m in lost)
+        raise ReleaseError(f"{', '.join(map(elements_name, lost))} not on the release, though it holds day files of "
+                           f"that month ({days}), so the month file was there and has gone; a month is never rebuilt "
+                           "from one reply. Since orbit-2.36 each copy replaced is kept in the private archive "
+                           "(lane geo-release) and each run's reply in lane geo-reply: restore the file to the "
+                           "release from there, then run again")
 
 
 def release_put(paths, repo=None, archive=None):
     """Upload `paths` to their releases geo-YYYY, replacing the files of the same name. First every file the
     releases already hold under those names is downloaded again and checked: a month file that would lose any
     element set (norad, epoch) the release holds is refused, and the release copies about to be replaced go to
-    `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). Any failure raises
-    ReleaseError before the first upload."""
+    `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). With an archive, the
+    files about to go up are copied there too, so the archive alone holds every version the releases have held.
+    Any failure raises ReleaseError before the first upload."""
     repo = _repo(repo)
     names = [os.path.basename(p) for p in paths]
     held = release_assets({tag_for(n) for n in names}, repo)
@@ -396,6 +413,11 @@ def release_put(paths, repo=None, archive=None):
             if archive is None:
                 raise ReleaseError(f"{', '.join(replaced)} would be replaced with no archive copy; refused")
             archive(tmp)
+    if archive is not None:  # the new copies, in the same lane: the next run's replaced copies then add no bytes
+        with tempfile.TemporaryDirectory(prefix="geo-upload-") as up:
+            for p in paths:
+                shutil.copyfile(p, os.path.join(up, os.path.basename(p)))
+            archive(up)
     for p in paths:
         tag = tag_for(os.path.basename(p))
         if _gh("release", "view", tag, "-R", repo).returncode:

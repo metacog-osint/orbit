@@ -124,6 +124,14 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
     }
+    # When Orbit's reading first listed each breakup (orbit-2.49): GCAT dates breakups late, so the feed's anomaly
+    # hold runs from the listing. Carried from the previous snapshot; a first reading has no "before", so it
+    # dates each one by GCAT's own breakup date rather than calling the whole record new.
+    seen = {b["jcat"]: b.get("first_listed") or f"{b['breakup_date'][:10]}T00:00:00Z"
+            for b in prev.get("breakups") or [] if b.get("jcat")}
+    for b in result["breakups"]:
+        b["first_listed"] = seen.get(b["jcat"]) or (
+            recs[0]["fetched_at"] if index_doc else f"{b['breakup_date'][:10]}T00:00:00Z")
     if index_doc:
         result["catalog_changes"] = {"previous_reading_at": index_doc["read_at"],
                                      **gcat.diff(index_doc["objects"], objs, today)}
@@ -312,7 +320,9 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, reentry_norads=None, **_):
     out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
            "thresholds": rep["thresholds"], "events": rep["events"],
            "counted_not_listed": {"below_floor": sum(o.get("below_report") or 0 for o in rep["objects"]),
-                                  "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"])},
+                                  "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"]),
+                                  "geo_one_set": sum(o.get("one_set") or 0 for o in rep["objects"]),
+                                  "geo_awaiting": sum(o.get("awaiting_next_set") or 0 for o in rep["objects"])},
            "quiet_or_untracked": sum(1 for o in rep["objects"] if not o["events"]),
            "stale": sum(1 for o in rep["objects"] if (o.get("note") or "").startswith("no new"))}
     want = set(reentry_norads or [])
@@ -497,7 +507,8 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
     msgs = archive.tip_messages(doc)
     snap["tip_check"] = tip.check(msgs, snap.get("reentries") or [], at,
                                   (_read_index(data_dir) or {}).get("objects") or {}) if msgs else {}
-    snap["lead"] = lead.build(snap, doc)
+    # the GEO element-set line comes later in the run (tools/geo_page.py, orbit-2.40); until then the lead says so
+    snap["lead"] = lead.merge_geo(lead.build(snap, doc), dict(lead.GEO_PENDING))
     archive.keep_lead(doc, snap["lead"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
@@ -574,6 +585,17 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     files["data/cesium.json"] = dump({"token": os.environ.get("CESIUM_ION_TOKEN") or None})
     # Notable orbit changes (orbit-2.26), for readers and tools that want only those: orbit/notable.py.
     files["data/notable.json"] = dump(notable.public(snapshot, _roles(root), feed.SITE))
+    # ITU filings linked to objects by review (orbit-2.42, doctrine/itu-filings.md): reviewed entries of
+    # orbit/data/catalog/itu-links.yml only, per object; no ITU table is published. A bad entry stops the build.
+    from orbit import itu
+    files["data/itu-links.json"] = dump(itu.public_links(itu.load_links(root / "orbit" / "data" / "catalog" / "itu-links.yml"),
+                                                         snapshot.get("generated_at") or ""))
+    # Names registered with the United Nations (orbit-2.50): reviewed entries of orbit/data/catalog/un-register.yml
+    # only, by COSPAR id; no register table is published. A bad entry stops the build.
+    from orbit import unregister
+    files["data/un-register.json"] = dump(unregister.public_names(
+        unregister.load_entries(root / "orbit" / "data" / "catalog" / "un-register.yml"),
+        snapshot.get("generated_at") or ""))
     # The satellite map's file (orbit-2.23), as the sats lane last wrote it; without one the map says so.
     if (root / "data" / SATS).exists():
         files["data/sats.json"] = (root / "data" / SATS).read_text(encoding="utf-8")
@@ -635,10 +657,12 @@ def _slot_objects(globe: dict, search: dict) -> list[dict]:
 
 
 def find_slot(slot: float, query: str, search: dict, geo: str | None = None, window: float | None = None,
-              getter=None) -> int:
+              getter=None, itu: bool = False, refresh: bool = False, itu_io: dict | None = None) -> int:
     """`orbit.py find 12.5W`: who is within `window` of a GEO slot now (the GEO page's longitudes at its build time),
     who carries a name that states the slot, and who held it since the GEO element history starts (ideas#366)."""
     from orbit import namepos
+    from orbit import itu as _itu
+    itu_window = _itu.WINDOW_DEG if window is None else window
     window = namepos.WINDOW_DEG if window is None else window
     if geo:
         raw, gwhere = Path(geo).read_bytes(), geo
@@ -687,13 +711,71 @@ def find_slot(slot: float, query: str, search: dict, geo: str | None = None, win
     if "." not in query:
         print("Names round a slot to the whole degree (Eutelsat's \"12 West\" is 12.5° W), so a whole-degree query may "
               "mean the half degree beside it: widen with --window 1.")
+    filed = find_itu(slot, itu_window, refresh, **(itu_io or {})) if itu else 0
+    if not itu:
+        print("ITU filings for the slot: add --itu (asks ITU Space Explorer; method orbit-2.42).")
     print("Object pages: https://orbit.theintelligence.company/object.html?n=<NORAD>; the GEO page's search takes the same "
           "slot forms.")
-    return 0 if res["there"] or res["named"] or res["held"] else 1
+    return 0 if res["there"] or res["named"] or res["held"] or filed else 1
+
+
+def find_itu(slot: float, window: float, refresh: bool = False, poster=None, getter=None, pacer=None,
+             cache_dir: Path | None = None) -> int:
+    """`orbit.py find 12.5W --itu` (orbit-2.42, doctrine/itu-filings.md): the ITU's active GEO notices filed for
+    the slot and its Resolution 40 statements, asked of ITU Space Explorer on this request only (cached a week in
+    git-ignored data/raw/itu/). Local use: nothing here is published. Returns how many networks and statements
+    it printed."""
+    from orbit import itu, namepos
+    lt = namepos.lon_txt
+    cache = ROOT / "data" / "raw" / "itu" if cache_dir is None else (cache_dir or None)  # False: no cache (tests)
+    pacer = pacer or itu._Pacer()
+    try:
+        got = itu.slot_notices(slot, window, cache, refresh, poster=poster, pacer=pacer)
+    except (OSError, ValueError) as exc:
+        print(f"ITU filings: Space Explorer did not answer ({type(exc).__name__}: {exc}); nothing shown, nothing assumed.")
+        return 0
+    nets = itu.networks(got["rows"])
+    nets.sort(key=lambda g: (namepos.apart(g["lon"], slot) if g["lon"] is not None else 999, g["network"]))
+    how = "cached copy of " if got["cached"] else ""
+    print(f"Filed for {lt(slot)} at the ITU ({len(nets)} networks, {got['total']} active GEO notices with a nominal "
+          f"longitude within {window:g}°; Space Explorer, {how}read {got['read']}):")
+    print("  " + itu.NETWORK_NOTE)
+    for g in nets:
+        steps = "; ".join(dict.fromkeys(f"{n['what']} received {n['received'] or '?'}" for n in g["notices"]))
+        where = lt(g["lon"]) if g["lon"] is not None else "longitude not given"
+        print(f"  {g['network']:<24} {g['filer']:<8} {where:>8}  {steps}")
+        print(f"  {'':<24} {g['notices'][-1]['link']}")
+    if not nets:
+        print("  none")
+    if len(got["rows"]) < got["total"]:
+        print(f"  Only {len(got['rows'])} of {got['total']} notices were read (page limit); narrow --window.")
+    try:
+        r40 = itu.res40_table(cache, refresh, getter=getter, pacer=pacer)
+    except (OSError, ValueError) as exc:
+        print(f"Resolution 40: the table did not load ({type(exc).__name__}: {exc}).")
+        return len(nets)
+    at = itu.res40_at(r40["rows"], slot, window)
+    how = "cached copy of " if r40["cached"] else ""
+    print(f"Resolution 40 statements for {lt(slot)} ({how}the ITU table read {r40['read']}):")
+    print("  " + itu.RES40_NOTE)
+    for x in at["in"]:
+        frm = (f"; the station came from {lt(x['prev_lon'])} ({x['prev_network']}), left {x['left_prev'] or '?'}"
+               if x["moved"] and x["prev_lon"] is not None else "; not moved from another filing's slot")
+        print(f"  in position  {x['network']:<24} {x['adm']:<5} at {lt(x['lon'])} from {x['in_position'] or '?'} "
+              f"({itu.provision(x['prov'])}){frm}")
+    for x in at["out"]:
+        print(f"  left it      {x['prev_network'] or '?'} at {lt(x['prev_lon'])}, left {x['left_prev'] or '?'}: the "
+              f"station went to {x['network']} ({x['adm']}) at {lt(x['lon'])}, in position {x['in_position'] or '?'}")
+    if not at["in"] and not at["out"]:
+        print("  none")
+    print("  Matching a filing or a statement to a satellite is TIC's inference, never the ITU's: compare the dates "
+          "with the GEO record above, and record a link only by review in orbit/data/catalog/itu-links.yml.")
+    print(f"  Source: {itu.CREDIT}. Not published by Orbit.")
+    return len(nets) + len(at["in"]) + len(at["out"])
 
 
 def find_name(query: str, index: str | None = None, limit: int = 10, getter=None, geo: str | None = None,
-              window: float | None = None) -> int:
+              window: float | None = None, itu: bool = False, refresh: bool = False, itu_io: dict | None = None) -> int:
     """`orbit.py find`: every name from every source in the catalog's search index, matched loosely
     (orbit/namepos.py), so a session looks here before the web. The hand-kept alias file is only the reviewed links;
     the index holds Space-Track's, GCAT's, CelesTrak's, Wikidata's, WMO OSCAR's and the aliases' names."""
@@ -713,7 +795,7 @@ def find_name(query: str, index: str | None = None, limit: int = 10, getter=None
     doc = json.loads(raw.decode("utf-8"))
     slot = namepos.parse_slot(query)
     if slot is not None:
-        return find_slot(slot, query, doc, geo, window, getter)
+        return find_slot(slot, query, doc, geo, window, getter, itu, refresh, itu_io)
     hits = namepos.find(doc, query, limit)
     print(f"{len(hits)} match{'es' if len(hits) != 1 else ''} for {query!r} in {where} (catalog read {doc.get('read')}):")
     known = namepos.statuses(doc)
@@ -752,6 +834,9 @@ def object_data(site_dir: Path, getter=None) -> int:
 def check_all(root: Path = ROOT) -> list[str]:
     errs = registers.check(root / "doctrine")
     regs = registers.ids(root / "doctrine")
+    roles_path = root / "site_src" / "geo_roles.json"
+    if roles_path.exists():
+        errs += notable.check_roles(json.loads(roles_path.read_text(encoding="utf-8")))
     feed_path = root / "site" / "data" / "feed.geojson"
     if not feed_path.exists():
         return errs + ["site/data/feed.geojson is missing: run collect and build first"]
@@ -868,6 +953,16 @@ def _tic_archive(lane: str, src) -> None:
 
 
 GEO_ARCHIVE = _tic_archive  # (lane, folder) -> None, raises on failure; replaceable in tests
+CATALOG_ARCHIVE = _tic_archive  # the same, for catalog.yml's copies (lane catalog-release)
+
+
+def _archive_files(archive, lane: str, files: dict) -> None:
+    """{asset name: local path} into a fresh folder, then `archive(lane, folder)`: the folder holds exactly those
+    files under their release names, so a later copy of the same release files shares their bytes."""
+    with tempfile.TemporaryDirectory(prefix=f"{lane}-") as tmp:
+        for name, p in files.items():
+            shutil.copyfile(p, Path(tmp) / name)
+        archive(lane, tmp)
 
 
 def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
@@ -879,7 +974,7 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     An upload never loses what the releases hold. Exit 1, with nothing uploaded, when a file a release holds does
     not download whole, a past month's file is missing from its release, an upload would drop an element set the
     release holds, or a copy to the private tic-archive fails: each gp reply goes there (lane geo-reply) before
-    anything else, and every release file before it is replaced (lane geo-release)."""
+    anything else, and every release file before it is replaced and as it is uploaded (lane geo-release)."""
     out.mkdir(parents=True, exist_ok=True)
     try:
         return _geo_pull(day, out, upload, getter)
@@ -1119,7 +1214,9 @@ def archive_upload(data_dir: Path) -> int:
 def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     """Workflow catalog.yml: the decay store and state from the public release `catalog`, one Space-Track read when
     due, GCAT's catalogs (one request each), the catalog built and uploaded with the store and state. Not due: exit 0
-    with a note. The release exists but its decay store will not download: exit 1, nothing read."""
+    with a note. The release exists but its decay store will not download: exit 1, nothing read. Every version of
+    the release's files goes to the private tic-archive (lane catalog-release): the files as the release holds them
+    before a due read (a failure stops the run, nothing read), and the files uploaded."""
     repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
     held = stcat.release_exists(repo)
     if held and stcat.DECAY_ASSET not in stcat.release_get(data_dir, repo):
@@ -1132,8 +1229,21 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     if not cred:
         print("No Space-Track credentials.")
         return 1
+    now = datetime.now(timezone.utc)
+    if held and stcat.due(now, stcat.read_json(data_dir / stcat.STATE, {})) is None:
+        # Private archive (lane catalog-release): a read is due, so this run replaces the release's files. First a
+        # copy of them as the release holds them now; normally the last run's copy of its uploads, so no new bytes.
+        # A failure stops the run before Space-Track is read, so the once-a-day read is never spent on a run that
+        # cannot keep what it replaces.
+        try:
+            with tempfile.TemporaryDirectory(prefix="catalog-held-") as tmp:
+                stcat.release_copy(Path(tmp), repo)
+                CATALOG_ARCHIVE("catalog-release", tmp)
+        except RuntimeError as exc:
+            print(f"::error::{exc}; Space-Track not read, nothing replaced")
+            return 1
     try:
-        got = stcat.pull(data_dir, cred, history_held=held)
+        got = stcat.pull(data_dir, cred, now=now, history_held=held)
     except spacetrack.NotReady as exc:
         print(f"::notice::Not read: {exc}")
         if clear_hold:
@@ -1156,15 +1266,24 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     out = data_dir / "catalog" / stcat.CATALOG_ASSET
     if catalog_local(raw, out, data_dir):
         return 1
-    stcat.release_put({stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
-                       **{n: out.parent / n for n in (catshards.SHARDS_ASSET, catshards.SEARCH_ASSET,
-                                                      catshards.RULES_ASSET)},
-                       stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
-                       stcat.STATE_ASSET: data_dir / stcat.STATE,
-                       stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
+    files = {stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
+             **{n: out.parent / n for n in (catshards.SHARDS_ASSET, catshards.SEARCH_ASSET, catshards.RULES_ASSET)},
+             stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
+             stcat.STATE_ASSET: data_dir / stcat.STATE,
+             stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}
+    stcat.release_put(files, repo)
     print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {catshards.SHARDS_ASSET}, {catshards.SEARCH_ASSET}, "
           f"{catshards.RULES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
           f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
+    # Private archive: the files just uploaded, so the archive holds every day's catalog (the release keeps only the
+    # newest, the weekly copy below one a week). A failure fails the run after the live files are up; the next due
+    # run's copy of the release, before it replaces anything, then keeps them.
+    failed = False
+    try:
+        _archive_files(CATALOG_ARCHIVE, "catalog-release", files)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        failed = True
     # retention (18 Nov 2026): the catalog is replaced every build, so keep one dated copy a week (already public on
     # release `catalog`); a failure fails the run, after the live files are up
     try:
@@ -1174,7 +1293,38 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
         return 1
     if wk:
         print(f"Kept the weekly copy {wk[0]}.")
-    return 1 if refused else 0
+    return 1 if refused or failed else 0
+
+
+def debris_release(data_dir: Path) -> int:
+    """Workflow catalog.yml, its own step (debrismap.STEP): the map's rocket bodies and debris, one Space-Track GP query
+    a UTC day when the account is clear, uploaded to release `catalog` with a dated copy. Not due or not clear: exit 0
+    with a note, the last file staying up."""
+    from orbit import debrismap
+    repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
+    local = data_dir / debrismap.LOCAL
+    local.parent.mkdir(parents=True, exist_ok=True)
+    stcat._gh("release", "download", stcat.RELEASE, "-R", repo, "-p", debrismap.ASSET, "-O", str(local), "--clobber")
+    cred = spacetrack.credentials(ROOT)
+    if not cred:
+        print("No Space-Track credentials.")
+        return 1
+    try:
+        got = debrismap.pull(data_dir, cred)
+    except spacetrack.NotReady as exc:
+        print(f"::notice::Rocket bodies and debris not read: {exc}")
+        return 0
+    doc = got["doc"]
+    print(f"Space-Track GP: {doc['count']:,} rocket bodies and debris ({doc['by_type']}), {doc['unusable']} unusable, "
+          f"{got['requests']} requests.")
+    try:
+        stcat.release_put({debrismap.ASSET: local}, repo)
+        kept = retention.upload_sats_rd(local, datetime.now(timezone.utc).date(), repo)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        return 1
+    print(f"Uploaded {debrismap.ASSET} to release {stcat.RELEASE}" + (f"; kept {kept[0]}." if kept else "."))
+    return 0
 
 
 def main(argv=None) -> int:
@@ -1193,7 +1343,11 @@ def main(argv=None) -> int:
     fd.add_argument("--index", help="a search.json (or .json.gz) to read instead of the live site's")
     fd.add_argument("--limit", type=int, default=10)
     fd.add_argument("--geo", help="a globe.json to read instead of the live GEO page's (slot queries)")
-    fd.add_argument("--window", type=float, default=None, help="degrees either side of a slot query (default 0.5)")
+    fd.add_argument("--window", type=float, default=None, help="degrees either side of a slot query (default 0.5; "
+                                                               "0.1 for ITU filings' nominal longitudes)")
+    fd.add_argument("--itu", action="store_true", help="slot queries: also the ITU's GEO filings and Resolution 40 "
+                                                       "statements for the slot (asks ITU Space Explorer; local only)")
+    fd.add_argument("--refresh", action="store_true", help="with --itu: ask ITU again, not the week-old cache")
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
                                               "BeiDou-2 G2), iss (2024 reboosts and the May storm) or luch2 (Luch (Olymp) 2, 2023-2026)")
@@ -1218,6 +1372,9 @@ def main(argv=None) -> int:
                                                            "release `catalog`, build, upload (GitHub only)")
     sc.add_argument("--clear-hold", choices=(catsources.CT, catsources.WD),
                     help="with --release: clear a source's hold after a person has looked at the refusal")
+    dg = sub.add_parser("debris-gp", help="the map's rocket bodies and debris: one Space-Track GP query a UTC day, "
+                                          "uploaded to release `catalog` (workflow catalog.yml, GitHub only)")
+    dg.add_argument("--data", default=str(ROOT / "data"))
     cs = sub.add_parser("catalog-sources", help="CelesTrak SATCAT (daily at most) and Wikidata (weekly) for the "
                                                 "catalog, each only when due; local (build step 4)")
     cs.add_argument("--data", default=str(ROOT / "data"))
@@ -1244,6 +1401,8 @@ def main(argv=None) -> int:
     if args.cmd == "spacetrack-catalog":
         return (catalog_release(Path(args.data), args.clear_hold) if args.release
                 else spacetrack_catalog(Path(args.data)))
+    if args.cmd == "debris-gp":
+        return debris_release(Path(args.data))
     if args.cmd == "catalog-sources":
         return catalog_sources(Path(args.data), args.clear_hold)
     if args.cmd == "catalog":
@@ -1279,7 +1438,8 @@ def main(argv=None) -> int:
     if args.cmd == "object-data":
         return object_data(Path(args.site))
     if args.cmd == "find":
-        return find_name(" ".join(args.query), args.index, args.limit, geo=args.geo, window=args.window)
+        return find_name(" ".join(args.query), args.index, args.limit, geo=args.geo, window=args.window,
+                         itu=args.itu, refresh=args.refresh)
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

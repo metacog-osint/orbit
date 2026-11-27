@@ -6,7 +6,11 @@ The method, for each watched object, over its stored Space-Track element sets (G
   1. One set per epoch: where Space-Track has re-issued an epoch, the later-created set is kept.
   2. For each pair of consecutive sets, the changes in semi-major axis (from mean motion), inclination, right
      ascension of the ascending node and eccentricity, less what the object's own steady drift would give over
-     that interval (the median rate across its pairs: drag decay, nodal precession).
+     that interval (the median rate across its pairs: drag decay, nodal precession). From orbit-2.43 the node's
+     J2 precession is first removed at the rate of each pair's own orbit (node_rate_j2), and the median then takes
+     only what is left (lunar and solar pull, higher zonal terms): one median rate left a decaying orbit's faster
+     precession in long pairs (15 Nov 2026 review: a 4.5-day gap at 450 km and 51.6 deg listed 2.5 m/s
+     cross-track with no burn).
   3. Each change as a velocity: in-track from semi-major axis (v * da / 2a), cross-track from inclination and node
      (v * angle), eccentricity (v * de / 2).
   4. The object's own noise: for each of the three, the median and 1.4826 * median absolute deviation across all
@@ -24,12 +28,19 @@ The method, for each watched object, over its stored Space-Track element sets (G
   7. Each listed change also carries dv_sma_ms, the velocity the net semi-major-axis change alone gives
      (v * |da| / 2a, steady drift removed), beside the total, which adds the noisier cross-track and eccentricity
      terms.
+  8. At GEO a change is listed only once the set after it confirms it (orbit-2.47): from the set before the change
+     to the set after its first marked pair, the change again reaches Z deviations and 0.25 m/s. When it does not,
+     that one set lay off the orbit (it gives a change and its return); the set is left out, counted as `one_set`,
+     and the rule runs again. A change at the newest set is counted as `awaiting_next_set` until the next set.
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
-marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
-drag can give the same. Orbit says which object, when and how much; never why, and never a warning. The
-thresholds are not yet calibrated against announced manoeuvres; `python tools/orbit.py maneuver-case` runs the
-known case (Shijian-21 towing BeiDou-2 G2 to a graveyard orbit, January 2022).
+marks are manoeuvres; a re-fit after a tracking gap, a single element set fitted off the orbit, a mis-tagged set,
+or (in low orbit) a geomagnetic storm's drag can give the same. Orbit says which object, when and how much; never why, and never a warning. What the
+known cases measure (`python tools/orbit.py maneuver-case sj21|iss|luch2`; docs/validation/maneuver-calibration.md):
+in low orbit all five of NASA's announced ISS reboosts of 2024, and no change outside NASA's list (10 listed,
+each within 12 hours of a reboost); at GEO the Shijian-21 tow of BeiDou-2
+G2 (January 2022). Before step 8, about a quarter of Luch (Olymp) 2's listed changes came in out-and-back pairs, the
+pattern of a single off set (21 pairs in 176 changes; 1 pair in 119 after it). No case covers medium or highly elliptical orbits, or small GEO station-keeping burns.
 """
 from __future__ import annotations
 
@@ -44,6 +55,7 @@ ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSP
 
 MU = 398600.4418  # km^3/s^2
 RE = 6378.137     # km
+J2 = 0.001082616  # WGS-72, the gravity model SGP4 element sets are fitted with
 SIDEREAL_REV_DAY = 1.0027379093
 Z = 8.0
 FLOOR_MS = 0.05
@@ -57,6 +69,7 @@ WINDOW_DAYS = 30    # changes reported from the last 30 days
 KEEP_DAYS = 120     # the analysis reads the sets of the last 120 days (view()); the store keeps every set
 STALE_DAYS = 3      # no new set for this long is named: an untracked object looks exactly like a quiet one
 GAP_LABEL_H = 48    # a change measured across a gap this long or longer is labelled: it happened somewhere inside it
+CONFIRM_REGIMES = ("GEO",)  # a change is listed once the next set confirms it (orbit-2.47); see confirmed()
 J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
 COMPONENTS = ("in-track", "cross-track", "eccentricity")
 
@@ -142,15 +155,27 @@ def geo_position(s: list) -> dict:
     return {"lon": round(lon, 2), "drift_deg_day": round((s[1] - SIDEREAL_REV_DAY) * 360.0, 3)}
 
 
+def node_rate_j2(a: float, e: float, i_deg: float) -> float:
+    """The first-order secular nodal precession from Earth's oblateness (J2), degrees a day:
+    -1.5 n J2 (Re / p)^2 cos i, with n from a (two-body), p = a (1 - e^2)."""
+    n = math.sqrt(MU / a ** 3)
+    p = a * (1.0 - e * e)
+    return math.degrees(-1.5 * n * J2 * (RE / p) ** 2 * math.cos(math.radians(i_deg))) * 86400.0
+
+
 def _pairs(sets: list) -> list[dict]:
+    """Consecutive set pairs. `dnode` is the node's change less the J2 precession each pair's own orbit gives
+    (orbit-2.43): the mean of the rates at its two sets, times the interval, so a decaying orbit's faster
+    precession is not left in the residual. Wrapped to +-180 degrees only after that removal."""
     out = []
     for p, q in zip(sets, sets[1:]):
         dt = (_dt(q[0]) - _dt(p[0])).total_seconds() / 86400.0
         if dt <= 0:
             continue
         a0, a1 = _a(p[1]), _a(q[1])
+        j2 = (node_rate_j2(a0, p[2], p[3]) + node_rate_j2(a1, q[2], q[3])) / 2 * dt
         out.append({"from": p[0], "to": q[0], "dt": dt, "a": (a0 + a1) / 2, "i": (p[3] + q[3]) / 2,
-                    "da": a1 - a0, "di": q[3] - p[3], "dnode": _wrap180(q[4] - p[4]), "de": q[2] - p[2],
+                    "da": a1 - a0, "di": q[3] - p[3], "dnode": _wrap180(q[4] - p[4] - j2), "de": q[2] - p[2],
                     "p": p, "q": q})
     return out
 
@@ -172,28 +197,13 @@ def _agrees(g: list[dict], p: dict) -> bool:
     return _dominant(g) == _dominant([p]) and da_g * da_p >= 0
 
 
-def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
-    sets = view(obj)
-    out = {"sets": len(sets), "events": [], "regime": None, "last_epoch": sets[-1][0] if sets else None,
-           "max_gap_h": None, "note": None}
-    if not sets:
-        out["note"] = "no element sets"
-        return out
-    last = sets[-1]
-    out["regime"] = reg = regime(last[1], last[2])
-    if reg == "GEO":
-        out["geo"] = geo_position(last)
-    age = (now - _dt(last[0])).total_seconds() / 86400.0
-    if age > STALE_DAYS:
-        out["note"] = f"no new element set for {age:.1f} days"
-    pairs = _pairs(sets)
-    if pairs:
-        out["max_gap_h"] = round(max(p["dt"] for p in pairs) * 24, 1)
-    if len(pairs) < MIN_PAIRS:
-        out["note"] = out["note"] or f"baseline too short ({len(pairs)} pairs of {MIN_PAIRS})"
-        return out
-    rated = [p for p in pairs if p["dt"] >= MIN_RATE_DT] or pairs
-    rate = {k: median(p[k] / p["dt"] for p in rated) for k in ("da", "di", "dnode", "de")}
+def terms(pairs: list[dict], rate: dict | None = None) -> dict:
+    """Each pair's change as velocities (p["dv"], p["total"]), less the object's own steady drift: the median rate
+    across its pairs of the semi-major axis, inclination, node (after J2) and eccentricity, or `rate` when given
+    (a confirming pair is judged with the rates of the object's own pairs). Returns the rates."""
+    if rate is None:
+        rated = [p for p in pairs if p["dt"] >= MIN_RATE_DT] or pairs
+        rate = {k: median(p[k] / p["dt"] for p in rated) for k in ("da", "di", "dnode", "de")}
     for p in pairs:
         v = math.sqrt(MU / p["a"]) * 1000.0  # m/s
         ja = p["da"] - rate["da"] * p["dt"]
@@ -206,6 +216,68 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
                    "eccentricity": abs(v * je / 2)}
         p["total"] = math.sqrt(sum(x * x for x in p["dv"].values()))
+    return rate
+
+
+def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
+    """Orbit's rule on the object's sets. In CONFIRM_REGIMES (GEO) a change is listed only once the set after it
+    confirms it (orbit-2.47): from the set before the change to the set after its first marked pair, the change must again
+    reach Z robust deviations of the object's noise and the regime's listing floor. When it does not, the set that
+    ends the change's first marked pair alone made it (one set off the orbit, which also gives the out-and-back pair it returns by): that set
+    is left out and the rule runs again. A change ending at the newest set waits for the next set."""
+    sets = list(view(obj))
+    off: list[str] = []
+    while True:
+        out, drop = _detect(sets, now, window_days)
+        if drop is None:
+            break
+        off.append(sets[drop][0])
+        sets = sets[:drop] + sets[drop + 1:]
+    if out["regime"] in CONFIRM_REGIMES:
+        out["sets"] = len(sets) + len(off)
+        out["one_set"] = len(off)          # changes the next set did not confirm: counted, not listed
+        out["one_set_epochs"] = off
+    return out
+
+
+def _confirmed(g: list[dict], sets: list, idx: dict, rate: dict, base: dict, reg: str):
+    """For a change (its marked pairs `g`): the index of the set after its first marked pair, and whether the pair
+    from the set before the change to that set is marked again by the same rule. A change that goes on over several
+    sets is confirmed by its own next set. None when no later set is held yet."""
+    j = idx[g[0]["to"]]
+    if j + 1 >= len(sets):
+        return None, False
+    pair = _pairs([g[0]["p"], sets[j + 1]])
+    if not pair:
+        return j + 1, False
+    p = pair[0]
+    terms([p], rate)
+    z = max((p["dv"][c] - base[c][0]) / max(base[c][1], 1e-6) for c in COMPONENTS)
+    return j + 1, z >= Z and p["total"] >= REPORT_MS.get(reg, FLOOR_MS) and p["total"] <= p["v"] * IMPLAUSIBLE_FRAC
+
+
+def _detect(sets: list, now: datetime, window_days: int) -> tuple[dict, int | None]:
+    """One pass of the rule. Returns (result, None), or (partial result, index of a set to leave out) when a GEO
+    change is not confirmed by the set after it."""
+    out = {"sets": len(sets), "events": [], "regime": None, "last_epoch": sets[-1][0] if sets else None,
+           "max_gap_h": None, "note": None}
+    if not sets:
+        out["note"] = "no element sets"
+        return out, None
+    last = sets[-1]
+    out["regime"] = reg = regime(last[1], last[2])
+    if reg == "GEO":
+        out["geo"] = geo_position(last)
+    age = (now - _dt(last[0])).total_seconds() / 86400.0
+    if age > STALE_DAYS:
+        out["note"] = f"no new element set for {age:.1f} days"
+    pairs = _pairs(sets)
+    if pairs:
+        out["max_gap_h"] = round(max(p["dt"] for p in pairs) * 24, 1)
+    if len(pairs) < MIN_PAIRS:
+        out["note"] = out["note"] or f"baseline too short ({len(pairs)} pairs of {MIN_PAIRS})"
+        return out, None
+    rate = terms(pairs)
     base = {c: _robust([p["dv"][c] for p in pairs]) for c in COMPONENTS}
     out["noise_ms"] = {c: round(base[c][1], 4) for c in COMPONENTS}
     cutoff = _iso(now - timedelta(days=window_days))
@@ -228,6 +300,10 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
             groups.append([p])
     out["below_report"] = 0
     out["leo_off_track"] = 0
+    confirm = reg in CONFIRM_REGIMES
+    if confirm:
+        out["awaiting_next_set"] = 0
+        idx = {s[0]: k for k, s in enumerate(sets)}
     for g in groups:
         total = sum(p["total"] for p in g)
         if total < REPORT_MS.get(reg, FLOOR_MS):
@@ -238,6 +314,14 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         if reg == "LEO" and total < LEO_OFF_TRACK_MS.get(dominant, 0.0):
             out["leo_off_track"] += 1  # counted, not listed: low-orbit cross-track and eccentricity noise
             continue
+        if confirm:
+            nxt, ok = _confirmed(g, sets, idx, rate, base, reg)
+            if nxt is None:
+                out["awaiting_next_set"] += 1  # counted, not listed until the next set confirms it
+                out.setdefault("awaiting", []).append({"from": g[0]["from"], "to": g[-1]["to"]})
+                continue
+            if not ok:
+                return out, idx[g[0]["to"]]
         a = sum(p["a"] for p in g) / len(g)
         ev = {"from": g[0]["from"], "to": g[-1]["to"], "dv_ms": round(total, 3),
               "dv_sma_ms": round(g[0]["v"] * abs(sum(p["ja"] for p in g)) / (2 * a), 3),
@@ -252,8 +336,10 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
             b, a = geo_position(g[0]["p"]), geo_position(g[-1]["q"])
             ev["geo"] = {"lon_before": b["lon"], "lon_after": a["lon"], "drift_before": b["drift_deg_day"],
                          "drift_after": a["drift_deg_day"]}
+        if confirm:
+            ev["confirmed_by"] = sets[nxt][0]
         out["events"].append(ev)
-    return out
+    return out, None
 
 
 def score(events: list[dict], announced: list[dict], tolerance_h: float = 12.0, storm: dict | None = None) -> dict:
@@ -284,4 +370,5 @@ def report(store: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
                     key=lambda e: e["to"], reverse=True)
     return {"objects": objs, "events": events, "window_days": window_days,
             "thresholds": {"z": Z, "floor_ms": FLOOR_MS, "report_ms": REPORT_MS, "leo_off_track_ms": LEO_OFF_TRACK_MS,
+                           "confirm_regimes": list(CONFIRM_REGIMES),
                            "min_pairs": MIN_PAIRS, "merge_days": MERGE_DAYS}}

@@ -152,14 +152,34 @@ def tracks(elsets, norads, end, days, step):
 
 
 def roles(path=os.path.join(ROOT, "site_src", "geo_roles.json")):
-    """{str(norad): {role, basis, sources}} for the objects whose role published reporting supports."""
+    """{str(norad): {role, claim, basis, status, status_date, status_note, sources}} for the objects whose role
+    published reporting supports."""
     try:
         with open(path, encoding="utf-8") as f:
             d = json.load(f)
     except (OSError, ValueError):
         return {}
-    return {str(o["id"]): {"role": o["role"], "basis": o.get("basis", ""), "sources": o.get("sources", [])}
-            for o in d.get("objects", []) if o.get("role")}
+    return {str(o["id"]): {"role": o["role"], "claim": o.get("claim", ""), "basis": o.get("basis", ""),
+                           "status": o.get("status", ""), "status_date": o.get("status_date", ""),
+                           "status_note": o.get("status_note", ""), "sources": _sources(o)}
+            for o in d.get("objects", []) if o.get("role") and _opened(o)}
+
+
+NOT_OPENED = "not opened"  # orbit/notable.py NOT_OPENED: a cited source its reviewer could not open
+
+
+def _not_opened(s):
+    return isinstance(s, list) and len(s) == 3 and s[2] == NOT_OPENED
+
+
+def _opened(o):
+    """At least one of the entry's sources was opened (orbit/notable.py check_roles refuses an entry with none)."""
+    return any(not _not_opened(s) for s in o.get("sources", []))
+
+
+def _sources(o):
+    """[label, URL] pairs for the page; a source cited but not opened says so in its label."""
+    return [[s[0] + " (not opened)", s[1]] if _not_opened(s) else list(s[:2]) for s in o.get("sources", [])]
 
 
 def region_events(release, last_day, days=EVENT_DAYS):
@@ -229,6 +249,69 @@ def movers(objs, elsets, rmap, now):
     except Exception as e:  # noqa: BLE001
         print(f"geo page: relocation tracker skipped: {e!r}")
         return {"error": f"{type(e).__name__}: {e}"}
+
+
+def set_gaps(release, region, elsets, now):
+    """Listed-role objects with no public set for 7 days or more, and sets back after such a gap (tools/geo_gaps.py,
+    method orbit-2.40), from the element sets and the newest day files' `regions`; {"error": ...} on a failure."""
+    import geo_gaps
+    try:
+        paths = sorted(glob.glob(os.path.join(release, "*.geo-region.json")))
+        paths = [p for p in paths if os.path.basename(p)[:10] <= region["day"]][-geo_gaps.READ_DAYS:]
+
+        def docs():
+            for p in paths:
+                try:
+                    with open(p, encoding="utf-8") as f:
+                        yield json.load(f)
+                except (OSError, ValueError):
+                    continue
+        rmap = {k: v["role"] for k, v in roles().items()}
+        cols = region["object_cols"]
+        objs = {o["norad"]: o for o in (dict(zip(cols, row)) for row in region["objects"])}
+        return geo_gaps.build(rmap, elsets, geo_gaps.first_reads(docs(), rmap), objs, now.replace(tzinfo=timezone.utc),
+                              region.get("fetched_utc"), region["day"])
+    except Exception as e:  # noqa: BLE001: reported on the page, in the lead and in the log
+        print(f"geo page: element-set gaps skipped: {e!r}")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+def add_lead(site, block, data_dir=None):
+    """Put the GEO element-set line (orbit/lead.py geo_line, orbit-2.40) into the lead the collect wrote: the site's
+    snapshot.json, and the day's lead in the daily archive (data/state/daily_archive.json and the site's copy), when
+    that lead is this run's. Returns the line, or None."""
+    sys.path.insert(0, ROOT)                           # the orbit package before tools/orbit.py
+    from orbit import archive, lead
+    path = os.path.join(site, "data", "snapshot.json")
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        snap = json.load(f)
+    doc = snap.get("lead")
+    if not doc or not doc.get("at"):
+        return None
+    line = lead.geo_line(block, doc["at"])
+    lead.merge_geo(doc, line)
+    _replace(path, json.dumps(snap, indent=2, ensure_ascii=False) + "\n")
+    for p in ([os.path.join(data_dir, "state", "daily_archive.json")] if data_dir else []) + [os.path.join(site, "data", "archive.json")]:
+        try:
+            with open(p, encoding="utf-8") as f:
+                arc = json.load(f)
+        except (OSError, ValueError):
+            continue
+        kept = ((arc.get("days") or {}).get(doc["at"][:10]) or {}).get("lead") or {}
+        if kept.get("at") != doc["at"]:
+            continue                                   # the archive holds another run's lead: leave it
+        archive.keep_lead(arc, doc)
+        _replace(p, json.dumps(arc, ensure_ascii=False, separators=(",", ":")) + "\n")
+    return line
+
+
+def _replace(path, text):
+    """Write a whole file or nothing: a failed write never leaves the archive or the snapshot cut short."""
+    with open(path + ".part", "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+    os.replace(path + ".part", path)
 
 
 def catalog_names(site, objs):
@@ -375,7 +458,7 @@ def name_positions(region, objs, other, now, lons=None, status=None):
             "cols": ["norad", "name", "stated_lon", "lon", "apart_deg", "status", "until"], "rows": rows}
 
 
-def build(release, site, now=None, snapshot=None):
+def build(release, site, now=None, snapshot=None, data_dir=None):
     now = (now or datetime.now(timezone.utc)).replace(tzinfo=None, second=0, microsecond=0)
     region = newest(glob.glob(os.path.join(release, "*.geo-region.json")), lambda d: "objects" in d)
     if not region:
@@ -431,7 +514,7 @@ def build(release, site, now=None, snapshot=None):
            "belt": belt(region, active, elsets, now),
            "names": {str(k): v for k, v in sorted(other.items())},
            "now_names": {str(k): v for k, v in sorted(catalog_now(site).items()) if k in {o[0] for o in objs}},
-           "name_positions": namepos_block, "held": held}
+           "name_positions": namepos_block, "held": held, "set_gaps": set_gaps(release, region, elsets, now)}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
     # the relocation tracker alone, small, for the object pages (method orbit-2.27)
@@ -439,6 +522,7 @@ def build(release, site, now=None, snapshot=None):
     with open(os.path.join(out_dir, "movers.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(mv or {"error": "not built"}, f, separators=(",", ":"), ensure_ascii=False)
     add_relocations(site, mv)
+    doc["lead_line"] = add_lead(site, doc["set_gaps"], data_dir)
     return doc
 
 
@@ -472,7 +556,7 @@ def main():
             snapshot = json.load(f)
     except (OSError, ValueError):
         print(f"geo page: no snapshot at {snap_path}; RPO pairs left out")
-    d = build(args[1], site, snapshot=snapshot)
+    d = build(args[1], site, snapshot=snapshot, data_dir=os.path.dirname(os.path.abspath(snap_path)))
     sizes = {k: os.path.getsize(os.path.join(site, "data", "geo", v["file"])) // 1024 for k, v in d["tracks"].items()}
     npb = d.get("name_positions") or {}
     print(f"names: {len(d['names'])} objects with other names; {len(npb.get('rows') or [])} names state a longitude, "
@@ -483,6 +567,14 @@ def main():
           f"{hb.get('from')} to {hb.get('to')}" if "error" not in hb else f"held stays: {hb['error']}")
     print(f"geo page: {len(d['objects'])} objects; tracks KB by window (days): {sizes}; "
           f"{len(d['region']['events'])} events in {EVENT_DAYS} days; {len(d['rpo']['pairs'])} RPO pairs")
+    sg = d.get("set_gaps") or {}
+    if "error" in sg:
+        print(f"element-set gaps: {sg['error']}")
+    else:
+        silent = [o["name"] for o in sg["objects"] if o["silent"]]
+        print(f"element-set gaps: {len(silent)} of {len(sg['objects'])} listed-role objects with no public set for "
+              f"{sg['quiet_days']} days or more ({', '.join(silent) or 'none'}); {len(sg['back'])} sets back after a gap "
+              f"in {sg['back_days']} days; lead line: {(d.get('lead_line') or {}).get('kind') or 'none'}")
     b = d.get("belt") or {}
     if "error" not in b:
         print(f"belt board: {b['objects']} active objects {b['counts']}; {b['close_other_owner_count']} close pairs of "

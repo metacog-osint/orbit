@@ -13,7 +13,7 @@
         "unambiguous": true,
         "collectable": true
       },
-      "note": "Not live: part of the manoeuvre lane."
+      "note": "The 1 Nov 2026 seed engine's rule, kept as the frozen record; that engine was replaced before it went live. The live lane (orbit-2.4, 14 Nov 2026) uses no confidence and makes no warning: it lists a change in a watched object's Space-Track element sets when one term is at least 8 robust deviations above the object's own noise, from 0.25 m/s at GEO, 0.05 m/s elsewhere and 1 m/s for low-orbit cross-track or eccentricity changes (doctrine/method.md, 'Orbit changes in watched objects'). Measured rates: docs/validation/maneuver-calibration.md."
     },
     {
       "id": "OR-IND-2",
@@ -51,7 +51,7 @@
         "unambiguous": true,
         "collectable": true
       },
-      "note": "Not live: part of the manoeuvre lane."
+      "note": "Live from orbit-2.4 on Space-Track element sets (series named for the seed engine's CelesTrak source, kept as the frozen record): a change measured across a gap of 48 hours or more between consecutive sets carries the gap, and an object with no new set for 3 days is counted as untracked."
     }
   ],
   "warning_problems": [
@@ -62,6 +62,7 @@
       "issue_on_change": "Issue a warning item when a watched object executes a maneuver with delta_v >= 1.5 m/s and calibrated confidence >= 0.75 outside routine station-keeping.",
       "deactivation": "Orbit stabilizes for 14 days with no further delta-v or drift toward another active payload.",
       "frozen": "2026-11-01",
+      "note": "Frozen with the 1 Nov 2026 seed engine. Orbit issues no warning items: every orbit change is an observation at tier routine (doctrine/method.md). The watch condition is live from orbit-2.4; the issue-on-change rule is not used.",
       "hypotheses": [
         {
           "id": "OR-H-1A",
