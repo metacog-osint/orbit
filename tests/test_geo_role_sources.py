@@ -76,6 +76,25 @@ class TestRoleSources(unittest.TestCase):
         self.assertEqual(o["claim"], "attributed")
         self.assertIn("declared a test of advanced technologies", o["basis"])
 
+    def test_the_afrl_angels_fact_sheet_is_marked_not_opened(self):
+        """It answers HTTP 403 to scripts, so ANGELS rests on Wikipedia and Gunter's Space Page, which were opened."""
+        o = next(x for x in DOC["objects"] if x["id"] == 40101)
+        afrl = [s for s in o["sources"] if "kirtland.af.mil" in s[1]]
+        self.assertEqual(afrl[0][2:], [notable.NOT_OPENED])
+        self.assertGreaterEqual(len(notable.opened_sources(o)), 2)
+
+    def test_sj25_purpose_is_declared_and_its_docking_attributed(self):
+        """SAST's own statement at launch (SpaceNews, 6 Jan 2025) gives the purpose; the docking is the trackers'."""
+        o = next(x for x in DOC["objects"] if x["id"] == 62485)
+        self.assertEqual(o["claim"], "declared")
+        self.assertTrue(any("spacenews.com/china-launches-shijian-25" in s[1] for s in o["sources"]))
+        self.assertIn("Attributed:", o["basis"])
+        self.assertIn("China has not confirmed", o["basis"])
+
+    def test_tjs3_status_dates_from_its_newest_activity_report(self):
+        o = next(x for x in DOC["objects"] if x["id"] == 43874)
+        self.assertEqual((o["status"], o["status_date"]), ("active", "2025-01"))
+
 
 if __name__ == "__main__":
     unittest.main()

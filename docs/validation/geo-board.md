@@ -21,9 +21,9 @@ MEV-1, MEV-2 and Luch (Olymp-K 2).
 |---|---|---|---|---|---|
 | 40099 | USA 253 (GSSAP 1) | inspection (declared) | active, 15 Feb 2026 | 72.7° E, above the protected zone | Air & Space Forces Magazine's GSSAP page; Designation-Systems.net; SWF's GSSAP row |
 | 40100 | USA 254 (GSSAP 2) | inspection (declared) | retired, 14 Aug 2023 | 154.4° W, above the protected zone | SpaceNews, 15 Aug 2023; Air & Space Forces Magazine, 17 Aug 2023 and GSSAP page |
-| 40101 | USA 255 (ANGELS) | inspection (declared) | retired, Nov 2017 | 118.3° E, above the protected zone | Wikipedia (AFRL fact sheet); Gunter's Space Page |
+| 40101 | USA 255 (ANGELS) | inspection (declared) | retired, Nov 2017 | 118.3° E, above the protected zone | Wikipedia (AFRL fact sheet, not opened: HTTP 403); Gunter's Space Page |
 | 40258 | Luch (Olymp-K 1) | inspection (attributed) | retired, 30 Jan 2026 | 162.6° E, above the protected zone | Wikipedia (SpaceNews 2015, the French armed forces minister 2018); Space.com, 30 Jan 2026 |
-| 43874 | TJS-3 | inspection (attributed) | active, 17 Feb 2026 | 175.6° E, in the zone | Space.com, 3 Mar 2023 (Orbital Focus, Satellite Dashboard); Breaking Defense, Oct 2021; SWF |
+| 43874 | TJS-3 | inspection (attributed) | active, Jan 2025 | 175.6° E, in the zone | Space.com, 3 Mar 2023 (Orbital Focus, Satellite Dashboard); Breaking Defense, Oct 2021; SWF's RPO fact sheet, Jun 2026; SWF |
 | 43917 | TJS-3 AKM (TJS-3's companion) | inspection (attributed) | uncertain, 20 May 2024 | 78.2° E, above the protected zone | Breaking Defense, Oct 2021 (COMSPOC); Wikipedia; Gunter's Space Page; Defense One |
 | 50321 | Shiyan 12 01 | inspection (attributed) | uncertain, 20 May 2024 | 100.1° E, in the zone | SpaceNews, Jun 2022 (COMSPOC); Defense One, May 2024 (Satellite Dashboard) |
 | 50322 | Shiyan 12 02 | inspection (attributed) | uncertain, 20 May 2024 | 164.2° E, in the zone | as Shiyan 12 01 |
@@ -76,5 +76,27 @@ List them when a public set appears.
 **Not in scope:**
 - chasers in SWF's LEO rows, and its planned missions;
 - targets and clients, for example LINUSS1, Shijian-23 and Intelsat 10-02, unless they are chasers themselves.
+
+## 27 Nov 2026: second re-read
+- **SJ-17 (41838):** its basis was cited to a SpacePolicyOnline article (5 Feb 2022) that covers SJ-21 and never
+  names SJ-17, ChinaSat or Shijian-20. It now rests on SWF's fact sheet "Chinese Military and Intelligence
+  Rendezvous and Proximity Operations" (June 2026), The Space Review (Mowthorpe and Trichas, 1 Aug 2022) and
+  Defense One (20 May 2024). Defense One dates its approaches to shortly after its 2016 checkout, so "later" is gone.
+  Status: active as of 20 Nov 2024, when SWF reports it entering the Western hemisphere; it appears stable at
+  178° W. The same fix reached `main` first (`orbit-2.48`).
+- **TJS-3 (43874):** the status date was the SWF sheet's update date (17 Feb 2026). The newest activity report is
+  the fact sheet's: it reached 148.7° E in Jan 2025, then stopped its drift at 148.23° E. Status: active, Jan 2025.
+- **SJ-21 (49330):** "reported docked" is now in the trackers' own degrees: COMSPOC's "possibly docked" on 13 Jun
+  2025 (Breaking Defense; Slingshot called its data inconclusive), then "thought to have docked" from early Jul to
+  late Nov 2025 (COMSPOC and s2a systems, via SWF's fact sheet).
+- **SJ-25 (62485): declared.** Its builder, SAST (a subsidiary of the state-owned CASC), said at launch that it
+  would verify satellite fuel replenishment and life extension service technology (SpaceNews, Andrew Jones,
+  6 Jan 2025). The servicing role is that declared purpose; the docking and any refuelling are attributed to
+  tracking firms and analysts, and the basis says so.
+- **ANGELS (40101):** Gunter's Space Page says AFRL transferred control authority to the 3rd Space Experimentation
+  Squadron in Jul 2016, giving the 50th Space Wing authority to task it, which then used it for threat replication
+  trajectories. The basis said the 3rd SES "flew it". The AFRL fact sheet is now marked "not opened".
+- A source cited but not opened is now written `[label, URL, "not opened"]` (`orbit-2.48`); an entry with no
+  opened source fails `check_roles`.
 
 **Wording kept:** "Unlisted objects have no listed role, which says nothing about what they are."
