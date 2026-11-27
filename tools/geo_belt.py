@@ -2,7 +2,7 @@
 """geo_belt.py: the GEO page's belt board (globe.json "belt"): every active object's class, today's close pairs of
 different owners, the last week's orbit changes across the whole belt, and the drifting objects.
 
-Moved from Noisefloor's CelesTrak board (tools/geo.py, d751b4c) in step 5 of doctrine/geo-move-plan.md (Tom, 18 Nov
+Moved from Noisefloor's CelesTrak board (tools/geo.py, d751b4c) in step 5 of doctrine/geo-move-plan.md (18 Nov
 2026, "Port to Orbit first"), so nothing the board showed is lost when Noisefloor's copy retires. Called by
 tools/geo_page.py build; no request to Space-Track or CelesTrak.
 
@@ -14,7 +14,7 @@ as Noisefloor's board, with Orbit's own Space-Track element sets.
             SGP4 from its newest set. Pairs of one owner code are counted, not listed (owner codes are often a
             country, and operators co-locate their own satellites on purpose), unless one of the two has a listed role.
   changes   Orbit's rule (orbit/maneuver.py: 8 robust deviations of the object's own noise, 0.25 m/s floor at GEO,
-            10 pairs minimum), the rule Tom chose over Noisefloor's C5 on 17 Nov 2026, run on every set held for each
+            10 pairs minimum), the rule chosen over Noisefloor's C5 on 17 Nov 2026, run on every set held for each
             object; changes ending in the last CHANGE_DAYS (7). Noisefloor's board compared daily CelesTrak snapshots
             with fixed thresholds (drift 0.02 deg a day, inclination 0.02 deg, longitude 0.15 deg). Each change gets
             Noisefloor's kind from the drift and inclination of the sets on either side: routine station-keeping

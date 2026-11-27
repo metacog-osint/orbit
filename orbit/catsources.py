@@ -13,7 +13,7 @@ CelesTrak (celestrak.org/usage-policy.php, by T.S. Kelso, "Updated 2026 Nov 16",
   - "M2M (machine-to-machine) software should immediately stop querying when it receives any non-HTTP 200 responses
     and report the results to a human for investigation." 500 or 503: "All requests should stop for at least 15
     minutes".
-  No licence, redistribution or credit terms are stated; ingested with credit (Tom, 16 Nov 2026), as for Launch
+  No licence, redistribution or credit terms are stated; ingested with credit (16 Nov 2026), as for Launch
   Library 2. So a run asks the directory once (FILE_MTIME of satcat.csv), downloads /pub/satcat.csv (gzip) only when
   that time differs from the last read and no read was made that UTC day, and never follows a redirect. Any answer
   but 200 is a hold: a 500 or 503 holds until the next UTC day; anything else holds until a person clears it

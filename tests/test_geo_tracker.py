@@ -181,7 +181,7 @@ class PageWiring(unittest.TestCase):
         self.assertIn("error", geo_page.movers([{"norad": 55841, "class": "drifting"}], {55841: [{}]}, ROLES, now))
 
     def test_page_wording(self):
-        """Tom's wording (24 Nov 2026): the table heading, both cases named, the braking note, the extrapolated mark;
+        """The approved wording (24 Nov 2026): the table heading, both cases named, the braking note, the extrapolated mark;
         no likelihood words in the section."""
         html = open(os.path.join(ROOT, "site_src", "geo.html"), encoding="utf-8").read()
         js = open(os.path.join(ROOT, "site_src", "geo", "globe.js"), encoding="utf-8").read()

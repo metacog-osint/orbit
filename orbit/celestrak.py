@@ -1,4 +1,4 @@
-"""CelesTrak's last-30-days GP group: element sets for the payloads of recent launches (orbit-2.12, Tom's yes 16 Nov
+"""CelesTrak's last-30-days GP group: element sets for the payloads of recent launches (orbit-2.12, 16 Nov
 2026), so the globe can draw their paths in the days before Orbit holds a Space-Track set for them. Space-Track stays
 the source for the satellites Orbit watches; this is for new payloads' paths only, never for orbit changes.
 

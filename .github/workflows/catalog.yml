@@ -1,5 +1,5 @@
 name: catalog
-# TIC's satellite catalog (orbit/catalog.py, orbit/stcat.py, orbit/catsources.py; build steps 3-4, Tom's yes 17 Nov
+# TIC's satellite catalog (orbit/catalog.py, orbit/stcat.py, orbit/catsources.py; build steps 3-4, 17 Nov
 # 2026): one Space-Track read a day (class satcat, class decay; 4 requests), and in that same run CelesTrak's SATCAT
 # (a directory check, and the file only when it changed: at most once a day) and Wikidata (one SPARQL query a week),
 # then GCAT's catalogs; the catalog built and uploaded with the decay store to this repository's public release

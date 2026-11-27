@@ -112,7 +112,7 @@ reentry warnings from Cordon's copies (14 Nov 2026).
 
 ## Rendezvous and proximity operations (`orbit-2.7`)
 Source: SWF's RPO sheet, linked from the 2026 report's page under "Additional Information"; the report is CC BY-NC
-4.0 (checked 15 Nov 2026). Graded B2, as the ASAT sheet (Tom, 15 Nov 2026: "I trust SWF"; Orbit had proposed
+4.0 (checked 15 Nov 2026). Graded B2, as the ASAT sheet (15 Nov 2026: SWF trusted; Orbit had proposed
 B3). Many rows are SWF's reading of public tracking (a purpose, an "Intelligence" category, a span of months), and
 the card says so.
 1. **SWF's text kept.** Every field as SWF wrote it, its spellings included ("Comos 2521"); the three tabs are
@@ -150,7 +150,7 @@ the card says so.
 ## Headlines for scheduled launches (`orbit-2.5`)
 Source: the Spaceflight News API (Spaceflight News API and The Space Devs), which ties articles to Launch Library 2
 launches. No licence or terms stated (read 15 Nov 2026); asked of The Space Devs in writing.
-1. **Links only** (Tom, 15 Nov 2026): headline, outlet, publication time and the link to the outlet's own page.
+1. **Links only** (15 Nov 2026): headline, outlet, publication time and the link to the outlet's own page.
    Summaries are the publishers' text and images are theirs; neither is kept.
 2. **One request a run**, filtered to the Launch Library 2 ids of the launches scheduled in the next 14 days; no
    request when none are. Each launch shows its three newest headlines; a link listed twice is kept once; links
@@ -162,13 +162,13 @@ launches. No licence or terms stated (read 15 Nov 2026); asked of The Space Devs
 Source: Space-Track.org (USSPACECOM, 18th Space Defense Squadron) GP and GP_HISTORY element sets for a private
 watch list. Space-Track's documentation gives USSPACECOM's blanket approval to redistribute basic SSA data
 "conditioned on appropriate citation". The citation and disclaimer are in `spacetrack-disclaimer.md`, approved by
-Tom on 14 Nov 2026, and appear on the card, in `snapshot.json` (`maneuvers.attribution`) and in the footer. Raw
-element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one item per listed change (kind
+on 14 Nov 2026, and appear on the card, in `snapshot.json` (`maneuvers.attribution`) and in the footer. Raw
+element sets are not republished. In the feed from 15 Nov 2026 (approved): one item per listed change (kind
 `maneuver`, off the map), carrying the citation; COP's gate holds the kind from joins as military context.
 1. **Space-Track's limits kept:** at most four requests a run, 2.5 s apart; GP at most once an hour, never at
    :57-:03 or :27-:33; each object's history (60 days) read once and stored, never asked for again. **The account
    is shared** with Noisefloor, whose daily workflow makes one GP query in its step "GEO region (Space-Track)"
-   (Tom, 15 Nov 2026). The hourly limit is the account's, so from `orbit-2.8` Orbit reads that workflow's recent
+   (15 Nov 2026). The hourly limit is the account's, so from `orbit-2.8` Orbit reads that workflow's recent
    runs from GitHub's API just before asking: while a run is going, or within an hour of that step, it keeps its
    last reading and says why on the lane; if GitHub cannot be read it waits too. Noisefloor checks Orbit's
    snapshot the other way (16 Nov 2026). From the GEO region lane (below), the update run also waits for
@@ -183,9 +183,9 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    velocities. A pair is marked when one term is at least 8 robust deviations (1.4826 x MAD) above the object's
    own median and the total is at least 0.05 m/s; at least 10 pairs are needed first; marks under a day apart are
    one change only when they agree, with the same dominant term and the same sign of semi-major-axis change
-   (`orbit-2.6`, Tom, 15 Nov 2026). A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s
+   (`orbit-2.6`, 15 Nov 2026). A change is listed only at 0.25 m/s or more in geostationary orbit (0.05 m/s
    elsewhere); smaller ones are counted, not listed. **In low orbit** a change whose largest term is cross-track or
-   eccentricity is listed only at 1 m/s or more (`orbit-2.8`, Tom, 15 Nov 2026, from the ISS case below); the rest
+   eccentricity is listed only at 1 m/s or more (`orbit-2.8`, 15 Nov 2026, from the ISS case below); the rest
    are counted, not listed. Every listed change also gives the velocity its net semi-major-axis change alone
    implies (v |da| / 2a, steady drift removed) beside the total, which adds the noisier terms. Geostationary
    objects also show longitude and drift before and after.
@@ -194,7 +194,7 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    which object, when and how much, never why; no warnings.
 5. **Silence is not quiet.** An object with no new set for 3 days is counted as untracked, and the longest gap
    between sets is kept. A change measured across a gap of 48 hours or more between consecutive sets is labelled
-   with that gap on the page (`gap`): it happened somewhere inside it, not at either end (Tom, 14 Nov 2026, after
+   with that gap on the page (`gap`): it happened somewhere inside it, not at either end (14 Nov 2026, after
    the first live reading timed USA 270's change across three weeks).
 6. **The known case** (Shijian-21 towing BeiDou-2 G2, `tools/orbit.py maneuver-case`, run 14 Nov 2026 on 423
    Space-Track sets, 1 Dec 2021 to 1 Mar 2022): G2 raised 1,720 km and SJ-21 1,694 km from 21-25 Jan, SJ-21 back
@@ -221,9 +221,9 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    **With the low-orbit rule (`orbit-2.8`)**: still 5 of 5 hits, 0 marks not in NASA's list; 11 cross-track or
    eccentricity marks counted, not listed, over the whole span (the 9 extras plus 2 beside reboosts). The
    semi-major-axis velocity alone: 1.79 m/s on 23 Feb (NASA 1.725), 1.71 on 14 Mar (NASA 1.59). The rule as first
-   worded to Tom ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
+   first worded ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
    0.53 m/s eccentricity mark of 28 Apr 2024; the 1 m/s floor applies to eccentricity too, which is what gave the
-   "drops all 9" result Tom approved.
+   approved "drops all 9" result.
 8. **Precession at each pair's own rate (`orbit-2.43`, 27 Nov 2026).** The node's J2 precession is removed first at
    the rate each pair's own orbit gives (-1.5 n J2 (Re/p)^2 cos i, the mean of its two sets' rates), and the
    object's median rate then takes only what is left (lunar and solar pull, higher zonal terms). One median rate
@@ -293,7 +293,7 @@ of the larger.
    this rule too; the GEO two-set rule (`orbit-2.38`) is unchanged.
 
 ## Baselines from GCAT's history (`orbit-2.8`)
-Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
+15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
 (`gcat.baseline`), shown in the card `#baseline`; not in the feed.
 1. **Windows:** the last 30 days (UTC dates, today included) against each of the 24 windows of 30 days before
    them (about two years). For each row: the recent count, the prior windows' median, lowest and highest, how many
@@ -348,7 +348,7 @@ or a record, never a warning, a prediction or a judgment of why. Two kinds:
 COP reads the tier as it does every program's: an anomaly is unusual against that program's own baseline.
 
 ## Orbit's own daily archive (`orbit-2.11`, 16 Nov 2026)
-Decision 8's second half (Tom, 15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,
+Decision 8's second half (15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,
 schema `orbit-archive/1`), every day kept (no cap since 18 Nov 2026):
 1. **Listed orbit changes**, each keyed by NORAD number and start date, with name, regime, size and dominant term,
    on days the lane read Space-Track itself (`ok`, or `unchanged` while it waits out the hour). Only what the page
@@ -395,7 +395,7 @@ not checked says so. Every level is a coincidence, never a finding that an area 
 `tic-launch`, graded B2 (Orbit's call).
 
 ## The globe (`orbit-2.11`, 16 Nov 2026)
-Tom's decisions 4 (Cesium ion) and 7 (ground tracks only on the 3D view; COP keeps pads). A "Globe (3D)" switch on
+Decisions 4 (Cesium ion) and 7 (ground tracks only on the 3D view; COP keeps pads). A "Globe (3D)" switch on
 the map card loads CesiumJS 1.146.0 (Apache-2.0) and satellite.js 7.1.0 (MIT), both self-hosted in `vendor/`, and
 draws the flat map's layers on a globe with the same cards. It adds the satellites whose orbit changes Orbit lists:
 each one's place when the page opened and its path over one orbit (a day at GEO), propagated with SGP4 from the
@@ -408,7 +408,7 @@ ion refuses it, Natural Earth II from Cesium's own assets. CesiumWidget only: th
 which the CSP forbids.
 
 ## Paths of new payloads (`orbit-2.12`, 16 Nov 2026)
-Tom's yes, 16 Nov 2026. Lane `paths` makes one request a run for CelesTrak's last-30-days GP group (JSON, about
+Approved 16 Nov 2026. Lane `paths` makes one request a run for CelesTrak's last-30-days GP group (JSON, about
 200 objects) and keeps the sets of objects of GCAT's recent launches, by launch tag: every object GCAT lists as a
 payload of that launch, and, while GCAT hasn't listed them, any other object of the launch whose name doesn't
 mark it as a rocket body, debris or a platform (CelesTrak's "OBJECT A" names stay). Snapshot block
@@ -418,9 +418,9 @@ drag left out, for orientation, not for tracking). CelesTrak's policy: one downl
 for a repeat inside an update keeps the previous sets and is not retried. Space-Track stays the source for watched
 objects and orbit changes; these sets are never used to find orbit changes. Not in the feed.
 
-## The GEO region (16 Nov 2026; step 2 of `geo-move-plan.md`, Tom's "Start step 2")
+## The GEO region (16 Nov 2026; step 2 of `geo-move-plan.md`)
 Moved from Noisefloor, where it ran from 27 Oct 2026 (`tools/geo_region.py` there). The GEO belt is Orbit's subject
-under the boundary Tom accepted on 16 Nov 2026 (Orbit: what is in orbit, who owns it, what it is doing; Noisefloor:
+under the boundary accepted on 16 Nov 2026 (Orbit: what is in orbit, who owns it, what it is doing; Noisefloor:
 signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit.py geo`, workflow `geo.yml`.
 1. **Source:** one Space-Track gp query a run for every object near GEO (mean motion 0.9-1.1 rev/day, eccentricity
    under 0.3, not decayed), through Orbit's client and limits (item 1 of the orbit changes above): at most an hour
@@ -436,7 +436,7 @@ signals, not objects). Module `orbit/geo_region.py`, command `python tools/orbit
    regions, counts, events, the objects with their latest elements, the active list used) and
    `geo-elements-YYYY-MM.json.gz` (schema `orbit-geo-elements/1`, every element set held by epoch month from
    1 Jul 2026, the columns Noisefloor's parquet files had). Basic SSA data, redistributed with Space-Track's
-   citation as Noisefloor did (Tom, 15 Nov 2026). Orbit's private watch list is not in them: they hold every
+   citation as Noisefloor did (15 Nov 2026). Orbit's private watch list is not in them: they hold every
    object near GEO, and the watch-list query stays separate.
 4. **History:** imported once from Noisefloor's public releases (`tools/geo_import.py`, workflow `geo-import.yml`;
    no Space-Track request): 508,742 element sets July-November 2026 and 111 day files, measured 16 Nov 2026.
@@ -456,7 +456,7 @@ collector and live lanes stay standard library. Published on the GEO page from s
 2. **One input change:** the catalogue (name, owner, type) is the newest entry per object across every day file.
    Noisefloor read the newest file only, so LDPE-2 (54219), gone from the public catalogue on 10 Nov 2026, lost its
    type in any later rerun and with it 14 callouts.
-3. **GEO orbit changes: Orbit's rule, not C5 (Tom, 17 Nov 2026).** Compared on the same element history
+3. **GEO orbit changes: Orbit's rule, not C5 (17 Nov 2026).** Compared on the same element history
    (8 Jul-16 Nov 2026) for the 10 listed-role objects and the GEO objects Orbit watches: C5 marked 53 days, Orbit's
    rule ("Orbit changes in watched objects", item 3: 8 robust deviations of the object's own noise, 0.25 m/s floor at GEO) 29
    changes; 27 agree. C5's 26 others: Luch (Olymp) 2 drifting along the belt (15, 0.06-0.55 m/s, within 2-9 of its
@@ -471,17 +471,17 @@ collector and live lanes stay standard library. Published on the GEO page from s
 ## The GEO page (18 Nov 2026; step 4 of `geo-move-plan.md`)
 `geo.html`, moved from Noisefloor's /geo page (globe, belt strip, look angles, sun and shadow, relative motion,
 closest objects, beams, footprint files, callouts). Page only: nothing new in the feed (callout feed items wait on
-Tom's yes).
+approved).
 1. **Data** (`tools/geo_page.py`, at build time in the update run): the newest `<day>.geo-region.json` on the
    `geo-YYYY` releases for the objects and the "Active" colour (CelesTrak's active GEO group from the same
    `geo.yml` run, where Noisefloor read its own CelesTrak snapshot), the monthly element files for the tracks
    (SGP4 per element set until the next, as Noisefloor's `geo_globe.py`), 30 days of the day files' events, and
    `site_src/geo_roles.json`. No request to Space-Track or CelesTrak.
-2. **RPO pairs (Tom, 17 Nov 2026, "Add RPO pairs"):** every row of SWF's RPO sheet (lane `rpo`, the snapshot's
+2. **RPO pairs (17 Nov 2026, "Add RPO pairs"):** every row of SWF's RPO sheet (lane `rpo`, the snapshot's
    names matched to catalogue numbers) whose chaser and target are both near GEO in today's list, one line per
    chaser-target pair between today's positions. Rows with one end near GEO are counted, not drawn. SWF's date and
    mission text are shown as SWF gives them; today's positions say nothing about how close the two were then.
-3. **Callouts:** `geo_callouts.py publish`, the last 14 days of C1-C8 by the frozen v1 rules, except C5 (Tom, 17
+3. **Callouts:** `geo_callouts.py publish`, the last 14 days of C1-C8 by the frozen v1 rules, except C5 (17
    Nov 2026): listed-role orbit changes are Orbit's rule (`orbit/maneuver.detect` on every set held, 8 robust
    deviations, 0.25 m/s floor at GEO, 10 pairs minimum), listed under C5's id with the change in m/s, its main
    term and, for a pair 48 h or more apart, the gap. Objects with under 10 pairs are listed as not judged.
@@ -494,7 +494,7 @@ Tom's yes).
    `geo/satellite.js`. geo.html's import map is the one inline script; its sha256 is in `_headers`' script-src
    (`tests/test_geo_page.py` holds it). The CSP has no `'unsafe-inline'` for styles, so the globe's markup carries
    `data-css` and one MutationObserver applies it through the CSSOM.
-5. **Belt board (18 Nov 2026; step 5, Tom: "Port to Orbit first"):** `tools/geo_belt.py`, called by `geo_page.py
+5. **Belt board (18 Nov 2026; step 5, "Port to Orbit first"):** `tools/geo_belt.py`, called by `geo_page.py
    build` into `globe.json`'s `belt`, drawn in the page's "Belt board" section. It carries what Noisefloor's CelesTrak
    board (`tools/geo.py`) showed and step 4 did not move, so nothing is lost when Noisefloor's copy retires. Scope:
    CelesTrak's active GEO group (the day file's `active`), as Noisefloor's board, with Orbit's Space-Track sets.
@@ -546,7 +546,7 @@ Tom's yes).
      colours; the rings are a second shape on the points, not a colour mode.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
-Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
+All three items approved, 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
 log in, one query of Space-Track's class `tip` (messages of the last 5 days, newest first), log out; three
 requests a run on the shared account. TIP is not GP, so the account's once-an-hour GP rule and the wait for
 Noisefloor's and the GEO run's queries do not apply. Reentry and decay data are basic SSA data under USSPACECOM's
@@ -564,11 +564,11 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    off the map). From `orbit-2.15`, on the globe only and only when picked: the ground track over the window
    (item 6).
 4. USSPACECOM's predictions, quoted as issued: Orbit adds no probability, warning or judgment. Not in the feed;
-   whether to add it, and under which requirement, is Tom's call.
+   whether to add it, and under which requirement, is a separate decision.
 5. Checked on the reply of 17 Nov 2026 03:3x UTC: 191 messages over 14 days, 7 objects with an open window
    (fixture `tests/fixtures/spacetrack_tip_20261117.json`). Early messages give the next report in 72 h, hence
    5 days and not 3.
-6. **Reentry tracks on the globe (`orbit-2.15`, Tom's "Reentry tracks", 16 Nov 2026 about 10:30 PM CST).** The
+6. **Reentry tracks on the globe (`orbit-2.15`, "Reentry tracks", 16 Nov 2026 about 10:30 PM CST).** The
    update run's one GP query (the watch list's, orbit changes item 1) also asks for the objects with an open TIP
    window, soonest first, at most 30: no extra request, and the hourly rule unchanged. Lane `decay` now runs
    before `maneuver` so the same run's predictions are used. Their newest sets go to snapshot block
@@ -579,7 +579,7 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    the dot. Checked 17 Nov 2026 on Starlink 5046 (53892, TIP 08:59 UTC +-60 min) with CelesTrak's set of 16 Nov
    22:56 UTC: the line passes within about 100 km of TIP's point (one point a minute limits it) and reaches it about
    3 minutes before TIP's time; with drag left out, 130 km. A drawing for orientation, not a prediction of Orbit's.
-7. **TIP against the reentry (`orbit-2.17`, Tom's "Yes, build it", 18 Nov 2026 about 9:40 AM CST).** Space-Track's
+7. **TIP against the reentry (`orbit-2.17`, 18 Nov 2026 about 9:40 AM CST).** Space-Track's
    reply covers 5 days and GCAT dated these reentries about 3 days later, so the TIP lane now hands every message of
    the reply on (`decay.all_messages`: NORAD number, message time, predicted time, window, message id) and Orbit's
    daily archive keeps each one once, on the day a run first saw it (`tip`, deduplicated over 10 days; carried or
@@ -604,8 +604,8 @@ blanket approval, conditioned on citation (`spacetrack-disclaimer.md`); the card
    records, not a rating of either.
 
 ## Daily lead (`orbit-2.18`, 18 Nov 2026)
-Tom, 18 Nov 2026 about 10:30 AM CST: "capture all of those ideas and the plan, then begin with the daily lead
-first"; readers are "mostly people with some amount of elevated knowledge but there will be people new to this topic
+18 Nov 2026 about 10:30 AM CST: capture the ideas and the plan, then begin with the daily lead
+first; readers are "mostly people with some amount of elevated knowledge but there will be people new to this topic
 as well". Plan: the private planning notes. Built by `orbit/lead.py` from the
 snapshot and the daily archive, no request, at the end of each run (`_archive_run`, after the TIP check).
 1. **Lines, in this order, each only when it has something:** objects TIP predicts to reenter in the next 24 hours
@@ -648,7 +648,7 @@ use), one entry per source id the items name, from the snapshot's lane records (
    built 15 Nov 2026, landed 18 Nov). A new source id on the items needs its line in `SOURCE_LANES`.
 
 ## Object pages (`orbit-2.20`, 18 Nov 2026)
-Tom, 18 Nov 2026: "Yes, build it" (design the private planning notes, globe option A). Split
+18 Nov 2026 (design the private planning notes, globe option A). Split
 agreed the same day with the catalog session: the TIC satellite catalog (build step 6) supplies the data and the rules
 note, Orbit draws the page.
 1. **Address:** `object.html?n=<NORAD number>`, or `?j=<GCAT JCAT id>` for an object without one (GCAT's `S` ids are
@@ -690,7 +690,7 @@ note, Orbit draws the page.
    inline-style CSP refusals, which the main page's globe shows too.
 
 ## Pages (`orbit-2.22`, 20 Nov 2026; ideas#71 and ideas#83)
-Tom, 19 Nov 2026: every tab is its own page within the program. Orbit's one long page is split into pages that share
+19 Nov 2026: every tab is its own page within the program. Orbit's one long page is split into pages that share
 one header, one row of page links (the current page marked) and one script, `app.js`, which draws only the cards on
 the page it runs on:
 - `/` Map: the daily lead, tiles, object search and the satellite map (`orbit-2.24`).
@@ -708,7 +708,7 @@ not on the current page goes to its page; an old `/#section` link on the home pa
 the split) is sent on to the page that now holds it. The feed's `visual.url` links name the page (`/catalog#breakups`).
 A test checks that every card is on exactly one page and every feed and lead link lands on its card.
 
-## The satellite map's data (`orbit-2.23`, 20 Nov 2026; ideas#71, Tom's yes to the map design)
+## The satellite map's data (`orbit-2.23`, 20 Nov 2026; ideas#71, map design approved)
 Lane `sats` (`orbit/satmap.py`): CelesTrak's GP group `active` (working satellites; the 18th Space Defense
 Squadron's GP data), FORMAT=csv, compressed, **once a UTC day**: a run on a day whose reading is already held asks
 nothing. CelesTrak's usage policy (read 20 Nov 2026, updated 16 Nov 2026) states no redistribution or credit terms,
@@ -842,7 +842,7 @@ its creation) and for the rolling reentry count (its newest date). Orbit has no 
 `signal`.
 
 ## What a GEO change did, notable changes and other names (`orbit-2.26`, 23 Nov 2026; ideas#249, #250, #251)
-Tom, 23 Nov 2026, after LUCH (OLYMP) 2 (55841) left 62 E: Orbit had listed "8.5 m/s between 15 Oct and 22 Nov" as
+23 Nov 2026, after LUCH (OLYMP) 2 (55841) left 62 E: Orbit had listed "8.5 m/s between 15 Oct and 22 Nov" as
 one routine row under GCAT's name, and he heard of the move elsewhere ("file all eight, then take on items 1-3").
 Modules `orbit/notable.py` and `orbit/names.py`; step `_describe_changes` at the end of every collect, on new and
 carried changes alike. No request: the element sets are the watch lane's, the names are the index the `rpo` lane
@@ -871,9 +871,9 @@ already reads, the roles are `site_src/geo_roles.json`.
    The archive's listed row carries `notable` with the kind. `/data/notable.json` (`orbit-notable/1`) holds the
    notable changes of the 30-day window, each readable alone: names, role with its basis and sources, the
    sentence, the sets, the gap. The feed item's title begins "Notable orbit change:"; **its tier stays
-   `routine`** and its id is unchanged. A higher tier, or a COP mark, is Tom's call.
+   `routine`** and its id is unchanged. A higher tier, or a COP mark, is a separate decision.
 4. **What it never says:** why, where the object is going, or which satellite it is near. No likelihood words.
-   A pass-by table and a stop projection are ideas#248, with the wording put to Tom first.
+   A pass-by table and a stop projection are ideas#248, with the wording approved first.
 5. **Other names.** A lane keeps the name it shows (GCAT's, for orbit changes). `names` on a listed change is
    every other name the TIC catalog's index gives the object: the catalog's display name first, then the
    index's order; a name differing only by case, spacing or punctuation from one already shown is left out, as
@@ -891,7 +891,7 @@ already reads, the roles are `site_src/geo_roles.json`.
    it, and the row and the lead say so. Objects with under 10 set pairs are not judged by that rule; the two-set rule (`orbit-2.38`) marks their changes apart.
 
 ## GEO relocation tracker (`orbit-2.27`, 25 Nov 2026; ideas#248, calibrated by ideas#256)
-Tom, 23 Nov 2026, after LUCH (OLYMP) 2 left 62 E: Orbit could say that it moved, not where it is now, what it will
+23 Nov 2026, after LUCH (OLYMP) 2 left 62 E: Orbit could say that it moved, not where it is now, what it will
 pass or where it stops. Module `tools/geo_tracker.py` (standard library, build time, no request); calibration
 `tools/geo_relocations.py` and `docs/validation/luch2-relocations.md` (Luch 2's full history, 2023-2026, read once).
 On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#movers`), in `globe.json`'s
@@ -933,8 +933,8 @@ On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#mov
    0.5-4.6 deg, and in 2025 later ones fell about 2 deg short (a two-stage brake).
 8. **What it never says:** why, where the object is going, which satellite it means to approach, or how likely
    anything is. Every figure is arithmetic on public element sets and says how many sets it rests on; the page says
-   so in one line (`geo_tracker.NOTE`). Feed tier, item kind and ids are unchanged (Tom's call).
-9. **Wording (Tom, 24 Nov 2026: "Yes, use the default"):** a table headed "At the last measured rate", the two
+   so in one line (`geo_tracker.NOTE`). Feed tier, item kind and ids are unchanged (a separate decision).
+9. **Wording (24 Nov 2026):** a table headed "At the last measured rate", the two
    cases named as in item 4, no likelihood words, the braking note and Luch 2's record of steady projections
    beside it; the estimated start shown on the GEO page and the object page, not in the feed id. A test holds the
    section free of likelihood words.
@@ -946,7 +946,7 @@ On the GEO page from 24 Nov 2026 (section "Listed satellites on the move", `#mov
 
 ## GEO movers: chart, summary and phone tables (`orbit-2.28`, 24 Nov 2026; ideas#321)
 
-Page only: no new computation beyond the chart's set list, no feed change, and Tom's wording for the tracker (item 9
+Page only: no new computation beyond the chart's set list, no feed change, and the approved wording for the tracker (item 9
 above) stands.
 1. **Summary.** A row per mover at the top of "Listed satellites on the move": name (linking to its card,
    `#movers-<norad>`), now (extrapolated) or "no position" for a stale entry, drift, the newest set's age, and its
@@ -963,7 +963,7 @@ above) stands.
    (a ring, "now") and 7 days on; with a steady stop projection, a dashed level line at the projected stop instead.
    Station-kept satellites passed at that rate are ticks on the dashed line, the nearest at most 4 named. Longitudes
    are unwrapped across 180 deg; east is up; axis dates are UTC days. A label that would touch a mark, a line or
-   another label is left out (Tom's figure rule: nothing touches); the table lists every slot. Drawn as SVG at
+   another label is left out (figure rule: nothing touches); the table lists every slot. Drawn as SVG at
    the box's own width (redrawn on resize), so text stays 12 px on a phone; no inline styles.
 4. **Times and owners in the pass-by table.** Each time is shown in the viewer's zone with the zone named, date and
    time on two lines on a phone; a tap swaps it with UTC and back. Owner codes carry CelesTrak's full name on hover,

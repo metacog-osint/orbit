@@ -1,8 +1,8 @@
-# Space-Track disclaimer (approved by Tom, 14 Nov 2026)
+# Space-Track disclaimer (approved 14 Nov 2026)
 
-Tom approved the draft on 14 Nov 2026 and chose to name the 18th Space Defense Squadron. Published from orbit-2.4:
+The draft was approved on 14 Nov 2026, naming the 18th Space Defense Squadron. Published from orbit-2.4:
 `PUBLISH = True` in `orbit/maneuver.py`, the `space-track` source's `use` is `ingest`, and the page card carries
-the wording below. Change the wording only with Tom's yes.
+the wording below. Change the wording only with the account holder's approval.
 
 ## What Space-Track's terms say (read 14 Nov 2026)
 - User Agreement (space-track.org/auth/createAccount): the user agrees "not to transfer any data or technical
@@ -42,8 +42,8 @@ the wording below. Change the wording only with Tom's yes.
 > Squadron; orbit-change analysis is Orbit's own.
 
 ## Settled
-- The 18th Space Defense Squadron is named (Tom, 14 Nov 2026); the 19th is not.
-- Space-Track's terms apply to the account holder. The account is Tom's, so this text is published under Tom's
-  account terms.
+- The 18th Space Defense Squadron is named (14 Nov 2026); the 19th is not.
+- Space-Track's terms apply to the account holder. This text is published under the account
+  holder's account terms.
 - Raw element sets are not republished: the page shows changes and positions derived from them, and the stored
   sets stay in the private Actions cache.

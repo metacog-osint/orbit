@@ -218,7 +218,7 @@ class Notable(unittest.TestCase):
     def test_the_feed_item(self):
         item = feed._maneuver_item(self.e, AT, AT, maneuver.ATTRIBUTION)["properties"]
         self.assertEqual(item["id"], "orbit:maneuver:55841:2026-10-15")   # the id does not change
-        self.assertEqual(item["tier"], "routine")               # a higher tier is Tom's call
+        self.assertEqual(item["tier"], "routine")               # a higher tier is a separate decision
         self.assertTrue(item["title"].startswith(
             "Notable orbit change: Luch-5Kh No. 3, also LUCH (OLYMP) 2 and LUCH-5X (OLYMP-K 2) (GEO, RU): started "
             "drifting west at 2.47 deg/day from 62.00 E; "), item["title"])

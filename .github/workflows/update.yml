@@ -1,6 +1,6 @@
 name: update
 # DRAFT, 13 Nov 2026: written and not yet run. It does nothing until it is on main, and it deploys nothing until
-# Tom creates the Cloudflare Pages project `orbit` and sets the secrets below. Copied from Headwind's update.yml.
+# The Cloudflare Pages project `orbit` and the secrets below are set up by hand. Copied from Headwind's update.yml.
 #
 # Four times a day (meant to be started by the hub's tic-dispatch Worker, because GitHub fires schedules 4-9 h
 # late; its own cron is the fallback), on every push to main, and by hand: the tests, the last run's state from
@@ -24,7 +24,7 @@ name: update
 # CLOUDFLARE_ACCOUNT_ID. Without them everything runs except the deploy. Collected data is not committed.
 #
 # Space-Track (manoeuvre lane, orbit-2.4): SPACETRACK_IDENTITY, SPACETRACK_PASSWORD and ORBIT_WATCH (the private
-# watch list, NORAD numbers comma-separated), set by Tom. Given to the collect step only, never to the tests.
+# watch list, NORAD numbers comma-separated) (a repository secret). Given to the collect step only, never to the tests.
 # Without them the lane is off and nothing else changes. GP is read at most once an hour; a run that reaches
 # Space-Track at :57-:03 or :27-:33 waits for a clear minute (up to about 7 minutes), as Space-Track asks.
 on:

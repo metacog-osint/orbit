@@ -22,7 +22,7 @@ Lanes (method orbit-2.7; launch lanes retired in orbit-2.32):
             start, end, precision and ongoing, rows whose dates do not read listed apart, names matched to GCAT.
   maneuver  Space-Track.org (USSPACECOM) element sets for a private watch list: GP once an hour at most, each
             object's history (GP_HISTORY) once only, stored in data/state/spacetrack/. Orbit changes larger than
-            each object's own element-set noise (orbit/maneuver.py). Published since Tom approved the disclaimer
+            each object's own element-set noise (orbit/maneuver.py). Published since the disclaimer was approved
             (14 Nov 2026); maneuver.PUBLISH = False holds it off the page again. Off without credentials.
     python tools/orbit.py maneuver-case      # the January 2022 Shijian-21 / BeiDou-2 G2 case, local only
     python tools/orbit.py maneuver-report    # the held report, printed locally
@@ -914,7 +914,7 @@ CASE_ISS = {"ids": [25544], "from": "2024-01-15", "to": "2024-06-01", "file": "c
             # the G5 geomagnetic storm (NOAA SWPC): from about 17 UTC on 10 May; drag, not a manoeuvre
             "storm": {"label": "G5 storm, 10-12 May 2024", "from": "2024-05-10T12:00:00Z", "to": "2024-05-13T00:00:00Z"}}
 # Luch (Olymp) 2 (55841, 2023-031A), from launch to the read: its relocations along the GEO belt, the calibration
-# for the relocation tracker (ideas#248, #256). Read once on 24 Nov 2026 on Tom's word; Orbit's own GEO sets start
+# for the relocation tracker (ideas#248, #256). Read once on 24 Nov 2026 once approved; Orbit's own GEO sets start
 # 1 Jul 2026. Stop table and profiles: tools/geo_relocations.py, docs/validation/luch2-relocations.md.
 CASE_LUCH2 = {"ids": [55841], "from": "2023-03-01", "to": "2026-11-25", "file": "case_luch2_2023.json.gz",
               "now": "2026-11-25T00:00:00Z", "window_days": 1365, "keep_days": 1400}
@@ -1220,7 +1220,7 @@ def oscar_propose(data_dir: Path, stamp: str, satcat: Path, names: Path | None, 
 
 def spacetrack_catalog(data_dir: Path) -> int:
     """Space-Track SATCAT and DECAY, once a day after 17:00 UTC (orbit/stcat.py). Local for now: no workflow
-    reads it until Tom says so."""
+    reads it until that is approved."""
     cred = spacetrack.credentials(ROOT)
     if not cred:
         print("No Space-Track credentials (.env or the environment).")

@@ -21,14 +21,14 @@
       "grade": "B2",
       "independence_group": "tic-launch",
       "commercial_ok": "unknown",
-      "note": "orbit-2.10 (Tom's 'do all four', 16 Nov 2026): one request a run. Grade is Orbit's call: Launch's method is published and tested (B); a place match is a geometric coincidence with its pad's closure history, not a confirmation that an area is for a launch (2). Not read from orbit-2.32 (25 Nov 2026, ideas#69): the pairs lane retired with Orbit's hazard areas; Launch draws its own matches.",
+      "note": "orbit-2.10 (16 Nov 2026): one request a run. Grade is Orbit's call: Launch's method is published and tested (B); a place match is a geometric coincidence with its pad's closure history, not a confirmation that an area is for a launch (2). Not read from orbit-2.32 (25 Nov 2026, ideas#69): the pairs lane retired with Orbit's hazard areas; Launch draws its own matches.",
       "retired": "orbit-2.32"
     },
     {
       "id": "ll2-thespacedevs",
       "name": "Launch Library 2, The Space Devs: upcoming launches, and every launch since 1 Jan 2024 (Orbit's ledger)",
       "url": "https://thespacedevs.com/llapi",
-      "licence": "Free access to the whole database (\"the entire database is accessible to everyone, for free\", thespacedevs.com/llapi, read 16 Nov 2026), 15 requests an hour without a key. No separate data licence is stated; Tom, 15 Nov 2026: freely available, so Orbit uses and republishes it with credit (the ledger on Orbit's public release). Images not used: each carries its own licence.",
+      "licence": "Free access to the whole database (\"the entire database is accessible to everyone, for free\", thespacedevs.com/llapi, read 16 Nov 2026), 15 requests an hour without a key. No separate data licence is stated; 15 Nov 2026: freely available, so Orbit uses and republishes it with credit (the ledger on Orbit's public release). Images not used: each carries its own licence.",
       "use": "excluded",
       "grade": "B2",
       "independence_group": "thespacedevs",
@@ -40,12 +40,12 @@
       "id": "snapi-thespacedevs",
       "name": "Spaceflight News API (Spaceflight News API and The Space Devs): headlines tied to Launch Library 2 launches",
       "url": "https://www.spaceflightnewsapi.net/",
-      "licence": "No licence, terms of use or rate limit stated (site read 15 Nov 2026; footer 'Copyright \u00a9 2026 Spaceflight News API & The Space Devs'). Orbit keeps links only: headline, outlet, time and the link to the outlet's page; no summaries, no images. Asked in Tom's email to The Space Devs (15 Nov 2026).",
+      "licence": "No licence, terms of use or rate limit stated (site read 15 Nov 2026; footer 'Copyright \u00a9 2026 Spaceflight News API & The Space Devs'). Orbit keeps links only: headline, outlet, time and the link to the outlet's page; no summaries, no images. Asked in an email to The Space Devs (15 Nov 2026).",
       "use": "excluded",
       "grade": "B3",
       "independence_group": "thespacedevs",
       "commercial_ok": "unknown",
-      "note": "orbit-2.5 (Tom's 'Yes, links only', 15 Nov 2026): one request a run, filtered to the scheduled launches' Launch Library 2 ids. Grade is Orbit's call: the API usually links the right launch (B); the headlines are the outlets' own reporting, not checked (3). Launch's from orbit-2.32 (25 Nov 2026, ideas#69): Orbit's news lane retired; Launch shows the headlines under each scheduled launch.",
+      "note": "orbit-2.5 ('links only', 15 Nov 2026): one request a run, filtered to the scheduled launches' Launch Library 2 ids. Grade is Orbit's call: the API usually links the right launch (B); the headlines are the outlets' own reporting, not checked (3). Launch's from orbit-2.32 (25 Nov 2026, ideas#69): Orbit's news lane retired; Launch shows the headlines under each scheduled launch.",
       "retired": "orbit-2.32"
     },
     {
@@ -80,7 +80,7 @@
       "grade": "B2",
       "independence_group": "swf",
       "commercial_ok": false,
-      "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade B2 confirmed by Tom, 15 Nov 2026 (the RPO sheet, if built, is graded on its own)."
+      "note": "Sheet: docs.google.com/spreadsheets/d/1e5GtZEzdo6xk41i2_ei3c8jRZDjvP4Xwz3BVsUHwi48 (gid 0), read as CSV with no key; the sheet says 'Last Updated 17-Feb-26'. Debris counts are U.S. military catalog counts (generally 10 cm and larger), as SWF compiled them. Grade B2 confirmed 15 Nov 2026 (the RPO sheet, if built, is graded on its own)."
     },
     {
       "id": "swf-rpo",
@@ -91,7 +91,7 @@
       "grade": "B2",
       "independence_group": "swf",
       "commercial_ok": false,
-      "note": "Sheet: docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4, tabs Commercial/Civil (gid 0), Military/Intelligence (gid 1789904048), Planned (gid 1403218889) and About (gid 1782604784, 'Last Updated 17 February 2026'), read as CSV with no key. Grade B3 is Orbit's call, graded apart from the ASAT sheet (Tom, 15 Nov 2026): the same reliable compiler, but many rows are SWF's reading of public tracking (an activity's purpose, its 'Intelligence' category, a span of months), not an operator's statement. Not in the feed."
+      "note": "Sheet: docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4, tabs Commercial/Civil (gid 0), Military/Intelligence (gid 1789904048), Planned (gid 1403218889) and About (gid 1782604784, 'Last Updated 17 February 2026'), read as CSV with no key. Grade B3 is Orbit's call, graded apart from the ASAT sheet (15 Nov 2026): the same reliable compiler, but many rows are SWF's reading of public tracking (an activity's purpose, its 'Intelligence' category, a span of months), not an operator's statement. Not in the feed."
     },
     {
       "id": "celestrak-gp",
@@ -102,7 +102,7 @@
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": "unknown",
-      "note": "orbit-2.12 (Tom's yes, 16 Nov 2026): one request a run, for the globe's paths of recent launches' payloads only; Space-Track stays the source for watched objects and orbit changes. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
+      "note": "orbit-2.12 (16 Nov 2026): one request a run, for the globe's paths of recent launches' payloads only; Space-Track stays the source for watched objects and orbit changes. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
     },
     {
       "id": "celestrak-gp-active",
@@ -113,15 +113,15 @@
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": "unknown",
-      "note": "orbit-2.23 (ideas#71, Tom's yes to the map design, 20 Nov 2026): once a UTC day, the home page's satellite map only, republished as /data/sats.json joined to GCAT owners. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
+      "note": "orbit-2.23 (ideas#71, map design approved 20 Nov 2026): once a UTC day, the home page's satellite map only, republished as /data/sats.json joined to GCAT owners. Same underlying data as space-track, so the same independence group. Grade is Orbit's call."
     },
     {
       "id": "space-track",
       "name": "Space-Track.org (United States Space Command, USSPACECOM, 18th Space Defense Squadron): GP and GP_HISTORY element sets",
       "url": "https://www.space-track.org/",
-      "licence": "Account required. User Agreement (read 14 Nov 2026): no transfer of data 'including the analysis of data' 'without prior express approval'. Space-Track's documentation (read 14 Nov 2026): 'USSPACECOM has provided express blanket approval for transfer/redistribution of basic SSA data and services ... conditioned on appropriate citation', and 'Publications of analysis based on USSPACECOM data also require appropriate citations.' Credit wording: doctrine/spacetrack-disclaimer.md, approved by Tom 14 Nov 2026.",
+      "licence": "Account required. User Agreement (read 14 Nov 2026): no transfer of data 'including the analysis of data' 'without prior express approval'. Space-Track's documentation (read 14 Nov 2026): 'USSPACECOM has provided express blanket approval for transfer/redistribution of basic SSA data and services ... conditioned on appropriate citation', and 'Publications of analysis based on USSPACECOM data also require appropriate citations.' Credit wording: doctrine/spacetrack-disclaimer.md, approved 14 Nov 2026.",
       "use": "ingest",
-      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. The watch list's raw element sets are not republished: the page shows changes and positions derived from them, credited as the disclaimer gives. From 17 Nov 2026 (orbit-2.13) also its TIP messages (lane decay, orbit/tip.py): one query a run, the newest reentry prediction per object, published with the citation; reentry and decay data are named among the basic SSA data the blanket approval covers. From 16 Nov 2026 also the GEO region (orbit/geo_region.py, moved from Noisefloor): one GP query for every object near GEO, published with the citation on the public releases geo-YYYY, as Noisefloor published it (Tom, 15 Nov 2026). Grade is Orbit's call, to be confirmed by Tom. Catalog (build step 3, orbit/stcat.py, workflow catalog.yml from 17 Nov 2026 on Tom's yes; published on the public release `catalog`): class satcat (CURRENT/Y) once a day after 17:00 UTC and class decay, both basic SSA data under the same blanket approval (space-track.org/documentation, read 16 Nov 2026: 'Basic SSA data are Two-Line Elements (TLEs) and Orbital Mean-element Messages (OMMs); SATCAT; and Satellite Decay and Reentry Data'). Space-Track's use policy (read 17 Nov 2026) gives SATCAT and DECAY their own rows, 1 a day each, so GP's hourly rule does not apply; no other TIC program queries either class. The whole decay history was read once (17 Nov 2026, 144,363 messages) and is stored on the release (spacetrack-decay.json.gz, the store between runs); later reads ask only for messages since the last read, and a run that cannot restore the store reads nothing. 4 requests a read. Identity keys (intldes), decay and the first-ranked name; launch date and country kept beside GCAT's and compared. Raw SATCAT replies are not republished; catalog.json.gz and the release notes carry the citation in doctrine/spacetrack-disclaimer.md section 3 form.",
+      "note": "Read for a private watch list (orbit-2.4): GP at most once an hour, off the top and bottom of the hour; each object's GP_HISTORY once only, stored in the private Actions cache. The watch list's raw element sets are not republished: the page shows changes and positions derived from them, credited as the disclaimer gives. From 17 Nov 2026 (orbit-2.13) also its TIP messages (lane decay, orbit/tip.py): one query a run, the newest reentry prediction per object, published with the citation; reentry and decay data are named among the basic SSA data the blanket approval covers. From 16 Nov 2026 also the GEO region (orbit/geo_region.py, moved from Noisefloor): one GP query for every object near GEO, published with the citation on the public releases geo-YYYY, as Noisefloor published it (15 Nov 2026). Grade is Orbit's call, to be confirmed. Catalog (build step 3, orbit/stcat.py, workflow catalog.yml from 17 Nov 2026 as approved; published on the public release `catalog`): class satcat (CURRENT/Y) once a day after 17:00 UTC and class decay, both basic SSA data under the same blanket approval (space-track.org/documentation, read 16 Nov 2026: 'Basic SSA data are Two-Line Elements (TLEs) and Orbital Mean-element Messages (OMMs); SATCAT; and Satellite Decay and Reentry Data'). Space-Track's use policy (read 17 Nov 2026) gives SATCAT and DECAY their own rows, 1 a day each, so GP's hourly rule does not apply; no other TIC program queries either class. The whole decay history was read once (17 Nov 2026, 144,363 messages) and is stored on the release (spacetrack-decay.json.gz, the store between runs); later reads ask only for messages since the last read, and a run that cannot restore the store reads nothing. 4 requests a read. Identity keys (intldes), decay and the first-ranked name; launch date and country kept beside GCAT's and compared. Raw SATCAT replies are not republished; catalog.json.gz and the release notes carry the citation in doctrine/spacetrack-disclaimer.md section 3 form.",
       "grade": "A2",
       "independence_group": "usspacecom",
       "commercial_ok": false
@@ -130,7 +130,7 @@
       "id": "celestrak-satcat",
       "name": "CelesTrak (T.S. Kelso): SATCAT records (names, international designators, owner, status)",
       "url": "https://celestrak.org/pub/satcat.csv",
-      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 Nov 2026, re-read 17 Nov 2026 18:39 UTC) states no licence, redistribution or credit terms; it asks to 'only download data once per update' ('The SATCAT updates manually once or twice a day'), directory queries at most hourly, compressed requests, and that software 'immediately stop querying when it receives any non-HTTP 200 responses and report the results to a human'; it speaks of 'our long tradition of making data freely available to all users'. Ingested with credit, on the footing Tom chose for Launch Library 2 (Tom, 16 Nov 2026). Credit: 'CelesTrak SATCAT (T.S. Kelso, celestrak.org)'.",
+      "licence": "CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 Nov 2026, re-read 17 Nov 2026 18:39 UTC) states no licence, redistribution or credit terms; it asks to 'only download data once per update' ('The SATCAT updates manually once or twice a day'), directory queries at most hourly, compressed requests, and that software 'immediately stop querying when it receives any non-HTTP 200 responses and report the results to a human'; it speaks of 'our long tradition of making data freely available to all users'. Ingested with credit, on the footing chosen for Launch Library 2 (16 Nov 2026). Credit: 'CelesTrak SATCAT (T.S. Kelso, celestrak.org)'.",
       "use": "ingest",
       "grade": "A2",
       "independence_group": "usspacecom",
@@ -146,7 +146,7 @@
       "grade": "C3",
       "independence_group": "wikimedia",
       "commercial_ok": true,
-      "note": "Satellite catalog build step 4 (17 Nov 2026, orbit/catsources.py): one SPARQL query a week, in the run that makes the day's Space-Track read: every item with a truthy P377, its English and 'mul' labels, English aliases and P247. User-Agent names the repository and the word bot, no person (Wikimedia User-Agent policy, read 17 Nov 2026); query service: 60 s deadline, 60 s of processing a minute per client, 5 parallel queries per IP (WDQS user manual, read 17 Nov 2026). Matched on P377 only. First read 17 Nov 2026 18:42 UTC: 7,518 items, 7 with Wikidata's 'unknown value' (skipped), 10 numbers carried by two items (attached objects, noted on the entry, not flagged). Names rank after CelesTrak, before SWF (Tom, 16 Nov 2026). Grade is Orbit's proposal: open editing (C), names usually match other catalogs (3)."
+      "note": "Satellite catalog build step 4 (17 Nov 2026, orbit/catsources.py): one SPARQL query a week, in the run that makes the day's Space-Track read: every item with a truthy P377, its English and 'mul' labels, English aliases and P247. User-Agent names the repository and the word bot, no person (Wikimedia User-Agent policy, read 17 Nov 2026); query service: 60 s deadline, 60 s of processing a minute per client, 5 parallel queries per IP (WDQS user manual, read 17 Nov 2026). Matched on P377 only. First read 17 Nov 2026 18:42 UTC: 7,518 items, 7 with Wikidata's 'unknown value' (skipped), 10 numbers carried by two items (attached objects, noted on the entry, not flagged). Names rank after CelesTrak, before SWF (16 Nov 2026). Grade is Orbit's proposal: open editing (C), names usually match other catalogs (3)."
     },
     {
       "id": "wmo-oscar-space",
@@ -157,25 +157,25 @@
       "grade": "A2",
       "independence_group": "wmo",
       "commercial_ok": "unknown",
-      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Added by Tom, 16 Nov 2026. API read 17 Nov 2026 (space.oscar.wmo.int/swagger/swagger.json): /api/v1/satellites, 30 a page, 1,062 satellites on 36 pages; fields id, slug, acronym, fullname, WIGOS_Station_Identifier (e.g. Metop-B 0-20009-0-003), space_agency, status (Operational, Inactive, Presumably inactive, Lost at launch, Mission concept...), orbit, launch_date, EoL, longitude, Altitude, ECT, instruments. No NORAD number and no COSPAR ID in the API or on the satellite pages, and no Wikidata item carries a WIGOS id (P4136: 0 of the 7,518 P377 items), so it cannot be matched on an id; held for Tom's decision on a reviewed slug-to-NORAD link file. Tom, 17 Nov 2026: that link file, the 414 operational satellites first; a script may propose candidates from launch date and orbit; nothing joins until a person has reviewed an entry. Read once 18 Nov 2026 by hand (orbit/oscar.py, tools/orbit.py oscar-read: 36 pages, 3 s apart, all 200; 1,062 satellites, 414 operational); raw replies in git-ignored data/raw/wmo-oscar/. Link file orbit/data/catalog/oscar-links.yml (orbit/oscarlinks.py): unreviewed proposals only, so nothing from OSCAR is in the catalog yet and `use` stays excluded. Disclaimer re-read 17 Nov 2026, unchanged. Ranks with GCAT for operator, role and status of weather and Earth-observation satellites (declared by the agencies through WMO). Join built 20 Nov 2026 (Tom's yes): read weekly by catalog.yml (36 pages, 3 s apart), joined through reviewed link entries only (285); adds operator (declared), status and names; ranks after Wikidata for names. 'excluded' lifted."
+      "note": "Planned for the satellite catalog (16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. Added 16 Nov 2026. API read 17 Nov 2026 (space.oscar.wmo.int/swagger/swagger.json): /api/v1/satellites, 30 a page, 1,062 satellites on 36 pages; fields id, slug, acronym, fullname, WIGOS_Station_Identifier (e.g. Metop-B 0-20009-0-003), space_agency, status (Operational, Inactive, Presumably inactive, Lost at launch, Mission concept...), orbit, launch_date, EoL, longitude, Altitude, ECT, instruments. No NORAD number and no COSPAR ID in the API or on the satellite pages, and no Wikidata item carries a WIGOS id (P4136: 0 of the 7,518 P377 items), so it cannot be matched on an id; held for a decision on a reviewed slug-to-NORAD link file. 17 Nov 2026: that link file, the 414 operational satellites first; a script may propose candidates from launch date and orbit; nothing joins until a person has reviewed an entry. Read once 18 Nov 2026 by hand (orbit/oscar.py, tools/orbit.py oscar-read: 36 pages, 3 s apart, all 200; 1,062 satellites, 414 operational); raw replies in git-ignored data/raw/wmo-oscar/. Link file orbit/data/catalog/oscar-links.yml (orbit/oscarlinks.py): unreviewed proposals only, so nothing from OSCAR is in the catalog yet and `use` stays excluded. Disclaimer re-read 17 Nov 2026, unchanged. Ranks with GCAT for operator, role and status of weather and Earth-observation satellites (declared by the agencies through WMO). Join built 20 Nov 2026 (approved): read weekly by catalog.yml (36 pages, 3 s apart), joined through reviewed link entries only (285); adds operator (declared), status and names; ranks after Wikidata for names. 'excluded' lifted."
     },
     {
       "id": "mccants-classfd",
       "name": "Mike McCants: classified elements (classfd.zip) from hobbyist observations",
       "url": "https://www.mmccants.org/tles/index.html",
-      "licence": "No terms, copyright or credit text on the page (read 16 Nov 2026). Tom, 16 Nov 2026: name and number pairs used as attributed aliases, credited 'Mike McCants, classified elements, mmccants.org'. Element files are not republished.",
+      "licence": "No terms, copyright or credit text on the page (read 16 Nov 2026). 16 Nov 2026: name and number pairs used as attributed aliases, credited 'Mike McCants, classified elements, mmccants.org'. Element files are not republished.",
       "use": "excluded",
       "planned_use": "ingest",
       "grade": "C3",
       "independence_group": "hobbyist-observers",
       "commercial_ok": "unknown",
-      "note": "Planned for the satellite catalog (Tom's yes, 16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. classfd.zip is 'updated whenever I receive and process new observations'; read daily at most. Grade is Orbit's proposal."
+      "note": "Planned for the satellite catalog (16 Nov 2026 CST); not read by Orbit yet, so 'excluded' until its build step lands. classfd.zip is 'updated whenever I receive and process new observations'; read daily at most. Grade is Orbit's proposal."
     },
     {
       "id": "gunter-space-page",
       "name": "Gunter's Space Page (G.D. Krebs): spacecraft and programme pages",
       "url": "https://space.skyrocket.de/",
-      "licence": "Terms of use (space.skyrocket.de/about/terms-of-use.htm, updated 27 Jul 2026, read 16 Nov 2026): 'All rights reserved'; no republishing or 'systematic extraction' without written consent; 'Automated scraping \u2026 prohibited'; use 'to inform your own analysis, research, or reports' allowed; citations need full page title, publisher, canonical URL and retrieval date. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "licence": "Terms of use (space.skyrocket.de/about/terms-of-use.htm, updated 27 Jul 2026, read 16 Nov 2026): 'All rights reserved'; no republishing or 'systematic extraction' without written consent; 'Automated scraping \u2026 prohibited'; use 'to inform your own analysis, research, or reports' allowed; citations need full page title, publisher, canonical URL and retrieval date. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
       "use": "link",
       "grade": "B2",
       "independence_group": "gunter",
@@ -185,7 +185,7 @@
       "id": "orbital-focus",
       "name": "Orbital Focus (Robert Christy): launch lists, GEO and sun-synchronous lists, manoeuvre histories",
       "url": "https://orbitalfocus.uk/",
-      "licence": "'Copyright \u00a9 Robert Christy, all rights reserved'; 'Reproduction of this web page or any of its content without permission from the website owner is prohibited' (orbitalfocus.uk, read 16 Nov 2026). Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "licence": "'Copyright \u00a9 Robert Christy, all rights reserved'; 'Reproduction of this web page or any of its content without permission from the website owner is prohibited' (orbitalfocus.uk, read 16 Nov 2026). Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
       "use": "link",
       "grade": "B2",
       "independence_group": "orbital-focus",
@@ -246,7 +246,7 @@
       "id": "operator-pages",
       "name": "Operator, programme-owner and manufacturer pages (e.g. NSMC for Fengyun, Geespace for its constellation)",
       "url": "https://orbit.theintelligence.company/",
-      "licence": "Each site's own terms, not checked as a class. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations'). The main source of declared names and roles.",
+      "licence": "Each site's own terms, not checked as a class. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (16 Nov 2026: 'we will cite names and include data as needed, always with proper citations'). The main source of declared names and roles.",
       "use": "link",
       "grade": "A2",
       "independence_group": "operators",

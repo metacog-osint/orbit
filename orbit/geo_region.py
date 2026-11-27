@@ -1,7 +1,7 @@
 """The GEO region: every object in and near the geostationary region from Space-Track, where each one is, and which
 arrived or left. Behaviour only, never intent.
 
-Moved from Noisefloor (`tools/geo_region.py`, built 27 Oct 2026) as step 2 of `doctrine/geo-move-plan.md` (Tom,
+Moved from Noisefloor (`tools/geo_region.py`, built 27 Oct 2026) as step 2 of `doctrine/geo-move-plan.md` (
 15-16 Nov 2026: the GEO belt is Orbit's subject; one Space-Track collector for the shared account). The region,
 the edges and the event rules are Noisefloor's, unchanged, so the two programs' day files can be compared day by day
 before Noisefloor's own query is switched off. What changed: standard library only (Orbit's live lanes), Orbit's

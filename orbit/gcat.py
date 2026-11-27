@@ -416,7 +416,7 @@ def hygiene(objs: list[dict]) -> dict:
     }
 
 
-# --- baselines from GCAT's own history (orbit-2.8; Tom, 15 Nov 2026, decision 8) ----------------------------
+# --- baselines from GCAT's own history (orbit-2.8; 15 Nov 2026, decision 8) ----------------------------
 
 BASE_WINDOW_DAYS = 30   # the recent window
 BASE_PRIOR_WINDOWS = 24  # the 24 windows of 30 days before it: about two years

@@ -1,5 +1,5 @@
 """Footprints page (ideas#232): builds the data for site_src/footprints.html. Published as
-site_src/footprints-data.json (Tom, 24 Nov 2026: publish), built here from the research folder and committed.
+site_src/footprints-data.json (24 Nov 2026: publish), built here from the research folder and committed.
 
     python tools/footprints.py build --day-file DAY.geo-region.json --tle-dir DIR [--published DIR] --out FILE
     python tools/footprints.py preview --json FILE --dir FOLDER      a small standalone copy of the page to serve
@@ -13,7 +13,7 @@ are matched exactly, never guessed: a case with no entry gets a note saying none
 Three cases, each outline labelled published, computed or estimated (orbit/footprint.py says what those mean):
 a wide-beam GEO satellite, a high-throughput GEO satellite and a LEO constellation. The cases and every assumption
 are in doctrine/footprint-cases.json. A fourth kind, measured, marks terminals seen in use (the LEO case).
-Published contours are read from --published and are NOT committed (Tom, 24 Nov 2026: filed contours may be
+Published contours are read from --published and are NOT committed (24 Nov 2026: filed contours may be
 redrawn on the page with credit; the files stay out of the repository until the page is approved). Without
 --published the estimates are still drawn, with no score, and a case note says which files were missing.
 

@@ -1,4 +1,4 @@
-// Orbit's globe (orbit-2.11, Tom's decisions 4 and 7, 15 Nov 2026: Cesium ion; ground tracks only here, pads stay
+// Orbit's globe (orbit-2.11, decisions 4 and 7, 15 Nov 2026: Cesium ion; ground tracks only here, pads stay
 // COP's mark). CesiumJS 1.146.0 and satellite.js 7.1.0 are self-hosted in vendor/ like MapLibre (licences there).
 // It draws the flat map's launches of the last 7 days on a globe (the scheduled launches, ledger history, hazard
 // areas and Launch's lines it drew until orbit-2.32 are Launch's now, ideas#69), plus the satellites whose orbit

@@ -1,4 +1,4 @@
-"""Orbit's own daily archive: the counts no outside source keeps for Orbit (decision 8, Tom, 15 Nov 2026).
+"""Orbit's own daily archive: the counts no outside source keeps for Orbit (decision 8, 15 Nov 2026).
 
 GCAT's history gives the launch, payload and reentry baselines at once (gcat.baseline). Three series exist only
 in Orbit's own readings, so Orbit keeps them day by day and gives them baselines after 90 days:

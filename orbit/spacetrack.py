@@ -25,7 +25,7 @@ So a run makes at most four requests (log in, GP for the watch list, GP_HISTORY 
 stored history yet, log out), at least 2.5 s apart; never within an hour of the last GP query; and never at
 :57-:03 or :27-:33 (it waits for a clear minute instead, plus a random 0-60 s).
 
-Credentials and the watch list are Tom's: SPACETRACK_IDENTITY and SPACETRACK_PASSWORD, and ORBIT_WATCH (NORAD
+Credentials and the watch list are the account holder's: SPACETRACK_IDENTITY and SPACETRACK_PASSWORD, and ORBIT_WATCH (NORAD
 numbers, comma-separated), from the environment (GitHub secrets in the workflow) or, locally, from the
 git-ignored files `.env` and `private/watch.txt`. Nothing here prints or stores them, and the query URLs, which
 name the watched objects, are never written to the published snapshot.

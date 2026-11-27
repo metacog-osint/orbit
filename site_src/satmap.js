@@ -1,4 +1,4 @@
-// Orbit's home map (orbit-2.24, ideas#71, the design Tom approved 20 Nov 2026): every object in CelesTrak's GP "active"
+// Orbit's home map (orbit-2.24, ideas#71, the design approved 20 Nov 2026): every object in CelesTrak's GP "active"
 // group (data/sats.json, read once a UTC day) as one point on the Cesium globe, placed with SGP4 from its newest public
 // element set, drag left out. A drawing for orientation, not a tracking product. Points are a PointPrimitiveCollection
 // (entities do not hold 17,000 objects) and are propagated a slice per frame, so the page keeps responding. Objects
