@@ -636,8 +636,12 @@ the last-30-days group), with a finding only. Display: globe or flat map, the se
 track, labels on marked objects when zoomed in. Filters and display options are kept in the URL. A table lists the
 first 200 shown objects, those with a finding first. A missing file (Pages answers it with index.html) shows a note,
 and without WebGL the filters and the list still work.
-**Not built from the approved design:** colour by orbit class (needs a validator run) and rocket bodies and debris
-(not in the active group).
+**Not built from the approved design:** colour by orbit class, and rocket bodies and debris (not in the active
+group). Colour by orbit class was dropped on 26 Nov 2026: points on a map are compared with every other colour, not
+only a neighbour, so the palette has to pass the dataviz validator with all pairs (`--pairs all`), in light (white
+panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
+with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against
+magenta, violet or aqua in dark mode). The orbit class stays a filter and a column in the list.
 
 ## The satellite map's added options (`orbit-2.37`, 26 Nov 2026; ideas#138)
 - **Owner search:** any owner code in the file, typed as the country's name or the code (GCAT's state codes for
