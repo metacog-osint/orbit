@@ -256,6 +256,28 @@ def release_get(data_dir: Path, repo: str, gh=_gh) -> list[str]:
     return got
 
 
+def release_copy(dest: Path, repo: str, gh=_gh) -> list[str]:
+    """Every file on the release, as it is now, into folder `dest` (for the private archive copy before a build
+    replaces them). Raises RuntimeError when the release cannot be listed or a file does not download whole."""
+    r = gh("api", f"repos/{repo}/releases/tags/{RELEASE}", "--jq", '.assets[] | "\\(.size) \\(.name)"')
+    if r.returncode:
+        raise RuntimeError(f"the files on release {RELEASE} could not be listed: {r.stderr.strip()[:300]}")
+    listed = {}
+    for line in r.stdout.splitlines():
+        size, _, name = line.strip().partition(" ")
+        if name:
+            listed[name] = int(size)
+    Path(dest).mkdir(parents=True, exist_ok=True)
+    for name, size in sorted(listed.items()):
+        d = gh("release", "download", RELEASE, "-R", repo, "-p", name, "-D", str(dest), "--clobber")
+        p = Path(dest) / name
+        got = p.stat().st_size if p.exists() else None
+        if d.returncode or got != size:
+            why = d.stderr.strip()[:300] if d.returncode else f"{got} of {size} bytes"
+            raise RuntimeError(f"{name} is on release {RELEASE} but did not download whole ({why})")
+    return sorted(listed)
+
+
 def release_put(paths: dict[str, Path], repo: str, gh=_gh) -> None:
     """Upload {asset name: local path} to the release, creating it (not marked latest) when missing."""
     if not release_exists(repo, gh):

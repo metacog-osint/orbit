@@ -276,7 +276,7 @@ class ReleaseGuard(unittest.TestCase):
         self.calls.append(["archive", lane])
         if lane in self.archive_fails:
             raise G.ReleaseError(f"the copy to the private archive (lane {lane}) failed")
-        self.archived[lane] = {p.name: p.read_bytes() for p in Path(folder).iterdir()}
+        self.archived.setdefault(lane, []).append({p.name: p.read_bytes() for p in Path(folder).iterdir()})
 
     def run_geo(self, day="2026-11-26"):
         """geo_pull's exit code; its log is kept in self.log (not printed: Actions would read the ::error:: lines of
@@ -309,7 +309,7 @@ class ReleaseGuard(unittest.TestCase):
                 self.assert_release_untouched()
                 self.assertEqual(len(self.held_sets(self.OCT)), 300)
                 self.assertEqual(len(self.held_sets(self.NOV)), 180)
-                reply, = self.archived["geo-reply"].values()   # the stopped run's sets are kept, privately
+                reply, = self.archived["geo-reply"][-1].values()   # the stopped run's sets are kept, privately
                 self.assertEqual(len(json.loads(gzip.decompress(reply))), 60)
 
     def test_a_truncated_download_stops_the_upload(self):
@@ -338,10 +338,12 @@ class ReleaseGuard(unittest.TestCase):
     def test_a_clean_run_archives_each_file_it_replaces_before_uploading(self):
         self.assertEqual(self.run_geo(), 0)
         self.assertEqual(self.rel.uploads(), ["2026-11-26.geo-region.json", self.NOV])
-        self.assertEqual(self.archived["geo-release"], {self.NOV: self.before[self.NOV]})  # the copy replaced
+        replaced, uploaded = self.archived["geo-release"]
+        self.assertEqual(replaced, {self.NOV: self.before[self.NOV]})  # the copy replaced
+        self.assertEqual(uploaded, {n: self.rel.path(n).read_bytes() for n in self.rel.uploads()})  # and the new ones
         order = [c[1] if c[0] == "archive" else "upload" for c in self.calls
                  if c[0] == "archive" or c[:2] == ["release", "upload"]]
-        self.assertEqual(order, ["geo-reply", "geo-release", "upload", "upload"])
+        self.assertEqual(order, ["geo-reply", "geo-release", "geo-release", "upload", "upload"])
         old = self.tmp / "old-nov.json.gz"
         old.write_bytes(self.before[self.NOV])
         nov = self.held_sets(self.NOV)
@@ -354,7 +356,7 @@ class ReleaseGuard(unittest.TestCase):
         first = self.rel.path("2026-11-26.geo-region.json").read_bytes()
         self.NOW = datetime(2026, 11, 26, 15, 20, tzinfo=timezone.utc)
         self.assertEqual(self.run_geo(), 0)
-        self.assertEqual(self.archived["geo-release"]["2026-11-26.geo-region.json"], first)
+        self.assertEqual(self.archived["geo-release"][-2]["2026-11-26.geo-region.json"], first)  # replaced copy
 
     def test_a_failed_archive_copy_stops_the_replace(self):
         self.archive_fails = {"geo-release"}

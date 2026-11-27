@@ -94,6 +94,7 @@ jobs:
           python tools/geo_page.py build "$dir" site --snapshot data/snapshot.json || echo "::warning::GEO page data skipped; the page shows its loading text"
           python tools/geo_callouts.py publish --data "$dir" --out site/data/geo/callouts.json || echo "::warning::GEO callouts skipped; the globe shows none"
       - name: Feed check
+        id: check
         run: python tools/orbit.py check
       - name: Keep this run's state for the next run
         uses: actions/cache/save@v6
@@ -103,6 +104,7 @@ jobs:
             data/state
           key: orbit-state-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy site/ to Cloudflare Pages
+        id: deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -120,6 +122,40 @@ jobs:
             fi
           done
           echo "::error::Cloudflare Pages deploy failed three times"; exit 1
+      # What the deploy and the public archive step below replace or remove, to the private repo
+      # metacog-osint/tic-archive (tools/tic_archive.py: release orbit-<lane>-YYYY-MM, a snapshot per run, only
+      # changed files uploaded, nothing replaced there):
+      #   site             site/data/ as built and checked: the snapshot, feed, daily archive, notable changes, the
+      #                    satellite map and the GEO page's data, each replaced by the next deploy. Not data/catalog/:
+      #                    those are the shards of release `catalog`, which catalog.yml archives (lane catalog-release).
+      #                    Only once the feed check passed.
+      #   catalog-changes  this run's GCAT catalog-change files, which the next step uploads to the public monthly
+      #                    release and then removes from the runner. Before that step, so both copies are made.
+      # These files are public already, so nothing is redacted and the archived bytes match the public copies. Each
+      # lane is tried even if the other failed; a failure turns the run red but never holds the live site.
+      - name: Private archive (published data and GCAT catalog changes, to tic-archive)
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
+          CHECKED: ${{ steps.check.outcome }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::secret TIC_ARCHIVE_TOKEN is not set, so site/data and the catalog changes did not reach the private archive"; exit 1
+          fi
+          failed=0
+          if [ "$CHECKED" = "success" ]; then
+            python tools/tic_archive.py put --program orbit --lane site --src site/data --exclude 'catalog/*' || failed=1
+          else
+            echo "site: the feed check did not pass this run, so site/data was not archived"
+          fi
+          if ls data/archive_out/catalog-changes-*.jsonl.gz >/dev/null 2>&1; then
+            python tools/tic_archive.py put --program orbit --lane catalog-changes --src data/archive_out               --include 'catalog-changes-*.jsonl.gz' || failed=1
+          else
+            echo "catalog-changes: no GCAT reading this run"
+          fi
+          if [ "$failed" != 0 ]; then
+            echo "::error::a lane did not reach the private archive this run (see above)"; exit 1
+          fi
       # Retention (18 Nov 2026): after the deploy, so a failed upload never blocks the live site. GCAT's whole catalog diff
       # (one file per reading, uncut) goes to release catalog-changes-YYYY-MM, and the daily archive (also public at
       # /data/archive.json) to archive-YYYY-MM, one dated copy a day. Unique names, no clobber (orbit/retention.py).

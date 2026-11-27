@@ -34,6 +34,7 @@ import gzip
 import json
 import math
 import os
+import shutil
 import subprocess
 import tempfile
 from datetime import datetime, timedelta
@@ -377,8 +378,9 @@ def release_put(paths, repo=None, archive=None):
     """Upload `paths` to their releases geo-YYYY, replacing the files of the same name. First every file the
     releases already hold under those names is downloaded again and checked: a month file that would lose any
     element set (norad, epoch) the release holds is refused, and the release copies about to be replaced go to
-    `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). Any failure raises
-    ReleaseError before the first upload."""
+    `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). With an archive, the
+    files about to go up are copied there too, so the archive alone holds every version the releases have held.
+    Any failure raises ReleaseError before the first upload."""
     repo = _repo(repo)
     names = [os.path.basename(p) for p in paths]
     held = release_assets({tag_for(n) for n in names}, repo)
@@ -396,6 +398,11 @@ def release_put(paths, repo=None, archive=None):
             if archive is None:
                 raise ReleaseError(f"{', '.join(replaced)} would be replaced with no archive copy; refused")
             archive(tmp)
+    if archive is not None:  # the new copies, in the same lane: the next run's replaced copies then add no bytes
+        with tempfile.TemporaryDirectory(prefix="geo-upload-") as up:
+            for p in paths:
+                shutil.copyfile(p, os.path.join(up, os.path.basename(p)))
+            archive(up)
     for p in paths:
         tag = tag_for(os.path.basename(p))
         if _gh("release", "view", tag, "-R", repo).returncode:
