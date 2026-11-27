@@ -1,5 +1,6 @@
 name: tests
-# Runs the same tests as update.yml on every pull request to main, so a PR has a check to read at its head sha.
+# Runs the unit tests of update.yml, then build and check, on every pull request to main, so a PR has a check
+# to read at its head sha. The build reads the committed snapshot in site/data; nothing is collected.
 # No secrets, no deploy, no release writes, and a read-only token.
 on:
   pull_request:
@@ -23,3 +24,9 @@ jobs:
         with: { node-version: "22" }
       - name: Tests
         run: python -m unittest discover -s tests
+      - name: Build and check
+        run: |
+          mkdir -p data
+          cp site/data/snapshot.json data/snapshot.json
+          python tools/orbit.py build
+          python tools/orbit.py check
