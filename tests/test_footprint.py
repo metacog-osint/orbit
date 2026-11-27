@@ -377,7 +377,7 @@ class ContourGeojson(unittest.TestCase):
 
 
 class PublishedData(unittest.TestCase):
-    """site_src/footprints-data.json is built outside CI and committed (Tom, 24 Nov 2026: publish). No local path
+    """site_src/footprints-data.json is built outside CI and committed (24 Nov 2026: publish). No local path
     may reach it, and every layer says what kind it is and where it came from."""
     def test_committed_data_is_clean_and_labelled(self):
         import json

@@ -1,13 +1,13 @@
 # TIC satellite catalog: Orbit's build record
 
-Moved from Orbit's CLAUDE.md on 18 Nov 2026 (Tom's yes: CLAUDE.md keeps what the program is, commands, rules and
-pointers). Design, Tom's answers and the full build log: the private planning notes
+Moved from Orbit's CLAUDE.md on 18 Nov 2026 (CLAUDE.md keeps what the program is, commands, rules and
+pointers). Design, its answers and the full build log: the private planning notes
 (sections 9 and 10). This file is the per-step record of what was built in this repository.
 
 Build steps 1-5 live 17 Nov 2026, published on the public release `catalog` by `.github/workflows/catalog.yml`;
 the WMO OSCAR/Space link file on branch `feat/catalog-oscar` (18 Nov 2026).
 
-Design and Tom's answers: the private planning notes (section 9). Branch `feat/sat-catalog`,
+Design and its answers: the private planning notes (section 9). Branch `feat/sat-catalog`,
 worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
 - **Step 1:** `doctrine/sources.json` 2.5 adds the catalog's sources with the terms read 16 Nov 2026: planned
   ingest (`use` `excluded` with `planned_use` `ingest` until each build step lands, so the page lists only live
@@ -23,7 +23,7 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   display rule "USA 253 (Hornet 1)" when the first name is a designation. On the 13 Nov GCAT copy: 70,731 numbered,
   12,745 without a number, 0 disagreements (one source), 95.5 MB JSON, 5.2 MB gzipped. Tests `tests/test_catalog.py`
   (18, on GCAT rows of the test objects); 167 tests pass, check PASS.
-- **Step 3 (Tom's brief, 17 Nov 2026):** `orbit/stcat.py`, `python tools/orbit.py spacetrack-catalog` (local
+- **Step 3 (17 Nov 2026):** `orbit/stcat.py`, `python tools/orbit.py spacetrack-catalog` (local
   only; no workflow change). Space-Track's use policy (read 17 Nov 2026) lists SATCAT ("Once per day after 1700
   (UTC)") and DECAY (1 a day; store an object's history, never download it again) on their own rows; GP's hourly
   rule is GP's alone, so `shared_gp_busy` is not used. No other TIC program queries satcat or decay (Noisefloor
@@ -38,7 +38,7 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   objects' `YYYY-000x` and 1 January dates are placeholders; GCAT's pre-1963 Greek-letter pieces are not compared.
   `swaps()` now flags a name only when each source gives it to a number the other does not, all from one launch.
   `doctrine/sources.json` 2.6: Space-Track's note records the SATCAT and DECAY use.
-- **First real read, 17 Nov 2026 18:09 UTC** (Tom's account, 4 requests): 71,335 SATCAT rows; 144,363 decay
+- **First real read, 17 Nov 2026 18:09 UTC** (Orbit's account, 4 requests): 71,335 SATCAT rows; 144,363 decay
   messages (whole history, stored). Built against GCAT of 15 Nov (`2026 Nov 15 1018:34`): 71,409 numbered entries
   (70,702 in both, 633 Space-Track only, mostly `OBJECT x` and new 101xxx debris; 74 GCAT only, e.g. USA 726-736
   SBST R-4); 2,560 with disagreements: decayed 1,093, launch date 863, state 744, intldes 41; 27 name swaps. Most are
@@ -51,7 +51,7 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   2/3 and others. Display: "USA 257 (NEMESIS 2)", "USA 253 (Hornet 1)", 55841 "LUCH (OLYMP) 2" (SWF's spelling).
   153 MB JSON, 8.2 MB gzipped. Tests `tests/test_stcat.py` (23, on real rows cut unchanged into
   `tests/fixtures/spacetrack_{satcat,decay}_20261117.json` and `catalog_satcat_extra.tsv`); 190 tests pass, check PASS.
-- **Workflow and release (Tom's "yes to all not done items", 17 Nov 2026 about 12:45 PM CST):** `catalog.yml`
+- **Workflow and release (17 Nov 2026 about 12:45 PM CST):** `catalog.yml`
   (cron 17:23, 19:23, 21:23 UTC and dispatch; `spacetrack-catalog --release`): decay store and state from the public
   release `catalog`, one read when `stcat.due` allows, GCAT's five tables (one request each), build, upload
   `catalog.json.gz`, `spacetrack-decay.json.gz` (the store between runs; Actions cache can be evicted) and
@@ -74,9 +74,9 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   after 17:23 UTC (17 Nov's read was made by hand before the merge, so no CelesTrak or Wikidata read that day),
   and the release notes are re-set each upload with both credits. `doctrine/sources.json` 2.7: both `ingest`
   (no page lane, so the page does not list them). WMO OSCAR/Space not built: no NORAD number or COSPAR ID in its
-  API, so it cannot be matched on an id. **Tom, 17 Nov 2026:** a hand-reviewed slug-to-NORAD link file, the 414
+  API, so it cannot be matched on an id. **17 Nov 2026:** a hand-reviewed slug-to-NORAD link file, the 414
   operational satellites first (not built). Real read and counts: design note section 10.
-- **Step 5 (17 Nov 2026, Tom's "Step 5: aliases + rpo"; branch `feat/catalog-step5`, worktree
+- **Step 5 (17 Nov 2026, branch `feat/catalog-step5`, worktree
   `_worktrees\orbit-catalog-step5`; not committed):** `orbit/aliases.py` reads `orbit/data/catalog/aliases.yml`
   (standard library, a strict YAML subset: errors name the line; `.gitignore` re-includes `orbit/data/`). Entries:
   a name (`norad` or `jcat`, `name`, `basis`, `source` from doctrine/sources.json, `read`, `evidence` list, optional
@@ -94,7 +94,7 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   `tests/test_aliases.py` (16, on the real alias file, SWF fixtures and 22 real name-index rows in
   `tests/fixtures/catalog_names_20261117.json`); 229 tests pass, check PASS; card checked in the browser pane on a
   local build (99 links, no console errors).
-- **WMO OSCAR/Space link file (18 Nov 2026, Tom's pick; branch `feat/catalog-oscar`, worktree
+- **WMO OSCAR/Space link file (18 Nov 2026, branch `feat/catalog-oscar`, worktree
   `_worktrees\orbit-catalog-oscar`):** `orbit/oscar.py`: `python tools/orbit.py oscar-read` reads the satellite list
   once (36 pages, 3 s apart, resumes; any non-200 stops) into git-ignored `data/raw/wmo-oscar/<stamp>/`; `oscar-propose
   --stamp S [--draft]` proposes NORAD candidates from launch date (within a day) and orbit only (CelesTrak SATCAT
@@ -106,7 +106,7 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   Read 18 Nov: 1,062 satellites, 414 operational; drafted 285, left 129 for a person (hosted instruments,
   constellation entries, operator names the catalogs lack, OSCAR values that do not fit). Never query CelesTrak for
   this: use catalog-sources' stored file. Tests `tests/test_oscar.py` (17); 247 pass. Details: design note section 10.
-- **Step 6, data for the object page (18 Nov 2026, Tom's pick; branch `feat/catalog-step6`, worktree
+- **Step 6, data for the object page (18 Nov 2026, branch `feat/catalog-step6`, worktree
   `_worktrees\orbit-catalog-step6`, from origin/main `aabfa10`):** `orbit/catshards.py`; no page code (the split
   agreed with the object-page session: the catalog supplies data and rules, Orbit's page draws them).
   - **Compact file, schema `tic-catalog/2`:** a record leaves out `read` when it equals its source's read in
@@ -130,11 +130,11 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
     2.1 MB, 154 MB unpacked, 8.6 MB as the tar; search index 84,160 rows, 6.1 MB JSON, 1.11 MB gzipped (under the
     page's 2 MB line, so one file); rules note 8 KB. Counts unchanged (2,686 with disagreements, 109 name swaps).
   - Tests `tests/test_catshards.py` (16, on the step 4 fixtures plus GCAT's auxcat and tmpcat rows and the real
-    alias file); 300 tests pass, check PASS. `catalog.yml`'s test step runs them (Tom's yes, 18 Nov 2026).
+    alias file); 300 tests pass, check PASS. `catalog.yml`'s test step runs them (18 Nov 2026).
 - **OSCAR links reviewed (18 Nov 2026; branch `feat/catalog-oscar-review`):** all 285 drafted entries accepted by a
   TIC analyst, none withdrawn; each has `reviewed_by: "tic-analyst"` and `reviewed`. The review record is kept
   privately.
-- **OSCAR join (20 Nov 2026; Tom's yes of 20 Nov to the OSCAR join including the `catalog.yml` change; branch
+- **OSCAR join (20 Nov 2026; the join includes the `catalog.yml` change; branch
   `feat/catalog-oscar-join`):** `oscar.pull` reads the satellite list weekly (36 pages, 3 s apart, in the run that
   makes the Space-Track read; any non-200 holds the source like CelesTrak's, a 429 or 5xx until the next UTC day,
   anything else until a person clears it with `--clear-hold wmo-oscar-space`; a list under 900 satellites is

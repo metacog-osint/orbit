@@ -1506,7 +1506,7 @@ function main() {
     $("geo-drift").innerHTML = dr.length ? table(["Satellite", "Owner", "Longitude", "Drift"], dr.map((d) => "<tr><td>" + pick([d.norad], d.name) + roleTag(d.role) + "</td><td>" + esc(d.owner || "") +
       '</td><td class="num">' + (d.lon == null ? "–" : lonTxt(d.lon)) + '</td><td class="num">' + esc(rateTxt(d.drift)) + "</td></tr>")) : "<p>None.</p>";
   }
-  // relocation tracker (tools/geo_tracker.py, method orbit-2.27): wording as Tom chose on 24 Nov 2026
+  // relocation tracker (tools/geo_tracker.py, method orbit-2.27): wording as chosen on 24 Nov 2026
   const when = (s) => esc(bothTxt(epochMs(s.replace("Z", "")), true));
   const hoursTxt = (h) => (h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days");
   const heightTxt = (km) => (Math.abs(km) < 1 ? "at geostationary altitude" : "about " + fmtN(Math.round(Math.abs(km))) + " km " + (km > 0 ? "above" : "below") + " geostationary altitude");

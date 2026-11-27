@@ -1,4 +1,4 @@
-"""Data for Orbit's object pages (orbit-2.20, 18 Nov 2026; Tom's "Yes, build it").
+"""Data for Orbit's object pages (orbit-2.20, 18 Nov 2026).
 
 The TIC satellite catalog (build step 6) publishes `catalog-shards.tar.gz` on the public release `catalog`: one file per
 thousand numbered objects (`n<NORAD // 1000>.json`), one per thousand unnumbered GCAT entries (`j<letter><n // 1000>.json`),

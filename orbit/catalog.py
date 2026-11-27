@@ -1,6 +1,6 @@
 """TIC's satellite catalog (schema `tic-catalog/1`): one entry per NORAD number, every value with its source.
 
-Design: the private planning notes (Tom's answers in its section 9). Build step 2: GCAT.
+Design: the private planning notes (answers in its section 9). Build step 2: GCAT.
 Build step 3 (17 Nov 2026): Space-Track SATCAT and DECAY (orbit/stcat.py). Build step 4 (17 Nov 2026): CelesTrak
 SATCAT and Wikidata (orbit/catsources.py). Build step 5 (17 Nov 2026): the hand-kept alias file (orbit/aliases.py)
 and a name index for readers (`names_index`). WMO OSCAR/Space comes through a reviewed link file; each source arrives
@@ -22,12 +22,12 @@ from . import aliases, catsources, gcat, oscar, oscarlinks, stcat
 
 SCHEMA = "tic-catalog/1"
 
-# Name ranking (Tom, 16 Nov 2026): Space-Track, GCAT, CelesTrak, Wikidata, SWF, then cited aliases. WMO OSCAR/Space
+# Name ranking (16 Nov 2026): Space-Track, GCAT, CelesTrak, Wikidata, SWF, then cited aliases. WMO OSCAR/Space
 # (join step, 20 Nov 2026) sits after Wikidata: its acronyms never replace a name another source gives; only an
 # object with no other name shows OSCAR's.
 RANK = ("space-track", "gcat-mcdowell", "celestrak-satcat", "wikidata", "wmo-oscar-space", "swf-rpo", "aliases")
 
-# Designations and placeholders: shown, but a better name goes beside them in brackets (Tom, 16 Nov 2026).
+# Designations and placeholders: shown, but a better name goes beside them in brackets (16 Nov 2026).
 # Space-Track's "PAYLOAD A" to "PAYLOAD C" (2013-037: SJ-15 is 39210) are placeholders like "OBJECT A".
 DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|PAYLOAD [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.I)
 
@@ -375,7 +375,7 @@ OS = oscar.SOURCE
 
 
 def add_oscar(numbered: dict, links: list[dict], satellites: list[dict], read: str) -> dict:
-    """WMO OSCAR/Space (build join step, Tom's yes 20 Nov 2026) through the reviewed link file only: `links` are the
+    """WMO OSCAR/Space (build join step, 20 Nov 2026) through the reviewed link file only: `links` are the
     reviewed live entries of oscar-links.yml (oscarlinks.reviewed), `satellites` the last read (oscar.store_load).
     A `same` entry with one number adds OSCAR's operator (`space_agency`, declared through WMO), its status (compared
     with CelesTrak's through oscar.STATUS_CLASS) and its acronym and full name as names. An entry that stands for

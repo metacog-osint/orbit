@@ -9,7 +9,7 @@ from the reading that first listed it. Items:
   - catalog changes since Orbit's previous reading: new objects from launches more than 30 days old (one item
     per launch), and owner or state changes (one item);
   - orbit changes in watched objects listed on the page (Space-Track element sets, last 30 days; one item each,
-    off-map), kind "maneuver" (Tom, 14 Nov 2026). COP's gate holds this kind as military context;
+    off-map), kind "maneuver" (14 Nov 2026). COP's gate holds this kind as military context;
   - 30-day counts outside every prior window (orbit-2.49; one item per series, off-map, tier anomaly);
   - GEO relocations of listed-role objects (orbit-2.30, ideas#323): one item per move, updated in place, off-map,
     from the GEO page's tracker (tools/geo_tracker.py). tools/geo_page.py adds them to site/data/feed.geojson after
@@ -305,7 +305,7 @@ def baseline_features(base: dict, generated: str, accessed: str) -> list[dict]:
 
 
 def _breakup_item(b: dict, generated: str, accessed: str, base: dict | None = None) -> dict:
-    """One object GCAT marks as broken up (E) or collided (C) in the last 30 days (OR-EEI-5, Tom's yes 16 Nov 2026).
+    """One object GCAT marks as broken up (E) or collided (C) in the last 30 days (OR-EEI-5, 16 Nov 2026).
     Kept apart from reentries since orbit-2.12: the object did not come down; its fragments are catalogued anew."""
     word = BREAKUP_WORD.get(b.get("status"), "ended in orbit")
     when = b["breakup_date"] + (" (GCAT marks the date uncertain)" if b.get("breakup_uncertain") else "")
@@ -419,7 +419,7 @@ def _lon(x: float) -> str:
 
 
 def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> dict:
-    """Off the map (geometry null): where to draw a satellite on COP's map is Tom's open decision (ground tracks)."""
+    """Off the map (geometry null): where to draw a satellite on COP's map is an open decision (ground tracks)."""
     name = e.get("gcat_name") or e["name"]
     also = e.get("names") or []          # the other names the object goes by (orbit/names.py, orbit-2.26)
     shown = names.label(name, also)

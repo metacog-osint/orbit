@@ -1,6 +1,6 @@
 """WMO OSCAR/Space for TIC's satellite catalog: the reader and the slug-to-NORAD link proposer (18 Nov 2026).
 
-Design: the private planning notes, sections 1, 2 and 9 (Tom's answer 8, 17 Nov 2026).
+Design: the private planning notes, sections 1, 2 and 9 (answer 8, 17 Nov 2026).
 
 Terms (space.oscar.wmo.int/pages/disclaimer, read 16 and 17 Nov 2026): "All information available on these pages
 may be used and redistributed freely", and "any publication using this information should acknowledge WMO";
@@ -12,7 +12,7 @@ satellite carries id, slug, acronym, fullname, WIGOS_Station_Identifier, space_a
 launch_date, EoL, longitude, Altitude, ECT, description, link, data_access_link and its instruments. It carries no
 NORAD number and no COSPAR ID, and no Wikidata item carries a WIGOS id, so OSCAR cannot be joined on an id.
 
-Tom, 17 Nov 2026: a hand-reviewed slug-to-NORAD link file, each entry with its evidence, reviewed by diff; a script
+17 Nov 2026: a hand-reviewed slug-to-NORAD link file, each entry with its evidence, reviewed by diff; a script
 may propose candidates (launch date and orbit); nothing joins until a person has reviewed the entry. The 414
 operational satellites first, the inactive ones later. So this module:
   - reads the satellite list once (`read`), one page every few seconds, raw replies kept unchanged in

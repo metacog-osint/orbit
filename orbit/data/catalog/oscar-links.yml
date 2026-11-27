@@ -1,4 +1,4 @@
-# TIC satellite catalog: WMO OSCAR/Space slug-to-NORAD links (Tom, 17 Nov 2026; design note
+# TIC satellite catalog: WMO OSCAR/Space slug-to-NORAD links (17 Nov 2026; design note
 # the private planning notes, section 9 answer 8). Read by orbit/oscarlinks.py.
 #
 # OSCAR gives no NORAD number and no COSPAR ID. Each entry links one OSCAR satellite (its slug) to the object it is

@@ -1,4 +1,4 @@
-"""Retention archives (18 Nov 2026, Tom's rule: no TIC program loses data; live views may filter, storage keeps all).
+"""Retention archives (18 Nov 2026, suite rule: no TIC program loses data; live views may filter, storage keeps all).
 
 Everything here goes to this repository's PUBLIC releases, so only what is already public or open-licensed goes in:
 GCAT's catalog changes (CC BY 4.0), the published daily archive (/data/archive.json) and the published TIC catalog

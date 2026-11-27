@@ -1,6 +1,6 @@
 """TIC's hand-reviewed WMO OSCAR/Space link file, `orbit/data/catalog/oscar-links.yml` (18 Nov 2026).
 
-Tom, 17 Nov 2026: OSCAR carries no NORAD number and no COSPAR ID, so it joins the catalog only through a
+17 Nov 2026: OSCAR carries no NORAD number and no COSPAR ID, so it joins the catalog only through a
 hand-reviewed slug-to-NORAD file, each entry with its evidence, reviewed by diff; a script may propose candidates;
 nothing joins until a person has reviewed the entry. The 414 operational satellites first.
 

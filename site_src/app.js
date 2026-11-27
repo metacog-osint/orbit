@@ -280,7 +280,7 @@
   function dayYear(isoDate) {
     return T ? T.format(isoDate + "T12:00:00Z", { year: true, time: false }) : isoDate;
   }
-  // Orbit changes in watched objects (Space-Track element sets, Orbit's analysis). Wording approved by Tom, 14 Nov 2026.
+  // Orbit changes in watched objects (Space-Track element sets, Orbit's analysis). Wording approved 14 Nov 2026.
   var DOMINANT = { "in-track": "along track", "cross-track": "plane change", "eccentricity": "orbit shape" };
   function lonText(x) { return x == null ? "" : Math.abs(x).toFixed(1) + "\u00b0" + (x < 0 ? "W" : "E"); }
   function driftText(x) {

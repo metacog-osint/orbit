@@ -1,4 +1,4 @@
-"""The satellite map's data (orbit-2.23, ideas#71, Tom's yes to the design 20 Nov 2026): CelesTrak's GP "active" group
+"""The satellite map's data (orbit-2.23, ideas#71, design approved 20 Nov 2026): CelesTrak's GP "active" group
 (working satellites, the 18th Space Defense Squadron's GP data) once a UTC day, joined to GCAT by NORAD number for the
 owner, type and launch date, written as one compact file the home page's map draws with SGP4.
 

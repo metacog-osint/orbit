@@ -1,7 +1,7 @@
 """What a geostationary orbit change did, in words, and which changes lead the page (orbit-2.26, 23 Nov 2026).
 
-Tom, 23 Nov 2026, after Luch (Olymp) 2 left 62 E: Orbit listed "8.5 m/s between 15 Oct and 22 Nov" as one routine
-row, and he heard of the move elsewhere. Two additions to a listed GEO change (orbit/maneuver.py), both from the
+23 Nov 2026, after Luch (Olymp) 2 left 62 E: Orbit listed "8.5 m/s between 15 Oct and 22 Nov" as one routine
+row, and the move was first learned of elsewhere. Two additions to a listed GEO change (orbit/maneuver.py), both from the
 element sets already held, no request:
 
 1. **What happened.** From the set before and the set after: the longitude and drift on each side, the kind of
@@ -16,7 +16,7 @@ element sets already held, no request:
    changed its drift rate) and the drift rate changed by NOTABLE_RATE (0.25 deg a day, about 0.7 m/s along track)
    or more. Without that floor a roaming inspector that edges across the 0.1 line reads as notable: on the live
    snapshot of 23 Nov 2026 USA 270 "started drifting" at 0.12 deg a day on a 0.9 m/s change. A notable change is the first line of the daily lead, is marked in the archive, and
-   goes into the public file /data/notable.json. Its feed item keeps tier "routine": a higher tier is Tom's call.
+   goes into the public file /data/notable.json. Its feed item keeps tier "routine": a higher tier is a separate decision.
 
 A line says which object, where and how fast, from which sets. It never says why, never names a destination and
 is not a warning. The simple longitude (node + perigee argument + mean anomaly - sidereal time) holds for the low

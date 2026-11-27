@@ -16,13 +16,13 @@ The method, for each watched object, over its stored Space-Track element sets (G
   4. The object's own noise: for each of the three, the median and 1.4826 * median absolute deviation across all
      its pairs. A pair is marked when one of them is at least Z (8) of those deviations above the median AND the
      total is at least FLOOR_MS (0.05 m/s). At least MIN_PAIRS (10) pairs are needed before anything is marked.
-     A change is reported only when its total is at least REPORT_MS for its regime: 0.25 m/s at GEO (Tom, 14 Nov
+     A change is reported only when its total is at least REPORT_MS for its regime: 0.25 m/s at GEO (14 Nov
      2026, after the known case gave four 0.06-0.19 m/s marks on the dead BeiDou-2 G2), FLOOR_MS elsewhere.
   5. Marked pairs less than a day apart are one change, but only when they agree: the same dominant term
      (in-track, cross-track or eccentricity) and the same sign of semi-major-axis change as the change so far
-     (orbit-2.6, Tom, 15 Nov 2026; before, SJ-21's lowering, raising, tow and return of 17-26 Jan 2022 read as one).
+     (orbit-2.6, 15 Nov 2026; before, SJ-21's lowering, raising, tow and return of 17-26 Jan 2022 read as one).
   6. In low orbit a change is listed only when it is mainly in-track, or when its cross-track or eccentricity
-     total is LEO_OFF_TRACK_MS (1 m/s) or more; the rest are counted, not listed (orbit-2.8, Tom, 15 Nov 2026). On
+     total is LEO_OFF_TRACK_MS (1 m/s) or more; the rest are counted, not listed (orbit-2.8, 15 Nov 2026). On
      the ISS known case low-orbit cross-track noise is 0.32 m/s against 0.006 m/s in-track, and all nine marks
      NASA did not list were cross-track or eccentricity at 0.28-0.84 m/s.
   7. Each listed change also carries dv_sma_ms, the velocity the net semi-major-axis change alone gives
@@ -48,7 +48,7 @@ import math
 from datetime import datetime, timedelta, timezone
 from statistics import median
 
-PUBLISH = True  # Tom approved the disclaimer, 14 Nov 2026 (doctrine/spacetrack-disclaimer.md); False holds the lane
+PUBLISH = True  # disclaimer approved 14 Nov 2026 (doctrine/spacetrack-disclaimer.md); False holds the lane
 ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, "
                "redistributed under USSPACECOM's blanket approval for basic SSA data. Orbit-change analysis: The "
                "Intelligence Company, not reviewed or endorsed by USSPACECOM. Not for operational use.")  # section 3

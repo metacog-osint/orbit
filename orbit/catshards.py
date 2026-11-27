@@ -199,7 +199,7 @@ SHARD_RULE = ("A numbered object is in n<NORAD number // 1000>.json (25544 in n2
               "number is in j<first letter of its JCAT id><rest of the id as a number // 1000>.json (A04907 in "
               "jA4.json). Keys: the NORAD number as written without leading zeros, or the JCAT id.")
 
-# The rules note. Wording is the page's: precise, with terms explained in place (mixed readers, Tom 18 Nov 2026).
+# The rules note. Wording is the page's: precise, with terms explained in place (mixed readers, 18 Nov 2026).
 SOURCE_LABELS = {
     catalog.ST: {"label": "Space-Track", "about": "The US Space Force's public catalog (18th Space Defense "
                  "Squadron). It assigns NORAD numbers and COSPAR IDs.", "url": "https://www.space-track.org"},
@@ -303,7 +303,7 @@ DISAGREEMENTS = {
     },
 }
 
-# Shown once on every satellite card, above "Names and sources" (Tom, 18 Nov 2026: a general note, no reviewer named).
+# Shown once on every satellite card, above "Names and sources" (18 Nov 2026: a general note, no reviewer named).
 CARD_NOTE = ("Names, owners, dates, orbits and status on this card come from several public catalogs and are shown as "
              "each source gives them. The sources sometimes disagree, and some details are attributed to the satellite "
              "by a catalog compiler or analyst rather than stated by its operator. Where they differ, TIC lists each "

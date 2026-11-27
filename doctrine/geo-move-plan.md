@@ -1,7 +1,7 @@
 # Moving Noisefloor's GEO belt into Orbit: plan
 
-Drafted 15 Nov 2026 after Tom's "yes, plan on moving it and keeping sun outages in noisefloor". Step 0 is built
-(below); steps 1-5 are not. Each step needs Tom's yes before it is built, and its own yes to commit, push and deploy,
+Drafted 15 Nov 2026 on a plan to move it and keep sun outages in Noisefloor. Step 0 is built
+(below); steps 1-5 are not. Each step needs approval before it is built, and its own approval to commit, push and deploy,
 in each repo.
 
 ## Why
@@ -11,7 +11,7 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
 - Orbit's orbit-change lane watches GEO objects (USA 270 and USA 271 among them) with its own rules, and
   Noisefloor's callout C5 marks orbit changes of listed objects with different thresholds. Two TIC sites can
   publish different answers about the same satellite.
-- Both repos log in to one Space-Track account (Tom, 15 Nov 2026). GP once an hour is the account's limit. Today
+- Both repos log in to one Space-Track account (15 Nov 2026). GP once an hour is the account's limit. Today
   Orbit checks Noisefloor's runs before its GP query (`orbit-2.8`), but Noisefloor does not check Orbit's.
   One collector in one repo ends that.
 
@@ -23,7 +23,7 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
 | `tools/geo.py` | 333 | The older GEO board from CelesTrak's active-GEO group | Retires once the Space-Track region covers it (step 5) |
 | `tools/geo_globe.py`, `site_src/globe.js`, `geo.js`, `geo.html` | 195 + 1,312 + 142 + 98 | The /geo page: three.js globe, belt strip, look angles, relative motion, closest objects, callouts | Moves (step 4) |
 | `site_src/geo_roles.json`, `satcat_owners.json` | | Listed roles and owner names | Move with the page |
-| `tools/sun_transit.py`, `sun.html`, `sun.js`, `sunoutage.js` | | Sun outages: when the sun sits behind a GEO satellite for a receiver | **Stay in Noisefloor** (Tom). They use a nominal GEO radius and slot longitude, not the GEO data, so nothing they need moves. The /geo page also loads `sunoutage.js` for its look-angle panel: Orbit takes a copy |
+| `tools/sun_transit.py`, `sun.html`, `sun.js`, `sunoutage.js` | | Sun outages: when the sun sits behind a GEO satellite for a receiver | **Stay in Noisefloor** (decided). They use a nominal GEO radius and slot longitude, not the GEO data, so nothing they need moves. The /geo page also loads `sunoutage.js` for its look-angle panel: Orbit takes a copy |
 | `tools/board.py` `geo_card` | | Noisefloor's home-page status board shows a GEO card from `site/data/geo.json` | Drops the card, or links to Orbit, at step 5 |
 | `tools/sentinel_gnss.py` (`import geo_region as G`) | | Uses geo_region's Space-Track client for Sentinel `gp_history` reads | **Stays in Noisefloor**: it needs its own copy of the client before `geo_region.py` leaves, and its `gp_history` reads still use the shared account (no hourly GP limit, but the 30 a minute and 300 an hour totals are shared) |
 | Registry rows `space-track`, `celestrak`, footprint rows (`satbeams`, `operator-coverage`, `fcc-space-filings`, `itu-space-filings`) | | Licences and terms already checked | Copied into `doctrine/sources.json` with their checks and dates |
@@ -33,19 +33,19 @@ Noisefloor's job is GPS and PNT interference. Two more reasons:
    snapshot (`orbit.theintelligence.company/data/snapshot.json`, `maneuvers.read_at`) and skips its query within
    the hour, as Orbit already does the other way. About 15 lines and a test. This closes the shared-account gap
    until step 2 lands.
-   **Built 16 Nov 2026** (Tom's "build step 0 with the window skip", 15 Nov CST): Noisefloor `be45abe` (PR #12,
+   **Built 16 Nov 2026** (with the window skip, 15 Nov CST): Noisefloor `be45abe` (PR #12,
    merged after CI passed). `orbit_busy` in `tools/geo_region.py` also skips when Orbit's snapshot can't be read,
    and from :38 to :05 around 00, 06, 12 and 18 UTC (Orbit's :41 cron and :55 dispatch), because Orbit's snapshot
    is published about a minute after its gp query and Orbit's runs couldn't be seen from Noisefloor while Orbit's repo
 was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now read Orbit's runs too). Noisefloor's
    12:40 UTC second-look cron falls inside that window, so an on-time run skips its GEO pull (05:40 has pulled).
-1. **Decide the open questions below** (Tom).
+1. **Decide the open questions below** (owner decision).
 2. **Collector in Orbit:** lane `geo` (`orbit/geo_region.py`), standard library only, through Orbit's Space-Track
    client: one GP query a run for the GEO region and the watch list together where Space-Track allows it, else two
    queries spaced inside the run, never two runs inside the hour. The history Noisefloor already holds is read
    once from its public releases (no new Space-Track requests). Then Noisefloor's step "GEO region (Space-Track)"
    is switched off in the same change window, so only one repo queries.
-   **Built 16 Nov 2026 (Tom's "Start step 2"); Orbit's side pushed to main on Tom's "Ship Orbit's side"**: branch `feat/geo-lane`, `orbit/geo_region.py`,
+   **Built 16 Nov 2026; Orbit's side pushed to main**: branch `feat/geo-lane`, `orbit/geo_region.py`,
    `python tools/orbit.py geo`, workflows `geo.yml` (twice a day) and `geo-import.yml` (once, by hand), method.md
    "The GEO region". Parity with Noisefloor checked on its 15 and 16 Nov 2026 day files (same objects, regions,
    counts and events). Elements are monthly JSON (gzipped, standard library) on the public releases `geo-YYYY`. Not one
@@ -54,11 +54,11 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
    day file instead of Space-Track), merged only after Orbit's first two geo runs are checked.
 3. **Callouts in Orbit:** C1-C8 ported with their pre-registered rules and scoring unchanged, and rerun on the
    same cases to show the same results before anything is published. Orbit's C5 and its own orbit-change lane are
-   then compared object by object on the GEO watch list; where they disagree, Tom picks one rule.
+   then compared object by object on the GEO watch list; where they disagree, one rule is picked.
 4. **The page in Orbit:** the globe and belt strip as Orbit's GEO page, three.js and satellite.js self-hosted like
-   MapLibre (Orbit's CSP has no CDN scripts). Feed items for callouts only with Tom's yes, held from joins by
+   MapLibre (Orbit's CSP has no CDN scripts). Feed items for callouts only with approval, held from joins by
    COP's gate like orbit changes.
-   **Decided 17 Nov 2026 (Tom, "Add RPO pairs"):** the page draws SWF's RPO chasers beside their targets, from the
+   **Decided 17 Nov 2026 ("Add RPO pairs"):** the page draws SWF's RPO chasers beside their targets, from the
    element sets on Orbit's public `geo-2026` release (no new source or request). **Built 18 Nov 2026** (branch
    `feat/geo-page`): `geo.html`, `tools/geo_page.py`, `site_src/geo/`, three.js 0.185.0 in `vendor/three/`, the
    update run's step "GEO page data and callouts" (installs `tools/requirements-callouts.txt`, reads the
@@ -69,14 +69,14 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
    tab's own page. Then `geo.py`, the GEO steps in `daily.yml` and the old page retire, and the hub's and COP's
    descriptions of both programs are updated.
    **Planned 18 Nov 2026** (file by file, in the suite's notes). The plan found that `geo.py`'s board
-   (belt-wide manoeuvres, today's close pairs, the drifting count) never moved; **Tom: "Port to Orbit first"** (18 Nov 2026). Built the same day: the page's "Belt board"
+   (belt-wide manoeuvres, today's close pairs, the drifting count) never moved; **Port to Orbit first** (18 Nov 2026). Built the same day: the page's "Belt board"
    (`tools/geo_belt.py`; `method.md`, "The GEO page", item 5, with the check against Noisefloor's live board).
    Noisefloor's side waits on the board being live. **Noisefloor's side shipped 18 Nov 2026** (Noisefloor PR #50,
-   `d3544d6`; Tom's decisions: Noisefloor stops reading Orbit's day files, no GEO card or row on its home page, old
+   `d3544d6`; decisions: Noisefloor stops reading Orbit's day files, no GEO card or row on its home page, old
    /geo 404s). It makes no GP query any more, so from `orbit-2.21` neither `geo.yml` nor the update run waits for
    Noisefloor's daily runs (`spacetrack.FOR_GEO`, `FOR_MANEUVER`).
 
-## Open questions for Tom
+## Open questions
 1. **3D:** port Noisefloor's three.js globe as is (built and checked), or rebuild it in Cesium as part of Orbit's
    planned 3D page? Recommended: port it as is now, and fold it into the Cesium page when that is built for ground
    tracks.
@@ -85,16 +85,16 @@ was private (it went public about 9:30 PM CST 15 Nov, so Noisefloor could now re
    on Orbit's own repo (private), or keep publishing to Noisefloor's releases from Orbit. Recommended: Orbit's own
    releases, with the element sets kept private as Orbit does now ("raw element sets are not republished").
 
-**Decided 15 Nov 2026 (Tom, about 9:15 PM CST):** question 1, port the globe as is; question 2, Orbit's own
-releases. Questions 3 and 4 stay open. **Settled the same evening:** `metacog-osint/orbit` went public about 9:30 PM CST 15 Nov, so its releases are public. Tom (about 9:40 PM CST): drop the overly cautious rules, the programs must be able to read each other's data. So the GEO element sets go on Orbit's public releases with Space-Track's citation, under USSPACECOM's blanket approval for basic SSA data, as Noisefloor publishes them now. Orbit's private watch list stays private (it is watch configuration, not a licence matter), so its sets stay in the Actions cache.
+**Decided 15 Nov 2026 (about 9:15 PM CST):** question 1, port the globe as is; question 2, Orbit's own
+releases. Questions 3 and 4 stay open. **Settled the same evening:** `metacog-osint/orbit` went public about 9:30 PM CST 15 Nov, so its releases are public. Decided about 9:40 PM CST: drop the overly cautious rules, the programs must be able to read each other's data. So the GEO element sets go on Orbit's public releases with Space-Track's citation, under USSPACECOM's blanket approval for basic SSA data, as Noisefloor publishes them now. Orbit's private watch list stays private (it is watch configuration, not a licence matter), so its sets stay in the Actions cache.
 3. **Dependencies:** `geo_callouts.py` uses numpy and sgp4, and the monthly element files are parquet (pyarrow).
    Orbit's live lanes are standard library only. Options: callouts run at build time with those packages pinned,
    or rewritten to the standard library (SGP4 in pure Python is slower but small at GEO's few thousand objects).
-   **Decided 16 Nov 2026 (Tom):** pinned at build time, for the callouts only; the collector and the live lanes
+   **Decided 16 Nov 2026:** pinned at build time, for the callouts only; the collector and the live lanes
    stay standard library.
 4. **Which rule wins for GEO orbit changes:** Orbit's (8 robust deviations of the object's own noise, 0.25 m/s
    floor) or Noisefloor's C5 (drift 0.02 deg/day, inclination 0.02 deg, or 0.15 deg longitude off prediction).
    Decided after step 3's comparison.
-   **Decided 17 Nov 2026 (Tom): Orbit's rule.** On the same history it hit 6 of 6 of C5's published cases (C5 5 of 6);
+   **Decided 17 Nov 2026: Orbit's rule.** On the same history it hit 6 of 6 of C5's published cases (C5 5 of 6);
    most of C5's extra marks were station-keeping, a drifting object and natural inclination drift (`method.md`,
    "GEO callouts").

@@ -531,7 +531,7 @@ class Registers(unittest.TestCase):
         self.assertEqual(by_id["gcat-mcdowell"]["reliability"], "Completely reliable")
         self.assertEqual(by_id["swf-rpo"]["grade"], "B2")
         self.assertEqual(by_id["swf-rpo"]["credibility"], "Probably true")
-        held = set() if maneuver.PUBLISH else {"maneuver"}  # held until Tom approves the Space-Track disclaimer
+        held = set() if maneuver.PUBLISH else {"maneuver"}  # held until the Space-Track disclaimer is approved
         self.assertEqual({lane for s in doc["sources"] for lane in s["lanes"]}, set(cli.LANE_FIELDS) - held)
         self.assertTrue(all(s["grade"] for s in doc["sources"]))
 

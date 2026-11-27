@@ -1,6 +1,6 @@
 """The daily lead: what changed in the last 24 hours and what is due in the next 24 (orbit-2.18, 18 Nov 2026).
 
-Tom, 18 Nov 2026: "begin with the daily lead first"; plan in the private planning notes.
+18 Nov 2026: the daily lead was built first; plan in the private planning notes.
 Readers are mostly informed, some new to the topic, so each line is exact (source, time, number) and the page
 defines its terms beside it.
 
@@ -164,7 +164,7 @@ def _gap(e: dict) -> list:
 def notable_changes(snap: dict, archive_doc: dict | None, now: datetime) -> list[dict]:
     """One line for each notable change (orbit/notable.py: a listed-role GEO object that started drifting, stopped
     or changed its drift rate), while it is new or its newest element set is under 24 hours old. First in the
-    lead (Tom, 23 Nov 2026). What moved and how, from which sets; never why."""
+    lead (23 Nov 2026). What moved and how, from which sets; never why."""
     m = snap.get("maneuvers") or {}
     new = {id(e) for e in _new_changes(snap, archive_doc, now)}
     out = []

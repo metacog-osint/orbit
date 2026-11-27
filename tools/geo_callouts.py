@@ -21,7 +21,7 @@ its rules, thresholds and scoring unchanged. Three changes, none to a rule: the 
 monthly geo-elements-YYYY-MM.json.gz files (written by orbit/geo_region.py; Noisefloor's .parquet files are still
 read when present); load_static reads every day file (newest entry per object), not only the newest; and `pull`
 stops with a message (every v1 case's history is held; it is not yet wired to Orbit's Space-Track client).
-GEO orbit changes: Tom chose Orbit's rule (orbit/maneuver.py) over C5 on 17 Nov 2026 (doctrine/method.md, "GEO
+GEO orbit changes: Orbit's rule (orbit/maneuver.py) was chosen over C5 on 17 Nov 2026 (doctrine/method.md, "GEO
 callouts"). C5 stays in `run` and `score`, unchanged, as the scored v1 record; `publish` (step 4, the GEO page)
 lists listed-role orbit changes by Orbit's rule instead, under the same id so the page's switch keeps working.
 numpy and sgp4 are needed here only, pinned at build time for the callouts (decided 16 Nov 2026) in
@@ -598,7 +598,7 @@ def orbit_rule_changes(elements, static, roles, start, end):
 
 def publish(data, days, out, show_days=14):
     """The last `show_days` of callouts (computed over `days`, so the look-back rules have history) for the globe.
-    Listed-role orbit changes (C5's place) are Orbit's rule, not C5 (Tom, 17 Nov 2026)."""
+    Listed-role orbit changes (C5's place) are Orbit's rule, not C5 (17 Nov 2026)."""
     end = (datetime.now(timezone.utc) - timedelta(days=1)).date()
     start = end - timedelta(days=days - 1)
     first_shown = (end - timedelta(days=show_days - 1)).isoformat()

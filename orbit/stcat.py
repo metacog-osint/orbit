@@ -44,7 +44,7 @@ OPEN_HOUR = 17  # "Once per day after 1700 (UTC)"
 STATE = Path("state") / "spacetrack-catalog.json"
 DECAY_STORE = Path("state") / "spacetrack-decay.json.gz"
 RAW = Path("raw")
-# doctrine/spacetrack-disclaimer.md section 3 (approved by Tom 14 Nov 2026), with "Element sets" read as catalog and
+# doctrine/spacetrack-disclaimer.md section 3 (approved 14 Nov 2026), with "Element sets" read as catalog and
 # decay data, as tip.py reads it for reentry predictions.
 CITATION = ("Catalog and decay data: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense "
             "Squadron, redistributed under USSPACECOM's blanket approval for basic SSA data. Comparisons with other "
@@ -208,7 +208,7 @@ def load_local(data_dir: Path) -> dict | None:
             "decay": read_json(data_dir / DECAY_STORE, []), "state": state}
 
 
-# --- the public release `catalog` (gh, on GitHub's runners; Tom's yes to publish, 17 Nov 2026) ------------------
+# --- the public release `catalog` (gh, on GitHub's runners; publishing approved 17 Nov 2026) ------------------
 # The release is also where the decay history lives between runs: Space-Track asks that it be stored, never fetched
 # whole again, and the Actions cache can be evicted. So a run on GitHub refuses to read when the release exists but
 # its decay store cannot be downloaded, and never asks for the whole history (the first read was made locally on
