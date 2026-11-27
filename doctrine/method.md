@@ -878,3 +878,17 @@ with an unexplained difference.
    for the GEO objects. Readers that ignore them are unaffected.
 3. **Where it shows.** The object page heading, the site search results, and the GEO page's object card, search
    list and slot search list. A former name, an attributed name or no alias entry shows nothing new.
+
+## Name swaps from the alias file, Prowler, and "PAYLOAD x" placeholders (`orbit-2.35`, 26 Nov 2026)
+
+1. **Swap entries.** The alias file can record that sources give one payload name to different numbers: a `swap`
+   entry names the disputed name and gives each source's claim (source, date read, NORAD number, the source's own
+   spelling). It joins the name swaps the build finds by itself and shows on each object's page under "Name swaps".
+   Nothing is reassigned; feeds and keys keep each source's numbers. First entries: Cosmos 2536, 2537 and 2538
+   (44422-44424), which GCAT names one place over from Space-Track and CelesTrak.
+2. **Prowler.** SWF's RPO row "Prowler" (1990-1998) links to GCAT's unnumbered object A04907 (1990-097E, launched
+   1990-11-15 on STS-38, GEO), the piece Wikidata's Prowler item also gives. The NORAD number on that Wikidata item,
+   20963, is USA 67 (1990-097B) in GCAT, Space-Track and CelesTrak, so it is not used.
+3. **Placeholders.** Space-Track's "PAYLOAD A" to "PAYLOAD C" (for example SJ-15, 39210) are treated like
+   "OBJECT A": shown, with the best-ranked real name beside them ("PAYLOAD C (Shi Jian 15)"), and not used to find
+   name swaps.

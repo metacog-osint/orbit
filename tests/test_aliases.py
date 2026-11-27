@@ -29,8 +29,9 @@ GOOD = """- norad: 40258
 
 class AliasFile(unittest.TestCase):
     def test_the_real_file_reads_with_its_objects(self):
-        got = {e.get("norad") or e.get("program") for e in ENTRIES}
-        self.assertEqual(got, {55841, 40258, 43917, 40208, 33459, 36101, 28924, 29270, "GSSAP"})
+        got = {e.get("norad") or e.get("jcat") or e.get("program") or ("swap", e["swap"]) for e in ENTRIES}
+        self.assertEqual(got, {55841, 40258, 43917, 40208, 33459, 36101, 28924, 29270, "GSSAP", "A04907",
+                               ("swap", "Cosmos 2536"), ("swap", "Cosmos 2537"), ("swap", "Cosmos 2538")})
         gssap = next(e for e in ENTRIES if e.get("program") == "GSSAP")
         self.assertEqual(gssap["members"], [40099, 40100, 41744, 41745, 51280, 51281, 67759, 67760])
         self.assertTrue(all(e["evidence"] for e in ENTRIES))
@@ -44,7 +45,8 @@ class AliasFile(unittest.TestCase):
         self.assertEqual(aliases.parse("- members: [1, 2, \"x, y\"]\n")[0]["members"], [1, 2, "x, y"])
 
     def test_outside_the_subset_is_an_error_with_its_line(self):
-        for text, line in (("- a: {b: 1}\n", 1), ("- a: 1\n  b:\n    - [1, [2]]\n", 3), ("- a: 1\n   b: 2\n", 2),
+        for text, line in (("- a: {b: 1\n", 1), ("- a:\n    - {b: {c: 1}}\n", 2), ("- a:\n    - {b}\n", 2),
+                           ("- a: 1\n  b:\n    - [1, [2]]\n", 3), ("- a: 1\n   b: 2\n", 2),
                            ("a: 1\n", 1), ("- a: 1\n  a: 2\n", 2)):
             with self.assertRaises(aliases.AliasError) as cm:
                 aliases.parse(text)
@@ -86,7 +88,8 @@ class NameStatus(unittest.TestCase):
                 check_live(text)
 
     def test_the_real_file_marks_the_eutelsat_names(self):
-        got = {(e["norad"], e["name"]): (e["status"], e.get("until")) for e in ENTRIES if "status" in e}
+        got = {(e["norad"], e["name"]): (e["status"], e.get("until")) for e in ENTRIES
+               if "status" in e and not aliases.is_swap(e)}
         self.assertEqual(got[(33459, "Eutelsat 50 West A")], ("current", None))
         self.assertEqual(got[(33459, "Eutelsat 12 West G")], ("former", "2025-12-19"))
         self.assertEqual(got[(36101, "Eutelsat 50A")], ("current", None))
@@ -145,7 +148,9 @@ class CatalogAliases(unittest.TestCase):
         self.assertEqual(sorted(c["not_in_catalog"]),
                          sorted(k for k in ("40258", "55841", "40208", "43917", "40099", "40100", "41744", "41745",
                                             "51280", "51281", "67759", "67760", "33459", "33459", "36101", "28924",
-                                            "29270") if k not in o))
+                                            "29270", "44422", "44422", "44422", "44423", "44423", "44423",
+                                            "44424", "44424", "44424", "A04907")
+                                if k not in o and k not in doc["unnumbered"]))
 
     def test_name_index_rows(self):
         row = next(r for r in NAMES["objects"] if r[0] == "55841")
@@ -196,9 +201,13 @@ class RpoOnCatalogNames(unittest.TestCase):
 
     def test_two_objects_fit_so_no_link(self):
         # Cosmos 2536: Space-Track gives the name to 44422, GCAT to 44424 (a piece swap): no link, not a guess.
+        # The alias file records the swap; a swap entry is never a pin.
         self.assertEqual(self.links("Aug - Dec 2019", "chaser"), [])
-        # Prowler: Wikidata's item carries USA 67's number (20963); GCAT lists Prowler apart as A04907.
-        self.assertEqual(self.links("1990-1998", "chaser"), [])
+
+    def test_prowler_by_alias(self):
+        # Wikidata's item carries USA 67's number (20963) but GCAT's piece 1990-097E; the alias file pins A04907.
+        g = self.links("1990-1998", "chaser")
+        self.assertEqual([(x["jcat"], x["norad"], x["by"]) for x in g], [("A04907", None, "alias")])
 
     def test_gcat_fallback_without_the_index(self):
         doc = rpo.read(BODIES, {}, None, ENTRIES)

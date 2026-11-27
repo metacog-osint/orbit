@@ -945,7 +945,8 @@ def catalog_local(raw_dir: Path, out: Path, st_dir: Path | None = None, src_dir:
     assets = catshards.bundle(doc, cdoc)
     for name, body in assets.items():
         (out.parent / name).write_bytes(body)
-    idx = catalog.names_index(doc, {aliases.key_of(e) for e in entries if "program" not in e})
+    idx = catalog.names_index(doc, {aliases.key_of(e) for e in entries
+                                     if "program" not in e and not aliases.is_swap(e)})
     idx_raw = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     (out.parent / stcat.NAMES_ASSET).write_bytes(gzip.compress(idx_raw, 9))
     c = doc["counts"]

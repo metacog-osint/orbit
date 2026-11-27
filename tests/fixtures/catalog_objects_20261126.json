@@ -1,0 +1,1565 @@
+{
+ "schema": "tic-catalog/2",
+ "read": "2026-11-26",
+ "record_defaults": {
+  "read": "Left out when it equals the source's read date in `sources`.",
+  "basis": "Left out when it is `attributed`.",
+  "ref": "Left out when it is the object's own key in that source: GCAT's JCAT id (`jcat`) for gcat-mcdowell, the NORAD number for space-track and celestrak-satcat. Wikidata's Q-id and the alias file's line are always given."
+ },
+ "sources": {
+  "gcat-mcdowell": {
+   "read": "2026-11-26",
+   "updated": "2026 Nov 26 0106:24",
+   "citation": "Data from GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0"
+  },
+  "space-track": {
+   "read": "2026-11-26",
+   "read_at": "2026-11-26T17:30:26Z",
+   "citation": "Catalog and decay data: Space-Track.org, United States Space Command (USSPACECOM), 18th Space Defense Squadron, redistributed under USSPACECOM's blanket approval for basic SSA data. Comparisons with other catalogs: The Intelligence Company, not reviewed or endorsed by USSPACECOM. Not for operational use."
+  },
+  "celestrak-satcat": {
+   "read": "2026-11-26",
+   "read_at": "2026-11-26T17:34:40Z",
+   "file_time": "2026-11-26 09:02:36 UTC",
+   "citation": "CelesTrak SATCAT (T.S. Kelso, celestrak.org)"
+  },
+  "wikidata": {
+   "read": "2026-11-25",
+   "read_at": "2026-11-25T17:34:54Z",
+   "citation": "Wikidata (CC0), each value with its item's Q-id"
+  },
+  "wmo-oscar-space": {
+   "read": "2026-11-21",
+   "read_at": "2026-11-21T17:34:24Z",
+   "citation": "WMO OSCAR/Space (space.oscar.wmo.int), courtesy of the World Meteorological Organization"
+  },
+  "aliases": {
+   "read": "2026-11-25",
+   "entries": 10,
+   "file": "orbit/data/catalog/aliases.yml"
+  }
+ },
+ "objects": {
+  "20963": {
+   "norad": 20963,
+   "jcat": "S20963",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "1990-097B",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "1990-097B",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "1990-097B",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    },
+    {
+     "value": "1990-097E",
+     "source": "wikidata",
+     "ref": "Q14940655",
+     "basis": "catalog",
+     "field": "P247"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "1990-097",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "1990-11-15",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "1990-11-15",
+     "source": "space-track"
+    },
+    {
+     "value": "1990-11-15",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "USA 67",
+     "source": "space-track",
+     "basis": "catalog",
+     "field": "SATNAME"
+    },
+    {
+     "value": "USA 67",
+     "source": "gcat-mcdowell",
+     "basis": "catalog",
+     "field": "Name"
+    },
+    {
+     "value": "QUASAR 8",
+     "source": "gcat-mcdowell",
+     "field": "PLName"
+    },
+    {
+     "value": "SDS B-2 GEO",
+     "source": "gcat-mcdowell",
+     "field": "AltNames",
+     "qualifier": "JP"
+    },
+    {
+     "value": "USA 67",
+     "source": "celestrak-satcat",
+     "basis": "catalog",
+     "field": "OBJECT_NAME"
+    },
+    {
+     "value": "Prowler",
+     "source": "wikidata",
+     "ref": "Q14940655",
+     "field": "label:en"
+    },
+    {
+     "value": "Prowler (satellite)",
+     "source": "wikidata",
+     "ref": "Q14940655",
+     "field": "altLabel:en"
+    }
+   ],
+   "owner": [
+    {
+     "value": "NRO",
+     "source": "gcat-mcdowell",
+     "name": "NRO"
+    },
+    {
+     "value": "SAFSP",
+     "source": "gcat-mcdowell",
+     "name": "SAFSP"
+    }
+   ],
+   "state": [
+    {
+     "value": "US",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "US",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "US"
+    },
+    {
+     "value": "US",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "US"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 35780.0,
+      "apogee_km": 35800.0,
+      "inc_deg": 0.0,
+      "elements_date": "1990-12-23",
+      "op_orbit": "GEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 36200.0,
+      "apogee_km": 36335.0,
+      "inc_deg": 14.97,
+      "period_min": 1460.72,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "USA 67 (QUASAR 8)",
+   "disagreements": [
+    {
+     "field": "intldes",
+     "claims": [
+      {
+       "value": "1990-097B",
+       "sources": [
+        "gcat-mcdowell",
+        "space-track",
+        "celestrak-satcat"
+       ]
+      },
+      {
+       "value": "1990-097E",
+       "sources": [
+        "wikidata"
+       ]
+      }
+     ]
+    }
+   ],
+   "ops_status": []
+  },
+  "39208": {
+   "norad": 39208,
+   "jcat": "S39208",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2013-037A",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037A",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037A",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2013-037",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2013-07-19",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "space-track"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "PAYLOAD A",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Shiyan Weixing 7",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Tansuo 4A",
+     "source": "gcat-mcdowell",
+     "field": "PLName"
+    },
+    {
+     "value": "SHIYAN-7 (SY-7)",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "CNSA",
+     "source": "gcat-mcdowell",
+     "name": "CNSA"
+    }
+   ],
+   "state": [
+    {
+     "value": "CN",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "PRC",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "CN"
+    },
+    {
+     "value": "PRC",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "CN"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 664.0,
+      "apogee_km": 673.0,
+      "inc_deg": 98.06,
+      "elements_date": "2013-07-20",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 648.0,
+      "apogee_km": 659.0,
+      "inc_deg": 98.09,
+      "period_min": 97.8,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "PAYLOAD A",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "+",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "active"
+    }
+   ]
+  },
+  "39209": {
+   "norad": 39209,
+   "jcat": "S39209",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2013-037B",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037B",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037B",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2013-037",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2013-07-19",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "space-track"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "PAYLOAD B",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Chuangxin-3",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Tansuo 3?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "CHUANGXIN-3 (CX-3)",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "SECM",
+     "source": "gcat-mcdowell",
+     "name": "SECM"
+    }
+   ],
+   "state": [
+    {
+     "value": "CN",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "PRC",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "CN"
+    },
+    {
+     "value": "PRC",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "CN"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 666.0,
+      "apogee_km": 673.0,
+      "inc_deg": 98.06,
+      "elements_date": "2013-07-20",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 643.0,
+      "apogee_km": 648.0,
+      "inc_deg": 98.08,
+      "period_min": 97.64,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "PAYLOAD B",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "+",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "active"
+    }
+   ]
+  },
+  "39210": {
+   "norad": 39210,
+   "jcat": "S39210",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2013-037C",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037C",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037C",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    },
+    {
+     "value": "2013-037C",
+     "source": "wikidata",
+     "ref": "Q110160546",
+     "basis": "catalog",
+     "field": "P247"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2013-037",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2013-07-19",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "space-track"
+    },
+    {
+     "value": "2013-07-19",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "PAYLOAD C",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Shi Jian 15",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Tansuo 5?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "SHIJIAN-15 (SJ-15)",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    },
+    {
+     "value": "Shijian-15",
+     "source": "wikidata",
+     "ref": "Q110160546",
+     "field": "label:en"
+    },
+    {
+     "value": "Shi Jian 15",
+     "source": "wikidata",
+     "ref": "Q110160546",
+     "field": "altLabel:en"
+    },
+    {
+     "value": "Shijian 15",
+     "source": "wikidata",
+     "ref": "Q110160546",
+     "field": "altLabel:en"
+    },
+    {
+     "value": "SJ-15",
+     "source": "wikidata",
+     "ref": "Q110160546",
+     "field": "altLabel:en"
+    }
+   ],
+   "owner": [
+    {
+     "value": "CNSA",
+     "source": "gcat-mcdowell",
+     "name": "CNSA"
+    }
+   ],
+   "state": [
+    {
+     "value": "CN",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "PRC",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "CN"
+    },
+    {
+     "value": "PRC",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "CN"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 660.0,
+      "apogee_km": 673.0,
+      "inc_deg": 98.06,
+      "elements_date": "2013-07-20",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 651.0,
+      "apogee_km": 660.0,
+      "inc_deg": 98.11,
+      "period_min": 97.85,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "PAYLOAD C",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "+",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "active"
+    }
+   ]
+  },
+  "44421": {
+   "norad": 44421,
+   "jcat": "S44421",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2019-039A",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039A",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039A",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039A",
+     "source": "wikidata",
+     "ref": "Q97353167",
+     "basis": "catalog",
+     "field": "P247"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2019-039",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2019-07-10",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "space-track"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "COSMOS 2535",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Kosmos-2535",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Burevestnik No. 1?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "COSMOS 2535",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "TSVS",
+     "source": "gcat-mcdowell",
+     "name": "TS VS RF"
+    }
+   ],
+   "state": [
+    {
+     "value": "RU",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "CIS",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "RU"
+    },
+    {
+     "value": "CIS",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "RU"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 610.0,
+      "apogee_km": 621.0,
+      "inc_deg": 97.88,
+      "elements_date": "2019-07-12",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 585.0,
+      "apogee_km": 598.0,
+      "inc_deg": 97.56,
+      "period_min": 96.5,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "COSMOS 2535",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "-",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "inactive"
+    }
+   ]
+  },
+  "44422": {
+   "norad": 44422,
+   "jcat": "S44422",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2019-039B",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039B",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039B",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2019-039",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2019-07-10",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "space-track"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "COSMOS 2536",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Kosmos-2537",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Naprazheniye No. 2?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "COSMOS 2536",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "TSKHM",
+     "source": "gcat-mcdowell",
+     "name": "TsNIIKhM"
+    }
+   ],
+   "state": [
+    {
+     "value": "RU",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "CIS",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "RU"
+    },
+    {
+     "value": "CIS",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "RU"
+    }
+   ],
+   "status": [
+    {
+     "value": "R",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": true,
+     "source": "gcat-mcdowell",
+     "date": "2024-06-21"
+    },
+    {
+     "value": true,
+     "source": "space-track",
+     "date": "2024-06-21"
+    },
+    {
+     "value": true,
+     "source": "celestrak-satcat",
+     "date": "2024-06-21"
+    }
+   ],
+   "decay_date": [
+    {
+     "value": "2024-06-21",
+     "source": "space-track",
+     "field": "SATCAT DECAY"
+    },
+    {
+     "value": "2024-06-21",
+     "source": "space-track",
+     "field": "DECAY",
+     "msg_type": "Historical",
+     "msg_epoch": "2026-07-29 18:59:26",
+     "precedence": "1",
+     "st_source": "satcat"
+    },
+    {
+     "value": "2024-06-21",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2024-06-21",
+     "source": "celestrak-satcat",
+     "field": "DECAY_DATE"
+    }
+   ],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 611.0,
+      "apogee_km": 623.0,
+      "inc_deg": 97.89,
+      "elements_date": "2019-07-12",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 166.0,
+      "apogee_km": 190.0,
+      "inc_deg": 97.62,
+      "period_min": 88.05,
+      "orbit_center": "EA",
+      "orbit_type": "IMP"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "COSMOS 2536",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "D",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "nocompare": true
+    }
+   ]
+  },
+  "44423": {
+   "norad": 44423,
+   "jcat": "S44423",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2019-039C",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039C",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039C",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2019-039",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2019-07-10",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "space-track"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "COSMOS 2537",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Kosmos-2538",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "KYuA No. 2?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "COSMOS 2537",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "PVO?",
+     "source": "gcat-mcdowell",
+     "name": "PVO",
+     "uncertain": true
+    }
+   ],
+   "state": [
+    {
+     "value": "RU",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "CIS",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "RU"
+    },
+    {
+     "value": "CIS",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "RU"
+    }
+   ],
+   "status": [
+    {
+     "value": "R",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": true,
+     "source": "gcat-mcdowell",
+     "date": "2023-10-06"
+    },
+    {
+     "value": true,
+     "source": "space-track",
+     "date": "2023-10-07"
+    },
+    {
+     "value": true,
+     "source": "celestrak-satcat",
+     "date": "2023-10-06"
+    }
+   ],
+   "decay_date": [
+    {
+     "value": "2023-10-07",
+     "source": "space-track",
+     "field": "SATCAT DECAY"
+    },
+    {
+     "value": "2023-10-07",
+     "source": "space-track",
+     "field": "DECAY",
+     "msg_type": "Historical",
+     "msg_epoch": "2026-07-29 18:59:26",
+     "precedence": "1",
+     "st_source": "satcat"
+    },
+    {
+     "value": "2023-10-06",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2023-10-06",
+     "source": "celestrak-satcat",
+     "field": "DECAY_DATE"
+    }
+   ],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 616.0,
+      "apogee_km": 623.0,
+      "inc_deg": 97.88,
+      "elements_date": "2019-07-12",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 172.0,
+      "apogee_km": 189.0,
+      "inc_deg": 97.68,
+      "period_min": 88.1,
+      "orbit_center": "EA",
+      "orbit_type": "IMP"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "COSMOS 2537",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "D",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "nocompare": true
+    }
+   ]
+  },
+  "44424": {
+   "norad": 44424,
+   "jcat": "S44424",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2019-039D",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039D",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2019-039D",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2019-039",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2019-07-10",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "space-track"
+    },
+    {
+     "value": "2019-07-10",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "COSMOS 2538",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Kosmos-2536",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "Nivelir No. 5?",
+     "source": "gcat-mcdowell",
+     "field": "PLName",
+     "uncertain": true
+    },
+    {
+     "value": "COSMOS 2538",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "TSKHM",
+     "source": "gcat-mcdowell",
+     "name": "TsNIIKhM"
+    }
+   ],
+   "state": [
+    {
+     "value": "RU",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "CIS",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "RU"
+    },
+    {
+     "value": "CIS",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "RU"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 610.0,
+      "apogee_km": 622.0,
+      "inc_deg": 97.87,
+      "elements_date": "2019-07-12",
+      "op_orbit": "LEO/S"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 471.0,
+      "apogee_km": 527.0,
+      "inc_deg": 97.58,
+      "period_min": 94.6,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "COSMOS 2538",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "+",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "active"
+    }
+   ]
+  },
+  "49113": {
+   "norad": 49113,
+   "jcat": "S49113",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "2021-076B",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    },
+    {
+     "value": "2021-076B",
+     "source": "space-track",
+     "basis": "catalog"
+    },
+    {
+     "value": "2021-076B",
+     "source": "celestrak-satcat",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "2021-076",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "2021-08-24",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "2021-08-24",
+     "source": "space-track"
+    },
+    {
+     "value": "2021-08-24",
+     "source": "celestrak-satcat"
+    }
+   ],
+   "names": [
+    {
+     "value": "PAYLOAD B",
+     "source": "space-track",
+     "field": "SATNAME"
+    },
+    {
+     "value": "Test satellite",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    },
+    {
+     "value": "PAYLOAD B",
+     "source": "celestrak-satcat",
+     "field": "OBJECT_NAME"
+    }
+   ],
+   "owner": [
+    {
+     "value": "CAST",
+     "source": "gcat-mcdowell",
+     "name": "CAST"
+    }
+   ],
+   "state": [
+    {
+     "value": "CN",
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": "PRC",
+     "source": "space-track",
+     "field": "COUNTRY",
+     "cmp": "CN"
+    },
+    {
+     "value": "PRC",
+     "source": "celestrak-satcat",
+     "field": "OWNER",
+     "cmp": "CN"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": false,
+     "source": "space-track"
+    },
+    {
+     "value": false,
+     "source": "celestrak-satcat"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 1084.0,
+      "apogee_km": 1108.0,
+      "inc_deg": 86.4,
+      "elements_date": "2021-08-26",
+      "op_orbit": "LEO/P"
+     },
+     "source": "gcat-mcdowell"
+    },
+    {
+     "value": {
+      "perigee_km": 846.0,
+      "apogee_km": 877.0,
+      "inc_deg": 86.41,
+      "period_min": 102.16,
+      "orbit_center": "EA",
+      "orbit_type": "ORB"
+     },
+     "source": "celestrak-satcat"
+    }
+   ],
+   "gcat_catalog": "satcat",
+   "name": "PAYLOAD B",
+   "disagreements": [],
+   "ops_status": [
+    {
+     "value": "+",
+     "source": "celestrak-satcat",
+     "field": "OPS_STATUS_CODE",
+     "cmp": "active"
+    }
+   ]
+  }
+ },
+ "unnumbered": {
+  "A04907": {
+   "norad": null,
+   "jcat": "A04907",
+   "type": "payload",
+   "intldes": [
+    {
+     "value": "1990-097E",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_tag": [
+    {
+     "value": "1990-097",
+     "source": "gcat-mcdowell",
+     "basis": "catalog"
+    }
+   ],
+   "launch_date": [
+    {
+     "value": "1990-11-15",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "names": [
+    {
+     "value": "PROWLER",
+     "source": "gcat-mcdowell",
+     "field": "Name"
+    }
+   ],
+   "owner": [
+    {
+     "value": "NRO",
+     "source": "gcat-mcdowell",
+     "name": "NRO"
+    }
+   ],
+   "state": [
+    {
+     "value": "US",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "status": [
+    {
+     "value": "O",
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decayed": [
+    {
+     "value": false,
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "decay_date": [],
+   "orbit": [
+    {
+     "value": {
+      "perigee_km": 35584.0,
+      "apogee_km": 36023.0,
+      "inc_deg": 5.76,
+      "elements_date": "2000-06-13",
+      "op_orbit": "GEO/ID"
+     },
+     "source": "gcat-mcdowell"
+    }
+   ],
+   "gcat_catalog": "auxcat",
+   "no_norad": true,
+   "name": "PROWLER",
+   "disagreements": []
+  }
+ }
+}

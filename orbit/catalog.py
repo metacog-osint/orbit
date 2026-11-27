@@ -28,7 +28,8 @@ SCHEMA = "tic-catalog/1"
 RANK = ("space-track", "gcat-mcdowell", "celestrak-satcat", "wikidata", "wmo-oscar-space", "swf-rpo", "aliases")
 
 # Designations and placeholders: shown, but a better name goes beside them in brackets (Tom, 16 Nov 2026).
-DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.I)
+# Space-Track's "PAYLOAD A" to "PAYLOAD C" (2013-037: SJ-15 is 39210) are placeholders like "OBJECT A".
+DESIGNATION = re.compile(r"^(USA[ -]?\d+|OBJECT [A-Z]{1,3}|PAYLOAD [A-Z]{1,3}|TBA.*|UNKNOWN)$", re.I)
 
 # Fields compared between sources for `disagreements` (names are listed, not flagged: they differ by design).
 # `ops_status` is an operational status (CelesTrak's +/-/P/B/S/X), compared only where two sources both give one;
@@ -522,9 +523,15 @@ def add_aliases(numbered: dict, unnumbered: dict, entries: list[dict]) -> dict:
     """The alias file's live entries (orbit/aliases.py, build step 5): a name entry adds a name record (source
     `aliases`, the cited source kept as `cited`) to its object; a program entry adds a `program` record to each
     member. An entry naming an object the catalog does not hold is counted in `not_in_catalog`, never invented."""
-    counts = {"names": 0, "programs": 0, "not_in_catalog": []}
+    counts = {"names": 0, "programs": 0, "swaps": 0, "not_in_catalog": []}
     for e in entries:
         ref = f"aliases.yml:{e['line']}"
+        if aliases.is_swap(e):
+            counts["swaps"] += 1
+            for c in e["claims"]:
+                if str(c["norad"]) not in numbered:
+                    counts["not_in_catalog"].append(str(c["norad"]))
+            continue
         if "program" in e:
             counts["programs"] += 1
             for m in e["members"]:
@@ -604,7 +611,7 @@ def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: st
         sources[OS] = {"read": oscar_join["read"], "read_at": oscar_join.get("read_at"), "citation": oscar.CITATION}
     if alias_entries:
         more[aliases.SOURCE] = add_aliases(numbered, unnumbered, alias_entries)
-        sources[aliases.SOURCE] = {"read": max(e["read"] for e in alias_entries), "entries": len(alias_entries),
+        sources[aliases.SOURCE] = {"read": max(aliases.read_of(e) for e in alias_entries), "entries": len(alias_entries),
                                    "file": "orbit/data/catalog/aliases.yml"}
     flags: dict = {}
     for e in numbered.values():
@@ -620,5 +627,27 @@ def build(tables: dict[str, list[dict]], orgs: dict, read: str, gcat_updated: st
                    "disagreements_by_field": flags, **({"space_track": st_counts} if st_counts else {}), **more},
         "objects": numbered,
         "unnumbered": unnumbered,
-        "swaps": swaps(numbered),
+        "swaps": merge_swaps(swaps(numbered), [e for e in alias_entries or [] if aliases.is_swap(e)]),
     }
+
+
+def merge_swaps(found: list[dict], entries: list[dict]) -> list[dict]:
+    """The swaps the build found plus the alias file's swap entries. An entry on a name the build also found adds
+    its claims, spellings and line to that swap; the build's own claims stay as found."""
+    out = [dict(s) for s in found]
+    by_name = {s["name"]: s for s in out}
+    for e in entries:
+        r = aliases.swap_record(e)
+        s = by_name.get(r["name"])
+        if s is None:
+            out.append(r)
+            by_name[r["name"]] = r
+            continue
+        claims = {k: list(v) for k, v in s["claims"].items()}
+        for src, nums in r["claims"].items():
+            claims[src] = sorted(set(claims.get(src, [])) | set(nums), key=int)
+        s.update({"claims": claims, "as": {**s.get("as", {}), **r["as"]}, "by": aliases.SOURCE, "ref": r["ref"]})
+        for k in ("status", "settled_by", "settled"):
+            if k in r:
+                s[k] = r[k]
+    return sorted(out, key=lambda s: s["name"])
