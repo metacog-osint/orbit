@@ -292,6 +292,55 @@ of the larger.
    The belt board's orbit changes and the GEO callouts' listed-role changes use the same detector, so they follow
    this rule too; the GEO two-set rule (`orbit-2.38`) is unchanged.
 
+## GEO north-south episodes at their net size (`orbit-2.54`, 27 Nov 2026)
+After a north-south station-keeping burn on a GEO satellite held near zero inclination, the published element sets
+often jump back and forth in plane for several days, by 0.02-0.03 deg between sets 3-6 hours apart, before they
+settle. Each jump was listed, so one burn could be listed as several plane changes whose total ran two to four times
+what the burn needed (`docs/validation/maneuver-calibration.md`, "Station-kept GEO satellites held near zero
+inclination"). `orbit-2.47` removes few of these: the off sets come several in a row, so each confirms the one before.
+1. **The rule (`orbit/maneuver.py`, step 9; GEO only, `EPISODE_REGIMES`):** after `orbit-2.47`, listed changes
+   that are mainly cross-track and less than `EPISODE_DAYS` (2 days) apart, from the end of one to the start of the
+   next, are one episode. The episode is listed once, from its first change's start to its last change's end. Its
+   size is the net plane change: the median inclination vector (sin i cos node, sin i sin node) of the
+   `EPISODE_SETS` (3) sets before the first change against the 3 sets after the last, less the object's own steady
+   drift of that vector (lunar and solar pull, the median rate across its set pairs) over the time between the two
+   medians. The inclination vector is used because near zero inclination a 0.02 deg jump also swings the node
+   through tens of degrees. `di_deg` is the change in median inclination; `da_km` and `dv_sma_ms` are the sums over
+   the episode's changes, as before. Each episode carries `episode`: how many changes it holds and what they listed.
+2. **Counted, not listed:** an episode whose net plane change is under the 0.25 m/s GEO floor
+   (`episode_below_report`): the plane went back where it was. An episode with fewer than 3 sets after it waits
+   (`awaiting_settle`) and is listed when they come. The card's "Counted, not listed" line gives these counts and
+   the number of plane changes folded into an episode (`episode_merged`).
+3. **Left as listed:** in-track and eccentricity changes (relocations, east-west station keeping, SJ-21's tow), a
+   cross-track change measured across a tracking gap (the `gap` label, 48 hours or more: sparse sets give no
+   settled orbit either side, and gap changes end where the next begins, so chaining them would make one episode
+   of weeks), and an episode with fewer than 3 sets before it (the start of the record).
+4. **Measured** (Orbit's public `geo-elements-2026-07..11` sets, 1 Jul to 27 Nov 2026, whole series, `orbit-2.53`
+   against `orbit-2.54`; listed cross-track changes and their total):
+
+   | Record | Cross-track listed before | After | Total before (m/s) | After (m/s) | Folded / under floor / waiting |
+   |---|---|---|---|---|---|
+   | Eutelsat 70B | 11 | 11 | 23.6 | 22.8 | 0 / 0 / 0 |
+   | Astra 2G | 21 | 14 | 43.6 | 29.7 | 7 / 0 / 0 |
+   | SES-11 | 31 | 11 | 74.8 | 25.6 | 20 / 0 / 0 |
+   | Turksat 4B | 35 | 19 | 69.4 | 35.2 | 13 / 3 / 0 |
+   | IS-15 | 27 | 18 | 34.4 | 17.9 | 7 / 1 / 0 |
+   | IS-22 | 34 | 17 | 59.5 | 26.3 | 16 / 0 / 1 |
+   | Galaxy 35 | 31 | 19 | 44.9 | 22.0 | 10 / 1 / 0 |
+   | Luch (Olymp) 2 case, 1,349 days | 71 | 39 | 78.8 | 55.2 | 24 / 6 / 0 |
+   | SJ-21 (49330), Dec 2021 to Feb 2022 | 3 | 1 | 3.4 | 0.6 | 0 / 2 / 0 |
+   | Every GEO object in release `geo-2026` (1,748) | 6,139 | 3,793 | 16,012 | 13,133 | - / 237 / 25 |
+
+   The seven station-kept satellites' totals now come to 1.1-1.6 times their north-south need (the calibration
+   table). In-track and eccentricity listings are unchanged on every object, so Luch 2's relocations (40 in-track
+   listings) and SJ-21's tow and return (69.6 and 70.7 m/s in-track) are listed as before; BeiDou-2 G2's graveyard
+   raise is unchanged. The ISS case is not GEO and is unchanged (5 of 5, 10 listed). Across every GEO object the
+   largest cross-track totals that remain are changes across tracking gaps, left as listed.
+5. **Not measured:** which of the folded or dropped plane changes were real burns. No operator publishes these
+   burns. A real burn undone by a second burn within the episode nets to nothing and is counted, not listed; the
+   element sets cannot tell that from sets that jumped and settled. The belt board's orbit changes and the GEO
+   callouts' listed-role changes use the same detector, so they follow this rule too.
+
 ## Baselines from GCAT's history (`orbit-2.8`)
 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
 (`gcat.baseline`), shown in the card `#baseline`; not in the feed.
