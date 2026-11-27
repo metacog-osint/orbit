@@ -9,7 +9,9 @@ Arithmetic on the last public element sets, not a forecast. For every object wit
   departure    the last stop in Orbit's own sets (tools/geo_relocations.py rules) and its last held set; the start
                is estimated two ways, both assuming the object sped up uniformly from rest: from the first moving
                set's distance and rate (t = 2d / v) and, with two moving sets speeding up, from the change in rate
-               (t = v / a). Both are clamped to the last held set; each says which sets it rests on.
+               (t = v / a). Both are clamped to the last held set; each says which sets it rests on. The stop is
+               taken as the move left it (left_stop): a pause under the line just after departure, under
+               MIN_STOP_DAYS, is part of the move, so sets added later never move the last held set (ideas#524).
   cases        "coast": the newest rate held. "speeding up": the rate change between the last two sets held until
                PEAK_CAP (4.5 deg a day, just above the fastest of Luch 2's eight moves, 4.42), then coasting; only
                with MIN_ACCEL_SETS (3) moving sets whose rates rise in turn. Neither includes braking (BRAKING_NOTE).
@@ -176,6 +178,22 @@ def steady_projection(moving):
     return seen or {"state": "none"}
 
 
+def left_stop(stop, rws):
+    """The stop as the move left it: a held stop whose last MIN_STOP_DAYS hold sets under the line after a set over
+    it ends at the set before that first set over the line. GR.stops joins a short pause near the stop's longitude
+    to the stop, so without this a pause just after departure, seen a run later, would move the departure and the
+    relocation item's id (ideas#524). A hold of MIN_STOP_DAYS or more after it is a stop again (not a mover)."""
+    if not stop or stop.get("kind") != "held":
+        return stop
+    inside = [r for r in rws if stop["arrival"] <= r["t"] <= stop["departure"]]
+    for k in range(1, len(inside)):
+        r = inside[k]
+        if (abs(r["drift"]) >= GR.DRIFT_KEPT and _days(_t(stop["arrival"]), _t(inside[k - 1]["t"])) >= GR.MIN_STOP_DAYS
+                and _days(_t(r["t"]), _t(stop["departure"])) < GR.MIN_STOP_DAYS):
+            return dict(stop, departure=inside[k - 1]["t"])
+    return stop
+
+
 def start_estimates(last_stop, moving):
     """When the move from `last_stop` began, estimated from the first moving sets (assuming the object sped up
     uniformly from rest), each clamped to the last held set and naming the sets it rests on."""
@@ -200,7 +218,7 @@ def arrival(o, rws, role, now):
     st = GR.stops(rws)
     if len(st) < 2:
         return None
-    here, before = st[-1], st[-2]
+    here, before = st[-1], left_stop(st[-2], rws)
     if any(_t(r["t"]) > _t(here["departure"]) for r in rws) or _days(_t(here["arrival"]), now) > ARRIVED_DAYS:
         return None                                   # moving again, or the stop is older than the window
     moving = [r for r in rws if _t(before["departure"]) < _t(r["t"]) < _t(here["arrival"])]
@@ -219,7 +237,7 @@ def arrival(o, rws, role, now):
 def track(o, rws, objs, elsets, role, now):
     """The tracker entry for one drifting object, from its positions `rws`."""
     st = GR.stops(rws)
-    last_stop = next((s for s in reversed(st) if _t(s["departure"]) < _t(rws[-1]["t"])), None)
+    last_stop = left_stop(next((s for s in reversed(st) if _t(s["departure"]) < _t(rws[-1]["t"])), None), rws)
     moving = [r for r in rws if last_stop is None or r["t"] > last_stop["departure"]]
     newest = rws[-1]
     t_new = _t(newest["t"])

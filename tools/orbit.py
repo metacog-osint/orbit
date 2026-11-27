@@ -1012,7 +1012,8 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     broken (Orbit's update run) or today's file was pulled under an hour ago.
 
     An upload never loses what the releases hold. Exit 1, with nothing uploaded, when a file a release holds does
-    not download whole, a past month's file is missing from its release, an upload would drop an element set the
+    not download whole, a past month's file is missing from its release, the current month's file is missing while
+    the release holds a day file of that month (orbit-2.41), an upload would drop an element set the
     release holds, or a copy to the private tic-archive fails: each gp reply goes there (lane geo-reply) before
     anything else, and every release file before it is replaced and as it is uploaded (lane geo-release)."""
     out.mkdir(parents=True, exist_ok=True)

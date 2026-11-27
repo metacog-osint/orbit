@@ -6,7 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -114,6 +114,41 @@ class Luch2Move2025(unittest.TestCase):
 
     def test_a_stop_older_than_the_window_drops_out(self):
         self.assertEqual(tracker_2025((3, 20))["arrived"], [])
+
+
+class IdStableAcrossRuns(unittest.TestCase):
+    """The id rests on the last held set and the first moving set; sets added on later runs must not move it
+    (ideas#524)."""
+
+    def test_luch2_2025_one_id_every_half_day(self):
+        seen = set()
+        for day in range(7, 29):
+            for hour in (0, 12):
+                doc = tracker_2025((2, day), hour)
+                seen |= set(items(doc, f"2025-02-{day:02d}T{hour:02d}:00:00Z"))
+        seen |= set(items(tracker_2025((3, 12)), "2025-03-12T00:00:00Z"))
+        self.assertEqual(seen, {"orbit:relocation:55841:2025-02-06"})
+
+    @staticmethod
+    def _id(rws):
+        now = gt._t(rws[-1]["t"]) + timedelta(hours=1)
+        o = {"norad": 99999, "name": "TEST", "owner": "X", "class": "drifting"}
+        m = gt.track(o, rws, [], {}, "test", now)
+        doc = {"at_utc": gt._iso(now), "movers": [m], "arrived": []}
+        return [f["properties"]["id"] for f in feed.relocation_features(doc, gt._iso(now))]
+
+    def test_a_pause_after_leaving_does_not_move_the_id(self):
+        t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        r = lambda h, lon, drift: {"t": gt._iso(t0 + timedelta(hours=h)), "lon": lon, "drift": drift,
+                                   "dh_km": 0.0, "i": 0.05}
+        held = [r(12 * k, 10.0, 0.0) for k in range(10)]           # 4.5 days held at 10 E
+        first = held + [r(120, 10.05, 0.12)]                        # one set over the line: the item appears
+        later = first + [r(132, 10.07, 0.05), r(144, 10.08, 0.05),  # a day back under it, near the stop
+                         r(156, 10.3, 0.4), r(168, 10.8, 0.8)]      # then the move
+        self.assertEqual(self._id(first), ["orbit:relocation:99999:2026-01-05"])
+        self.assertEqual(self._id(later), self._id(first))
+        held_again = first + [r(132 + 12 * k, 10.06, 0.02) for k in range(5)] + [r(192, 10.3, 0.4)]
+        self.assertEqual(self._id(held_again), ["orbit:relocation:99999:2026-01-08"])  # 2 days held: a new stop
 
 
 class FeedMerge(unittest.TestCase):
