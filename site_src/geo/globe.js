@@ -449,7 +449,9 @@ function main() {
 
   // ---------------------------------------------------------------- G3: the sun, a place on the ground, board overlays
   const SUN_COL = "#f2c94c", SHADOW_COL = "#ff6b6b", PLACE_COL = "#e7e9ed", OMEGA = 7.2921159e-5;   // rad/s, the Earth's spin
-  const OVER = [["close", "#ff6b6b", "RPO pair (SWF): chaser and target"], ["ev", "#56ccf2", "Arrival or departure, last 30 days"]];
+  // Ring colours shown together: RPO red, arrival teal and one callout violet pass the dataviz validator with all pairs
+  // on the dark ground (method orbit-2.53). Callouts share one colour; the rule is named on hover, in the panel and the key.
+  const OVER = [["close", "#e5484d", "RPO pair (SWF): chaser and target"], ["ev", "#009fb3", "Arrival or departure, last 30 days"]];
   const ringTex = dotTexture(true), discTex = dotTexture(false);
   const ptsOf = (vs, color, size) => new THREE.Points(new THREE.BufferGeometry().setFromPoints(vs),
     new THREE.PointsMaterial({ size, sizeAttenuation: false, color, map: size > 12 ? ringTex : discTex, alphaTest: 0.3, transparent: true, depthTest: false }));
@@ -752,7 +754,7 @@ function main() {
   }
 
   // ---------------------------------------------------------------- G4: callouts (docs/validation/geo-callouts.md, v1)
-  const CO_COL = { C1: "#ff8c42", C2: "#ffb380", C3: "#ff5d8f", C4: "#ff9ec0", C5: "#c792ea", C6: "#4dd0e1", C7: "#9be7f0", C8: "#9aa5b1" };
+  const CO_RING = "#9475f5";
   const coRule = (id) => (S.coData ? S.coData.rules.find((r) => r.id === id) : null) || { name: id, score: "" };
   function coShown() {                                                    // enabled callouts in the 14 days up to the time shown
     if (!S.coData || !S.co) return [];
@@ -761,11 +763,11 @@ function main() {
   }
   function drawCallouts() {
     clearGroup(coGroup);
-    const by = {};
+    const on = new Set();
     coShown().forEach((c) => [c.a, c.b].filter(Boolean).forEach((x) => {
-      const o = S.byId.get(x[0]); if (o && o.p && shown(o)) (by[c.r] = by[c.r] || new Set()).add(o);
+      const o = S.byId.get(x[0]); if (o && o.p && shown(o)) on.add(o);
     }));
-    Object.keys(by).forEach((r) => coGroup.add(ptsOf([...by[r]].map((o) => sc(...o.p)), CO_COL[r], 19)));
+    if (on.size) coGroup.add(ptsOf([...on].map((o) => sc(...o.p)), CO_RING, 19));
     dirty = true;
   }
   function calloutText(c, me) {
@@ -792,7 +794,7 @@ function main() {
     const list = coShown().slice().sort((a, b) => (a.d < b.d ? 1 : -1)).slice(0, 20);
     if (!S.coData) return "";
     return '<h4 class="globe-h4">Callouts in the 14 days to ' + esc(utcTxt(nowMs(), true).split(",")[0]) + "</h4>" +
-      (list.length ? '<ul class="globe-near">' + list.map((c) => '<li><i data-css="background:' + CO_COL[c.r] + '"></i><button type="button" class="linkish" data-act="copick" data-ids="' +
+      (list.length ? '<ul class="globe-near">' + list.map((c) => '<li><i data-css="background:' + CO_RING + '"></i><button type="button" class="linkish" data-act="copick" data-ids="' +
         [c.a[0]].concat(c.b ? [c.b[0]] : []).join(",") + '">' + esc(c.a[1]) + "</button> " + esc(calloutText(c, c.a[0])) + "</li>").join("") + "</ul>"
         : '<p class="small">None for the rules switched on.</p>') +
       '<p class="small">Behaviour only, never intent. Each rule was tested on published cases before it was switched on; see Callouts above for the scores.</p>';
@@ -801,7 +803,7 @@ function main() {
     const el = $("g-callouts");
     if (!S.coData) { el.innerHTML = '<p class="small">The callouts file could not be loaded.</p>'; return; }
     el.innerHTML = "<fieldset><legend>Callouts, last 14 days</legend>" + S.coData.rules.map((r) => '<label><input type="checkbox" data-co="' + r.id + '"' +
-      (S.co.has(r.id) ? " checked" : "") + '> <i class="co-key" data-css="background:' + CO_COL[r.id] + '"></i>' + esc(r.id + " " + r.name) +
+      (S.co.has(r.id) ? " checked" : "") + '> ' + esc(r.id + " " + r.name) +
       ' <span class="small">(' + esc(r.score) + ")</span></label>").join("") + '</fieldset><p class="small">Behaviour only, never intent. ' +
       '<a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/geo-callouts.md">How each rule was tested</a>; C5 now uses Orbit\u2019s orbit-change rule (<a href="https://github.com/metacog-osint/orbit/blob/main/doctrine/method.md">method</a>).</p>';
   }
@@ -1022,7 +1024,7 @@ function main() {
     let extra = "";
     if (S.over && S.board) { const it = overlayItems(), n = { close: it.close.length, ev: it.ev.length };
       extra = OVER.map((v) => '<span><i class="ring" data-css="border-color:' + v[1] + '"></i>' + esc(v[2]) + " " + fmtN(n[v[0]]) + "</span>").join(""); }
-    if (S.co && S.coData) { const on = S.coData.rules.filter((r) => S.co.has(r.id)); if (on.length) extra += on.map((r) => '<span><i class="ring" data-css="border-color:' + CO_COL[r.id] + '"></i>' + esc(r.id + " " + r.name) + "</span>").join(""); }
+    if (S.co && S.coData) { const on = S.coData.rules.filter((r) => S.co.has(r.id)); if (on.length) extra += '<span><i class="ring" data-css="border-color:' + CO_RING + '"></i>' + esc("Callout: " + on.map((r) => r.id).join(", ")) + "</span>"; }
     if (S.sun) extra += '<span><i data-css="background:' + SUN_COL + '"></i>Sun, day–night line</span><span><i class="bar" data-css="background:' + SHADOW_COL + '"></i>Belt in the Earth\u2019s shadow</span>';
     $("g-legend").innerHTML = items.map((i) => '<span><i data-css="background:' + i[0] + '"></i>' + esc(i[1]) + " " + fmtN(i[2]) + "</span>").join("") + extra;
   }
