@@ -1227,3 +1227,35 @@ Index, so Orbit publishes no register table and imports nothing in bulk.
 4. **Display.** Object pages join on the COSPAR id and show the name as declared by the state of registry to the UN
    Register, with the document symbol, a link to the document and the date read. It is the name at registration, never
    shown as the current name, and it changes no catalog name or number.
+
+## Imaging: last acquired and Landsat next due (`orbit-2.52`, 27 Nov 2026)
+The newest Landsat 8/9, Sentinel-2 and Sentinel-1 scene that a public catalogue lists over each place in
+`orbit/data/imaging-places.json`, and the days Landsat is next due over it (`orbit/imaging.py`, lane `imaging`, page
+`imaging.html`, file `/data/imaging.json`).
+
+1. **Places.** A reviewed list of launch sites the suite's Launch program already shows in public, at GCAT's site
+   points (`sites.tsv`, CC BY 4.0), each with its source. A site point is the site's nominal centre, not a pad. A
+   place is added only if it is already public on a TIC site and names its source.
+2. **Reads.** Once a UTC day, in series, 1 s apart: one search per place of USGS LandsatLook STAC (`landsat-c2l1`)
+   and two of the Copernicus Data Space STAC (`sentinel-2-l1c`, `sentinel-1-grd`), anonymous, by the place's point,
+   newest first, over the last 32 days. Scene metadata only; no imagery is downloaded. USGS's calendar file
+   (`cycles_full.json`) is read once a week. Any failed search fails the lane, and the last file stays.
+3. **Last acquired** is the newest scene a catalogue lists whose footprint covers the point, with its time, satellite,
+   the scene's own cloud estimate (optical) or mode and pass direction (radar). A Landsat scene with the sun below the
+   horizon is marked night. Nothing is said about scenes no public catalogue lists.
+4. **Landsat next due.** The WRS-2 paths that covered the place in daylight in the last 32 days, per satellite, and the
+   UTC days in the next 16 on which USGS's nominal calendar puts that satellite on one of those paths. The calendar
+   file ran only to 31 Dec 2025 when read on 27 Nov 2026. It repeats every 16 days without exception over its
+   published days (checked on every read; a file that does not repeat is refused), so its last 16 days are carried
+   forward. Every daylight scene read is checked against the carried calendar; a place with any scene off it gets
+   "unknown", not a date. Check made when the lane was written: 526 of 526 daylight scenes of 1 Oct-27 Nov 2026 in six
+   test areas fell on the carried calendar.
+5. **Sentinel planned** is never given. ESA publishes Sentinel-1 and -2 acquisition plans, but it is not settled which
+   of ESA's terms (the Sentinel data legal notice or the Sentinel Online site terms) covers those files, so Orbit
+   neither uses nor re-hosts them.
+6. **Terms.** Landsat: USGS public domain, credit "U.S. Geological Survey". Sentinel scene metadata: each Data Space
+   STAC collection links the Legal Notice on the use of Copernicus Sentinel Data as its licence, credit "Copernicus
+   Sentinel data [year]".
+7. **Never claims** that a place was or was not imaged outside these catalogues, that a due day will be kept or will be
+   clear, who asked for a scene or why, or anything fit for planning around imaging. Other imaging satellites,
+   commercial and government, are not covered; their "could image" passes are not built.

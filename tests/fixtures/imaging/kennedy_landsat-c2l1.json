@@ -1,0 +1,122 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "id": "LC09_L1GT_016040_20261118_20261119_02_T2",
+   "properties": {
+    "datetime": "2026-11-18T15:55:33.198536Z",
+    "platform": "LANDSAT_9",
+    "eo:cloud_cover": 97.38,
+    "view:sun_elevation": 38.54703825,
+    "landsat:wrs_path": "016",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC09_L1GT_116204_20261115_20261115_02_T2",
+   "properties": {
+    "datetime": "2026-11-15T03:19:02.412127Z",
+    "platform": "LANDSAT_9",
+    "view:sun_elevation": -62.7993855,
+    "landsat:wrs_path": "116",
+    "landsat:wrs_row": "204"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC09_L1TP_015040_20261111_20261111_02_T1",
+   "properties": {
+    "datetime": "2026-11-11T15:49:23.075515Z",
+    "platform": "LANDSAT_9",
+    "eo:cloud_cover": 38.83,
+    "view:sun_elevation": 40.3138241,
+    "landsat:wrs_path": "015",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC08_L1TP_016040_20261110_20261124_02_T1",
+   "properties": {
+    "datetime": "2026-11-10T15:55:36.042719Z",
+    "platform": "LANDSAT_8",
+    "eo:cloud_cover": 7.58,
+    "view:sun_elevation": 40.58068932,
+    "landsat:wrs_path": "016",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC08_L1GT_116204_20261107_20261116_02_T2",
+   "properties": {
+    "datetime": "2026-11-07T03:19:03.935171Z",
+    "platform": "LANDSAT_8",
+    "view:sun_elevation": -61.8702555,
+    "landsat:wrs_path": "116",
+    "landsat:wrs_row": "204"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC08_L1TP_015040_20261103_20261116_02_T1",
+   "properties": {
+    "datetime": "2026-11-03T15:49:22.929919Z",
+    "platform": "LANDSAT_8",
+    "eo:cloud_cover": 60.42,
+    "view:sun_elevation": 42.53516668,
+    "landsat:wrs_path": "015",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC09_L1GT_016040_20261102_20261102_02_T2",
+   "properties": {
+    "datetime": "2026-11-02T15:55:31.340318Z",
+    "platform": "LANDSAT_9",
+    "eo:cloud_cover": 99.95,
+    "view:sun_elevation": 42.8224558,
+    "landsat:wrs_path": "016",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC09_L1GT_116204_20261030_20261030_02_T2",
+   "properties": {
+    "datetime": "2026-10-30T03:18:58.194545Z",
+    "platform": "LANDSAT_9",
+    "view:sun_elevation": -60.50980565,
+    "landsat:wrs_path": "116",
+    "landsat:wrs_row": "204"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC09_L1TP_015040_20261026_20261026_02_T1",
+   "properties": {
+    "datetime": "2026-10-26T15:49:18.879151Z",
+    "platform": "LANDSAT_9",
+    "eo:cloud_cover": 17.81,
+    "view:sun_elevation": 44.90658182,
+    "landsat:wrs_path": "015",
+    "landsat:wrs_row": "040"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "LC08_L1TP_016040_20261025_20261030_02_T1",
+   "properties": {
+    "datetime": "2026-10-25T15:55:28.444487Z",
+    "platform": "LANDSAT_8",
+    "eo:cloud_cover": 34.57,
+    "view:sun_elevation": 45.20955215,
+    "landsat:wrs_path": "016",
+    "landsat:wrs_row": "040"
+   }
+  }
+ ]
+}
