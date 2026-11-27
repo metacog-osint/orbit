@@ -588,6 +588,12 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     from orbit import itu
     files["data/itu-links.json"] = dump(itu.public_links(itu.load_links(root / "orbit" / "data" / "catalog" / "itu-links.yml"),
                                                          snapshot.get("generated_at") or ""))
+    # Names registered with the United Nations (orbit-2.50): reviewed entries of orbit/data/catalog/un-register.yml
+    # only, by COSPAR id; no register table is published. A bad entry stops the build.
+    from orbit import unregister
+    files["data/un-register.json"] = dump(unregister.public_names(
+        unregister.load_entries(root / "orbit" / "data" / "catalog" / "un-register.yml"),
+        snapshot.get("generated_at") or ""))
     # The satellite map's file (orbit-2.23), as the sats lane last wrote it; without one the map says so.
     if (root / "data" / SATS).exists():
         files["data/sats.json"] = (root / "data" / SATS).read_text(encoding="utf-8")
