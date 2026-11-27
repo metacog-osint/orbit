@@ -542,8 +542,14 @@ approved).
      clear spot is left off the globe, and the panel lists every selected object. With about 1,800 points in the
      belt a name cannot keep clear of every point; its dark halo keeps it readable over them.
    - **Not changed here:** the panel's line charts (up to five nearest objects, keyed by a numbered list) keep five
-     line colours, and the overlay rings (RPO pairs, arrivals and departures, callouts C1-C8) keep their own
-     colours; the rings are a second shape on the points, not a colour mode.
+     line colours, and the overlay rings (RPO pairs, arrivals and departures, callouts) are a second shape on
+     the points, not a colour mode, and are checked on their own (next item).
+   - **Rings (`orbit-2.53`, 27 Nov 2026).** The rings drawn over points (RPO pairs, arrivals and departures, and the
+     callouts) are compared with each other, so they pass the same check, all pairs on `#0b0e12`: RPO red `#e5484d`,
+     arrival teal `#009fb3`, callout violet `#9475f5`; worst pair 11.1 colour-blind (violet and teal, deuteranopia)
+     and 20.0 normal vision. The old eight callout colours (C1-C8) all sat above the lightness band, and the worst
+     colour-blind pair, grey C8 and pink C4, was Delta E 3.7. Every callout now has one ring colour; which rule
+     fired is named in the hover card, the panel's list and the key ("Callout: C3, C4"), never by colour alone.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 All three items approved, 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):

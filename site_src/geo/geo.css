@@ -95,7 +95,6 @@ button.linkish { font: inherit; font-size: var(--fs-sm); color: var(--acc); back
 .globe-key i:first-child { margin-left: 0; }
 .globe-near { margin: .4rem 0; padding-left: 0; list-style: none; display: grid; gap: .25rem; font-size: var(--fs-xs); }
 .globe-near i { margin-left: 0; }
-.co-key { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; vertical-align: -1px; }
 .geo-page .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: .3rem 0; }
 /* listed satellites on the move (ideas#321): the chart is drawn at the box's own width, so 12px text stays 12px */
 .mv-h { scroll-margin-top: 1rem; }
