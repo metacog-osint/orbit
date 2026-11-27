@@ -121,20 +121,20 @@ button.linkish { font: inherit; font-size: var(--fs-sm); color: var(--acc); back
 .mv-k-start { width: 0; height: .8rem; border-left: 2px dotted var(--mut); }
 .mv-k-now { width: .6rem; height: .6rem; border-radius: 50%; border: 2px solid var(--fg); }
 .mv-k-pass { width: 0; height: .7rem; border-left: 2px solid var(--fg); }
-.mv-pass-t .mv-t, .mv-sum td.num, .mv-nw { white-space: nowrap; }
+.mv-pass-t .mv-t, .mv-sum td.num, .mv-nw, .sg-t td.num { white-space: nowrap; }
 button.mv-tt { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
   text-decoration: underline dotted; text-underline-offset: 3px; }
-#geo-movers abbr[title] { text-decoration: none; cursor: help; }
+#geo-movers abbr[title], #geo-set-gaps abbr[title] { text-decoration: none; cursor: help; }
 .mv-fn { display: none; }
 @media (max-width: 34rem) {
-  .mv-sum thead { display: none; }
-  .mv-sum tr { display: block; padding: .45rem 0; border-bottom: 1px solid var(--line-2); }
-  .mv-sum td { display: inline; border: 0; padding: 0; white-space: normal; }
-  .mv-sum td:first-child { display: block; font-weight: 600; }
-  .mv-sum td[data-l]::before { content: attr(data-l) ": "; color: var(--mut); }
-  .mv-sum td[data-l]::after { content: " · "; color: var(--mut); }
-  .mv-sum td:last-child::after { content: ""; }
-  .mv-sum td.num { white-space: normal; text-align: left; }
+  .mv-sum thead, .sg-t thead { display: none; }
+  .mv-sum tr, .sg-t tr { display: block; padding: .45rem 0; border-bottom: 1px solid var(--line-2); }
+  .mv-sum td, .sg-t td { display: inline; border: 0; padding: 0; white-space: normal; }
+  .mv-sum td:first-child, .sg-t td:first-child { display: block; font-weight: 600; }
+  .mv-sum td[data-l]::before, .sg-t td[data-l]::before { content: attr(data-l) ": "; color: var(--mut); }
+  .mv-sum td[data-l]::after, .sg-t td[data-l]::after { content: " · "; color: var(--mut); }
+  .mv-sum td:last-child::after, .sg-t td:last-child::after { content: ""; }
+  .mv-sum td.num, .sg-t td.num { white-space: normal; text-align: left; }
   .mv-pass-t th:nth-child(3), .mv-pass-t td:nth-child(3) { display: none; }   /* degrees ahead: the longitude says it */
   .mv-pass-t th:nth-child(5), .mv-pass-t td:nth-child(5) { display: none; }   /* from now: shown under the date instead */
   .mv-fn { display: block; }

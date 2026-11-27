@@ -977,3 +977,45 @@ now runs a second rule on those objects only.
    291 marked. On objects not judged at the time: USA 324's stop (found) and 10 marks in the first 8 days of the
    history, when every object had few sets. Luch (Olymp) 2's start across its 37-day gap is found by both rules
    from the same 21 Nov set. The page does not draw `belt.two_set` yet; the data is in `globe.json`.
+
+## Gaps in public element sets (`orbit-2.40`, 27 Nov 2026)
+Space-Track's public data holds element sets for some listed-role GEO satellites days or weeks apart. Luch (Olymp) 2
+had none from 15 Oct to 21 Nov 2026 (37 days): the day files' "quiet" event of 22 Oct recorded the start, the GEO
+page showed nothing, and when its sets came back it had left 62 E. Module `tools/geo_gaps.py` (standard library,
+build time, no request), called by `tools/geo_page.py` into `globe.json`'s `set_gaps`; GEO page section "Listed
+satellites with no recent public set" (`#set-gaps`); one line in the daily lead.
+1. **Scope.** The objects with a listed role (`site_src/geo_roles.json`), in any region, whether or not CelesTrak
+   lists them as active. The day files' "quiet" event covers active payloads in the zone only: USA 271 (in the
+   graveyard) and SJ-21 and SJ-25 (crossing the zone) are outside it.
+2. **Listed.** An object whose newest set in Orbit's files is 7 days old or more at the page's build time
+   (`geo_region.QUIET_DAYS`, the age the "quiet" event uses), with the set's epoch, its age, the longitude and drift
+   it gives (low-inclination formula, as the tracker), the day of the GEO run whose day file first carried it, and
+   the object's earlier gaps of 7 days or more between consecutive sets in Orbit's files (how many, the longest).
+   Every listed-role object's newest set is in a closed list below.
+3. **A set again.** Each day file's newest epoch for the object is compared with the day file before it. A newer
+   set counts when the newest set before it was 7 days old or more at the new file's read time (`fetched_utc`):
+   when the list in item 2 would have held the object just before. That includes every gap of 7 days or more
+   between two epochs, and also a set that reached Orbit's files late: MEV-1's set of 22 Nov 2026 23:29Z was first
+   read on 24 Nov at 23:57Z, after its set of 16 Nov 18:43Z had passed 7 days old there; the two epochs are 6.2
+   days apart, so the entry is marked `late`. The pair shown is the widest between consecutive sets from that
+   newest set to the new file's. Listed for 30 days after the read. The day files imported from Noisefloor (to
+   26 Oct 2026) hold no read time; there only sets 7 days or more apart count.
+4. **Daily lead.** One line (kind `geo_sets`, after the notable lines, linked to `geo.html#set-gaps`) when, in the
+   24 hours before the lead's time, a listed object's newest set passed 7 days old, or a set again (item 3) was
+   first read; at most 3 names in each part, and the read time of Orbit's GEO files. The collect writes the lead
+   before the update run downloads the GEO release, so the GEO page's build adds the line to the site's
+   `snapshot.json` and to the day's lead in the daily archive (`data/state/daily_archive.json` and the site's
+   copy) when that lead is this run's. Until then the lead carries a line saying the check was not made, which
+   stays if the GEO step fails. GEO files read more than 36 hours before the lead give a line saying how old they
+   are instead.
+5. **Wording.** About the source, never the satellite: "no public set", never quiet, inactive or holding its slot,
+   and never why no set was published. No public set is not the same as no movement. Across their gaps in Orbit's
+   files, USA 325's longitude went from 154.76 E to 138.69 E (24.6 days), USA 324's from 108.54 E to 121.36 E
+   (24.1 days), SJ-17's from 45.68 E to 34.96 E (7.2 days) and Luch 2's from 62.00 E to 60.29 E (37 days). A test
+   holds the section, its note and the lead line free of "quiet", "inactive", "dormant" and likelihood words.
+6. **Checks** (`tests/test_geo_gaps.py`; fixture `geo_set_gaps_2026.json`, the ten listed objects' sets
+   1 Jul-26 Nov 2026 and their day-file entries from 1 Oct). Day file of 22 Oct: Luch 2 (newest set 15 Oct 15:56Z)
+   and SJ-25 (15 Oct 18:06Z) pass 7 days that day and are the lead's names; the day file's own "quiet" event has
+   Luch 2 only. Day file of 21 Nov (read 20:57Z): both come back after 37 days. Day file of 22 Nov: USA 324 and USA
+   325 pass 7 days, as that file's "quiet" events also record. At 03:00Z on 27 Nov 2026, three are listed: USA 270
+   (newest set 24.8 days old), USA 271 (24.6) and USA 325 (11.7).

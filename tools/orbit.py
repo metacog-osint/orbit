@@ -497,7 +497,8 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
     msgs = archive.tip_messages(doc)
     snap["tip_check"] = tip.check(msgs, snap.get("reentries") or [], at,
                                   (_read_index(data_dir) or {}).get("objects") or {}) if msgs else {}
-    snap["lead"] = lead.build(snap, doc)
+    # the GEO element-set line comes later in the run (tools/geo_page.py, orbit-2.40); until then the lead says so
+    snap["lead"] = lead.merge_geo(lead.build(snap, doc), dict(lead.GEO_PENDING))
     archive.keep_lead(doc, snap["lead"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
