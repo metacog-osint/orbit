@@ -153,7 +153,15 @@ def roles_index(roles_doc: dict | None) -> dict[int, dict]:
     words = (roles_doc or {}).get("roles") or {}
     return {int(o["id"]): {"role": o["role"], "role_text": words.get(o["role"]) or o["role"],
                            "basis": o.get("basis"), "sources": o.get("sources") or []}
-            for o in (roles_doc or {}).get("objects") or []}
+            for o in (roles_doc or {}).get("objects") or [] if opened_sources(o)}
+
+
+NOT_OPENED = "not opened"  # third item of a source the list cites but its reviewer could not open (paywall, 403)
+
+
+def opened_sources(o: dict) -> list:
+    """An entry's sources that were opened, leaving out those marked [label, URL, NOT_OPENED]."""
+    return [s for s in o.get("sources") or [] if not (isinstance(s, list) and len(s) == 3 and s[2] == NOT_OPENED)]
 
 
 ROLE_CLAIMS = ("declared", "attributed")
@@ -165,7 +173,9 @@ def check_roles(roles_doc: dict | None, today: str | None = None) -> list[str]:
     """Problems in site_src/geo_roles.json, one line each; [] when every entry holds. Each object needs a unique
     catalog number, a name, a listed role, a basis, whether the role is declared or attributed, at least one
     source as [label, https URL], a status (active, retired or uncertain), the status date (YYYY-MM or YYYY-MM-DD,
-    not after `today`) and a note saying who reports the status."""
+    not after `today`) and a note saying who reports the status. A source cited but not opened is
+    [label, https URL, "not opened"]; an entry none of whose sources was opened is refused, so a role is listed
+    only where a source someone read supports it."""
     doc = roles_doc or {}
     words = doc.get("roles") or {}
     today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -201,11 +211,13 @@ def check_roles(roles_doc: dict | None, today: str | None = None) -> list[str]:
         src = o.get("sources")
         if not isinstance(src, list) or not src:
             errs.append(f"{at}: no source")
-        else:
-            for s in src:
-                if not (isinstance(s, list) and len(s) == 2 and str(s[0]).strip()
-                        and str(s[1]).startswith("https://")):
-                    errs.append(f"{at}: source {s!r} is not [label, https URL]")
+            continue
+        for s in src:
+            if not (isinstance(s, list) and len(s) in (2, 3) and str(s[0]).strip()
+                    and str(s[1]).startswith("https://") and (len(s) == 2 or s[2] == NOT_OPENED)):
+                errs.append(f"{at}: source {s!r} is not [label, https URL] or [label, https URL, {NOT_OPENED!r}]")
+        if not opened_sources(o):
+            errs.append(f"{at}: no opened source: every source is marked {NOT_OPENED!r}, so the role is not listed")
     return errs
 
 

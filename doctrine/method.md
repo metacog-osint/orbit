@@ -437,6 +437,33 @@ Tom's yes).
    with their last two sets (USA 324's drift 0.68 to 0.02 deg a day east between 22 Oct and 15 Nov). Routine
    station-keeping: Orbit 284 against Noisefloor's 135; Orbit's rule marks smaller changes between consecutive sets
    than fixed thresholds on daily snapshots.
+6. **The GEO globe's colours (`orbit-2.46`, 27 Nov 2026).** Points on the globe are compared with every other point,
+   so each colour mode has to pass the dataviz validator with all pairs (`--pairs all`). The globe is a dark canvas
+   in both page themes (`#0b0e12`), so its colours are checked once, in dark mode on that ground. The old palette of
+   seven hues and a grey failed: worst colour-blind pair magenta and aqua, Delta E 1.6 (deuteranopia); worst
+   normal-vision pair violet and blue, 9.8 (floor 15); the grey `#8e97a3` outside the lightness band. Of the
+   reference palette's eight dark hues, no four pass all pairs on `#0b0e12`, and only eight sets of three pass with
+   the grey `#616a75` (blue, orange and aqua among them). Each mode now uses at most the three owner hues and the
+   grey, at the site's dark token values (`--g-us`, `--g-cn`, `--g-ru`, `--g-other`): worst pair 9.4 colour-blind
+   (aqua and orange, deuteranopia) and 16.5 normal vision (grey and aqua), every colour at 3:1 or more on the ground.
+   The grey is neutral by design, so the chroma floor is not applied to it.
+   - **Owner:** US blue, PRC orange, CIS (Space-Track's code for Russia and the former USSR) aqua, all other owners
+     grey, as on the site's other maps. The earlier mode coloured the seven owners with the most objects, so a
+     colour followed a rank, not an owner. Any owner can still be found by typing its code in the search box, and
+     the selected object's details name it.
+   - **Where:** protected zone blue, graveyard orange, crossing the zone aqua; inclined and below the zone share the
+     grey (one key entry, "Inclined or below the zone"). The Where filter still shows either alone, and the
+     selected object's details name its region.
+   - **Type:** payload blue, rocket body orange, debris aqua, other or unknown grey. **Active:** active blue, not
+     listed as active orange.
+   - **Key and labels:** the key sits under the canvas on the same dark ground, not over it, so no point, label or
+     ring passes beneath it. A selected object's name takes the first spot (right, below, above or left of its
+     point) that keeps 2 px clear of every other name, every selected point and the view's edge; a name with no
+     clear spot is left off the globe, and the panel lists every selected object. With about 1,800 points in the
+     belt a name cannot keep clear of every point; its dark halo keeps it readable over them.
+   - **Not changed here:** the panel's line charts (up to five nearest objects, keyed by a numbered list) keep five
+     line colours, and the overlay rings (RPO pairs, arrivals and departures, callouts C1-C8) keep their own
+     colours; the rings are a second shape on the points, not a colour mode.
 
 ## Predicted reentries (`orbit-2.13`, 17 Nov 2026)
 Tom's "let's get all three items done", 16 Nov 2026, about 9:15 PM CST. Lane `decay` (`orbit/tip.py`):
@@ -1065,3 +1092,15 @@ the newest source. The GEO page shows the claim and the status in the role table
 `check_roles` (`orbit/notable.py`) refuses an entry without a source as [label, https URL], a claim, a status,
 a status date (not after today) or a note; `orbit.py check` runs it and `tests/test_geo_roles.py` holds it. The
 status is the sources' word, never Orbit's reading of the element sets, except where the note says Orbit measured it.
+## The GEO role list: sources that were opened (`orbit-2.48`, 27 Nov 2026)
+Every entry in `site_src/geo_roles.json` rests on a source that was opened and says what the basis says. A source
+the list cites but could not open (a paywall, an HTTP 403 to scripts) is written `[label, URL, "not opened"]`; the
+page adds "(not opened)" to its label. An entry none of whose sources was opened is refused by `check_roles`
+(`orbit/notable.py`, run by `orbit.py check` and held by `tests/test_geo_role_sources.py`) and, should one reach
+the file, is left off the page and out of the notable rule. A role is never listed on a source nobody read.
+SJ-17 (41838): its earlier basis cited a SpacePolicyOnline article (5 Feb 2022) that covers SJ-21 and never names
+SJ-17. The basis now rests on SWF's fact sheet "Chinese Military and Intelligence Rendezvous and Proximity
+Operations" (June 2026): China declared the satellite a test of advanced technologies; SWF reports it circumnavigated
+ChinaSat-5A in Nov 2016, came within 1.5 km of ChinaSat-1C on 29 Jul 2018, and made RPO with ChinaSat-6B and
+Shijian-20 in 2020. The Space Review (Matthew Mowthorpe and Markos Trichas, 1 Aug 2022) and Defense One (David D.
+Chen and Peter W. Singer, 20 May 2024) report the same approaches.

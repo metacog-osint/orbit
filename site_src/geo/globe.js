@@ -25,7 +25,13 @@ function main() {
   new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach(cssFix))).observe(document.body, { childList: true, subtree: true });
   const RE = 6378.137, GEO_ALT = 35786, GEO_R = (RE + GEO_ALT) / RE, DEG = Math.PI / 180, SIDEREAL = 360.98564736629;
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const PAL = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9"], OTHER = "#8e97a3";
+  // Point colours: the site's owner tokens at their dark values (style.css), since the globe is a dark canvas in both
+  // themes. Points are compared with every other point, so a mode holds at most these three hues and the grey, the
+  // set that passes the dataviz validator with all pairs on SPACE (method.md, "The GEO globe's colours").
+  const HUE = ["#3987e5", "#d95926", "#199e70"], OTHER = "#616a75";
+  const OWNER_HUE = { US: HUE[0], PRC: HUE[1], CIS: HUE[2] };          // Space-Track's codes; CIS covers Russia and the USSR
+  // Line colours for the panel's charts (up to five nearest objects): a line chart, keyed by a numbered list.
+  const PAL = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
   const SPACE = "#0b0e12", OCEAN = "#111822", COAST = "#3a4656", GRID = "#1a222d", RING = "#2c3644", SEL = "#ffffff";
   const REGIONS = [["zone", "Protected zone"], ["graveyard", "Graveyard"], ["crossing", "Crossing the zone"], ["inclined", "Inclined"], ["below", "Below the zone"]];
   const TYPES = [["PAYLOAD", "Payload"], ["ROCKET BODY", "Rocket body"], ["DEBRIS", "Debris"], ["OTHER", "Other or unknown"]];
@@ -62,7 +68,7 @@ function main() {
   // ---------------------------------------------------------------- state
   const S = { objs: [], byId: new Map(), sel: [], q: "", regions: new Set(REGIONS.map((r) => r[0])), types: new Set(TYPES.map((t) => t[0])),
               activeOnly: false, color: "region", trails: "sel", win: 7, fp: "", t: null, track: null, tracks: {}, board: null, owners: {},
-              ownerColor: {}, strip: { x0: -180, x1: 180, y: "alt" }, beams: new Map(), aim: null, files: [],
+              strip: { x0: -180, x1: 180, y: "alt" }, beams: new Map(), aim: null, files: [],
               place: null, pickPlace: false, sun: false, over: false, dish: 0.9, ghz: 12, open: {}, rel: null, near: null, look: null, sunwins: null,
               co: null, coHash: null, coData: null };
   function readHash() {
@@ -182,10 +188,10 @@ function main() {
   // ---------------------------------------------------------------- colours and filters
   const col = new THREE.Color(), bgCol = new THREE.Color(SPACE);
   function colorOf(o) {
-    if (S.color === "region") return PAL[REGIONS.findIndex((r) => r[0] === o.region)] || OTHER;
-    if (S.color === "type") return PAL[TYPES.findIndex((t) => t[0] === o.tk)] || OTHER;
-    if (S.color === "active") return o.active ? PAL[0] : PAL[1];
-    return S.ownerColor[o.owner] || OTHER;
+    if (S.color === "region") return HUE[REGIONS.findIndex((r) => r[0] === o.region)] || OTHER;   // inclined, below: grey
+    if (S.color === "type") return HUE[TYPES.findIndex((t) => t[0] === o.tk)] || OTHER;          // other or unknown: grey
+    if (S.color === "active") return o.active ? HUE[0] : HUE[1];
+    return OWNER_HUE[o.owner] || OTHER;
   }
   const shown = (o) => S.regions.has(o.region) && S.types.has(o.tk) && (!S.activeOnly || o.active);
   let terms = [], slot = null;
@@ -893,14 +899,28 @@ function main() {
   }
   window.addEventListener("resize", resize);
   controls.addEventListener("change", () => { dirty = true; });
+  // Selected objects' names. Each label takes the first spot (right, below, above, left of its point) that keeps 2 px
+  // clear of every other label, every selected point and the view's edge; a name with no clear spot is left off the
+  // globe (the panel lists every selected object).
+  const LABEL_SPOTS = [[11, -8], [11, 4], [11, -20], [-11, -8]], LABEL_GAP = 2, SEL_R = 8;   // px; SEL_R: half the selected dot
   function placeLabels() {
-    const html = [];
+    const html = [], pts = [];
     S.sel.slice(0, 20).forEach((id) => {
       const o = S.byId.get(id); if (!o || !o.p) return;
       const s = screenOf(o); if (!s) return;
-      html.push('<span class="globe-label" data-css="left:' + (s.x + 9) + "px;top:" + (s.y - 8) + 'px">' + esc(o.name) + "</span>");
+      pts.push(s);
+      html.push('<span class="globe-label">' + esc(o.name) + "</span>");
     });
     labels.innerHTML = html.join("");
+    const W = view.clientWidth, H = view.clientHeight, taken = pts.map((s) => [s.x - SEL_R, s.y - SEL_R, s.x + SEL_R, s.y + SEL_R]);
+    const clear = (b) => b[0] >= LABEL_GAP && b[1] >= LABEL_GAP && b[2] <= W - LABEL_GAP && b[3] <= H - LABEL_GAP &&
+      taken.every((t) => b[2] + LABEL_GAP <= t[0] || t[2] + LABEL_GAP <= b[0] || b[3] + LABEL_GAP <= t[1] || t[3] + LABEL_GAP <= b[1]);
+    [...labels.children].forEach((el, k) => {
+      const s = pts[k], w = el.offsetWidth, h = el.offsetHeight;
+      const spot = LABEL_SPOTS.map(([dx, dy]) => { const x = dx < 0 ? s.x + dx - w : s.x + dx, y = s.y + dy; return [x, y, x + w, y + h]; }).find(clear);
+      if (!spot) { el.hidden = true; return; }
+      taken.push(spot); el.style.left = spot[0] + "px"; el.style.top = spot[1] + "px";
+    });
   }
   function frame(now) {
     if (fly) {
@@ -993,11 +1013,12 @@ function main() {
   // ---------------------------------------------------------------- legend, panel, search
   function legend() {
     let items;
-    if (S.color === "region") items = REGIONS.map((r, k) => [PAL[k], r[1], drawn.filter((o) => o.region === r[0]).length]);
-    else if (S.color === "type") items = TYPES.map((t, k) => [PAL[k], t[1], drawn.filter((o) => o.tk === t[0]).length]);
-    else if (S.color === "active") items = [[PAL[0], "Active (CelesTrak)", drawn.filter((o) => o.active).length], [PAL[1], "Not listed as active", drawn.filter((o) => !o.active).length]];
-    else items = Object.keys(S.ownerColor).map((k) => [S.ownerColor[k], S.owners[k] ? k + " · " + S.owners[k] : k, drawn.filter((o) => o.owner === k).length])
-      .concat([[OTHER, "All other owners", drawn.filter((o) => !S.ownerColor[o.owner]).length]]);
+    if (S.color === "region") items = REGIONS.slice(0, HUE.length).map((r, k) => [HUE[k], r[1], drawn.filter((o) => o.region === r[0]).length])
+      .concat([[OTHER, "Inclined or below the zone", drawn.filter((o) => o.region === "inclined" || o.region === "below").length]]);
+    else if (S.color === "type") items = TYPES.map((t, k) => [HUE[k] || OTHER, t[1], drawn.filter((o) => o.tk === t[0]).length]);
+    else if (S.color === "active") items = [[HUE[0], "Active (CelesTrak)", drawn.filter((o) => o.active).length], [HUE[1], "Not listed as active", drawn.filter((o) => !o.active).length]];
+    else items = Object.keys(OWNER_HUE).map((k) => [OWNER_HUE[k], S.owners[k] ? k + " · " + S.owners[k] : k, drawn.filter((o) => o.owner === k).length])
+      .concat([[OTHER, "All other owners", drawn.filter((o) => !OWNER_HUE[o.owner]).length]]);
     let extra = "";
     if (S.over && S.board) { const it = overlayItems(), n = { close: it.close.length, ev: it.ev.length };
       extra = OVER.map((v) => '<span><i class="ring" data-css="border-color:' + v[1] + '"></i>' + esc(v[2]) + " " + fmtN(n[v[0]]) + "</span>").join(""); }
@@ -1847,9 +1868,6 @@ function main() {
       return o;
     });
     S.objs.forEach((o) => S.byId.set(o.norad, o));
-    const counts = {};
-    S.objs.forEach((o) => { counts[o.owner] = (counts[o.owner] || 0) + 1; });
-    Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, PAL.length).forEach((k, i) => { S.ownerColor[k] = PAL[i]; });
     S.sel = S.sel.filter((id) => S.byId.has(id));
     $("g-status").innerHTML = "<strong>" + fmtN(S.objs.length) + "</strong> objects near GEO from Space-Track, elements fetched " + esc(bothTxt(Date.parse(g.elements_fetched_utc.replace("Z", ":00Z")), true)) +
       ". Positions are good to tens of kilometres. Tracks show what the published elements said at each time; the dashed line is the next 48 hours predicted from the latest elements.";
