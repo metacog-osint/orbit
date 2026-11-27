@@ -15,6 +15,13 @@ name: catalog
 # hourly, stop on any answer but 200 and tell a person. A refusal puts that source on hold (state on the release) and
 # fails the run after the upload; once a person has looked, start this workflow by hand with `clear_hold`.
 # CelesTrak's and Wikidata's last replies ride the Actions cache (private); if it is evicted, each is read once more.
+#
+# Private archive (metacog-osint/tic-archive, tools/tic_archive.py; dated snapshots, nothing replaced there). The
+# release `catalog` keeps only its newest files, so every version goes to the archive, lane catalog-release: the
+# release's files as they are before a due read replaces them (a failure stops the run before Space-Track is read)
+# and the files just uploaded. The run's raw replies (Space-Track SATCAT and DECAY, CelesTrak, Wikidata, WMO
+# OSCAR/Space; not GCAT's tables) go to lane catalog-raw after the catalog step, even when it failed. Token:
+# TIC_ARCHIVE_TOKEN, contents:write on tic-archive only, handed to tic_archive.py alone.
 on:
   schedule:
     - cron: "23 17,19,21 * * *"
@@ -39,7 +46,7 @@ jobs:
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Catalog tests
-        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards tests.test_oscar tests.test_debrismap
+        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards tests.test_oscar tests.test_archive_lanes tests.test_debrismap
       - name: CelesTrak and Wikidata replies from the Actions cache (none on the first run)
         uses: actions/cache/restore@v6
         with:
@@ -60,6 +67,7 @@ jobs:
           SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
           CLEAR_HOLD: ${{ inputs.clear_hold }}
+          TIC_ARCHIVE_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
         run: python tools/orbit.py spacetrack-catalog --release ${CLEAR_HOLD:+--clear-hold "$CLEAR_HOLD"}
       # The satellite map's rocket bodies and debris (orbit/debrismap.py, orbit-2.51): one Space-Track GP query a UTC
       # day, the account's third GP query. It waits for the update run's and geo.yml's (spacetrack.FOR_DEBRIS), and they
@@ -86,3 +94,15 @@ jobs:
             data/state/celestrak-satcat.csv.gz
             data/state/wikidata-p377.json.gz
           key: catalog-sources-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Private archive (the catalog run's raw replies, to tic-archive)
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
+        run: |
+          if [ -z "$(find data/raw -type f ! -path 'data/raw/gcat-*' 2>/dev/null | head -n 1)" ]; then
+            echo "catalog-raw: no reply was read this run"; exit 0
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::secret TIC_ARCHIVE_TOKEN is not set, so this run's raw replies did not reach the private archive"; exit 1
+          fi
+          python tools/tic_archive.py put --program orbit --lane catalog-raw --src data/raw --exclude 'gcat-*'

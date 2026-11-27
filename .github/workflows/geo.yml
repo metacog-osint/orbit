@@ -17,8 +17,9 @@ name: geo
 # An upload never loses what the releases hold (tools/orbit.py geo_pull, orbit/geo_region.py release_put): a file a
 # release holds that does not download whole, a past month's file missing from its release, an upload that would
 # drop any element set the release holds, or a failed copy to the private archive stops the run (exit 1) before
-# anything is uploaded. Each gp reply, and every release file before it is replaced, goes to the PRIVATE repo
-# metacog-osint/tic-archive (tools/tic_archive.py, lanes geo-reply and geo-release, dated, nothing replaced there).
+# anything is uploaded. Each gp reply, every release file before it is replaced, and every file about to be uploaded
+# go to the PRIVATE repo metacog-osint/tic-archive (tools/tic_archive.py, lanes geo-reply and geo-release, dated,
+# nothing replaced there), so the archive alone holds every version the releases have held.
 # Token: TIC_ARCHIVE_TOKEN, contents:write on tic-archive only, handed to tic_archive.py alone.
 on:
   schedule:

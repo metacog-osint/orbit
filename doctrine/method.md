@@ -1153,3 +1153,20 @@ Operations" (June 2026): China declared the satellite a test of advanced technol
 ChinaSat-5A in Nov 2016, came within 1.5 km of ChinaSat-1C on 29 Jul 2018, and made RPO with ChinaSat-6B and
 Shijian-20 in 2020. The Space Review (Matthew Mowthorpe and Markos Trichas, 1 Aug 2022) and Defense One (David D.
 Chen and Peter W. Singer, 20 May 2024) report the same approaches.
+
+## Names registered with the United Nations (`orbit-2.50`, 27 Nov 2026)
+Source: the UN Register of Objects Launched into Outer Space, read through UNOOSA's Online Index
+(`orbit/unregister.py`). The UN's terms permit personal, non-commercial use and bar redistributing or compiling the
+Index, so Orbit publishes no register table and imports nothing in bulk.
+
+1. **Requests.** On a person's request only: one request per COSPAR id, at most 10 ids a call, 3 s apart. Replies are
+   kept a week in git-ignored `data/raw/unoosa/` and never published.
+2. **Declared name.** Only the Index's registered-name field counts, without square brackets, on a record marked
+   registered that carries a registration document. A name from the Index's other name field (information it did not
+   receive as a registration) is never a declared name. The official mark on the international designator concerns the
+   designator, not the name. The GSO location is kept only when marked official.
+3. **Review.** A person adds each entry to `orbit/data/catalog/un-register.yml` with `reviewed_by` and `reviewed`.
+   Only reviewed entries are written to `data/un-register.json`; a bad entry stops the build.
+4. **Display.** Object pages join on the COSPAR id and show the name as declared by the state of registry to the UN
+   Register, with the document symbol, a link to the document and the date read. It is the name at registration, never
+   shown as the current name, and it changes no catalog name or number.
