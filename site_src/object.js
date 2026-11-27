@@ -9,7 +9,7 @@
   var q = new URLSearchParams(location.search);
   var KEY = (q.get("n") || q.get("j") || "").trim().toUpperCase().replace(/^S0*(?=\d)/, "").replace(/^0+(?=\d)/, "");
   var NUMBERED = /^\d+$/.test(KEY);
-  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null, movers = null;
+  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null, movers = null, itu = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -304,6 +304,8 @@
     }
     return null;
   }
+  function ituLinks(n) { return n && itu && itu.objects ? itu.objects[n] || [] : []; }
+  function filedFor(lon) { return lon === 0 ? "0°" : Math.abs(lon) + "° " + (lon < 0 ? "W" : "E"); }
   function holds() {
     var box = document.getElementById("obj-holds");
     box.textContent = "";
@@ -406,6 +408,20 @@
           isT ? "target or client" : "chaser or servicer", o, r.mission_type || "", r.orbit || ""];
       })));
     }
+    // ITU filings linked to this object by review (method orbit-2.42): the reviewed entries of itu-links.yml only
+    var il = ituLinks(n);
+    if (il.length) {
+      any = true;
+      var si = sub(box, "ITU filings linked by review", itu.about + " " + itu.link_note);
+      si.appendChild(table(["Filing (network name)", "Administration", "Filed for", "Served", "Basis", "Evidence"], il.map(function (x) {
+        var ev = el("ul", "plain small");
+        x.evidence.forEach(function (t) { ev.appendChild(el("li", "", t)); });
+        var b = el("span", "", x.basis); b.title = (itu.bases || {})[x.basis] || "";
+        b.appendChild(el("div", "pl", "reviewed " + day(x.reviewed)));
+        return [link(x.network, x.link, true), x.adm + (x.org ? " / " + x.org : ""), filedFor(x.slot),
+          x.from || x.to ? (x.from ? day(x.from) : "?") + " to " + (x.to ? day(x.to) : "the latest evidence") : "dates not given", b, ev];
+      })));
+    }
     var cc = snap.catalog_changes || {}, cat = [];
     (cc.late_groups || []).forEach(function (g) { (g.objects || []).forEach(function (o) { if (mine(o)) cat.push("New entry in GCAT, from launch " + g.launch_tag + " (" + day(g.launch_date) + "), over 30 days after it."); }); });
     (cc.owner_changes || []).forEach(function (c) {
@@ -432,7 +448,7 @@
     box.appendChild(el("p", "small muted", (any ? "" : "Orbit holds nothing on this object beyond its catalog record. ") +
       "What Orbit keeps: TIP messages since " + fmt((snap.tip_check || {}).kept_since) + "; orbit changes in the satellites it watches over the last " +
       ((snap.maneuvers || {}).window_days || 30) + " days; GCAT's changes between its last two readings; launches and reentries of the last 30 days; " +
-      "SWF's RPO sheet. Snapshot of " + fmt(snap.generated_at) + "."));
+      "SWF's RPO sheet; ITU filings linked to an object by review. Snapshot of " + fmt(snap.generated_at) + "."));
   }
 
   // ---------------------------------------------------------------- names and sources (the catalog's rules note)
@@ -548,6 +564,15 @@
         ul.appendChild(li2);
       }
     }
+    var nk = NUMBERED ? KEY : obj && obj.norad != null ? String(obj.norad) : null;
+    if (ituLinks(nk).length) {
+      var li3 = el("li");
+      li3.appendChild(el("strong", "", "ITU"));
+      li3.appendChild(document.createTextNode(": " + itu.credit + ". Each filing links to its page on "));
+      li3.appendChild(link("ITU Space Explorer", "https://www.itu.int/go/ITUSpaceExplorer", true));
+      li3.appendChild(document.createTextNode("; the link from a filing to this object is TIC's."));
+      ul.appendChild(li3);
+    }
     ul.appendChild(el("li", "", "Orbit's own records: Space-Track.org TIP messages and element sets (USSPACECOM, 18th Space Defense Squadron), " +
       "redistributed under USSPACECOM's blanket approval for basic SSA data; orbit-change analysis by The Intelligence Company, not reviewed or " +
       "endorsed by USSPACECOM. GCAT (CC BY 4.0). Secure World Foundation (CC BY-NC 4.0). Not for operational use."));
@@ -568,8 +593,8 @@
     return;
   }
   Promise.all([getJson("data/catalog/" + shardName(KEY)), getJson("data/catalog/rules.json"), getJson("data/catalog/index.json"),
-    getJson("data/snapshot.json"), getJson("data/archive.json"), getJson("data/geo/movers.json")]).then(function (r) {
-    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4]; movers = r[5];
+    getJson("data/snapshot.json"), getJson("data/archive.json"), getJson("data/geo/movers.json"), getJson("data/itu-links.json")]).then(function (r) {
+    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4]; movers = r[5]; itu = r[6];
     shard = r[0] && rules ? r[0] : r[0] === null && rules && man ? { missing: true, sources: {}, swaps: [] } : null;
     obj = shard && !shard.missing ? (shard.objects || {})[KEY] || null : null;
     if (shard && !obj) shard.missing = true;  // the shard is here but this key is not in it
