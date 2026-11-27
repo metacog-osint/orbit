@@ -261,8 +261,10 @@ of the larger.
 2. **Why GEO only:** the pattern was measured at GEO. In low orbit the 1 m/s rule for cross-track and eccentricity
    marks (`orbit-2.8`) already holds back fit noise, and the ISS case lists all five announced reboosts and nothing
    outside NASA's list without this step.
-3. **What it costs:** a real change is listed one element set later. For a GEO object with sets twice a day that is
-   about half a day; for a sparsely tracked one it is the gap to its next set. Luch 2's departure from 62°E (first
+3. **What it costs:** a real change is listed one element set later, and the wait is the gap to that set. On the
+   records measured (item 4) the median wait is about 9 to 13 hours: 8.6 h across every judged GEO object, 11.7 h
+   on the SJ-21 case and 12.8 h on Luch 2. Where public sets are sparse it is longer: a median of 23.8 h on the GEO
+   role list, and as long as the next public set takes. The orbit-change page and the GEO page say so. Luch 2's departure from 62°E (first
    seen in the set of 21 Nov 2026 15:41 UTC, listed at 00:57 UTC on 22 Nov) would have waited for the set of 22 Nov
    15:37 UTC, listed at 20:05 UTC the same day, about 19 hours later. A real burn undone by a second burn before the
    next set reads exactly like one set off the orbit and is not listed; the element sets cannot tell the two apart.
