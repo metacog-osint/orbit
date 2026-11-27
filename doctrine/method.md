@@ -1033,8 +1033,8 @@ with an unexplained difference.
    carries scheduled launches as `launch:upcoming:*` (LA-PIR-3); COP ends Orbit's old items when Orbit is read.
    OR-PIR-3 stays in the register, noted, so older items still resolve.
 3. **Ledger:** Orbit's last `launch-ledger.json` stays on its release `ledger`, frozen, with a "moved to Launch"
-   note in the release text; the private archive keeps its dated copies. `ledger.yml` has no schedule and does nothing
-   when started; it remains while the suite's dispatcher still starts it.
+   note in the release text; the private archive keeps its dated copies. `ledger.yml` was removed once the suite's
+   dispatcher stopped starting it.
 4. **Launches page:** the map and globe draw GCAT's launches of the last 7 days (each with its payloads and their
    orbits, and their paths on the globe); pads, hazard areas, ledger history and Launch's lines are gone. A card
    under the old ids `#upcoming`, `#hazards` and `#ledger` points to Launch, so older links still land.
