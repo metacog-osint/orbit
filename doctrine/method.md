@@ -651,6 +651,14 @@ only a neighbour, so the palette has to pass the dataviz validator with all pair
 panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
 with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against
 magenta, violet or aqua in dark mode). The orbit class stays a filter and a column in the list.
+**The owner colours, all pairs (`orbit-2.44`, 27 Nov 2026).** The four owner tokens now pass `--pairs all` in both
+modes. The dark grey is `#616a75`, darker than the old `#7d8794`, which fell to 13.1 normal-vision and 5.2
+deuteranopia Delta E against the aqua `#199e70`. Dark, on `#131822`: worst pair 9.4 for colour-blind vision (aqua
+and orange) and 16.5 for normal vision (grey and aqua), every token at 3:1 or more. Light, on `#ffffff`, unchanged:
+worst 8.2 (grey and aqua, protanopia) and 16.1. The grey is neutral by design, so the validator's chroma floor is not
+applied to it. In light mode the aqua (2.8:1) and grey (2.3:1) sit under 3:1 on white; every owner chip carries its
+flag and code, and each map's list and selected-object details name the owner, which is the relief the validator
+asks for.
 Rocket bodies and debris have no CelesTrak source. CelesTrak's GP groups (its Current Data page and GP
 documentation, read 27 Nov 2026) hold no whole-catalog, rocket-body or debris group: the only debris groups are three
 single clouds (FENGYUN 1C, IRIDIUM 33, COSMOS 2251), and the special sets are the GEO protected zone and potential
