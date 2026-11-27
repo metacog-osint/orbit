@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-tic-layer="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imaging · Orbit · The Intelligence Company</title>
+<meta name="description" content="The newest Landsat, Sentinel-2 and Sentinel-1 scenes that public catalogues list over launch sites, and the days Landsat is next due over each on USGS's calendar.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tic-time.css">
+<link rel="stylesheet" href="tic-nav.css">
+<link rel="stylesheet" href="tic-shell.css">
+<link rel="stylesheet" href="tic-fold.css">
+<script src="tic-time.js"></script>
+<script src="tic-fold.js" defer></script>
+<script src="tic-nav.js" defer data-current="orbit" data-health="on"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand"><a href="./"><strong>Orbit</strong></a><a class="tic-layer" href="https://theintelligence.company/#layers">Space layer</a><span class="muted">The Intelligence Company</span></div>
+    <nav class="top-nav">
+      <span id="time-settings"></span>
+    </nav>
+  </div>
+  <nav class="page-nav wrap" aria-label="Orbit's pages">
+    <a href="./">Map</a>
+    <a href="launches.html">Launches</a>
+    <a href="reentries.html">Reentries</a>
+    <a href="catalog.html">Catalog</a>
+    <a href="changes.html">Orbit changes</a>
+    <a href="geo.html">GEO belt</a>
+    <a href="footprints.html">Footprints</a>
+    <a href="imaging.html" aria-current="page">Imaging</a>
+    <a href="sources.html">Sources</a>
+  </nav>
+</header>
+
+<main id="main" class="wrap" data-page="imaging">
+  <noscript><p class="noscript">This page needs JavaScript to draw its tables.</p></noscript>
+  <section class="hero hero-sub">
+    <h1>Imaging</h1>
+    <p class="lede">The newest scene that a public catalogue lists over each launch site, from Landsat 8 and 9,
+      Sentinel-2 and Sentinel-1, and the days Landsat is next due over it. <span id="im-asof" class="muted"></span></p>
+  </section>
+
+  <section class="card" id="imaging-last" aria-labelledby="im-last-h">
+    <div class="card-head">
+      <h2 id="im-last-h">Last acquired</h2>
+      <p class="muted small">The newest scene each catalogue lists whose footprint covers the place, searched over
+        the last 32 days: USGS LandsatLook (Landsat Collection 2 Level-1) and the Copernicus Data Space catalogue
+        (Sentinel-2 Level-1C, Sentinel-1 ground-range scenes). A catalogue lists a scene some hours after it is
+        taken. Cloud is the scene's own estimate; Sentinel-1 is radar, so cloud does not apply. Other satellites,
+        commercial and government, image these places too and mostly publish nothing, so a long gap here does not
+        mean a place went unimaged.</p>
+    </div>
+    <div class="tbl-wrap" id="im-last"></div>
+  </section>
+
+  <section class="card" id="imaging-next" aria-labelledby="im-next-h">
+    <div class="card-head">
+      <h2 id="im-next-h">Landsat next due</h2>
+      <p class="muted small">UTC days in the next 16 on which Landsat 8 or 9 flies a path that has covered the place
+        in daylight in the last 32 days, on USGS's nominal 16-day acquisition calendar. USGS's calendar file runs to
+        <span id="im-cal"></span>; it repeats every 16 days, so Orbit carries it forward and checks every daylight
+        scene it reads against it. A place with a scene off the calendar shows "unknown". Due is the calendar's
+        path for the day, not a promise that a scene will be taken or will be clear.</p>
+      <p class="muted small">Sentinel-1 and Sentinel-2: <span id="im-s-plan"></span></p>
+    </div>
+    <div class="tbl-wrap" id="im-next"></div>
+  </section>
+</main>
+
+<footer class="wrap foot small muted">
+  <p>Orbit (orbit-2.52), The Intelligence Company. Landsat scenes and calendar: U.S. Geological Survey (public
+    domain), <a href="https://landsatlook.usgs.gov/stac-server">LandsatLook STAC</a> and the
+    <a href="https://landsat.usgs.gov/landsat_acq">Landsat Acquisition Tool</a>. Sentinel scenes: Copernicus Sentinel
+    data <span id="im-year"></span>, from the <a href="https://dataspace.copernicus.eu/">Copernicus Data Space
+    Ecosystem</a> catalogue (ESA). Site positions from GCAT (J. McDowell,
+    <a href="https://planet4589.org/space/gcat">planet4589.org/space/gcat</a>), CC BY 4.0. Scene metadata only; no
+    imagery is copied. Publicly available information only.</p>
+</footer>
+<script src="imaging.js"></script>
+</body>
+</html>

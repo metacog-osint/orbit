@@ -1,0 +1,115 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "id": "S2C_MSIL1C_20261125T160511_N0513_R054_T17RNM_20261125T174652",
+   "properties": {
+    "datetime": "2026-11-25T16:05:11.025000Z",
+    "platform": "sentinel-2c",
+    "eo:cloud_cover": 100.0,
+    "view:sun_elevation": 38.4176173215048,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2B_MSIL1C_20261123T160609_N0513_R097_T17RNM_20261123T193227",
+   "properties": {
+    "datetime": "2026-11-23T16:06:09.024000Z",
+    "platform": "sentinel-2b",
+    "eo:cloud_cover": 99.86,
+    "view:sun_elevation": 39.4991981867811,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2B_MSIL1C_20261120T160509_N0513_R054_T17RNM_20261120T191229",
+   "properties": {
+    "datetime": "2026-11-20T16:05:09.024000Z",
+    "platform": "sentinel-2b",
+    "eo:cloud_cover": 99.48,
+    "view:sun_elevation": 39.5104346692371,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2A_MSIL1C_20261117T160521_N0513_R054_T17RNM_20261117T192522",
+   "properties": {
+    "datetime": "2026-11-17T16:05:21.024000Z",
+    "platform": "sentinel-2a",
+    "eo:cloud_cover": 99.29,
+    "view:sun_elevation": 40.2271719727489,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2C_MSIL1C_20261115T160511_N0513_R054_T17RNM_20261115T174658",
+   "properties": {
+    "datetime": "2026-11-15T16:05:11.025000Z",
+    "platform": "sentinel-2c",
+    "eo:cloud_cover": 7.05,
+    "view:sun_elevation": 40.7158293244987,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2B_MSIL1C_20261113T160519_N0513_R097_T17RNM_20261113T193127",
+   "properties": {
+    "datetime": "2026-11-13T16:05:19.024000Z",
+    "platform": "sentinel-2b",
+    "eo:cloud_cover": 30.09,
+    "view:sun_elevation": 41.8988183849589,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2A_MSIL1C_20261110T160651_N0513_R097_T17RNM_20261110T193503",
+   "properties": {
+    "datetime": "2026-11-10T16:06:51.024000Z",
+    "platform": "sentinel-2a",
+    "eo:cloud_cover": 10.74,
+    "view:sun_elevation": 42.7124611855643,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2B_MSIL1C_20261110T160509_N0513_R054_T17RNM_20261110T192232",
+   "properties": {
+    "datetime": "2026-11-10T16:05:09.024000Z",
+    "platform": "sentinel-2b",
+    "eo:cloud_cover": 5.43,
+    "view:sun_elevation": 42.0342022984033,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2C_MSIL1C_20261108T160451_N0513_R097_T17RNM_20261108T180005",
+   "properties": {
+    "datetime": "2026-11-08T16:04:51.025000Z",
+    "platform": "sentinel-2c",
+    "eo:cloud_cover": 0.0,
+    "view:sun_elevation": 43.2614554379946,
+    "sat:orbit_state": "descending"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "S2C_MSIL1C_20261105T160501_N0513_R054_T17RNM_20261105T191522",
+   "properties": {
+    "datetime": "2026-11-05T16:05:01.025000Z",
+    "platform": "sentinel-2c",
+    "eo:cloud_cover": 1.08,
+    "view:sun_elevation": 43.4339987018654,
+    "sat:orbit_state": "descending"
+   }
+  }
+ ]
+}

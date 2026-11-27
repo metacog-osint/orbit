@@ -1,0 +1,143 @@
+{
+ "about": [
+  "Places the imaging lane reads (orbit-2.52, doctrine/method.md). Launch sites that the suite's Launch program already shows in public.",
+  "Positions are GCAT's site points (sites.tsv, read 27 Nov 2026), a site's nominal centre, not a pad. A place added here must already be public on a TIC site and must name its source."
+ ],
+ "places": [
+  {
+   "id": "kennedy",
+   "name": "Kennedy Space Center and Cape Canaveral",
+   "kind": "launch site",
+   "country": "US",
+   "lat": 28.6083,
+   "lon": -80.6041,
+   "source": "GCAT sites.tsv, site KSC (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "vandenberg",
+   "name": "Vandenberg",
+   "kind": "launch site",
+   "country": "US",
+   "lat": 34.75,
+   "lon": -120.62,
+   "source": "GCAT sites.tsv, site V (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "kourou",
+   "name": "Guiana Space Centre, Kourou",
+   "kind": "launch site",
+   "country": "GF",
+   "lat": 5.2333,
+   "lon": -52.7517,
+   "source": "GCAT sites.tsv, site CSG (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "baikonur",
+   "name": "Baikonur Cosmodrome",
+   "kind": "launch site",
+   "country": "KZ",
+   "lat": 46.0,
+   "lon": 63.0,
+   "source": "GCAT sites.tsv, site GIK-5 (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "plesetsk",
+   "name": "Plesetsk Cosmodrome",
+   "kind": "launch site",
+   "country": "RU",
+   "lat": 62.9,
+   "lon": 40.5,
+   "source": "GCAT sites.tsv, site GIK-1 (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "vostochny",
+   "name": "Vostochny Cosmodrome",
+   "kind": "launch site",
+   "country": "RU",
+   "lat": 51.7,
+   "lon": 128.0,
+   "source": "GCAT sites.tsv, site VOST (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "jiuquan",
+   "name": "Jiuquan Satellite Launch Center",
+   "kind": "launch site",
+   "country": "CN",
+   "lat": 41.31,
+   "lon": 100.31,
+   "source": "GCAT sites.tsv, site JQ (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "taiyuan",
+   "name": "Taiyuan Satellite Launch Center",
+   "kind": "launch site",
+   "country": "CN",
+   "lat": 38.85,
+   "lon": 111.6,
+   "source": "GCAT sites.tsv, site TYSC (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "xichang",
+   "name": "Xichang Satellite Launch Center",
+   "kind": "launch site",
+   "country": "CN",
+   "lat": 28.2472,
+   "lon": 102.0291,
+   "source": "GCAT sites.tsv, site XSC (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "wenchang",
+   "name": "Wenchang Space Launch Site",
+   "kind": "launch site",
+   "country": "CN",
+   "lat": 19.6142,
+   "lon": 110.9511,
+   "source": "GCAT sites.tsv, site WEN (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "sriharikota",
+   "name": "Satish Dhawan Space Centre, Sriharikota",
+   "kind": "launch site",
+   "country": "IN",
+   "lat": 13.621,
+   "lon": 80.303,
+   "source": "GCAT sites.tsv, site SHAR (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "mahia",
+   "name": "Rocket Lab Launch Complex 1, Mahia",
+   "kind": "launch site",
+   "country": "NZ",
+   "lat": -39.2609,
+   "lon": 177.8655,
+   "source": "GCAT sites.tsv, site MAHIA (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "semnan",
+   "name": "Semnan launch site",
+   "kind": "launch site",
+   "country": "IR",
+   "lat": 35.2347,
+   "lon": 53.921,
+   "source": "GCAT sites.tsv, site SEM (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "shahroud",
+   "name": "Shahroud launch site",
+   "kind": "launch site",
+   "country": "IR",
+   "lat": 36.23,
+   "lon": 55.33,
+   "source": "GCAT sites.tsv, site SHAHR (J. McDowell, CC BY 4.0)"
+  },
+  {
+   "id": "sohae",
+   "name": "Sohae Satellite Launching Station",
+   "kind": "launch site",
+   "country": "KP",
+   "lat": 39.66,
+   "lon": 124.706,
+   "source": "GCAT sites.tsv, site SOHAE (J. McDowell, CC BY 4.0)"
+  }
+ ]
+}

@@ -49,7 +49,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "doctrine" / "kit" / "python"))
 
 from orbit import (aliases, archive, catalog, catshards, catsources, celestrak, satmap, counterspace, feed, fetch, gcat, geo_region, lead, maneuver, names, notable, objpage,  # noqa: E402
-                   oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
+                   imaging, oscar, oscarlinks, retention, rpo, spacetrack, stcat, tip)
 from tic_doctrine import contract, registers  # noqa: E402
 
 LANE_FIELDS = {
@@ -60,9 +60,11 @@ LANE_FIELDS = {
     "maneuver": ["maneuvers", "reentry_sets"],
     "decay": ["decay"],
     "sats": ["sats"],
+    "imaging": ["imaging"],
 }
 EMPTY = {"baseline": {}, "gcat_updated": {}, "launches": [], "reentries": [], "breakups": [], "hygiene": {}, "catalog_changes": {},
-         "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "reentry_sets": {}, "decay": {}, "sats": {}}
+         "payload_sets": {}, "counterspace": {}, "rpo": {}, "maneuvers": {}, "reentry_sets": {}, "decay": {}, "sats": {},
+         "imaging": {}}
 ST_DIR = Path("state") / "spacetrack"  # Space-Track sets, kept in the private Actions cache, never published
 ST_CLIENT = spacetrack.Client            # replaceable in tests
 ST_WAIT = spacetrack.wait_for_clear_minute
@@ -72,11 +74,14 @@ INDEX = Path("state") / "catalog_index.json.gz"
 SATS = Path("state") / "sats.json"  # the satellite map's file (orbit/satmap.py), published at /data/sats.json
 SATS_STOP = Path("state") / "sats_stop.json"  # CelesTrak's last non-200, until a person clears it (orbit/satmap.py)
 TEXT_SUFFIXES = {".html", ".css", ".js", ".mjs", ".json", ".geojson", ".svg", ".txt", ".md", ".glsl", ".xml"}
+IMAGING = Path("state") / "imaging.json"  # the imaging lane's file (orbit/imaging.py), published at /data/imaging.json
+IMAGING_CAL = Path("state") / "landsat_calendar.json"  # USGS's Landsat calendar as last read, re-read after 7 days
 ARCHIVE = Path("state") / "daily_archive.json"  # Orbit's own daily counts (orbit/archive.py), published at /data/archive.json
 MIN_KEEP = 0.9  # a reading with under 90% of the previous reading's objects fails the lane
 # Which register source feeds each lane (doctrine/sources.json), so the page can show each lane's grade.
 LANE_SOURCE = {"catalog": ["gcat-mcdowell"], "paths": ["celestrak-gp"], "counterspace": ["swf-counterspace"], "rpo": ["swf-rpo"],
-               "maneuver": ["space-track"], "decay": ["space-track"], "sats": ["celestrak-gp-active"]}
+               "maneuver": ["space-track"], "decay": ["space-track"], "sats": ["celestrak-gp-active"],
+               "imaging": ["usgs-landsat-calendar", "usgs-landsatlook-stac", "cdse-stac"]}
 
 
 def _read_index(data_dir: Path) -> dict | None:
@@ -396,9 +401,41 @@ def _lane_sats(raw_dir: Path, prev: dict, getter, **_):
     return {"sats": {**satmap.summary(doc), "bytes": path.stat().st_size}}, [rec], None
 
 
+def _lane_imaging(raw_dir: Path, prev: dict, getter, **_):
+    """Last Landsat and Sentinel scenes over the reviewed places, and Landsat's next due days (orbit/imaging.py,
+    orbit-2.52). Once a UTC day; USGS's calendar file once a week. Any failed search fails the lane and keeps the
+    last file."""
+    data_dir = raw_dir.parent
+    path = data_dir / IMAGING
+    now = imaging.utc_now()
+    last = (prev.get("imaging") or {}).get("read_at") or ""
+    if path.exists() and last[:10] == now.strftime("%Y-%m-%d"):
+        return None, [], "the imaging catalogues were read today already (once a UTC day)"
+    get = getter or fetch.get
+    recs = []
+    cal_path = data_dir / IMAGING_CAL
+    cal_doc = json.loads(cal_path.read_text(encoding="utf-8")) if cal_path.exists() else {}
+    age = (now - datetime.fromisoformat(cal_doc["read_at"].replace("Z", "+00:00"))).days if cal_doc else None
+    if age is None or age >= imaging.CALENDAR_MAX_AGE:
+        body, rec = fetch.fetch("usgs-landsat-calendar", imaging.CALENDAR_URL, raw_dir, "json", getter=get)
+        imaging.parse_calendar(body)  # refuses a bad file before it replaces the stored one
+        cal_doc = {"read_at": rec["fetched_at"], "sha256": rec["sha256"], "body": body.decode("utf-8")}
+        cal_path.parent.mkdir(parents=True, exist_ok=True)
+        cal_path.write_text(json.dumps(cal_doc), encoding="utf-8", newline="\n")
+        recs.append(rec)
+    cal = imaging.parse_calendar(cal_doc["body"].encode("utf-8"))
+    doc, calls = imaging.read(imaging.load_places(), get, cal, now)
+    doc["calendar"] = {"url": imaging.CALENDAR_URL, "read_at": cal_doc["read_at"],
+                       "published_through": min(c["through"] for c in cal.values()).isoformat()}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    recs += [{**c, "sha256": None} for c in calls]
+    return {"imaging": imaging.summary(doc)}, recs, None
+
+
 LANES = {"catalog": _lane_catalog, "paths": _lane_paths,
          "counterspace": _lane_counterspace, "rpo": _lane_rpo, "decay": _lane_decay,
-         "maneuver": _lane_maneuver, "sats": _lane_sats}
+         "maneuver": _lane_maneuver, "sats": _lane_sats, "imaging": _lane_imaging}
 
 
 def collect(root: Path = ROOT, getter=None, header=None, only: list[str] | None = None, force: bool = False) -> dict:
@@ -599,6 +636,9 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     # The satellite map's file (orbit-2.23), as the sats lane last wrote it; without one the map says so.
     if (root / "data" / SATS).exists():
         files["data/sats.json"] = (root / "data" / SATS).read_text(encoding="utf-8")
+    # The imaging lane's file (orbit-2.52), as it was last written; without one the page says so.
+    if (root / "data" / IMAGING).exists():
+        files["data/imaging.json"] = (root / "data" / IMAGING).read_text(encoding="utf-8")
     src_dir = root / "site_src"
     binary = {}
     if src_dir.exists():

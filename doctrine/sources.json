@@ -251,6 +251,39 @@
       "grade": "A2",
       "independence_group": "operators",
       "commercial_ok": "unknown"
+    },
+    {
+      "id": "usgs-landsat-calendar",
+      "name": "USGS Landsat acquisition calendar (cycles_full.json, the file behind the Landsat Acquisition Tool)",
+      "url": "https://landsat.usgs.gov/sites/default/files/landsat_acq/assets/json/cycles_full.json",
+      "licence": "USGS: \"USGS-authored or produced data and information are considered to be in the U.S. Public Domain\" (usgs.gov copyrights and credits page, read 27 Nov 2026); credit \"U.S. Geological Survey\".",
+      "use": "ingest",
+      "grade": "A2",
+      "independence_group": "usgs",
+      "commercial_ok": "yes",
+      "note": "orbit-2.52: read once a week. The published file ran to 31 Dec 2025 when read on 27 Nov 2026; its 16-day repeat is carried forward and checked against every daylight scene read (526 of 526 daylight scenes of 1 Oct-27 Nov 2026 in six test areas matched)."
+    },
+    {
+      "id": "usgs-landsatlook-stac",
+      "name": "USGS LandsatLook STAC server, collection landsat-c2l1 (Landsat Collection 2 Level-1 scenes)",
+      "url": "https://landsatlook.usgs.gov/stac-server",
+      "licence": "USGS public domain (as above); credit \"U.S. Geological Survey\".",
+      "use": "ingest",
+      "grade": "A1",
+      "independence_group": "usgs",
+      "commercial_ok": "yes",
+      "note": "orbit-2.52: one anonymous search per place once a UTC day, 1 s apart. Scene metadata only; no imagery is downloaded."
+    },
+    {
+      "id": "cdse-stac",
+      "name": "Copernicus Data Space Ecosystem STAC catalogue, collections sentinel-2-l1c and sentinel-1-grd",
+      "url": "https://stac.dataspace.copernicus.eu/v1/",
+      "licence": "Each collection's own licence link is the Legal Notice on the use of Copernicus Sentinel Data and Service Information (free access for reproduction, distribution, adaptation), citation \"Copernicus Sentinel data [Year]\" (collection records read 27 Nov 2026). Portal terms: other portal content is for non-commercial use and not for redistribution.",
+      "use": "ingest",
+      "grade": "A1",
+      "independence_group": "esa-copernicus",
+      "commercial_ok": "yes",
+      "note": "orbit-2.52: anonymous searches, two per place once a UTC day, 1 s apart; no account. Quotas page (read 27 Nov 2026) lists no monthly request cap for STAC. Scene metadata only. ESA's acquisition-plan files are not used."
     }
   ]
 }
