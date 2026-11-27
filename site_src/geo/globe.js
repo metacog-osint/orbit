@@ -1374,6 +1374,7 @@ function main() {
     })) : "<p>None.</p>";
     beltTables(g.belt);
     moverCards(g.belt && g.belt.movers);
+    gapCards(g.set_gaps);
     nameTable(g);
   }
   // ---------------------------------------------------------------- names that state a position (orbit/namepos.py, ideas#361)
@@ -1753,6 +1754,49 @@ function main() {
       '<p class="small">At ' + when(t.at_utc) + ". " + esc(t.attribution) + "</p>";
     drawMoverCharts();
   }
+  // listed satellites with no recent public set (tools/geo_gaps.py, method orbit-2.40): worded about the source,
+  // never the satellite, since a satellite can move while no set is published
+  const daysTxt = (h) => { const d = h / 24; return (d >= 10 ? String(Math.round(d)) : d.toFixed(1)) + " days"; };
+  const setAt = (s) => lonTxt(s.lon) + ", drift " + esc(rateTxt(s.drift));
+  const lab = (cell, l) => cell.replace("<td", '<td data-l="' + l + '"');   // a phone stacks the row, each cell labelled
+  function dayRange(a, b) {                                                // "12–29 Oct 2026", "21 Oct – 15 Nov 2026"
+    const [ya, ma, da] = a.slice(0, 10).split("-"), [yb, mb, db] = b.slice(0, 10).split("-");
+    if (ya !== yb) return dayTxt(a.slice(0, 10)) + " – " + dayTxt(b.slice(0, 10));
+    return ma === mb ? +da + "–" + +db + " " + MON[+mb - 1] + " " + yb : +da + " " + MON[+ma - 1] + " – " + +db + " " + MON[+mb - 1] + " " + yb;
+  }
+  function gapsHeld(o) {
+    const g = o.gaps || {}, from = o.first_set ? " in Orbit’s sets from " + esc(dayTxt(o.first_set.slice(0, 10))) : "";
+    if (!g.count) return "none" + from;
+    return fmtN(g.count) + from + (g.count > 1 ? "; the longest " : ": ") + esc(daysTxt(g.longest_days * 24)) + ", " + esc(dayRange(g.longest[0], g.longest[1]));
+  }
+  function gapCards(t) {
+    const el = $("geo-set-gaps");
+    if (!el) return;
+    if (!t || t.error) { el.textContent = "Not built in the last update" + (t && t.error ? " (" + t.error + ")" : "") + "."; return; }
+    const os = t.objects || [], silent = os.filter((o) => o.silent), back = t.back || [], qd = t.quiet_days || 7;
+    const read = t.read_utc ? "the element sets Orbit read at " + when(t.read_utc) : "Orbit’s GEO day file of " + esc(dayTxt(t.region_day));
+    const caveat = '<p class="small mv-caveat"><strong>No public set is not the same as no movement.</strong> ' + esc(t.note) +
+      " An element set is a published fit of a satellite’s orbit at one moment (its epoch); Space-Track’s public data holds them for these satellites at irregular intervals, and for some none for weeks." +
+      " Luch (Olymp) 2 had no public set from 15 Oct to 21 Nov 2026 and had left 62° E when its sets came back.</p>";
+    const quietT = silent.length ? foldTable(["Satellite", "Newest public set", "Age", "Where that set put it", "Earlier gaps of " + qd + " days or more"], silent.map((o) =>
+      "<tr><td>" + pick([o.norad], o.name) + roleTag(o.role) + ownTag(o.owner) + "</td>" + (o.newest ? lab(timeCell(o.newest.t), "Newest set") + '<td class="num" data-l="Age">' + esc(daysTxt(o.newest.age_h)) +
+        '</td><td data-l="At that set">' + setAt(o.newest) + "</td>" : '<td>none held</td><td class="num">–</td><td>–</td>') + '<td data-l="Earlier gaps">' + gapsHeld(o) + "</td></tr>"))
+      .replace("<table data-tic-fold>", '<table data-tic-fold class="sg-t">')
+      : "<p>Every satellite with a listed role has a public set under " + qd + " days old in " + read + ".</p>";
+    const backT = back.length ? "<h3>A public set again after " + qd + " days or more with none newer in Orbit’s files, in the last " + fmtN(t.back_days || 30) + " days</h3>" +
+      foldTable(["Satellite", "Set before", "Set after", "Apart", "First in Orbit’s files", "Before → after"], back.map((b) =>
+        "<tr><td>" + pick([b.norad], b.name) + roleTag(b.role) + ownTag(b.owner) + "</td>" + lab(timeCell(b.before.t), "Set before") + lab(timeCell(b.after.t), "Set after") + '<td class="num" data-l="Apart">' + esc(daysTxt(b.gap_days * 24)) +
+        (b.late ? ' <span class="small muted">(it reached Orbit’s files late)</span>' : "") +
+        '</td><td data-l="First in Orbit’s files">' + esc(dayTxt(b.first_read.day)) + '</td><td data-l="Before → after">' + setAt(b.before) + " → " + setAt(b.after) + "</td></tr>"))
+        .replace("<table data-tic-fold>", '<table data-tic-fold class="sg-t">') +
+      '<p class="small">“Apart” is the time between the two sets’ epochs. “First in Orbit’s files” is the day of the GEO run whose day file first carried the newer set; a set can reach Orbit’s files a day or more after its epoch, so one under ' + qd + " days after the set before can still end " + qd + " days or more with none newer in Orbit’s files. " +
+      "The longitudes are each set’s own (low-inclination formula), so a change says where the sets put the satellite, not when or how it moved.</p>" : "";
+    const allT = '<details class="globe-more"><summary>Newest public set of every listed satellite (' + fmtN(os.length) + ")</summary>" +
+      table(["Satellite", "Newest public set", "Age", "Sets held", "Gaps of " + qd + " days or more"], os.map((o) => "<tr><td>" + pick([o.norad], o.name) + roleTag(o.role) + "</td>" +
+        (o.newest ? lab(timeCell(o.newest.t), "Newest set") + '<td class="num" data-l="Age">' + esc(daysTxt(o.newest.age_h)) + "</td>" : '<td data-l="Newest set">none held</td><td data-l="Age">–</td>') +
+        '<td class="num" data-l="Sets held">' + fmtN(o.sets) + '</td><td data-l="Gaps">' + gapsHeld(o) + "</td></tr>")).replace("<table>", '<table class="sg-t">') + "</details>";
+    el.innerHTML = caveat + quietT + backT + allT + '<p class="small">At ' + when(t.at_utc) + ", from " + read + ". Times in your zone; tap one for UTC. " + esc(t.attribution) + "</p>";
+  }
   document.addEventListener("click", (e) => {
     const t = e.target.closest("button.mv-tt");
     if (!t) return;
@@ -1777,7 +1821,7 @@ function main() {
   if (S.place) { $("g-place").value = S.place.name || S.place.lat.toFixed(3) + ", " + S.place.lon.toFixed(3); $("g-noplace").hidden = false; }
   filtersUI();
   fetch("data/geo/globe.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((g) => {
-    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles", "geo-belt-status", "geo-close", "geo-changes", "geo-drift", "geo-movers"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
+    if (!g) { $("g-status").textContent = "The globe data could not be loaded."; ["geo-rpo", "geo-region", "geo-roles", "geo-belt-status", "geo-close", "geo-changes", "geo-drift", "geo-movers", "geo-set-gaps"].forEach((id) => { if ($(id)) $(id).textContent = "Not loaded."; }); return; }
     const board = { roles: g.roles || {}, region: g.region || {}, rpo: g.rpo || {} };
     S.globe = g; S.board = board; S.owners = g.owners || {}; S.cite = g.source;
     const cols = g.cols, roleIds = new Set(Object.keys((board || {}).roles || {}).map(Number));
