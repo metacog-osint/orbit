@@ -233,6 +233,17 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    ISS stays 5 of 5 with none outside NASA's list. Scaling noise by pair length was measured and not adopted (it
    added a change outside NASA's list). What the known cases measure, detection and probable false listings
    included: `docs/validation/maneuver-calibration.md`.
+9. **How soon a change is listed (measured 19-27 Nov 2026).** The lane reads Space-Track when an update run starts
+   and the account's hour allows: the hub's dispatch at :55 past 00, 06, 12 and 18 UTC, and every push to main (the
+   run's own cron is a late fallback). A change is listed in the run that first reads its set and goes live with
+   that run's deploy, about 3 minutes later. Of 84 new element sets of watched objects published in that span, the
+   first read came a median 1.6 hours after Space-Track created the set (its `CREATION_DATE`), 90% within 3.8
+   hours, longest 5.7 hours. Expect up to about 6 hours when nothing is pushed, and longer when a GEO run's query
+   takes the account's hour just before a dispatch: 9 of 112 update runs were held that way, two of them dispatch
+   runs (25 Nov 00:55 and 26 Nov 12:55 UTC; the second left 10 hours between reads). Luch (Olymp) 2's set of 21 Nov
+   15:41 UTC was created at 19:16 UTC. The run at 19:47 was held by the hour after the 18:56 read, and the run at
+   21:06 by the GEO run of 20:56. The change was listed at 00:57 UTC on 22 Nov. Its next set (22 Nov 15:37 UTC,
+   created 19:16) was listed at 20:05 UTC the same day.
 
 ## Baselines from GCAT's history (`orbit-2.8`)
 Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
