@@ -107,8 +107,9 @@
     <div class="card-head">
       <h2 id="sm-h">Satellites in orbit now</h2>
       <p class="muted small">Every object in CelesTrak's "active" group, placed with SGP4 from its newest public element
-        set, drag left out, and refreshed every two seconds. A drawing for orientation, not a tracking product. Larger,
-        ringed points are objects Orbit has a finding on. Select a point or a row for its details. <span id="sm-read"></span></p>
+        set, drag left out, and refreshed every two seconds. A drawing for orientation, not a tracking product; places
+        shifted away from now drift further from the real ones. Larger, ringed points are objects Orbit has a finding
+        on. Select a point or a row for its details. <span id="sm-read"></span></p>
     </div>
     <div class="sm-ctl">
       <fieldset class="sm-group"><legend>View</legend>
@@ -120,6 +121,8 @@
         <label><input type="checkbox" data-sm="own" value="cn" checked><span class="sw g-cn"></span>China</label>
         <label><input type="checkbox" data-sm="own" value="ru" checked><span class="sw g-ru"></span>Russia, USSR</label>
         <label><input type="checkbox" data-sm="own" value="other" checked><span class="sw g-other"></span>Everyone else</label>
+        <label>Owner <input type="search" id="sm-cc" list="sm-cc-list" size="18" autocomplete="off"
+          placeholder="Country or code"></label><datalist id="sm-cc-list"></datalist>
       </fieldset>
       <fieldset class="sm-group"><legend>Orbit</legend>
         <label><input type="checkbox" data-sm="cls" value="leo" checked>LEO</label>
@@ -130,20 +133,32 @@
       <fieldset class="sm-group"><legend>Filter</legend>
         <label>Constellation <select id="sm-con"><option value="">All</option><option value="starlink">Starlink</option>
           <option value="oneweb">OneWeb</option><option value="kuiper">Kuiper</option><option value="iridium">Iridium</option>
-          <option value="gps">GPS</option><option value="galileo">Galileo</option><option value="beidou">BeiDou</option>
-          <option value="none">None of these</option></select></label>
+          <option value="qianfan">Qianfan</option><option value="guowang">Guowang</option>
+          <option value="gps">GPS</option><option value="glonass">GLONASS</option><option value="galileo">Galileo</option>
+          <option value="beidou">BeiDou</option><option value="none">None of these</option></select></label>
         <label><input type="checkbox" id="sm-nostar">Hide Starlink</label>
         <label><input type="checkbox" id="sm-recent">Launched in 30 days</label>
+        <span class="sm-range" role="group" aria-label="Launch date"><label>Launched from <input type="date" id="sm-from"></label>
+          <label>to <input type="date" id="sm-to"></label><button type="button" id="sm-year" class="sm-reset">This year</button></span>
         <label><input type="checkbox" id="sm-marked">With a finding only</label>
         <button type="button" id="sm-reset" class="sm-reset">Reset</button>
       </fieldset>
       <fieldset class="sm-group"><legend>Draw</legend>
-        <label><input type="checkbox" id="sm-lines" checked>Orbit line</label>
+        <label>Orbit lines <select id="sm-lines"><option value="sel">Selected object</option>
+          <option value="all">Every object shown (first 300)</option><option value="off">Off</option></select></label>
         <label><input type="checkbox" id="sm-track" checked>Ground track</label>
         <label><input type="checkbox" id="sm-labels" checked>Labels when zoomed in</label>
       </fieldset>
+      <fieldset class="sm-group sm-time"><legend>Time</legend>
+        <button type="button" id="sm-now" class="sm-reset">Now</button>
+        <button type="button" id="sm-play" class="sm-reset" aria-pressed="false">Play, 60 times faster</button>
+        <label>Shift <input type="range" id="sm-shift" min="-1440" max="1440" step="10" value="0"
+          aria-describedby="sm-time-out"></label>
+        <output id="sm-time-out" for="sm-shift" aria-live="off"></output>
+      </fieldset>
     </div>
     <p class="small" id="sm-count" aria-live="polite"></p>
+    <p class="small muted" id="sm-lines-note"></p>
     <p class="small muted" id="sm-note" aria-live="polite" hidden></p>
     <div class="map-stage sm-stage"><div id="sm-globe" class="map globe sm-globe"><div class="sm-preview" id="sm-preview"><p class="small muted">The globe and the satellite file (about 4 MB together) load when you scroll here or press the button. The filters and the list start with them.</p><button type="button" id="sm-load">Load the globe</button></div></div><aside id="sm-card" class="sm-card small" aria-live="polite" hidden></aside></div>
     <h3 class="sm-list-h">The objects shown</h3>

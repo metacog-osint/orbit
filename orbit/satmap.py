@@ -24,9 +24,12 @@ SCHEMA = "orbit-sats/1"
 CREDIT = "Element sets: CelesTrak (celestrak.org), GP group 'active', from the 18th Space Defense Squadron's GP data"
 FIELDS = ["norad", "name", "cospar", "group", "cc", "type", "launch", "cls", "con",
           "epoch", "n", "e", "i", "raan", "argp", "ma", "bstar", "ndot"]
-# Constellations named by the start of CelesTrak's object name. Only families whose names say so: GLONASS satellites
-# are named COSMOS nnnn and Guowang's and Qianfan's naming was not checked, so they are not listed here.
-CONSTELLATIONS = [("starlink", re.compile(r"^STARLINK\b")), ("oneweb", re.compile(r"^ONEWEB\b")),
+# Constellations named by CelesTrak's object name. Only families whose names say so: GLONASS satellites are named
+# COSMOS nnnn with the series in brackets ("COSMOS 2433 [GLONASS-M]"); Guowang's are HULIANWANG DIGUI-nn (China SatNet's
+# test satellites, HULIANWANG JISHU SHIYAN, are not counted); Qianfan's are QIANFAN-n or "QIANFAN 16 OBJECT A".
+CONSTELLATIONS = [("glonass", re.compile(r"\[GLONASS\b")), ("guowang", re.compile(r"^HULIANWANG DIGUI\b")),
+                  ("qianfan", re.compile(r"^QIANFAN\b")),
+                  ("starlink", re.compile(r"^STARLINK\b")), ("oneweb", re.compile(r"^ONEWEB\b")),
                   ("kuiper", re.compile(r"^KUIPER\b")), ("iridium", re.compile(r"^IRIDIUM\b")),
                   ("gps", re.compile(r"^NAVSTAR\b")), ("beidou", re.compile(r"^BEIDOU\b")),
                   ("galileo", re.compile(r"^GSAT0\d|GALILEO"))]

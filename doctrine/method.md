@@ -598,8 +598,11 @@ the ISO code or GCAT's state code), GCAT's type and launch date; an object GCAT 
 no type. Orbit class from mean motion n (rev/day) and eccentricity e: `heo` from e 0.25; `leo` above n 11.25 (under
 128 min a revolution); `geo` at n 0.9-1.1 (about a sidereal day, inclined orbits included); `meo` between; `other`
 below n 0.9. Constellation by the start of CelesTrak's name only: Starlink, OneWeb, Kuiper, Iridium, GPS (NAVSTAR),
-BeiDou, Galileo (GSAT0nnn). GLONASS (named COSMOS nnnn), Guowang and Qianfan are not named this way and are not
-listed. Published as `/data/sats.json` (`orbit-sats/1`: `fields` and `rows`, rounded to what SGP4 on a map needs);
+BeiDou, Galileo (GSAT0nnn). From `orbit-2.37`, also GLONASS (CelesTrak names them COSMOS nnnn with the series in
+brackets, "COSMOS 2433 [GLONASS-M]"; a COSMOS name without the bracket is not counted), Guowang (HULIANWANG
+DIGUI-nn; China SatNet's test satellites, HULIANWANG JISHU SHIYAN, are not counted) and Qianfan (QIANFAN-n, or
+"QIANFAN 16 OBJECT A" before CelesTrak gives the number). On CelesTrak's reading of 26 Nov 2026: 27 GLONASS, 249
+Guowang, 275 Qianfan. Published as `/data/sats.json` (`orbit-sats/1`: `fields` and `rows`, rounded to what SGP4 on a map needs);
 the snapshot keeps counts only. The map that draws it is the next step of ideas#71; until then the file is unused.
 
 ## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
@@ -633,8 +636,23 @@ the last-30-days group), with a finding only. Display: globe or flat map, the se
 track, labels on marked objects when zoomed in. Filters and display options are kept in the URL. A table lists the
 first 200 shown objects, those with a finding first. A missing file (Pages answers it with index.html) shows a note,
 and without WebGL the filters and the list still work.
-**Not built from the approved design:** time controls (play, scrub), colour by orbit class (needs a validator run),
-all filtered orbit lines, owner search, launch-date range, and rocket bodies and debris (not in the active group).
+**Not built from the approved design:** colour by orbit class (needs a validator run) and rocket bodies and debris
+(not in the active group).
+
+## The satellite map's added options (`orbit-2.37`, 26 Nov 2026; ideas#138)
+- **Owner search:** any owner code in the file, typed as the country's name or the code (GCAT's state codes for
+  owners that are not countries, such as I-ESA). The owner's colour group is switched on with it. URL `cc`.
+- **Launch date:** a from and a to day, both optional, and a "This year" button. An object with no launch date in
+  GCAT is left out while a range is set. URL `from`, `to`.
+- **Constellation:** GLONASS, Guowang and Qianfan join the list (the data section above).
+- **Orbit lines:** the selected object (default), every object shown, or off. "Every object shown" draws the first
+  300 in the list's order (objects with a finding first, then by name), each over one revolution centred on the
+  map's time, in its owner colour, on the globe only; the line under the count says how many are drawn. URL
+  `lines=all` or `lines=0`.
+- **Time:** the places, lines and track can be shifted up to 24 h either way (10-minute steps), or run 60 times
+  faster; "Now" returns to real time. A run stops at +24 h. The time shown is the viewer's zone, named. The
+  further from now, the further SGP4 without drag moves from the real place, most in low orbits. The time is not
+  kept in the URL, because a shared link should open on the reader's own now.
 
 ## Feed contract revision 2.1 (`orbit-2.25`, 23 Nov 2026)
 Every feed item states `subject_id`, `event_start` and `last_change`. Ids that carry a day (the reentry count, late
