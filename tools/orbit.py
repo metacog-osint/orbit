@@ -818,6 +818,9 @@ def object_data(site_dir: Path, getter=None) -> int:
 def check_all(root: Path = ROOT) -> list[str]:
     errs = registers.check(root / "doctrine")
     regs = registers.ids(root / "doctrine")
+    roles_path = root / "site_src" / "geo_roles.json"
+    if roles_path.exists():
+        errs += notable.check_roles(json.loads(roles_path.read_text(encoding="utf-8")))
     feed_path = root / "site" / "data" / "feed.geojson"
     if not feed_path.exists():
         return errs + ["site/data/feed.geojson is missing: run collect and build first"]
