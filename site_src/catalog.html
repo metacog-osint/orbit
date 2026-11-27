@@ -68,7 +68,10 @@
       <p class="muted small">Counts from GCAT's own history: orbital launches by launching country and agency, payloads
         launched by owner, and reentries by owner, in the last 30 days and in each of the 24 windows of 30 days before
         them. "Above" or "below" means outside every one of those 24 windows. A count, not a warning. GCAT adds
-        payloads and dates reentries as it learns of them, so the newest window for those two can still grow.</p>
+        payloads and dates reentries as it learns of them, so the newest window for those two can still grow.
+        Launch counts outside every window, and payload and reentry counts above every window, also go in Orbit's feed
+        as anomalies (unusual against this history), unless the same rule fired on that row in more than 1 of the 24
+        windows before, or the count is under 3.</p>
     </div>
     <div id="baseline-body"></div>
     <div id="archive-body"></div>

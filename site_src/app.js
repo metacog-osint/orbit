@@ -63,6 +63,14 @@
      holds a card id or a row id prefix; a link to an id not on this page goes to that page, and an old /#section
      link on the home page is sent there too. */
   var PAGE = (document.querySelector("main[data-page]") || { getAttribute: function () { return "index"; } }).getAttribute("data-page");
+  // Ids of the old single page that no page holds now (its tab panels, and parts of cards retired in orbit-2.32):
+  // a link to one goes to the card that took its place.
+  var MOVED = {
+    "sec-launches": "launches", "sec-history": "ledger", "lg-h": "ledger", "ledger-body": "ledger", "hist-n": "ledger",
+    "hist-on": "ledger", "hist-who": "ledger", "hist-year": "ledger", "hz-h": "hazards", "hazard-table": "hazards",
+    "upcoming-table": "upcoming", "sec-reentries": "reentries", "sec-baseline": "baseline", "sec-changes": "maneuvers",
+    "sec-sources": "sources"
+  };
   var PAGE_OF = {
     "sat-map": "index",
     "map-card": "launches", launches: "launches", upcoming: "launches", hazards: "launches", ledger: "launches",
@@ -70,10 +78,21 @@
     reentries: "reentries", decay: "reentries", "decay-h": "reentries", "tipcheck-h": "reentries", "re-": "reentries",
     catalog: "catalog", breakups: "catalog", baseline: "catalog", "breakup-": "catalog",
     maneuvers: "changes", rpo: "changes", asat: "changes", "mv-": "changes",
-    sources: "sources", "data-files": "sources"
+    sources: "sources", "data-files": "sources",
+    // the other ids of the single page before the split (orbit-2.22) that are still on a page, so an old /#id link
+    // lands (tests/test_orbit.py holds the old page's list)
+    "la-h": "launches", map: "launches", "map-h": "launches", "map-info": "launches", "view-flat": "launches",
+    "view-globe": "launches", "globe-note": "launches", "up-h": "launches",
+    "reentry-table": "reentries", "decay-body": "reentries", "tipcheck-body": "reentries",
+    "cat-h": "catalog", "catalog-body": "catalog", "bu-h": "catalog", "base-h": "catalog", "baseline-body": "catalog",
+    "archive-body": "catalog",
+    "mn-h": "changes", "maneuver-body": "changes", "rpo-h": "changes", "rpo-body": "changes", "asat-h": "changes",
+    "asat-body": "changes",
+    "src-h": "sources", lanes: "sources"
   };
   function pageOf(id) {
     if (!id) return null;
+    if (MOVED[id]) id = MOVED[id];
     if (PAGE_OF[id]) return PAGE_OF[id];
     var m = /^[a-z]+-/.exec(id);
     return m && PAGE_OF[m[0]] || null;
@@ -86,7 +105,7 @@
   (function oldLinks() {  // /#maneuvers and the like, from feeds, COP and bookmarks made before the split
     var id = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
     var pg = pageOf(id);
-    if (PAGE === "index" && pg && pg !== "index") location.replace(pageUrl(pg) + "#" + id);
+    if (PAGE === "index" && pg && pg !== "index") location.replace(pageUrl(pg) + "#" + (MOVED[id] || id));
   })();
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest('a[href^="#"]');

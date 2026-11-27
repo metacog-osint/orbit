@@ -1,0 +1,14 @@
+# TIC satellite catalog: names registered with the United Nations (method orbit-2.50). Read by orbit/unregister.py
+# (load_entries); the build writes the reviewed entries to site/data/un-register.json for the object pages.
+#
+# Source: United Nations Register of Objects Launched into Outer Space (UNOOSA Online Index). The UN's terms bar
+# redistributing or compiling the Index, so an entry is added one object at a time, after review, and never in bulk.
+#
+# One entry per registration of one object:
+#   cospar (the COSPAR id, the only join), name (as registered: never a name the Index shows in square brackets),
+#   state (the state or organization of registry), symbol (the registration document, ST/SG/SER.E/...), link (that
+#   document on unoosa.org), gso (the registered GSO location, only if marked official), read (the date the Index was
+#   read), proposed_by, proposed, note.
+# ONLY ENTRIES WITH `reviewed_by` AND `reviewed` REACH A PAGE: a person adds both after checking the entry by diff.
+# A registered name is never one of the object's current names and never moves a catalog number. Never edit an entry
+# to point elsewhere: add `withdrawn: <date>` and `reason`, and add a new entry.

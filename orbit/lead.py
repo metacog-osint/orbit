@@ -276,6 +276,108 @@ def gaps(snap: dict) -> dict | None:
             "parts": ["Not read on this run: " + ", ".join(out) + ". Their lines use the last copy Orbit holds."]}
 
 
+# ---------------------------------------------------------------- GEO element-set gaps (orbit-2.40)
+# The collect writes the lead before the update run downloads the GEO release, so tools/geo_page.py adds this line
+# afterwards (merge_geo) from tools/geo_gaps.py's block. Until it does, the lead carries GEO_PENDING, so a GEO step
+# that fails leaves a line saying the check was not made, never silence.
+GEO_HREF = "geo.html#set-gaps"
+GEO_SOURCE = "Space-Track.org element sets, in Orbit's GEO files"
+GEO_STALE_H = 36       # Orbit's GEO files are read twice a day; past this the lead says how old they are
+GEO_PENDING = {"kind": "gap", "geo": True, "href": GEO_HREF, "source": "Orbit's run record",
+               "parts": ["Listed GEO satellites' public element sets were not checked on this run "
+                         "(the GEO page's data was not built)."]}
+
+
+def _lon(x: float) -> str:
+    return f"{abs(x):.2f}° {'W' if x < 0 else 'E'}"
+
+
+def _gap_days(d: float) -> str:
+    return f"{round(d) if d >= 10 else round(d, 1):g} days"
+
+
+def _list(items: list, render) -> list:
+    out = []
+    for i, x in enumerate(items[:SHOW]):
+        out.append(" " if i == 0 else "; ")
+        out.extend(render(x))
+    if len(items) > SHOW:
+        out.append(f"; and {len(items) - SHOW} more")
+    return out
+
+
+def _end_of(day: str) -> datetime | None:
+    t = _dt((day or "") + "T00:00:00")
+    return t + timedelta(days=1) if t else None
+
+
+def geo_line(block: dict | None, at: str) -> dict:
+    """The GEO element-set line, or None when there is nothing to say. Names listed-role GEO objects whose newest
+    public set passed 7 days old in the 24 hours before `at`, and sets that first reached Orbit's GEO files in those
+    24 hours after 7 days or more with none newer there (tools/geo_gaps.backs). Worded about the source: a missing
+    set is never read as a satellite at rest. A block that failed gives a gap line; GEO files over GEO_STALE_H old
+    give a stale line."""
+    now = _dt(at)
+    if not block or block.get("error") or now is None:
+        why = (block or {}).get("error") or "the GEO page's data was not built"
+        return dict(GEO_PENDING, parts=[f"Listed GEO satellites' public element sets were not checked on this run ({why})."])
+    day = block.get("region_day") or ""
+    read = _dt(block.get("read_utc")) or _end_of(day)
+    if read is None or (now - read).total_seconds() / 3600 > GEO_STALE_H:
+        return {"kind": "stale", "geo": True, "href": GEO_HREF, "source": GEO_SOURCE,
+                "parts": (["Orbit's GEO files were last read at ", {"t": _iso(read)},
+                           f" (about {round((now - read).total_seconds() / 3600)} hours ago)"] if read else
+                          ["Orbit's GEO files have no recorded read time"]) +
+                         [": listed GEO satellites' element sets are not checked past that."]}
+    since = now - timedelta(hours=HOURS)
+
+    def first_read(b):
+        fr = b.get("first_read") or {}
+        return _dt(fr.get("read_utc")) or _end_of(fr.get("day"))
+    quiet = [o for o in block.get("objects") or [] if (t := _dt(o.get("silent_since"))) and since < t <= now]
+    back = [b for b in block.get("back") or [] if (t := first_read(b)) and since < t <= now]
+    if not quiet and not back:
+        return None
+    parts = []
+    if quiet:
+        parts.append("Listed GEO satellites now 7 days without a public element set:")
+        parts += _list(quiet, lambda o: [_obj(o["name"], o["norad"]), " (newest set ", {"t": o["newest"]["t"]}, ")"])
+        parts.append(".")
+    if back:
+        parts.append((" A public set again" if quiet else "Listed GEO satellites with a public element set again")
+                     + ", after 7 days or more with none newer in Orbit's files:")
+
+        def render(b):
+            out = [_obj(b["name"], b["norad"]), " (set of ", {"t": b["after"]["t"]}, ", the first since ", {"t": b["before"]["t"]},
+                   f", {_gap_days(b['gap_days'])} apart"]
+            if b.get("late"):  # under 7 days apart: the set reached Orbit's files late (geo_gaps.backs)
+                out += ["; it reached Orbit's files on ", {"d": b["first_read"]["day"]}]
+            return out + [f"; {_lon(b['before']['lon'])} then, {_lon(b['after']['lon'])} at the new set)"]
+        parts += _list(back, render)
+        parts.append(".")
+    if quiet:
+        parts.append(" No public set is not the same as no movement.")
+    parts += [" Orbit's GEO files read at ", {"t": block["read_utc"]}, "."] if block.get("read_utc") else \
+             [" Orbit's GEO day file of ", {"d": day}, "."]
+    return {"kind": "geo_sets", "geo": True, "href": GEO_HREF, "source": GEO_SOURCE, "parts": parts}
+
+
+def merge_geo(lead_doc: dict, line: dict | None) -> dict:
+    """The lead with this run's GEO line in place of any earlier one (or of GEO_PENDING): after the notable lines,
+    within MAX_LINES, with the gap lines last. Run twice, it gives the same lead."""
+    lines = [x for x in lead_doc.get("lines") or [] if not x.get("geo")]
+    body = [x for x in lines if x["kind"] != "gap"]
+    tail = [x for x in lines if x["kind"] == "gap"]
+    if line is not None:
+        if line["kind"] == "gap":
+            tail.append(line)
+        else:
+            body.insert(sum(1 for x in body if x["kind"] == "notable"), line)
+    lead_doc["lines"] = body[:MAX_LINES] + tail
+    lead_doc["nothing_new"] = not any(x["kind"] not in ("baseline", "gap", "stale") for x in lead_doc["lines"])
+    return lead_doc
+
+
 def build(snap: dict, archive_doc: dict | None = None) -> dict:
     now = _dt(snap.get("generated_at")) or datetime.now(timezone.utc)
     lines = notable_changes(snap, archive_doc, now)

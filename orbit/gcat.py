@@ -452,10 +452,31 @@ def _position(recent: int, prior: list[int]) -> dict:
             "prior_windows": len(prior), "windows_at_or_above": sum(1 for x in prior if x >= recent), "position": pos}
 
 
+def _flag_rates(counts: list[int], prior: int = BASE_PRIOR_WINDOWS) -> dict | None:
+    """How often the 'outside every prior window' rule fired on this series before (orbit-2.49): each of the
+    `prior` windows before the recent one, against its own `prior` windows before it. Needs 2 * prior + 1 windows;
+    None when the history is shorter. Shares of `prior`, per tail."""
+    if len(counts) < 2 * prior + 1:
+        return None
+    hi = lo = 0
+    for i in range(1, prior + 1):
+        before = counts[i + 1:i + 1 + prior]
+        hi += counts[i] > max(before)
+        lo += counts[i] < min(before)
+    return {"high": round(hi / prior, 4), "low": round(lo / prior, 4), "windows": prior}
+
+
 def _rows(series: dict[str, list[int]], label) -> list[dict]:
+    """One row per key with a count in the recent window or its 24 prior windows. The series may hold 48 prior
+    windows: the older 24 only measure the rule's own flag rate (`_flag_rates`); the row shows 25."""
     rows = []
+    n = BASE_PRIOR_WINDOWS + 1
     for key, counts in series.items():
-        rows.append({**label(key), **_position(counts[0], counts[1:]), "series": counts[::-1]})  # oldest first
+        shown = counts[:n]
+        if not any(shown):
+            continue
+        rows.append({**label(key), **_position(shown[0], shown[1:]), "series": shown[::-1],  # oldest first
+                     **({"flag_rate": fr} if (fr := _flag_rates(counts)) else {})})
     rows.sort(key=lambda r: (-(r["recent"] + sum(r["series"][:-1]) / max(len(r["series"]) - 1, 1)), str(r.get("key"))))
     return rows
 
@@ -464,7 +485,7 @@ def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date)
     """Launch cadence per launching country and per launch agency, payloads launched per owner and reentries per
     owner: the last 30 days against each of the 24 windows of 30 days before them, from GCAT's own history.
     GCAT dates the last few days as it learns of them, so the newest window can grow after a reading."""
-    wins = _windows(today)
+    wins = _windows(today, prior=2 * BASE_PRIOR_WINDOWS)  # 24 shown, 24 more for the rule's flag rate
     by_country, by_agency, all_launches = [], [], []
     for r in launch_rows:
         code = r.get("LaunchCode", "")
@@ -480,7 +501,7 @@ def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date)
         for l in ls:
             by_agency.append((l["code"], d))
     names = {l: (orgs.get(l) or {}) for l, _ in by_agency}
-    payloads, reentries = [], []
+    payloads, reentries, breakups = [], [], []
     for o in objs:
         st = o["state"] or "?"
         if o["type"] == "P":
@@ -491,6 +512,10 @@ def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date)
             d = vague_date(o["ddate"])["date"]
             if d:
                 reentries.append((st, d))
+        if o["status"] in BROKEN_UP:
+            d = vague_date(o["ddate"])["date"]
+            if d:
+                breakups.append((st, d))
     country = lambda c: {"key": c, "country": c if len(c) == 2 and c.isalpha() and c.isupper() else None}
     owner = lambda st: {"key": st, "state": st, "country": iso_country(st)}
     agency = lambda a: {"key": a, "agency": a, "name": names.get(a, {}).get("name", a),
@@ -501,13 +526,14 @@ def baseline(launch_rows: list[dict], objs: list[dict], orgs: dict, today: date)
     return {
         "window_days": BASE_WINDOW_DAYS, "prior_windows": BASE_PRIOR_WINDOWS,
         "recent": [wins[0][0].isoformat(), wins[0][1].isoformat()],
-        "prior": [wins[-1][0].isoformat(), wins[1][1].isoformat()],
+        "prior": [wins[BASE_PRIOR_WINDOWS][0].isoformat(), wins[1][1].isoformat()],
         "launches_all": total(all_launches),
         "launches_by_country": _rows(_series(by_country, wins), country),
         "launches_by_agency": ag,
         "payloads_by_owner": _rows(_series(payloads, wins), owner)[:30],
         "reentries_all": total(reentries),
         "reentries_by_owner": _rows(_series(reentries, wins), owner)[:20],
+        "breakups_all": total(breakups),  # GCAT E and C by date (orbit-2.49): the record a breakup item cites
     }
 
 

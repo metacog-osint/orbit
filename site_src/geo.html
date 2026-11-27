@@ -44,6 +44,7 @@
     <a href="#globe">Globe</a>
     <a href="#belt">Belt board</a>
     <a href="#movers">On the move</a>
+    <a href="#set-gaps">No recent set</a>
     <a href="#rpo">RPO pairs</a>
     <a href="#region">Arrivals and departures</a>
     <a href="#roles">Listed roles</a>
@@ -83,11 +84,13 @@
     <details class="globe-filters"><summary>Callouts</summary><div id="g-callouts"><p class="small">Loading…</p></div></details>
   </div>
   <div class="globe-main">
-    <div class="globe-view" id="g-view">
-      <canvas id="g-canvas" role="img" aria-label="Globe with every object near GEO; the tables below hold the same data"></canvas>
-      <div id="g-labels" class="globe-labels" aria-hidden="true"></div>
-      <div id="g-tip" class="globe-tip" hidden></div>
-      <div id="g-box" class="globe-box" hidden></div>
+    <div class="globe-stage">
+      <div class="globe-view" id="g-view">
+        <canvas id="g-canvas" role="img" aria-label="Globe with every object near GEO; the tables below hold the same data"></canvas>
+        <div id="g-labels" class="globe-labels" aria-hidden="true"></div>
+        <div id="g-tip" class="globe-tip" hidden></div>
+        <div id="g-box" class="globe-box" hidden></div>
+      </div>
       <div id="g-legend" class="globe-legend"></div>
     </div>
     <aside class="globe-panel" id="g-panel" aria-live="polite"><p class="small">Loading…</p></aside>
@@ -136,6 +139,16 @@
       where a satellite is going or why.</p>
   </div>
   <div id="geo-movers"><p class="small">Loading…</p></div>
+</section>
+
+<section class="card" id="set-gaps" aria-labelledby="set-gaps-h">
+  <div class="card-head">
+    <h2 id="set-gaps-h">Listed satellites with no recent public set</h2>
+    <p class="muted small">Satellites with a listed role (inspection or servicing) whose newest public element set
+      is 7 days old or more, and, for 30 days, the sets that came back after one. About the public data, not the
+      satellites: no public set is not the same as no movement.</p>
+  </div>
+  <div id="geo-set-gaps"><p class="small">Loading…</p></div>
 </section>
 
 <section class="card" id="rpo" aria-labelledby="rpo-h">
@@ -194,6 +207,16 @@
     station-kept satellites in the table. Rules and the Luch 2 record: <a href="https://github.com/metacog-osint/orbit/blob/main/doctrine/method.md">method.md</a>
     ("GEO relocation tracker") and
     <a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/luch2-relocations.md">luch2-relocations.md</a>.</li>
+  <li><strong>Listed satellites with no recent public set.</strong> For each satellite with a listed role, the newest
+    element set in Orbit's files, from the same GEO runs: a satellite is listed when that set is 7 days old or more
+    (the age the "no new public elements" event uses), with the set's time, its age, where it put the satellite, and
+    the earlier gaps of 7 days or more in Orbit's sets. A set that ends such a gap is listed for 30 days after it first
+    reached Orbit's files, with the set before it and where each put the satellite. "First in Orbit's files" is the
+    day of the GEO run whose day file first carried the set. This is about the source: Space-Track's public data has
+    no set for these satellites for days or weeks at a time, a satellite can move while none is published, and Orbit
+    cannot tell why none was. The daily lead on Orbit's main page carries one line when a newest set passes 7 days
+    old, or a set comes back after a gap, in the 24 hours before the run. Rules:
+    <a href="https://github.com/metacog-osint/orbit/blob/main/doctrine/method.md">method.md</a> ("Gaps in public element sets").</li>
   <li><strong>Callouts.</strong> Automatic highlights of behaviour worth a look, from the last 14 days: C1 close to another owner's satellite (under 100 km on some hour of a day), C2 approaching (three daily falls, ending under 200 km), C3 parked beside another owner (stopped after a manoeuvre within 0.5° of a station-kept satellite of another owner), C4 heading for an occupied slot, C5 an orbit change by an object with a listed role, C6 arrived in the protected zone, C7 retired to the graveyard, C8 went quiet. Each rule was frozen in writing with a list of published cases before it was run, then scored on four months of history and seven older cases (<a href="https://github.com/metacog-osint/orbit/blob/main/docs/validation/geo-callouts.md">the validation file</a>). C3 to C7 show by default; C1, C2 and C8 stay off unless you switch them on. <strong>C5 uses Orbit's orbit-change rule</strong> (from 17 Nov 2026): a change between two element sets counts when it stands 8 robust deviations above the object's own noise and is at least 0.25 m/s at GEO. On the same history it found 6 of the 6 published cases C5 was scored on (C5 itself found 5); most of C5's extra marks were station-keeping, a drifting object and natural inclination drift. An object with fewer than 10 pairs of element sets is not judged, so a rarely published object's move can be missed.</li>
   <li><strong>Names.</strong> The globe shows Space-Track's name. Search and each object's card also use every other
     name TIC's satellite catalogue gives it (GCAT, CelesTrak, Wikidata, WMO OSCAR and reviewed aliases), and search

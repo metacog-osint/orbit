@@ -366,12 +366,27 @@ def element_keys(path):
 
 
 def check_new_months(months, held, day):
-    """A month file the release does not hold is started only for `day`'s month or a later one. A past month that
-    is not on the release is a lost file or a wrong listing, never a month to rebuild from one reply's sets."""
-    gone = [m for m in sorted(months) if elements_name(m) not in held and m < month_of(day)]
+    """A month file the release does not hold is started only for `day`'s month or a later one, and only while the
+    release holds no day file of that month. A past month that is not on the release is a lost file or a wrong
+    listing, never a month to rebuild from one reply's sets. So is a current month whose day files are on the
+    release: a run that wrote a day file of the month also wrote the month's element sets, so the file was there
+    and has gone (a replace that failed after the old file was removed, or a removal by hand)."""
+    missing = [m for m in sorted(months) if elements_name(m) not in held]
+    gone = [m for m in missing if m < month_of(day)]
     if gone:
         raise ReleaseError(f"{', '.join(map(elements_name, gone))} not on the release, though the month has passed; "
                            "a past month is never rebuilt from one reply")
+    started = {m: sorted(n for n in held if n.startswith(m + "-") and n.endswith(".geo-region.json"))
+               for m in missing}
+    lost = [m for m in missing if started[m]]
+    if lost:
+        days = "; ".join(f"{elements_name(m)}: {len(started[m])} day file(s) of the month, the last "
+                         f"{started[m][-1][:10]}" for m in lost)
+        raise ReleaseError(f"{', '.join(map(elements_name, lost))} not on the release, though it holds day files of "
+                           f"that month ({days}), so the month file was there and has gone; a month is never rebuilt "
+                           "from one reply. Since orbit-2.36 each copy replaced is kept in the private archive "
+                           "(lane geo-release) and each run's reply in lane geo-reply: restore the file to the "
+                           "release from there, then run again")
 
 
 def release_put(paths, repo=None, archive=None):

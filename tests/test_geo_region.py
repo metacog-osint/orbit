@@ -329,6 +329,44 @@ class ReleaseGuard(unittest.TestCase):
         self.assertEqual(self.rel.uploads(), [])
         self.assertFalse(self.rel.path(self.OCT).exists())
 
+    def test_the_current_month_missing_from_the_release_is_not_rebuilt(self):
+        # The state a `gh release upload --clobber` that fails after removing the old file leaves (or a removal by
+        # hand): November's file is gone, but the release holds a November day file. Before this guard: exit 0, and
+        # November was rebuilt from the one reply, 180 sets -> 55.
+        self.rel.path(self.NOV).unlink()
+        self.assertEqual(self.run_geo(), 1)
+        self.assertEqual(self.rel.uploads(), [])
+        self.assertFalse(self.rel.path(self.NOV).exists())
+        self.assertEqual(self.rel.path(self.OCT).read_bytes(), self.before[self.OCT])
+        self.assertIn("geo-elements-2026-11.json.gz not on the release, though it holds day files", self.log)
+        self.assertIn("the last 2026-11-25", self.log)
+        self.assertIn("lane geo-release", self.log)
+        self.assertIn("geo-reply", self.archived)        # the stopped run's sets are kept, privately
+        self.assertNotIn("geo-release", self.archived)   # nothing was replaced
+
+    def test_a_month_file_lost_after_its_first_day_is_not_rebuilt(self):
+        # The first run of December starts its file; if that file then goes, a later run that day finds December's
+        # day file on the release and stops instead of starting the month again.
+        GpReply.day = "2026-12-01"
+        self.assertEqual(self.run_geo("2026-12-01"), 0)
+        dec = G.elements_name("2026-12")
+        self.assertEqual(len(self.held_sets(dec)), 55)
+        self.rel.path(dec).unlink()
+        self.NOW = datetime(2026, 11, 26, 15, 20, tzinfo=timezone.utc)
+        self.assertEqual(self.run_geo("2026-12-01"), 1)
+        self.assertFalse(self.rel.path(dec).exists())
+        self.assertIn("geo-elements-2026-12.json.gz not on the release", self.log)
+
+    def test_check_new_months(self):
+        nov_day = {"2026-11-25.geo-region.json": 10}
+        G.check_new_months(["2026-11"], {}, "2026-11-26")                        # no day file of the month: new
+        G.check_new_months(["2026-12"], nov_day, "2026-12-01")                   # November's days say nothing of December
+        G.check_new_months(["2026-11"], {**nov_day, self.NOV: 5}, "2026-11-26")  # held: nothing to start
+        with self.assertRaisesRegex(G.ReleaseError, "holds day files of that month"):
+            G.check_new_months(["2026-11"], nov_day, "2026-11-26")
+        with self.assertRaisesRegex(G.ReleaseError, "the month has passed"):
+            G.check_new_months(["2026-10"], {}, "2026-11-26")
+
     def test_a_new_month_starts_its_file(self):
         GpReply.day = "2026-12-01"
         self.assertEqual(self.run_geo("2026-12-01"), 0)

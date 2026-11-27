@@ -124,6 +124,14 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
     }
+    # When Orbit's reading first listed each breakup (orbit-2.49): GCAT dates breakups late, so the feed's anomaly
+    # hold runs from the listing. Carried from the previous snapshot; a first reading has no "before", so it
+    # dates each one by GCAT's own breakup date rather than calling the whole record new.
+    seen = {b["jcat"]: b.get("first_listed") or f"{b['breakup_date'][:10]}T00:00:00Z"
+            for b in prev.get("breakups") or [] if b.get("jcat")}
+    for b in result["breakups"]:
+        b["first_listed"] = seen.get(b["jcat"]) or (
+            recs[0]["fetched_at"] if index_doc else f"{b['breakup_date'][:10]}T00:00:00Z")
     if index_doc:
         result["catalog_changes"] = {"previous_reading_at": index_doc["read_at"],
                                      **gcat.diff(index_doc["objects"], objs, today)}
@@ -497,7 +505,8 @@ def _archive_run(data_dir: Path, snap: dict, getter=None) -> dict:
     msgs = archive.tip_messages(doc)
     snap["tip_check"] = tip.check(msgs, snap.get("reentries") or [], at,
                                   (_read_index(data_dir) or {}).get("objects") or {}) if msgs else {}
-    snap["lead"] = lead.build(snap, doc)
+    # the GEO element-set line comes later in the run (tools/geo_page.py, orbit-2.40); until then the lead says so
+    snap["lead"] = lead.merge_geo(lead.build(snap, doc), dict(lead.GEO_PENDING))
     archive.keep_lead(doc, snap["lead"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
@@ -574,6 +583,17 @@ def build_site(root: Path = ROOT, snapshot: dict | None = None) -> dict[str, str
     files["data/cesium.json"] = dump({"token": os.environ.get("CESIUM_ION_TOKEN") or None})
     # Notable orbit changes (orbit-2.26), for readers and tools that want only those: orbit/notable.py.
     files["data/notable.json"] = dump(notable.public(snapshot, _roles(root), feed.SITE))
+    # ITU filings linked to objects by review (orbit-2.42, doctrine/itu-filings.md): reviewed entries of
+    # orbit/data/catalog/itu-links.yml only, per object; no ITU table is published. A bad entry stops the build.
+    from orbit import itu
+    files["data/itu-links.json"] = dump(itu.public_links(itu.load_links(root / "orbit" / "data" / "catalog" / "itu-links.yml"),
+                                                         snapshot.get("generated_at") or ""))
+    # Names registered with the United Nations (orbit-2.50): reviewed entries of orbit/data/catalog/un-register.yml
+    # only, by COSPAR id; no register table is published. A bad entry stops the build.
+    from orbit import unregister
+    files["data/un-register.json"] = dump(unregister.public_names(
+        unregister.load_entries(root / "orbit" / "data" / "catalog" / "un-register.yml"),
+        snapshot.get("generated_at") or ""))
     # The satellite map's file (orbit-2.23), as the sats lane last wrote it; without one the map says so.
     if (root / "data" / SATS).exists():
         files["data/sats.json"] = (root / "data" / SATS).read_text(encoding="utf-8")
@@ -635,10 +655,12 @@ def _slot_objects(globe: dict, search: dict) -> list[dict]:
 
 
 def find_slot(slot: float, query: str, search: dict, geo: str | None = None, window: float | None = None,
-              getter=None) -> int:
+              getter=None, itu: bool = False, refresh: bool = False, itu_io: dict | None = None) -> int:
     """`orbit.py find 12.5W`: who is within `window` of a GEO slot now (the GEO page's longitudes at its build time),
     who carries a name that states the slot, and who held it since the GEO element history starts (ideas#366)."""
     from orbit import namepos
+    from orbit import itu as _itu
+    itu_window = _itu.WINDOW_DEG if window is None else window
     window = namepos.WINDOW_DEG if window is None else window
     if geo:
         raw, gwhere = Path(geo).read_bytes(), geo
@@ -687,13 +709,71 @@ def find_slot(slot: float, query: str, search: dict, geo: str | None = None, win
     if "." not in query:
         print("Names round a slot to the whole degree (Eutelsat's \"12 West\" is 12.5° W), so a whole-degree query may "
               "mean the half degree beside it: widen with --window 1.")
+    filed = find_itu(slot, itu_window, refresh, **(itu_io or {})) if itu else 0
+    if not itu:
+        print("ITU filings for the slot: add --itu (asks ITU Space Explorer; method orbit-2.42).")
     print("Object pages: https://orbit.theintelligence.company/object.html?n=<NORAD>; the GEO page's search takes the same "
           "slot forms.")
-    return 0 if res["there"] or res["named"] or res["held"] else 1
+    return 0 if res["there"] or res["named"] or res["held"] or filed else 1
+
+
+def find_itu(slot: float, window: float, refresh: bool = False, poster=None, getter=None, pacer=None,
+             cache_dir: Path | None = None) -> int:
+    """`orbit.py find 12.5W --itu` (orbit-2.42, doctrine/itu-filings.md): the ITU's active GEO notices filed for
+    the slot and its Resolution 40 statements, asked of ITU Space Explorer on this request only (cached a week in
+    git-ignored data/raw/itu/). Local use: nothing here is published. Returns how many networks and statements
+    it printed."""
+    from orbit import itu, namepos
+    lt = namepos.lon_txt
+    cache = ROOT / "data" / "raw" / "itu" if cache_dir is None else (cache_dir or None)  # False: no cache (tests)
+    pacer = pacer or itu._Pacer()
+    try:
+        got = itu.slot_notices(slot, window, cache, refresh, poster=poster, pacer=pacer)
+    except (OSError, ValueError) as exc:
+        print(f"ITU filings: Space Explorer did not answer ({type(exc).__name__}: {exc}); nothing shown, nothing assumed.")
+        return 0
+    nets = itu.networks(got["rows"])
+    nets.sort(key=lambda g: (namepos.apart(g["lon"], slot) if g["lon"] is not None else 999, g["network"]))
+    how = "cached copy of " if got["cached"] else ""
+    print(f"Filed for {lt(slot)} at the ITU ({len(nets)} networks, {got['total']} active GEO notices with a nominal "
+          f"longitude within {window:g}°; Space Explorer, {how}read {got['read']}):")
+    print("  " + itu.NETWORK_NOTE)
+    for g in nets:
+        steps = "; ".join(dict.fromkeys(f"{n['what']} received {n['received'] or '?'}" for n in g["notices"]))
+        where = lt(g["lon"]) if g["lon"] is not None else "longitude not given"
+        print(f"  {g['network']:<24} {g['filer']:<8} {where:>8}  {steps}")
+        print(f"  {'':<24} {g['notices'][-1]['link']}")
+    if not nets:
+        print("  none")
+    if len(got["rows"]) < got["total"]:
+        print(f"  Only {len(got['rows'])} of {got['total']} notices were read (page limit); narrow --window.")
+    try:
+        r40 = itu.res40_table(cache, refresh, getter=getter, pacer=pacer)
+    except (OSError, ValueError) as exc:
+        print(f"Resolution 40: the table did not load ({type(exc).__name__}: {exc}).")
+        return len(nets)
+    at = itu.res40_at(r40["rows"], slot, window)
+    how = "cached copy of " if r40["cached"] else ""
+    print(f"Resolution 40 statements for {lt(slot)} ({how}the ITU table read {r40['read']}):")
+    print("  " + itu.RES40_NOTE)
+    for x in at["in"]:
+        frm = (f"; the station came from {lt(x['prev_lon'])} ({x['prev_network']}), left {x['left_prev'] or '?'}"
+               if x["moved"] and x["prev_lon"] is not None else "; not moved from another filing's slot")
+        print(f"  in position  {x['network']:<24} {x['adm']:<5} at {lt(x['lon'])} from {x['in_position'] or '?'} "
+              f"({itu.provision(x['prov'])}){frm}")
+    for x in at["out"]:
+        print(f"  left it      {x['prev_network'] or '?'} at {lt(x['prev_lon'])}, left {x['left_prev'] or '?'}: the "
+              f"station went to {x['network']} ({x['adm']}) at {lt(x['lon'])}, in position {x['in_position'] or '?'}")
+    if not at["in"] and not at["out"]:
+        print("  none")
+    print("  Matching a filing or a statement to a satellite is TIC's inference, never the ITU's: compare the dates "
+          "with the GEO record above, and record a link only by review in orbit/data/catalog/itu-links.yml.")
+    print(f"  Source: {itu.CREDIT}. Not published by Orbit.")
+    return len(nets) + len(at["in"]) + len(at["out"])
 
 
 def find_name(query: str, index: str | None = None, limit: int = 10, getter=None, geo: str | None = None,
-              window: float | None = None) -> int:
+              window: float | None = None, itu: bool = False, refresh: bool = False, itu_io: dict | None = None) -> int:
     """`orbit.py find`: every name from every source in the catalog's search index, matched loosely
     (orbit/namepos.py), so a session looks here before the web. The hand-kept alias file is only the reviewed links;
     the index holds Space-Track's, GCAT's, CelesTrak's, Wikidata's, WMO OSCAR's and the aliases' names."""
@@ -713,7 +793,7 @@ def find_name(query: str, index: str | None = None, limit: int = 10, getter=None
     doc = json.loads(raw.decode("utf-8"))
     slot = namepos.parse_slot(query)
     if slot is not None:
-        return find_slot(slot, query, doc, geo, window, getter)
+        return find_slot(slot, query, doc, geo, window, getter, itu, refresh, itu_io)
     hits = namepos.find(doc, query, limit)
     print(f"{len(hits)} match{'es' if len(hits) != 1 else ''} for {query!r} in {where} (catalog read {doc.get('read')}):")
     known = namepos.statuses(doc)
@@ -752,6 +832,9 @@ def object_data(site_dir: Path, getter=None) -> int:
 def check_all(root: Path = ROOT) -> list[str]:
     errs = registers.check(root / "doctrine")
     regs = registers.ids(root / "doctrine")
+    roles_path = root / "site_src" / "geo_roles.json"
+    if roles_path.exists():
+        errs += notable.check_roles(json.loads(roles_path.read_text(encoding="utf-8")))
     feed_path = root / "site" / "data" / "feed.geojson"
     if not feed_path.exists():
         return errs + ["site/data/feed.geojson is missing: run collect and build first"]
@@ -1227,7 +1310,11 @@ def main(argv=None) -> int:
     fd.add_argument("--index", help="a search.json (or .json.gz) to read instead of the live site's")
     fd.add_argument("--limit", type=int, default=10)
     fd.add_argument("--geo", help="a globe.json to read instead of the live GEO page's (slot queries)")
-    fd.add_argument("--window", type=float, default=None, help="degrees either side of a slot query (default 0.5)")
+    fd.add_argument("--window", type=float, default=None, help="degrees either side of a slot query (default 0.5; "
+                                                               "0.1 for ITU filings' nominal longitudes)")
+    fd.add_argument("--itu", action="store_true", help="slot queries: also the ITU's GEO filings and Resolution 40 "
+                                                       "statements for the slot (asks ITU Space Explorer; local only)")
+    fd.add_argument("--refresh", action="store_true", help="with --itu: ask ITU again, not the week-old cache")
     sub.add_parser("check")
     mc = sub.add_parser("maneuver-case", help="a known case from Space-Track, local only: sj21 (Jan 2022 Shijian-21 / "
                                               "BeiDou-2 G2), iss (2024 reboosts and the May storm) or luch2 (Luch (Olymp) 2, 2023-2026)")
@@ -1313,7 +1400,8 @@ def main(argv=None) -> int:
     if args.cmd == "object-data":
         return object_data(Path(args.site))
     if args.cmd == "find":
-        return find_name(" ".join(args.query), args.index, args.limit, geo=args.geo, window=args.window)
+        return find_name(" ".join(args.query), args.index, args.limit, geo=args.geo, window=args.window,
+                         itu=args.itu, refresh=args.refresh)
     if args.cmd == "build":
         files = build_site(ROOT)
         print(f"Built site/ ({len(files)} files).")

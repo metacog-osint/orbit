@@ -297,7 +297,10 @@ class EndToEnd(unittest.TestCase):
         for f in doc["features"]:
             p = f["properties"]
             self.assertEqual(p["kind"], "observation")
-            self.assertEqual(p["tier"], "routine")
+            if p["tier"] != "routine":  # orbit-2.49: anomalies only against GCAT's history, with their baseline
+                self.assertEqual(p["tier"], "anomaly", p["id"])
+                self.assertTrue(p["id"].startswith(("orbit:baseline:", "orbit:breakup:")), p["id"])
+                self.assertIn("baseline_ref", p)
             self.assertNotIn("probability", p)
 
     def test_failed_lane_keeps_last_good_copy(self):
@@ -606,6 +609,40 @@ class Registers(unittest.TestCase):
         for card in re.findall(r'"href": "#([a-z-]+)"', lead_src):
             self.assertIn(card, table, card)
 
+    # Every id on the single page before the split (site_src/index.html at the parent of 4764758, orbit-2.22).
+    OLD_PAGE_IDS = (
+        "archive-body asat asat-body asat-h asof base-h baseline baseline-body breakup-table breakups bu-h cat-h "
+        "catalog catalog-body decay decay-body decay-h globe globe-note hazard-table hazards hist-n hist-on hist-who "
+        "hist-year hz-h la-h lanes launch-table launches lead lead-h lead-list ledger ledger-body lg-h maneuver-body "
+        "maneuvers map map-card map-h map-info method mn-h obj-q re-h reentries reentry-table rpo rpo-body rpo-h "
+        "sec-baseline sec-changes sec-history sec-launches sec-reentries sec-sources sources src-h tiles "
+        "time-settings tipcheck-body tipcheck-h up-h upcoming upcoming-table view-flat view-globe").split()
+
+    def test_every_old_single_page_link_still_lands(self):
+        """An old /#id link (the hub linked /#src-h) lands on the page that holds the id now, or on the card that
+        took its place: each old id is on the home page, in PAGE_OF on a page that holds it, or in MOVED to an id
+        that is."""
+        import re
+        site = ROOT / "site_src"
+        pages = {p.stem: set(re.findall(r'id="([^"]+)"', p.read_text(encoding="utf-8"))) for p in site.glob("*.html")}
+        js = (site / "app.js").read_text(encoding="utf-8")
+        entries = lambda block: dict(re.findall(r'"?([a-z-]+)"?: "([a-z-]+)"', block))
+        page_of = entries(js[js.index("var PAGE_OF = {"):js.index("function pageOf")])
+        moved = entries(js[js.index("var MOVED = {"):js.index("var PAGE_OF = {")])
+
+        def page(i):
+            i = moved.get(i, i)
+            return i, page_of.get(i) or page_of.get((re.match(r"^[a-z]+-", i) or [""])[0])
+
+        for old in self.OLD_PAGE_IDS:
+            if old in pages["index"]:
+                continue
+            now, pg = page(old)
+            self.assertIsNotNone(pg, old)
+            self.assertIn(now, pages[pg], (old, now, pg))
+        self.assertEqual(page("src-h"), ("src-h", "sources"))
+        self.assertIn('location.replace(pageUrl(pg) + "#" + (MOVED[id] || id))', js)
+
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
               "from": "2026-10-12T18:06:12Z", "to": "2026-11-02T06:44:40Z", "dv_ms": 0.887, "dominant": "in-track",
@@ -639,9 +676,11 @@ SIDEREAL = maneuver.SIDEREAL_REV_DAY
 def synth(norad, days=40, per_day=2, n0=1.0027379, e0=0.0002, i0=0.05, node0=80.0, n_rate=0.0, node_rate=0.0,
           noise_n=2e-7, noise_i=2e-5, noise_node=0.0, burns=(), lon0=100.0, seed=1, end=NOW_M):
     """SYNTHETIC element sets in Space-Track's GP form, for testing the detector's logic only: a steady orbit with
-    Gaussian set-to-set noise and step changes ("burns") at given days. Not real data."""
+    Gaussian set-to-set noise and step changes ("burns") at given days. node_rate "j2" makes the node precess at the
+    J2 rate of each set's own orbit, as real low orbits do (a decaying orbit precesses faster). Not real data."""
     rng = random.Random(seed)
     out, n, i, step, lon = [], n0, i0, 1.0 / per_day, lon0
+    node_j2 = node0
     t0 = end - timedelta(days=days)
     for k in range(int(days * per_day)):
         d = k * step
@@ -650,7 +689,11 @@ def synth(norad, days=40, per_day=2, n0=1.0027379, e0=0.0002, i0=0.05, node0=80.
             if abs(d - bd) < step / 2:
                 n, i = n + dn, i + di
         n_now = n + n_rate * d
-        node = node0 + node_rate * d + rng.gauss(0, noise_node)
+        if node_rate == "j2":
+            node = node_j2 + rng.gauss(0, noise_node)
+            node_j2 += maneuver.node_rate_j2(maneuver._a(n_now), e0, i) * step
+        else:
+            node = node0 + node_rate * d + rng.gauss(0, noise_node)
         argp = 10.0
         lon = lon + (n_now - SIDEREAL) * 360.0 * step if k else lon0
         ma = (lon + maneuver._gmst_deg(t) - node - argp) % 360.0
@@ -736,26 +779,48 @@ class Maneuver(unittest.TestCase):
         self.assertAlmostEqual(d["events"][0]["dv_ms"], 0.54, delta=0.06)
 
     def test_leo_drag_decay_and_precession_are_not_changes(self):
-        d = self.detect(synth(4, per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5,
+        d = self.detect(synth(4, per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate="j2", noise_n=2e-5,
                               noise_i=1e-4, noise_node=1e-3))
         self.assertEqual((d["regime"], d["events"]), ("LEO", []))
 
     def test_precession_across_a_long_gap_is_not_a_change(self):
         # 15 Nov review: 28.5 deg, 30-day gap, no burn listed 22,902 m/s cross-track (node residual off by 360 deg)
-        leo = dict(days=70, per_day=4, n0=15.2, i0=28.5, node_rate=-7.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        leo = dict(days=70, per_day=4, n0=15.2, i0=28.5, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
         recs = [r for r in synth(18, **leo) if not "2026-09-25" <= r["EPOCH"][:10] <= "2026-10-24"]
         d = self.detect(recs)
         self.assertGreaterEqual(d["max_gap_h"], 30 * 24)
         self.assertEqual((d["events"], d["implausible"]), ([], 0))
 
+    def test_decaying_orbit_precession_across_a_gap_is_not_a_change(self):
+        # 15 Nov review: one median node rate per object leaves a decaying orbit's faster precession in a long
+        # pair. 450 km, 51.6 deg, decaying about 36 m a day, 120 days of sets, a 4.5-day gap two days before now,
+        # no burn: before orbit-2.43 this listed a cross-track change; the J2 rate of each pair's own orbit
+        # removes it. synth precesses with maneuver.node_rate_j2 itself, so this shows only that the detector is
+        # consistent with that function; test_j2_precession_rate pins the function to values found outside it.
+        leo = dict(days=120, per_day=2, n0=15.38, i0=51.6, n_rate=1.2e-4, node_rate="j2", noise_n=2e-6,
+                   noise_i=1e-5, noise_node=1e-4)
+        recs = [r for r in synth(20, **leo) if not "2026-11-07T12" <= r["EPOCH"][:13] <= "2026-11-11T23"]
+        d = self.detect(recs, window_days=30)
+        self.assertGreaterEqual(d["max_gap_h"], 4.5 * 24)
+        self.assertEqual((d["regime"], d["events"], d["leo_off_track"]), ("LEO", [], 0))
+
+    def test_j2_precession_rate(self):
+        # Values from outside the function. A sun-synchronous orbit's node turns with the mean Sun, 360 deg in a
+        # tropical year of 365.2422 days, and at 700 km that takes 98.19 deg. The ISS (about 6,790 km, 51.6 deg)
+        # regresses about 5 deg a day. At the geostationary radius (42,164 km, n equal to Earth's sidereal
+        # rotation) J2 alone turns the node back about 4.9 deg a year (first-order formula worked by hand).
+        self.assertAlmostEqual(maneuver.node_rate_j2(6378.137 + 700.0, 0.0, 98.19), 360 / 365.2422, delta=0.0005)
+        self.assertAlmostEqual(maneuver.node_rate_j2(6790.0, 0.0005, 51.64), -5.0, delta=0.1)
+        self.assertAlmostEqual(maneuver.node_rate_j2(42164.0, 0.0, 0.05) * 365.25, -4.90, delta=0.02)
+
     def test_a_change_beyond_orbital_speed_is_counted_never_listed(self):
-        leo = dict(per_day=4, n0=15.2, i0=51.6, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        leo = dict(per_day=4, n0=15.2, i0=51.6, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
         d = self.detect(synth(19, burns=[(30.0, 0.0, 70.0)], **leo))  # a 70 deg plane jump: a bad set, not a burn
         self.assertEqual((d["events"], d["implausible"]), ([], 1))
 
     def test_leo_small_cross_track_change_is_counted_not_listed(self):
         # orbit-2.8: in low orbit a change mainly cross-track or eccentricity is listed only at 1 m/s or more
-        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-4)
+        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-4)
         d = self.detect(synth(15, burns=[(30.0, 0.0, 0.0037)], **leo))  # about 0.5 m/s plane change
         self.assertEqual((d["regime"], d["events"], d["leo_off_track"]), ("LEO", [], 1))
         d = self.detect(synth(16, burns=[(30.0, 0.0, 0.0112)], **leo))  # about 1.5 m/s: listed
@@ -763,7 +828,7 @@ class Maneuver(unittest.TestCase):
         self.assertEqual(d["leo_off_track"], 0)
 
     def test_leo_in_track_change_is_listed_with_its_semi_major_axis_velocity(self):
-        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate=-5.0, noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
+        leo = dict(per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)
         dn = 3 * 0.3 * 15.2 / 7680.0  # about 0.3 m/s along-track at 400 km
         d = self.detect(synth(17, burns=[(30.0, -dn, 0.0)], **leo))
         self.assertEqual([e["dominant"] for e in d["events"]], ["in-track"], d["events"])
