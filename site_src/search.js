@@ -20,9 +20,10 @@
     }).then(function (d) {
       var c = d.columns || [], at = {};
       c.forEach(function (k, i) { at[k] = i; });
+      var now = d.now_names || {};
       index = { types: d.types || {}, read: d.read, rows: (d.objects || []).map(function (r) {
         var others = r[at.other_names] || [];
-        return { key: String(r[at.key]), name: r[at.name] || "", others: others, cospar: r[at.cospar] || "",
+        return { key: String(r[at.key]), name: r[at.name] || "", now: now[String(r[at.key])] || "", others: others, cospar: r[at.cospar] || "",
           type: r[at.type], gone: !!r[at.gone], n: norm(r[at.name]), o: others.map(norm),
           c: [compact(r[at.name])].concat(others.map(compact)) };
       }) };
@@ -120,6 +121,7 @@
           var li = el("li"), a = el("a", "", o.name || o.key);
           a.href = href(o.key);
           li.appendChild(a);
+          if (o.now) li.appendChild(el("span", "muted", " now " + o.now));  // declared current name (ideas#379)
           var qn = norm(q), qc = compact(q);
           var hit = function (x) { return norm(x).indexOf(qn) >= 0 || (qc.length >= 3 && compact(x).indexOf(qc) >= 0); };
           var others = o.others.filter(function (x) { return norm(x) !== o.n; });

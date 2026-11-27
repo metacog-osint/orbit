@@ -268,6 +268,16 @@ def catalog_status(site):
         return {}
 
 
+def catalog_now(site):
+    """{norad: declared current name} from the search index's `now_names` (ideas#379); {} when missing."""
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+        return {int(k): v for k, v in (doc.get("now_names") or {}).items() if k.isdigit() and v}
+    except (OSError, ValueError, TypeError, AttributeError):
+        return {}
+
+
 def lons_now(region, now):
     """{norad: longitude in degrees east at `now`} from each object's newest set (the `lon` column of globe.json,
     ideas#366: slot search reads it, so the CLI needs no SGP4). An object whose set SGP4 refuses is left out."""
@@ -419,7 +429,9 @@ def build(release, site, now=None, snapshot=None):
            "cols": OBJ_COLS, "objects": objs, "tracks": meta, "roles": roles(),
            "region": region_events(release, region["day"]), "rpo": rpo_pairs(snapshot, objs),
            "belt": belt(region, active, elsets, now),
-           "names": {str(k): v for k, v in sorted(other.items())}, "name_positions": namepos_block, "held": held}
+           "names": {str(k): v for k, v in sorted(other.items())},
+           "now_names": {str(k): v for k, v in sorted(catalog_now(site).items()) if k in {o[0] for o in objs}},
+           "name_positions": namepos_block, "held": held}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
     # the relocation tracker alone, small, for the object pages (method orbit-2.27)

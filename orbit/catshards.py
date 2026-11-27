@@ -158,8 +158,9 @@ def search_index(doc: dict) -> dict:
     every source's names not equal (ignoring case) to the display name, best-ranked source first. COSPAR ID: the
     best-ranked one. Type: TYPE_CODES. Gone: 1 when the best-ranked source says the object has left orbit.
     `name_status`: {key: [[name, status, until or ""]]} for the names the alias file marks current or former; an
-    object or name not listed has no status."""
-    rows, status = [], {}
+    object or name not listed has no status. `now_names`: {key: name} for an object whose alias file declares a
+    current name (basis "declared", status "current") that differs from the display name (ideas#379)."""
+    rows, status, now = [], {}, {}
     for group in ("objects", "unnumbered"):
         for key, e in doc[group].items():
             shown = e.get("name") or ""
@@ -171,12 +172,27 @@ def search_index(doc: dict) -> dict:
             marked = [[n["value"], n["status"], n.get("until") or ""] for n in e.get("names") or [] if n.get("status")]
             if marked:
                 status[key] = marked
+            cur = now_name(e)
+            if cur:
+                now[key] = cur
             rows.append([key, shown, others, catalog._first(e, "intldes") or "", TYPE_CODES.get(e["type"], "o"),
                          _gone(e)])
     return {"schema": SEARCH_SCHEMA, "read": doc["read"], "catalog_schema": SCHEMA,
             "columns": ["key", "name", "other_names", "cospar", "type", "gone"],
             "types": {v: k for k, v in TYPE_CODES.items()}, "shard_rule": SHARD_RULE, "objects": rows,
-            "name_status": status}
+            "name_status": status, "now_names": now}
+
+
+def now_name(e: dict) -> str:
+    """The current name the operator has declared, when it differs (ignoring case) from the display name: the first
+    name record with basis "declared" and status "current". "" otherwise. The display name stays the ranked
+    source's (Space-Track first); this name is shown beside it as "now <name>" (ideas#379)."""
+    shown = (e.get("name") or "").strip().lower()
+    for n in e.get("names") or []:
+        v = (n.get("value") or "").strip()
+        if v and n.get("status") == "current" and n.get("basis") == "declared" and v.lower() != shown:
+            return v
+    return ""
 
 
 SHARD_RULE = ("A numbered object is in n<NORAD number // 1000>.json (25544 in n25.json); an object with no NORAD "
