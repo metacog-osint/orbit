@@ -365,7 +365,7 @@ collector and live lanes stay standard library. Published on the GEO page from s
    0.25 m/s. Orbit's 6 others: MEV-1 12-19 Aug (0.77 m/s, the A6 undocking C5 missed) and five MEV-2 cross-track
    changes of 0.32-0.75 m/s. On C5's own published cases Orbit's rule hits 6 of 6 (C5 5 of 6). Known gap: an
    object with under 10 set pairs is not judged (USA 324 moved +0.66 deg/day over a 24-day gap and was not
-   marked). C5 stays in the script as the scored v1 record; the page (step 4) uses Orbit's rule for listed-role
+   marked; from `orbit-2.38` the two-set rule covers such objects). C5 stays in the script as the scored v1 record; the page (step 4) uses Orbit's rule for listed-role
    orbit changes.
 
 ## The GEO page (18 Nov 2026; step 4 of `geo-move-plan.md`)
@@ -727,7 +727,7 @@ already reads, the roles are `site_src/geo_roles.json`.
    "started drifting"; notable (role: inspection).
 7. **Limits.** The simple longitude holds for low inclinations; an inclined object swings either side of it
    daily. A set fitted during a burn smears the rate. A change measured across a gap happened somewhere inside
-   it, and the row and the lead say so. Objects with under 10 set pairs are still not judged (ideas#252).
+   it, and the row and the lead say so. Objects with under 10 set pairs are not judged by that rule; the two-set rule (`orbit-2.38`) marks their changes apart.
 
 ## GEO relocation tracker (`orbit-2.27`, 25 Nov 2026; ideas#248, calibrated by ideas#256)
 Tom, 23 Nov 2026, after LUCH (OLYMP) 2 left 62 E: Orbit could say that it moved, not where it is now, what it will
@@ -943,3 +943,37 @@ uploaded, when:
 
 `tools/geo_import.py` (the one-off import from Noisefloor) passes no archive, so a re-run cannot replace a file
 the release holds. Tests: `tests/test_geo_region.py`, classes `ReleaseGuard` and `ArchiveCopy`.
+
+## GEO two-set rule (`orbit-2.38`, 26 Nov 2026; ideas#252)
+Orbit's rule ("Orbit changes in watched objects") judges an object against its own noise and needs 10 pairs of
+sets. An object with fewer public sets could move along the belt unmarked: USA 324 stopped drifting inside a
+24-day gap between its third and fourth sets. The belt board (`tools/geo_belt.py`, `globe.json`'s `belt.two_set`)
+now runs a second rule on those objects only.
+1. **Scope:** the objects the belt board lists as not judged (under 10 pairs), each pair of consecutive sets ending
+   in the last 30 days. Listed apart from the board's orbit changes and never merged with them, so a reader cannot
+   take a two-set mark for a change measured against the object's own noise. On the history from 1 Jul 2026,
+   Orbit's rule listed every change the two-set rule found on objects it judges (280 of 280).
+2. **What natural drift alone explains:** Earth's triaxiality accelerates an uncontrolled GEO object's drift by
+   up to about 0.0017 deg a day² (`A_NAT`; Soop, *Handbook of Geostationary Orbits*, 1994). Over a gap of `t` days
+   that changes the drift by up to `A_NAT x t`. With a constant acceleration the mean longitude follows the mean of
+   the two drifts times the gap exactly; the rule allows `A_NAT x t² / 2` off that path for an acceleration that
+   changes along the way.
+3. **Tests** (drift from mean motion, as the board's classes; mean longitude = RAAN + argument of perigee + mean
+   anomaly - GMST at each epoch):
+   - drift: the drift changed by 0.088 deg a day (Orbit's 0.25 m/s GEO floor; 0.352 deg a day per m/s) plus
+     `A_NAT x t`;
+   - class: the object crossed 0.1 deg a day (held to drifting, or back) with a drift change of 0.02 deg a day
+     plus `A_NAT x t`;
+   - longitude: the second set's mean longitude is 0.5 deg plus `A_NAT x t² / 2` or more off the mean-of-drifts
+     path from the first. This catches a move that started and stopped inside the gap, with both sets held.
+   Any one test marks the pair. The mark carries the two epochs, the gap in hours, both drifts and longitudes,
+   the natural path's longitude, the tests met and the allowances used, and a kind: started drifting, stopped
+   drifting, drift rate changed, moved inside the gap, or drift changed with the object held either side.
+4. **Limits:** two sets say that something changed between them, not when or how; the change can sit anywhere in
+   the gap, and the mark carries the gap. A single set with a poor fit can mark a change and its return. A steady
+   drift with no change (USA 325, 24.6 days) is not marked; the object stays in the drifting list. Never says why
+   an object moved.
+5. **Checks** (`docs/validation/geo-two-set.md`): 208,793 pairs of the 554 active objects, 1 Jul-26 Nov 2026,
+   291 marked. On objects not judged at the time: USA 324's stop (found) and 10 marks in the first 8 days of the
+   history, when every object had few sets. Luch (Olymp) 2's start across its 37-day gap is found by both rules
+   from the same 21 Nov set. The page does not draw `belt.two_set` yet; the data is in `globe.json`.
