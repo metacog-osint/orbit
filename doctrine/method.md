@@ -224,6 +224,15 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    worded to Tom ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
    0.53 m/s eccentricity mark of 28 Apr 2024; the 1 m/s floor applies to eccentricity too, which is what gave the
    "drops all 9" result Tom approved.
+8. **Precession at each pair's own rate (`orbit-2.43`, 27 Nov 2026).** The node's J2 precession is removed first at
+   the rate each pair's own orbit gives (-1.5 n J2 (Re/p)^2 cos i, the mean of its two sets' rates), and the
+   object's median rate then takes only what is left (lunar and solar pull, higher zonal terms). One median rate
+   left a decaying low orbit's faster precession in long pairs: synthetic, no burn, 450 km and 51.6 deg decaying
+   36 m a day, a 4.5-day gap late in a 120-day history listed 2.5 m/s cross-track. With the change it lists nothing;
+   on the three known cases every listed change stays at the same span, totals move by 0.29 m/s at most, and the
+   ISS stays 5 of 5 with none outside NASA's list. Scaling noise by pair length was measured and not adopted (it
+   added a change outside NASA's list). What the known cases measure, detection and probable false listings
+   included: `docs/validation/maneuver-calibration.md`.
 
 ## Baselines from GCAT's history (`orbit-2.8`)
 Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
