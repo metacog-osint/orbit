@@ -11,6 +11,7 @@ anything, and an upload that fails raises (the workflow step fails loudly, after
   catalog-changes-YYYY-MM   catalog-changes-<fetch stamp>.jsonl.gz, the whole per-object diff of one GCAT reading
   archive-YYYY-MM           archive-YYYY-MM-DD.json.gz, Orbit's daily archive as published on that day (first run of the day)
   catalog-archive-YYYY-MM   catalog-YYYY-MM-DD.json.gz, the TIC catalog copied weekly (the ISO week's Monday names it)
+  sats-rd-archive-YYYY-MM   sats-rd-YYYY-MM-DD.json.gz, the map's rocket bodies and debris as read that day (orbit-2.51)
 """
 from __future__ import annotations
 
@@ -31,7 +32,12 @@ NOTES = {
                "archive.json, one dated copy a day.",
     "catalog-archive": "Weekly dated copies of TIC's satellite catalog (the file on release `catalog`, schema "
                        "tic-catalog/2), so values a source later changes stay on record.",
+    "sats-rd-archive": "Daily dated copies of the satellite map's rocket bodies and debris (sats-rd.json.gz on release "
+                       "`catalog`, schema orbit-sats/1), one per Space-Track read. Element sets: Space-Track.org, "
+                       "United States Space Command (USSPACECOM), 18th Space Defense Squadron, redistributed under "
+                       "USSPACECOM's blanket approval for basic SSA data. Not for operational use.",
 }
+
 
 
 def _gh(*args):
@@ -127,3 +133,9 @@ def upload_catalog_week(catalog_gz: Path, today: date, repo: str, gh=_gh) -> lis
     mon = week_monday(today)
     name = f"catalog-{mon.isoformat()}.json.gz"
     return put_new(f"catalog-archive-{mon.strftime('%Y-%m')}", "catalog-archive", {name: catalog_gz}, repo, gh)
+
+
+def upload_sats_rd(path: Path, day: date, repo: str, gh=_gh) -> list[str]:
+    """A dated copy of the day's rocket-body and debris file (no clobber)."""
+    return put_new(f"sats-rd-archive-{day.strftime('%Y-%m')}", "sats-rd-archive", {f"sats-rd-{day.isoformat()}.json.gz": path},
+                   repo, gh)

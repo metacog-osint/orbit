@@ -297,7 +297,10 @@ class EndToEnd(unittest.TestCase):
         for f in doc["features"]:
             p = f["properties"]
             self.assertEqual(p["kind"], "observation")
-            self.assertEqual(p["tier"], "routine")
+            if p["tier"] != "routine":  # orbit-2.49: anomalies only against GCAT's history, with their baseline
+                self.assertEqual(p["tier"], "anomaly", p["id"])
+                self.assertTrue(p["id"].startswith(("orbit:baseline:", "orbit:breakup:")), p["id"])
+                self.assertIn("baseline_ref", p)
             self.assertNotIn("probability", p)
 
     def test_failed_lane_keeps_last_good_copy(self):
@@ -606,6 +609,40 @@ class Registers(unittest.TestCase):
         for card in re.findall(r'"href": "#([a-z-]+)"', lead_src):
             self.assertIn(card, table, card)
 
+    # Every id on the single page before the split (site_src/index.html at the parent of 4764758, orbit-2.22).
+    OLD_PAGE_IDS = (
+        "archive-body asat asat-body asat-h asof base-h baseline baseline-body breakup-table breakups bu-h cat-h "
+        "catalog catalog-body decay decay-body decay-h globe globe-note hazard-table hazards hist-n hist-on hist-who "
+        "hist-year hz-h la-h lanes launch-table launches lead lead-h lead-list ledger ledger-body lg-h maneuver-body "
+        "maneuvers map map-card map-h map-info method mn-h obj-q re-h reentries reentry-table rpo rpo-body rpo-h "
+        "sec-baseline sec-changes sec-history sec-launches sec-reentries sec-sources sources src-h tiles "
+        "time-settings tipcheck-body tipcheck-h up-h upcoming upcoming-table view-flat view-globe").split()
+
+    def test_every_old_single_page_link_still_lands(self):
+        """An old /#id link (the hub linked /#src-h) lands on the page that holds the id now, or on the card that
+        took its place: each old id is on the home page, in PAGE_OF on a page that holds it, or in MOVED to an id
+        that is."""
+        import re
+        site = ROOT / "site_src"
+        pages = {p.stem: set(re.findall(r'id="([^"]+)"', p.read_text(encoding="utf-8"))) for p in site.glob("*.html")}
+        js = (site / "app.js").read_text(encoding="utf-8")
+        entries = lambda block: dict(re.findall(r'"?([a-z-]+)"?: "([a-z-]+)"', block))
+        page_of = entries(js[js.index("var PAGE_OF = {"):js.index("function pageOf")])
+        moved = entries(js[js.index("var MOVED = {"):js.index("var PAGE_OF = {")])
+
+        def page(i):
+            i = moved.get(i, i)
+            return i, page_of.get(i) or page_of.get((re.match(r"^[a-z]+-", i) or [""])[0])
+
+        for old in self.OLD_PAGE_IDS:
+            if old in pages["index"]:
+                continue
+            now, pg = page(old)
+            self.assertIsNotNone(pg, old)
+            self.assertIn(now, pages[pg], (old, now, pg))
+        self.assertEqual(page("src-h"), ("src-h", "sources"))
+        self.assertIn('location.replace(pageUrl(pg) + "#" + (MOVED[id] || id))', js)
+
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
               "from": "2026-10-12T18:06:12Z", "to": "2026-11-02T06:44:40Z", "dv_ms": 0.887, "dominant": "in-track",
@@ -796,7 +833,8 @@ class Maneuver(unittest.TestCase):
         # 15 Nov review: one median node rate per object leaves a decaying orbit's faster precession in a long
         # pair. 450 km, 51.6 deg, decaying about 36 m a day, 120 days of sets, a 4.5-day gap two days before now,
         # no burn: before orbit-2.43 this listed a cross-track change; the J2 rate of each pair's own orbit
-        # removes it.
+        # removes it. synth precesses with maneuver.node_rate_j2 itself, so this shows only that the detector is
+        # consistent with that function; test_j2_precession_rate pins the function to values found outside it.
         leo = dict(days=120, per_day=2, n0=15.38, i0=51.6, n_rate=1.2e-4, node_rate="j2", noise_n=2e-6,
                    noise_i=1e-5, noise_node=1e-4)
         recs = [r for r in synth(20, **leo) if not "2026-11-07T12" <= r["EPOCH"][:13] <= "2026-11-11T23"]
@@ -805,10 +843,13 @@ class Maneuver(unittest.TestCase):
         self.assertEqual((d["regime"], d["events"], d["leo_off_track"]), ("LEO", [], 0))
 
     def test_j2_precession_rate(self):
-        # the ISS (about 6,790 km, 51.6 deg) regresses about 5 deg a day; a sun-synchronous orbit at 700 km and
-        # 98.19 deg advances 360 deg a year (0.9856 deg a day)
+        # Values from outside the function. A sun-synchronous orbit's node turns with the mean Sun, 360 deg in a
+        # tropical year of 365.2422 days, and at 700 km that takes 98.19 deg. The ISS (about 6,790 km, 51.6 deg)
+        # regresses about 5 deg a day. At the geostationary radius (42,164 km, n equal to Earth's sidereal
+        # rotation) J2 alone turns the node back about 4.9 deg a year (first-order formula worked by hand).
+        self.assertAlmostEqual(maneuver.node_rate_j2(6378.137 + 700.0, 0.0, 98.19), 360 / 365.2422, delta=0.0005)
         self.assertAlmostEqual(maneuver.node_rate_j2(6790.0, 0.0005, 51.64), -5.0, delta=0.1)
-        self.assertAlmostEqual(maneuver.node_rate_j2(6378.137 + 700.0, 0.0, 98.19), 0.9856, delta=0.005)
+        self.assertAlmostEqual(maneuver.node_rate_j2(42164.0, 0.0, 0.05) * 365.25, -4.90, delta=0.02)
 
     def test_a_change_beyond_orbital_speed_is_counted_never_listed(self):
         leo = dict(per_day=4, n0=15.2, i0=51.6, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)

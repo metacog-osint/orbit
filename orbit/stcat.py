@@ -229,7 +229,8 @@ RELEASE_NOTES = (
     "for search. catalog-rules.json: what each source, field, basis and flag means. spacetrack-decay.json.gz: every "
     "Space-Track decay message Orbit holds (class decay, kept so the history is never downloaded again). "
     "spacetrack-catalog.json: the last read's date and counts. catalog-sources.json: the last CelesTrak and "
-    "Wikidata reads.\n\n"
+    "Wikidata reads. sats-rd.json.gz: rocket bodies and debris on orbit for the satellite map (one Space-Track GP "
+    "query a day, orbit/debrismap.py; dated copies on releases sats-rd-archive-YYYY-MM).\n\n"
     "Sources: " + "GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0. " + CITATION + " Satellite catalog "
     "records also from CelesTrak SATCAT (T.S. Kelso, celestrak.org), credited; CelesTrak states no licence. Names "
     "and COSPAR IDs also from Wikidata (CC0), each with its item's Q-id.")
@@ -254,6 +255,28 @@ def release_get(data_dir: Path, repo: str, gh=_gh) -> list[str]:
         if gh("release", "download", RELEASE, "-R", repo, "-p", name, "-O", str(dest), "--clobber").returncode == 0:
             got.append(name)
     return got
+
+
+def release_copy(dest: Path, repo: str, gh=_gh) -> list[str]:
+    """Every file on the release, as it is now, into folder `dest` (for the private archive copy before a build
+    replaces them). Raises RuntimeError when the release cannot be listed or a file does not download whole."""
+    r = gh("api", f"repos/{repo}/releases/tags/{RELEASE}", "--jq", '.assets[] | "\\(.size) \\(.name)"')
+    if r.returncode:
+        raise RuntimeError(f"the files on release {RELEASE} could not be listed: {r.stderr.strip()[:300]}")
+    listed = {}
+    for line in r.stdout.splitlines():
+        size, _, name = line.strip().partition(" ")
+        if name:
+            listed[name] = int(size)
+    Path(dest).mkdir(parents=True, exist_ok=True)
+    for name, size in sorted(listed.items()):
+        d = gh("release", "download", RELEASE, "-R", repo, "-p", name, "-D", str(dest), "--clobber")
+        p = Path(dest) / name
+        got = p.stat().st_size if p.exists() else None
+        if d.returncode or got != size:
+            why = d.stderr.strip()[:300] if d.returncode else f"{got} of {size} bytes"
+            raise RuntimeError(f"{name} is on release {RELEASE} but did not download whole ({why})")
+    return sorted(listed)
 
 
 def release_put(paths: dict[str, Path], repo: str, gh=_gh) -> None:

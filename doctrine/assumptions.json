@@ -7,7 +7,7 @@
       "assumption": "Public CelesTrak / 18 SDS GP element sets update frequently enough on watched objects to distinguish discrete thruster burns from secular perturbation drift.",
       "status": "untested",
       "test": "Flag any watched object whose TLE gap exceeds 48 hours (OR-IND-4) and cap maneuver confidence at Low when a gap spans the detection window.",
-      "note": "Manoeuvre lane live from orbit-2.4 on Space-Track element sets, with no confidence (a change is listed or not; doctrine/method.md). Gaps of 48 hours or more are labelled on each change. Known cases (docs/validation/maneuver-calibration.md): the ISS had a set every 3 hours at the median, the GEO cases every 9-14 hours, and the known burns there stand well clear of the drift; live gaps have reached 17 days."
+      "note": "Manoeuvre lane live from orbit-2.4 on Space-Track element sets, with no confidence (a change is listed or not; doctrine/method.md). Gaps of 48 hours or more are labelled on each change. Known cases (docs/validation/maneuver-calibration.md): the ISS had a set every 3 hours at the median, the GEO cases every 9-14 hours, and the known burns there stand well clear of the drift; live gaps have reached 37 days (Luch (Olymp) 2, 15 Oct to 22 Nov 2026)."
     },
     {
       "id": "OR-ASM-2",

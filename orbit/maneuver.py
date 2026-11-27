@@ -34,10 +34,11 @@ The method, for each watched object, over its stored Space-Track element sets (G
      and the rule runs again. A change at the newest set is counted as `awaiting_next_set` until the next set.
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
-marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
-drag can give the same. Orbit says which object, when and how much; never why, and never a warning. What the
+marks are manoeuvres; a re-fit after a tracking gap, a single element set fitted off the orbit, a mis-tagged set,
+or (in low orbit) a geomagnetic storm's drag can give the same. Orbit says which object, when and how much; never why, and never a warning. What the
 known cases measure (`python tools/orbit.py maneuver-case sj21|iss|luch2`; docs/validation/maneuver-calibration.md):
-in low orbit all five of NASA's announced ISS reboosts of 2024 and nothing else; at GEO the Shijian-21 tow of BeiDou-2
+in low orbit all five of NASA's announced ISS reboosts of 2024, and no change outside NASA's list (10 listed,
+each within 12 hours of a reboost); at GEO the Shijian-21 tow of BeiDou-2
 G2 (January 2022). Before step 8, about a quarter of Luch (Olymp) 2's listed changes came in out-and-back pairs, the
 pattern of a single off set (21 pairs in 176 changes; 1 pair in 119 after it). No case covers medium or highly elliptical orbits, or small GEO station-keeping burns.
 """

@@ -152,14 +152,34 @@ def tracks(elsets, norads, end, days, step):
 
 
 def roles(path=os.path.join(ROOT, "site_src", "geo_roles.json")):
-    """{str(norad): {role, basis, sources}} for the objects whose role published reporting supports."""
+    """{str(norad): {role, claim, basis, status, status_date, status_note, sources}} for the objects whose role
+    published reporting supports."""
     try:
         with open(path, encoding="utf-8") as f:
             d = json.load(f)
     except (OSError, ValueError):
         return {}
-    return {str(o["id"]): {"role": o["role"], "basis": o.get("basis", ""), "sources": o.get("sources", [])}
-            for o in d.get("objects", []) if o.get("role")}
+    return {str(o["id"]): {"role": o["role"], "claim": o.get("claim", ""), "basis": o.get("basis", ""),
+                           "status": o.get("status", ""), "status_date": o.get("status_date", ""),
+                           "status_note": o.get("status_note", ""), "sources": _sources(o)}
+            for o in d.get("objects", []) if o.get("role") and _opened(o)}
+
+
+NOT_OPENED = "not opened"  # orbit/notable.py NOT_OPENED: a cited source its reviewer could not open
+
+
+def _not_opened(s):
+    return isinstance(s, list) and len(s) == 3 and s[2] == NOT_OPENED
+
+
+def _opened(o):
+    """At least one of the entry's sources was opened (orbit/notable.py check_roles refuses an entry with none)."""
+    return any(not _not_opened(s) for s in o.get("sources", []))
+
+
+def _sources(o):
+    """[label, URL] pairs for the page; a source cited but not opened says so in its label."""
+    return [[s[0] + " (not opened)", s[1]] if _not_opened(s) else list(s[:2]) for s in o.get("sources", [])]
 
 
 def region_events(release, last_day, days=EVENT_DAYS):

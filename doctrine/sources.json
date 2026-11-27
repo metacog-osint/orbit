@@ -195,7 +195,7 @@
       "id": "unoosa-register",
       "name": "UN Register of Objects Launched into Outer Space (UNOOSA): registration documents (ST/SG/SER.E) and the Online Index",
       "url": "https://www.unoosa.org/oosa/en/spaceobjectregister/index.html",
-      "licence": "UN terms (unoosa.org/oosa/en/aboutus/terms-of-use.html, read 16 Nov 2026): 'personal, non-commercial use, without any right to resell or redistribute', not 'to compile or create derivative works'. The Online Index was unavailable (IT changes) on 16 Nov 2026. Tom, 16 Nov 2026: a state's registered name is shown as declared by that state, one object at a time, with the document symbol and a link; ids, dates and links otherwise; no bulk table.",
+      "licence": "UN terms (unoosa.org/oosa/en/aboutus/terms-of-use.html, read 16 Nov 2026): 'personal, non-commercial use, without any right to resell or redistribute', not 'to compile or create derivative works'. The Online Index was unavailable (IT changes) on 16 Nov 2026 and served again on 27 Nov 2026 (unoosa.org/unoosa/en/osoindex/search/search-objects.html). Orbit asks it one object at a time on a person's request only, 3 s apart, replies kept a week in git-ignored data/raw/unoosa/ and never published (orbit/unregister.py, method orbit-2.50). A state's registered name is shown as declared by that state, one object at a time, with the document symbol and a link; ids, dates and links otherwise; no bulk table.",
       "use": "link",
       "grade": "A1",
       "independence_group": "un",

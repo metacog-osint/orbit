@@ -1,13 +1,16 @@
 """Build Orbit's contract-v2 feed (tic-feed/2, GeoJSON) from the snapshot.
 
-Every item is an observation (measured or reported, no judgment) at tier "routine": Orbit has no baseline
-of its own readings yet, so nothing is called an anomaly (see doctrine/method.md). Items:
+Every item is an observation (measured or reported, no judgment). Most are tier "routine"; from orbit-2.49 two kinds
+can be tier "anomaly", each against a baseline from GCAT's own history (doctrine/method.md, "Anomalies against
+GCAT's history"): a 30-day count outside every one of its 24 prior windows, and a breakup or collision for 72 hours
+from the reading that first listed it. Items:
   - orbital launches GCAT dates in the last 7 days (one item each, at the launch site);
   - reentries GCAT dates in the last 7 days (one summary item, off-map);
   - catalog changes since Orbit's previous reading: new objects from launches more than 30 days old (one item
     per launch), and owner or state changes (one item);
   - orbit changes in watched objects listed on the page (Space-Track element sets, last 30 days; one item each,
     off-map), kind "maneuver" (Tom, 14 Nov 2026). COP's gate holds this kind as military context;
+  - 30-day counts outside every prior window (orbit-2.49; one item per series, off-map, tier anomaly);
   - GEO relocations of listed-role objects (orbit-2.30, ideas#323): one item per move, updated in place, off-map,
     from the GEO page's tracker (tools/geo_tracker.py). tools/geo_page.py adds them to site/data/feed.geojson after
     the tracker runs, since the tracker is built after the feed in the same run (relocation_features below).
@@ -194,7 +197,114 @@ def _reentry_item(rows: list[dict], generated: str, accessed: str, since: str) -
 BREAKUP_WORD = {"E": "exploded (broke up in orbit)", "C": "collided"}
 
 
-def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
+ANOMALY_METHOD = "orbit-2.49"
+ANOMALY_HOLD_HOURS = 72   # the kit's hold for an event (feed contract revision 2.1, D5)
+FLAG_RATE_CAP = 0.05      # the kit's cap: a series the rule flagged on more than 5% of its baseline windows is not flagged
+SMALL_COUNT = 3           # high tail: at least 3 in the recent window; low tail: at least 3 in every prior window
+# (series key in gcat.baseline, tails Orbit flags). Payloads and reentries only on the high side: GCAT adds payloads
+# and dates reentries as it learns of them, so a low recent window there can be lag (method "Baselines" item 3).
+ANOMALY_SERIES = (("launches_all", ("high", "low")), ("launches_by_country", ("high", "low")),
+                  ("launches_by_agency", ("high", "low")), ("payloads_by_owner", ("high",)),
+                  ("reentries_all", ("high",)), ("reentries_by_owner", ("high",)))
+
+
+def _series_label(series: str, r: dict) -> tuple[str, str]:
+    """(what is counted, its unit) for one baseline row."""
+    cc = r.get("country")
+    place = geo.name(cc) if cc else None
+    if series == "launches_all":
+        return "Orbital launch attempts, all launchers", "launches"
+    if series == "launches_by_country":
+        return f"Orbital launch attempts with a launching agency of {place or r['key']}", "launches"
+    if series == "launches_by_agency":
+        return f"Orbital launch attempts by {r.get('name') or r['key']} (GCAT agency {r['key']})", "launches"
+    if series == "payloads_by_owner":
+        return f"Payloads launched for owner {place or r['key']} (GCAT state {r['key']})", "payloads"
+    if series == "reentries_all":
+        return "Reentries, all owners", "reentries"
+    return f"Reentries of objects owned by {place or r['key']} (GCAT state {r['key']})", "reentries"
+
+
+def _baseline_tail(r: dict, tails: tuple) -> str | None:
+    """The tail this row departs on under the orbit-2.49 rule, or None."""
+    fr = r.get("flag_rate")
+    if not fr or r.get("prior_windows") != 24:
+        return None
+    if "high" in tails and r["position"] == "above" and r["recent"] >= SMALL_COUNT and fr["high"] <= FLAG_RATE_CAP:
+        return "high"
+    if "low" in tails and r["position"] == "below" and r["prior_min"] >= SMALL_COUNT and fr["low"] <= FLAG_RATE_CAP:
+        return "low"
+    return None
+
+
+def _baseline_item(series: str, r: dict, tail: str, base: dict, generated: str, accessed: str) -> dict:
+    """A 30-day count outside every one of its 24 prior windows (orbit-2.49): tier anomaly, against GCAT's history."""
+    what, unit = _series_label(series, r)
+    start, end = base["recent"]
+    n = r["prior_windows"]
+    fr = r["flag_rate"][tail]
+    word = "more" if tail == "high" else "fewer"
+    fired = round(fr * r["flag_rate"]["windows"])
+    lag = (" GCAT lists a launch about one to three days after it, so the last days of the window can still fill in."
+           if series.startswith("launches") and tail == "low" else "")
+    each = (" A launch counts once for each country among its GCAT agencies." if series == "launches_by_country" else "")
+    key = re.sub(r"[^a-z0-9-]+", "-", str(r["key"]).lower()).strip("-") or "x"
+    countries = _countries(r.get("country"))
+    prior = base.get("prior") or ["", ""]
+    props = {
+        **_base(generated, 48),
+        "tier": "anomaly",
+        "method_version": ANOMALY_METHOD,
+        "id": f"orbit:baseline:{series}:{key}",
+        "subject_id": f"orbit:baseline:{series}:{key}",
+        "event_start": f"{start}T00:00:00Z",
+        "event_end": f"{end}T00:00:00Z",
+        "event_time_precision": "day",
+        **_change("changed", accessed, generated),
+        "title": (f"{what}: {r['recent']} in the last 30 days, {word} than in any of the {n} windows of 30 days "
+                  "before (GCAT)"),
+        "summary": (f"{what}, from GCAT's own history: {r['recent']} in the 30 days {start} to {end}, against "
+                    f"{r['prior_min']} to {r['prior_max']} (median {r['prior_median']:g}) in each of the {n} windows "
+                    f"of 30 days before ({prior[0]} to {prior[1]}).{each} Outside every prior window is Orbit's "
+                    f"rule, a count, not a warning or a judgment of why. Over the {n} windows before those, the same "
+                    f"rule fired on this series {fired} time(s) on this side.{lag}"),
+        "data_as_of": accessed,
+        "countries": countries,
+        **({"place_basis": "subject" if series == "launches_by_country" else "named"} if countries else {}),
+        "requirement_ids": ["OR-REQ-1"],
+        "coverage_fraction": 1.0,
+        "precision_class": "none",
+        "signal": {"name": f"{what}, 30 days", "value": r["recent"], "expected": r["prior_median"], "unit": unit,
+                   "tail": tail, "baseline_n": n, "exceedance": round(1 / (n + 1), 4)},
+        "baseline_ref": {"id": f"gcat-30d:{series}", "type": "rolling", "version": ANOMALY_METHOD,
+                         "window": f"the last 30 days against each of the {n} windows of 30 days before them",
+                         "flag_rate": fr},
+        "measures": {"recent": r["recent"], "prior_median": r["prior_median"], "prior_min": r["prior_min"],
+                     "prior_max": r["prior_max"], "series_oldest_first": r["series"]},
+        "visual": {"type": "table", "url": f"{SITE}/catalog#baseline"},
+        "sources": [{**SRC_GCAT, "accessed_at": accessed}],
+    }
+    return {"type": "Feature", "geometry": None, "properties": props}
+
+
+def baseline_features(base: dict, generated: str, accessed: str) -> list[dict]:
+    """Every baseline row outside all of its prior windows under the orbit-2.49 rule. None when the baseline's
+    recent window ended more than the hold before this build (GCAT unchanged for days): the count is then old."""
+    if not base or not base.get("recent"):
+        return []
+    end = _dt(f"{base['recent'][1]}T00:00:00Z") + timedelta(days=1)
+    if _dt(generated) - end > timedelta(hours=ANOMALY_HOLD_HOURS):
+        return []
+    out = []
+    for series, tails in ANOMALY_SERIES:
+        for r in base.get(series) or []:
+            tail = _baseline_tail(r, tails)
+            if tail:
+                out.append(_baseline_item(series, r, tail, base, generated, accessed))
+    return out
+
+
+def _breakup_item(b: dict, generated: str, accessed: str, base: dict | None = None) -> dict:
     """One object GCAT marks as broken up (E) or collided (C) in the last 30 days (OR-EEI-5, Tom's yes 16 Nov 2026).
     Kept apart from reentries since orbit-2.12: the object did not come down; its fragments are catalogued anew."""
     word = BREAKUP_WORD.get(b.get("status"), "ended in orbit")
@@ -207,7 +317,7 @@ def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
         "subject_id": f"orbit:breakup:{b['jcat']}",
         **({"event_start": _day(b["breakup_date"]), "event_time_precision": "day"} if _day(b["breakup_date"])
            else {"event_start": accessed}),
-        **_change("new", _day(b["breakup_date"]) or accessed, generated),
+        **_change("new", b.get("first_listed") or _day(b["breakup_date"]) or accessed, generated),
         "title": f"{b['name']} ({b['type']}, {b['state']}) {word}, {b['breakup_date']} (GCAT)",
         "summary": (f"GCAT gives {b['name']} ({b['jcat']}{', NORAD ' + str(b['norad']) if b.get('norad') else ''}"
                     f"{parent}) status {b.get('status')}: {word}, on {when}.{launched} Orbit class "
@@ -224,6 +334,23 @@ def _breakup_item(b: dict, generated: str, accessed: str) -> dict:
         "visual": {"type": "table", "url": f"{SITE}/catalog#breakups"},
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
+    listed = b.get("first_listed")
+    if listed and timedelta(0) <= _dt(generated) - _dt(listed) <= timedelta(hours=ANOMALY_HOLD_HOURS):
+        # orbit-2.49: a breakup or collision is rare in GCAT's record; tier anomaly for 72 hours from the reading
+        # that first listed it, then routine. The record it is set against is stated in the item.
+        row = next(iter((base or {}).get("breakups_all") or []), None)
+        before = sum(row["series"][:-1]) if row else 0
+        span = (base or {}).get("prior")
+        within = f" ({span[0]} to {span[1]})" if span else ""
+        props["tier"] = "anomaly"
+        props["method_version"] = ANOMALY_METHOD
+        props["baseline_ref"] = {"id": "gcat-breakups", "type": "rolling", "version": ANOMALY_METHOD,
+                                 "window": "GCAT's breakups and collisions (status E or C) in the 24 windows of 30 "
+                                           "days before the last 30 days"}
+        props["measures"]["breakups_in_prior_24_windows"] = before
+        props["summary"] += (f" GCAT dates {before} breakup(s) or collision(s) in the 24 windows of 30 days before "
+                             f"the last 30{within}. Orbit calls a breakup an anomaly for {ANOMALY_HOLD_HOURS} hours "
+                             f"from the reading that first listed it ({listed}).")
     return {"type": "Feature", "geometry": None, "properties": props}
 
 
@@ -529,7 +656,8 @@ def build_feed(snap: dict) -> dict:
     if rows:
         features.append(_reentry_item(rows, generated, cat_at, re_since))
     for b in (snap.get("breakups") or [])[:10]:   # GCAT E and C, last 30 days (gcat.recent_breakups)
-        features.append(_breakup_item(b, generated, cat_at))
+        features.append(_breakup_item(b, generated, cat_at, snap.get("baseline")))
+    features += baseline_features(snap.get("baseline") or {}, generated, cat_at)
 
     changes = snap.get("catalog_changes") or {}
     # Change items stay in the feed for two days after the reading that found them.

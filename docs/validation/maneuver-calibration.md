@@ -44,7 +44,10 @@ never committed, so CI skips them); `tests/test_orbit.py` covers the logic on sy
   inclination (17 pairs) or semi-major-axis (4 pairs) changes have opposite signs and cancel to within half of the
   larger one. That is the pattern one element set lying off the orbit gives, not a burn, though a real burn and its
   correction a day apart cannot be told from it here. On SJ-21, 1 such pair (27-28 Dec 2021, 0.40 m/s each) of 15.
-  So at GEO roughly a quarter of listed changes, at the least, show the pattern of a single off set.
+  So on Luch 2 about a quarter of listed changes (42 of 176) show the pattern of a single off set. A second
+  check, comparing the settled orbit over the 24 hours before and after each listing, finds 31 of 136 testable
+  listings (23%) leave it moved by under 0.25 m/s. Two of the 21 pairs do not return to the old orbit. This is
+  one object: on SJ-21 the settled-orbit check finds 1 of 12.
 
 ## One set off the orbit (the orbit-2.47 change)
 
