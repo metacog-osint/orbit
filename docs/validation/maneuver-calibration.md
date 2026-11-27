@@ -49,6 +49,42 @@ never committed, so CI skips them); `tests/test_orbit.py` covers the logic on sy
   listings (23%) leave it moved by under 0.25 m/s. Two of the 21 pairs do not return to the old orbit. This is
   one object: on SJ-21 the settled-orbit check finds 1 of 12.
 
+## Station-kept GEO satellites held near zero inclination
+
+Seven commercial station-kept satellites, from Orbit's public `geo-elements-2026-07..11` sets (1 Jul to 26 Nov 2026,
+about 148 days each), run through the detector over their whole stored series. The north-south need is the object's
+own steady inclination-vector drift between listings (lunar and solar pull, 0.63-0.99 deg a year here) times orbital
+speed over the span: the plane change station keeping has to undo. An episode is a run of listed cross-track changes
+less than 2 days apart; its net change compares the median orbit of the 3 sets before it with the 3 sets after it,
+with the steady drift removed.
+
+| Satellite | Median i (deg) | Listed (cross-track) | Listed total (m/s) | Episodes | Net over episodes (m/s) | North-south need (m/s) |
+|---|---|---|---|---|---|---|
+| Eutelsat 70B | 0.065 | 11 | 23.7 | 11 | 22.8 | 20.7 |
+| Astra 2G | 0.053 | 22 | 44.2 | 13 | 28.0 | 19.1 |
+| SES-11 | 0.027 | 35 | 80.5 | 11 | 25.4 | 18.3 |
+| Turksat 4B | 0.019 | 42 | 80.2 | 20 | 32.6 | 21.6 |
+| IS-15 | 0.019 | 33 | 40.1 | 19 | 17.9 | 13.7 |
+| IS-22 | 0.017 | 38 | 67.0 | 19 | 26.7 | 17.0 |
+| Galaxy 35 | 0.015 | 34 | 47.8 | 19 | 20.0 | 19.1 |
+
+- **Why the listed totals run 2-4 times the need:** one north-south burn is often listed as several plane changes.
+  In the days after a burn the published sets jump back and forth in plane, by 0.02-0.03 deg between sets 3-6 hours
+  apart, which no burn explains, before they settle. Each jump is listed. Away from listings the sets are smooth: a
+  set more than 0.25 m/s off the line through its two neighbours occurs in 0-7% of sets elsewhere, against 5-31% in
+  the 8 days after an episode starts (SES-11 31%, Eutelsat 70B 5%). Counted by episode, with the net change across
+  each, the totals come to 1.0-1.6 times the need, as station keeping with some fit scatter would.
+- **The clean one:** Eutelsat 70B, held at about 0.065 deg, has the smallest set scatter (0.008 m/s against
+  0.014-0.033) and the fewest off sets after a burn (5%), and lists one change per episode. Why its sets settle
+  faster is not measured. The six that list more are held at 0.015-0.053 deg, where a 0.02 deg jump also swings the
+  node through tens of degrees.
+- **Cross-tagged neighbours are not the cause here:** no catalogued object within 0.3 deg of longitude sits on the
+  alternate track of SES-11's sets (checked 28-29 Aug 2026), though many station-kept satellites share that
+  inclination vector, so a match would not prove a swap either.
+- **`orbit-2.47` (one off set confirmed by the next set) removes few of these:** 38 to 34 on IS-22, 35 to 31 on
+  SES-11, 42 to 36 on Turksat 4B, since the off sets come several in a row.
+- No operator publishes these burns, so which individual listings are real is not known. The page states the limit.
+
 ## Long gaps (the orbit-2.43 change)
 
 Before `orbit-2.43` the detector removed nodal precession at one median rate per object. A decaying low orbit
