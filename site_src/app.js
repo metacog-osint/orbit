@@ -202,6 +202,12 @@
     });
   }
 
+  /* A launch's own record (time, site, vehicle, closures and history) is on the suite's Launch program, under the
+     same GCAT tag; Orbit keeps what the launch put in orbit. */
+  function launchHref(tag) {
+    return "https://launch.theintelligence.company/#history?st=launched&q=" + encodeURIComponent(tag) +
+      "&sel=" + encodeURIComponent("gcat:" + tag);
+  }
   function launchTable() {
     var box = document.getElementById("launch-table");
     if (!box) return;
@@ -246,12 +252,15 @@
       cell(tr, who(st.country || st.state ? [mark(st.country, st.state)] : [], st.name || x.site_code));
       var out = el("span", x.outcome === "success" ? "badge" : "badge badge-warn", x.outcome);
       cell(tr, out);
-      cell(tr, x.launch_tag, "muted");
+      var rec = el("a", "", x.launch_tag);
+      rec.href = launchHref(x.launch_tag); rec.rel = "noopener";
+      rec.title = "This launch's record on Launch";
+      cell(tr, rec, "muted");
       return tr;
     });
     if (!rows.length) return empty(box, "No orbital launches in GCAT's list for the last 7 days.");
     box.textContent = "";
-    box.appendChild(table(["When", "Flight and payloads (by owner)", "Vehicle and launcher", "Site", "Outcome", "GCAT"], rows));
+    box.appendChild(table(["When", "Flight and payloads (by owner)", "Vehicle and launcher", "Site", "Outcome", "On Launch (GCAT tag)"], rows));
   }
 
   /* Anti-satellite tests in space: Secure World Foundation's sheet as it stands (CC BY-NC 4.0). History, not new
@@ -769,8 +778,7 @@
     var t = el("a", "", "Show in table"); t.href = "#" + key; links.appendChild(t);
     links.appendChild(document.createTextNode(" · "));
     var lh = el("a", "", "Find it in Launch's history");
-    lh.href = "https://launch.theintelligence.company/#history?st=launched&q=" + encodeURIComponent(x.launch_tag) +
-      "&sel=" + encodeURIComponent("gcat:" + x.launch_tag);
+    lh.href = launchHref(x.launch_tag);
     lh.rel = "noopener"; links.appendChild(lh);
     box.appendChild(links);
     return box;

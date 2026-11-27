@@ -567,8 +567,9 @@ Tom, 19 Nov 2026: every tab is its own page within the program. Orbit's one long
 one header, one row of page links (the current page marked) and one script, `app.js`, which draws only the cards on
 the page it runs on:
 - `/` Map: the daily lead, tiles, object search and the satellite map (`orbit-2.24`).
-- `/launches`: the launch map, globe and table of GCAT's launches of the last 7 days, and a card pointing to
-  Launch for scheduled launches, closures and the ledger (`orbit-2.32`).
+- `/launches` ("New in orbit" from `orbit-2.33`): the map, globe and table of what GCAT's launches of the last 7
+  days put in orbit, by launch, and a card pointing to Launch for scheduled launches, closures and the ledger
+  (`orbit-2.32`).
 - `/reentries`: reentries of the last 7 days, predicted reentries (TIP) and TIP against the reentry. "Track on the
   globe" opens the launch page's globe with `launches.html?track=re-<NORAD>`.
 - `/catalog`: catalog changes and owner codes, breakups and collisions, the 30-day baseline and archive note.
@@ -977,3 +978,15 @@ now runs a second rule on those objects only.
    291 marked. On objects not judged at the time: USA 324's stop (found) and 10 marks in the first 8 days of the
    history, when every object had few sets. Luch (Olymp) 2's start across its 37-day gap is found by both rules
    from the same 21 Nov set. The page does not draw `belt.two_set` yet; the data is in `globe.json`.
+
+## Links between Orbit and Launch (`orbit-2.39`, 27 Nov 2026)
+A launch's own record (its time, site, vehicle, closures, schedule and history) is Launch's; what it put in orbit
+is Orbit's. Both name a launch by GCAT's tag (the COSPAR launch id, such as `2026-266`).
+1. **To Launch:** on the launches page, each row's GCAT tag and the map card's "Find it in Launch's history" open
+   that launch's record in Launch's history (`#history?st=launched&q=<tag>&sel=gcat:<tag>`).
+2. **From Launch:** `/?q=<text>` opens the home page with that object search run (at most 80 characters, decoded
+   once). Launch links `/?q=<tag>`, which lists every piece of the launch, and, for the last 7 days, the launch's row
+   on the launches page (`launches.html#launch-<tag>`).
+3. **Nothing read:** the links add no request to either program.
+4. **Page name:** the launches page is "New in orbit" in the page links, with its address unchanged, so older links
+   and `launches.html?track=` from the reentries page still land.

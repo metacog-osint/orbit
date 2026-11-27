@@ -29,7 +29,7 @@ from tic_doctrine import CONTRACT, __version__ as KIT_VERSION, geo  # noqa: E402
 from orbit import names, notable  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.32"
+METHOD = "orbit-2.39"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
