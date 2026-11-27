@@ -867,3 +867,14 @@ with an unexplained difference.
    the "Names that state another position" table, the object card and the slot search list (`globe.json`
    `name_positions` columns `status` and `until`). Names match loosely (`namepos.compact`), so another source's
    spelling of the same name takes the mark. A name without a status shows as before.
+
+## The current declared name beside the catalogue name (`orbit-2.34`, 26 Nov 2026; ideas#379)
+
+1. **Rule.** The display name stays the ranked source's (Space-Track first); keys and joins are unchanged. When the
+   alias file declares the object's current name (basis `declared`, status `current`) and it differs from the
+   display name, it shows beside it as "now <name>". Example: 33459 reads "EUTE HOT BIRD 13C (HB 9) now Eutelsat 50
+   West A".
+2. **Data.** `search.json` (`tic-catalog-search/1`) gains `now_names`, {key: name}; `globe.json` carries the same
+   for the GEO objects. Readers that ignore them are unaffected.
+3. **Where it shows.** The object page heading, the site search results, and the GEO page's object card, search
+   list and slot search list. A former name, an attributed name or no alias entry shows nothing new.

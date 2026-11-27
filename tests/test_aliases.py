@@ -106,6 +106,22 @@ class NameStatus(unittest.TestCase):
         self.assertEqual(namepos.statuses({}), {})
 
 
+    def test_now_name_is_the_declared_current_one(self):
+        cur = next(e for e in ENTRIES if e.get("name") == "Eutelsat 50 West A")
+        old = next(e for e in ENTRIES if e.get("name") == "Eutelsat 12 West G")
+        obj = {"type": "payload", "name": "EUTE HOT BIRD 13C (HB 9)", "names": [
+            {"value": "EUTE HOT BIRD 13C (HB 9)", "source": "space-track", "basis": "attributed"},
+            aliases.name_record(old), aliases.name_record(cur)]}
+        doc = catshards.search_index({"read": "2026-11-26", "objects": {"33459": obj}, "unnumbered": {}})
+        self.assertEqual(doc["now_names"], {"33459": "Eutelsat 50 West A"})
+        self.assertEqual(doc["objects"][0][1], "EUTE HOT BIRD 13C (HB 9)")  # display name unchanged
+        same = dict(obj, name="EUTELSAT 50 WEST A")
+        self.assertEqual(catshards.now_name(same), "")  # no label when the display name already is it
+        attributed = dict(aliases.name_record(cur), basis="attributed")
+        self.assertEqual(catshards.now_name(dict(obj, names=[attributed])), "")
+        self.assertEqual(catshards.now_name(dict(obj, names=[aliases.name_record(old)])), "")
+
+
 def check_live(text):
     return aliases.validate(aliases.parse(text), IDS)
 

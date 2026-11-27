@@ -209,6 +209,8 @@ function main() {
   const statedTxt = (x) => (Math.abs(x) % 1 ? Math.abs(x).toFixed(1) : Math.abs(x).toFixed(0)) + "°" + (x < 0 ? "W" : x > 0 ? "E" : "");
   const shortWay = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
   // a name TIC's alias file marks current or former, as orbit/namepos.py's status_txt (ideas#376); "" otherwise
+  // the operator's declared current name beside the catalogue's, when they differ (ideas#379)
+  const nowTxt = (o) => (o.now ? ' <span class="small muted">now ' + esc(o.now) + "</span>" : "");
   const statusTxt = (x) => (x && x.status ? x.status + " name" + (x.until ? ", until " + dayTxt(x.until) : "") : "");
   // the other names a search matched, when the shown name alone does not match every term
   const viaNames = (o) => (!terms.length || terms.every((t) => o.name.toLowerCase().indexOf(t) >= 0) ? [] :
@@ -1099,7 +1101,7 @@ function main() {
         ["Launched", esc(o.launch || "unknown")], ["Radar size", esc(o.rcs || "not given")],
         ["Sunlight", '<span id="g-sunlit">' + esc(sunlitTxt(o)) + "</span>"],
       ]).concat(S.place ? [["From " + esc(placeName()), '<span id="g-look">' + esc(lookTxt(o)) + "</span>"]] : []).concat(coFor(o)).concat(boardFor(o));
-      el.innerHTML = "<h3>" + esc(o.name) + '</h3><p class="small">Catalogue ' + o.norad + (o.cospar ? " · " + esc(o.cospar) : "") +
+      el.innerHTML = "<h3>" + esc(o.name) + nowTxt(o) + '</h3><p class="small">Catalogue ' + o.norad + (o.cospar ? " · " + esc(o.cospar) : "") +
         ' · <a href="https://celestrak.org/satcat/table-satcat.php?CATNR=' + o.norad + '">CelesTrak record</a></p><dl class="globe-dl">' +
         rows.map((r) => "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>").join("") + "</dl>" +
         '<details class="globe-more" data-more="near"' + (S.open.near ? " open" : "") + '><summary>Closest objects over time</summary><div id="g-near"><p class="small">Working…</p></div></details>' +
@@ -1191,7 +1193,7 @@ function main() {
     const hits = S.objs.filter(matches);
     results.innerHTML = '<li class="globe-res-head">' + fmtN(hits.length) + " match" + (hits.length === 1 ? "" : "es") +
       (hits.length ? ' <button type="button" class="linkish" data-all="1">Select all</button>' : "") + "</li>" +
-      hits.slice(0, 40).map((o) => { const via = viaNames(o); return '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " +
+      hits.slice(0, 40).map((o) => { const via = viaNames(o); return '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button>" + nowTxt(o) + " " +
         (via.length ? '<span class="small muted">also ' + esc(via.join(", ")) + "</span> " : "") + esc(o.owner || "") + " · " + esc(TYPE_WORD[o.type] || o.type || "") + "</li>"; }).join("");
     results.hidden = false;
   }
@@ -1199,7 +1201,7 @@ function main() {
   // position), and the payloads that held it since the element history starts (geo_page.held_stays).
   function slotResults() {
     const regionWord = (r) => ((REGIONS.find((x) => x[0] === r) || [])[1] || r || "").toLowerCase();
-    const item = (o, txt) => '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button> " + txt + "</li>";
+    const item = (o, txt) => '<li><button type="button" class="linkish" data-id="' + o.norad + '">' + esc(o.name) + "</button>" + nowTxt(o) + " " + txt + "</li>";
     const there = S.objs.filter(atSlot).map((o) => [o, shortWay(lonOf(o), slot)]).sort((a, b) => a[1] - b[1]);
     const named = S.objs.filter((o) => namedSlot(o).length);
     const H = (S.globe && S.globe.held) || {};
@@ -1773,6 +1775,7 @@ function main() {
       const o = {}; cols.forEach((c, k) => { o[c] = row[k]; });
       o.tk = typeKey(o.type); o.drift = o.n * 360 - SIDEREAL; o.sr = satrecOf(o);
       o.others = (g.names || {})[String(o.norad)] || [];
+      o.now = (g.now_names || {})[String(o.norad)] || "";
       const role = roleIds.has(o.norad) ? board.roles[String(o.norad)].role : "";
       o.key = [o.name, o.norad, o.cospar, o.owner, S.owners[o.owner], TYPE_WORD[o.type], o.region, role, o.active ? "active" : ""]
         .concat(o.others, [o.name].concat(o.others).map(compact)).join(" ").toLowerCase();
