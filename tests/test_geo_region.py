@@ -156,11 +156,16 @@ class SharedAccount(unittest.TestCase):
 class FakeRelease:
     """Stands in for `gh` against GitHub's releases: a local folder <root>/<tag>/<asset>, no network. Downloads named
     in `fail` exit non-zero, those in `truncate` write half the file and exit 0; `list_fail` makes every listing
-    fail with HTTP 500. Every call is logged in `calls` (shared with the archive stand-in, for the order)."""
+    fail with HTTP 500. Asset calls (`api -X DELETE|PATCH .../releases/assets/<tag>~<name>`) remove and rename;
+    uploads named in `upload_fail` leave half the file, listed as state "open", and exit non-zero; those in
+    `upload_short` arrive half and "uploaded"; names in `delete_fail` and `rename_fail` refuse those calls. Every
+    call is logged in `calls` (shared with the archive stand-in, for the order)."""
 
     def __init__(self, root, calls=None):
         self.root = Path(root)
         self.fail, self.truncate, self.list_fail = set(), set(), False
+        self.upload_fail, self.upload_short, self.delete_fail, self.rename_fail = set(), set(), set(), set()
+        self.open = set()   # (tag, name) of uploads that did not finish
         self.calls = [] if calls is None else calls
 
     def __call__(self, *args):
@@ -172,12 +177,32 @@ class FakeRelease:
             if self.list_fail:
                 return bad("gh: Server Error (HTTP 500)")
             path = next(x for x in a[1:] if x.startswith("repos/"))
+            m = re.fullmatch(r"repos/[^/]+/[^/]+/releases/assets/([^/~]+)~([^/]+)", path)
+            if m:
+                tag, name = m.groups()
+                f = self.root / tag / name
+                method = a[a.index("-X") + 1]
+                if not f.exists():
+                    return bad("gh: Not Found (HTTP 404)")
+                if method == "DELETE":
+                    if name in self.delete_fail:
+                        return bad("gh: Server Error (HTTP 502)")
+                    f.unlink()
+                    self.open.discard((tag, name))
+                    return ok()
+                new = a[a.index("-f") + 1].removeprefix("name=")
+                if name in self.rename_fail or (self.root / tag / new).exists():
+                    return bad("gh: Validation Failed (HTTP 422)")
+                f.rename(self.root / tag / new)
+                return ok("{}")
             m = re.fullmatch(r"repos/[^/]+/[^/]+/releases/tags/([^/?]+)", path)
             if m:
                 return ok(m.group(1) + "\n") if (self.root / m.group(1)).is_dir() else bad("gh: Not Found (HTTP 404)")
             m = re.fullmatch(r"repos/[^/]+/[^/]+/releases/([^/?]+)/assets\?per_page=100", path)
             d = self.root / m.group(1)
-            return ok("".join(f"{p.stat().st_size} {p.name}\n" for p in sorted(d.iterdir())))
+            return ok("".join(f"{d.name}~{p.name} {p.stat().st_size} "
+                              f"{'open' if (d.name, p.name) in self.open else 'uploaded'} {p.name}\n"
+                              for p in sorted(d.iterdir())))
         tag = a[2]
         if a[1] == "download":
             name, out = a[a.index("-p") + 1], a[a.index("-D") + 1]
@@ -195,12 +220,22 @@ class FakeRelease:
             (self.root / tag).mkdir(parents=True)
             return ok()
         if a[1] == "upload":
-            shutil.copyfile(a[-1], self.root / tag / os.path.basename(a[-1]))
+            assert "--clobber" not in a, "an upload never goes over the old copy"
+            name = os.path.basename(a[-1])
+            dest, data = self.root / tag / name, Path(a[-1]).read_bytes()
+            if dest.exists():
+                return bad(f"asset under the same name already exists: [{name}]")
+            final = name.removesuffix(".part")
+            if final in self.upload_fail:
+                dest.write_bytes(data[: len(data) // 2])
+                self.open.add((tag, name))
+                return bad("HTTP 502: Bad Gateway")
+            dest.write_bytes(data[: len(data) // 2] if final in self.upload_short else data)
             return ok()
         raise AssertionError(f"unexpected gh call {a}")
 
     def uploads(self):
-        return [os.path.basename(a[-1]) for a in self.calls if a[:2] == ["release", "upload"]]
+        return [os.path.basename(a[-1]).removesuffix(".part") for a in self.calls if a[:2] == ["release", "upload"]]
 
     def path(self, name):
         return self.root / G.tag_for(name) / name
@@ -434,6 +469,103 @@ class ReleaseGuard(unittest.TestCase):
         with self.assertRaisesRegex(G.ReleaseError, "no archive copy"):
             G.release_put([str(local / self.NOV)])
         self.assert_release_untouched()
+
+
+class UploadSwap(unittest.TestCase):
+    """A GEO file goes up as <name>.part and is swapped in, never uploaded over the old copy (`gh release upload
+    --clobber` removes the old copy first, so an upload that failed midway left the release without the file).
+    Each failure point leaves the release with its old copy or a whole .part that the next run completes."""
+    NOV = G.elements_name("2026-11")
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.rel = FakeRelease(self.tmp / "release")
+        (self.tmp / "release" / "geo-2026").mkdir(parents=True)
+        G.write_elements(str(self.rel.path(self.NOV)), month_rows(range(1, 61), range(1, 4), "2026-11"))
+        self.old = self.rel.path(self.NOV).read_bytes()
+        self.local = self.tmp / "local"
+        self.local.mkdir()
+        G.write_elements(str(self.local / self.NOV), month_rows(range(1, 61), range(1, 6), "2026-11"))
+        self.new = (self.local / self.NOV).read_bytes()
+        self.patch = mock.patch.object(G, "_gh", self.rel)
+        self.patch.start()
+
+    def tearDown(self):
+        self.patch.stop()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def put(self):
+        G.release_put([str(self.local / self.NOV)], repo="o/r", archive=lambda folder: None)
+
+    def on_release(self):
+        return sorted(p.name for p in (self.tmp / "release" / "geo-2026").iterdir())
+
+    def assert_old_copy_kept(self):
+        self.assertEqual(self.rel.path(self.NOV).read_bytes(), self.old)
+        self.assertEqual(G.release_assets({"geo-2026"}, "o/r")[self.NOV], len(self.old))
+
+    def test_a_clean_upload_swaps_the_new_copy_in(self):
+        self.put()
+        self.assertEqual(self.rel.path(self.NOV).read_bytes(), self.new)
+        self.assertNotIn(self.NOV + ".part", self.on_release())
+        self.assertTrue(all("--clobber" not in a for a in self.rel.calls if a[:2] == ["release", "upload"]))
+
+    def test_an_upload_that_fails_keeps_the_old_copy_and_the_next_run_replaces_it(self):
+        self.rel.upload_fail = {self.NOV}
+        with self.assertRaisesRegex(RuntimeError, "failed.*keeps its copy"):
+            self.put()
+        self.assert_old_copy_kept()
+        self.assertNotIn(self.NOV + ".part", G.release_assets({"geo-2026"}, "o/r"))   # never listed
+        self.rel.upload_fail = set()
+        self.put()                                                                     # removes the stale .part first
+        self.assertEqual(self.rel.path(self.NOV).read_bytes(), self.new)
+        self.assertEqual(self.on_release(), [self.NOV])
+
+    def test_an_upload_that_arrives_short_keeps_the_old_copy(self):
+        self.rel.upload_short = {self.NOV}
+        with self.assertRaisesRegex(RuntimeError, "did not arrive whole"):
+            self.put()
+        self.assert_old_copy_kept()
+        self.assertEqual(self.on_release(), [self.NOV])                                # the short copy is removed
+
+    def test_a_failed_removal_of_the_old_copy_keeps_it(self):
+        self.rel.delete_fail = {self.NOV}
+        with self.assertRaisesRegex(RuntimeError, "could not be removed"):
+            self.put()
+        self.assert_old_copy_kept()                                                    # the .part beside it is ignored
+        self.rel.delete_fail = set()
+        self.put()
+        self.assertEqual(self.rel.path(self.NOV).read_bytes(), self.new)
+        self.assertEqual(self.on_release(), [self.NOV])
+
+    def test_a_failed_rename_leaves_a_whole_part_that_the_next_listing_finishes(self):
+        self.rel.rename_fail = {self.NOV + ".part"}
+        with self.assertRaisesRegex(RuntimeError, "not renamed.*next run finishes"):
+            self.put()
+        self.assertEqual(self.on_release(), [self.NOV + ".part"])
+        self.rel.rename_fail = set()
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            held = G.release_assets({"geo-2026"}, "o/r")
+        self.assertEqual(held, {self.NOV: len(self.new)})
+        self.assertIn(f"{self.NOV}: finished the upload a run left as {self.NOV}.part", buf.getvalue())
+        self.assertEqual(self.rel.path(self.NOV).read_bytes(), self.new)
+        G.check_new_months(["2026-11"], {**held, "2026-11-25.geo-region.json": 1}, "2026-11-26")   # not taken as lost
+
+    def test_a_rename_that_fails_again_stops_the_listing(self):
+        self.rel.rename_fail = {self.NOV + ".part"}
+        with self.assertRaises(RuntimeError):
+            self.put()
+        with self.assertRaisesRegex(G.ReleaseError, "could not be renamed"):
+            G.release_assets({"geo-2026"}, "o/r")
+
+    def test_an_unfinished_part_is_never_swapped_in(self):
+        self.rel.upload_fail = {self.NOV}
+        with self.assertRaises(RuntimeError):
+            self.put()
+        self.rel.path(self.NOV).unlink()          # the old copy then removed by hand: the half upload stays a .part
+        self.assertEqual(G.release_assets({"geo-2026"}, "o/r"), {})
+        self.assertEqual(self.on_release(), [self.NOV + ".part"])
 
 
 class ArchiveCopy(unittest.TestCase):

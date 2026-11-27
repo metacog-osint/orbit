@@ -1125,6 +1125,19 @@ uploaded, when:
 `tools/geo_import.py` (the one-off import from Noisefloor) passes no archive, so a re-run cannot replace a file
 the release holds. Tests: `tests/test_geo_region.py`, classes `ReleaseGuard` and `ArchiveCopy`.
 
+**Uploads swap in (`orbit-2.56`, 27 Nov 2026).** `gh release upload --clobber` removes the old copy before it
+uploads the new one, so an upload that failed midway left the release without the file, and from `orbit-2.41` the
+next run stopped until a person restored it. Each file now goes up under a temporary name, `<name>.part` (any
+earlier `.part` of that name is removed first). Only when GitHub lists it whole, at the local file's size, is the
+old copy removed and the `.part` renamed. The release is without the file only between those two short calls.
+At each failure point the release keeps its file:
+- the upload fails or arrives short: the old copy stays, and the next run uploads again;
+- the old copy cannot be removed: it stays, and the `.part` beside it is never read;
+- the rename fails: a whole `.part` is left with no old copy. The next listing (`release_assets`, before
+  `check_new_months` reads it) finishes the rename and logs it, so the month is not taken as lost.
+
+A `.part` that GitHub does not list as wholly uploaded is never renamed in. Tests: class `UploadSwap`.
+
 ## GEO two-set rule (`orbit-2.38`, 26 Nov 2026; ideas#252)
 Orbit's rule ("Orbit changes in watched objects") judges an object against its own noise and needs 10 pairs of
 sets. An object with fewer public sets could move along the belt unmarked: USA 324 stopped drifting inside a

@@ -313,26 +313,60 @@ def _repo(repo):
     return repo or os.environ.get("GITHUB_REPOSITORY", REPO)
 
 
+PART = ".part"   # an upload in progress: release_put uploads each file under <name>.part, then swaps it in
+
+
+def _release_files(repo, tag):
+    """{asset name: (id, bytes, state)} for release `tag`, or None when the release does not exist (HTTP 404). Any
+    other failure to read or list raises ReleaseError. `state` is GitHub's: "uploaded" for a whole file."""
+    r = _gh("api", f"repos/{repo}/releases/tags/{tag}", "--jq", ".id")
+    if r.returncode and "HTTP 404" in r.stderr:
+        return None
+    if r.returncode or not r.stdout.strip():
+        raise ReleaseError(f"release {tag} could not be read: {r.stderr.strip()[:300]}")
+    r = _gh("api", "--paginate", f"repos/{repo}/releases/{r.stdout.strip()}/assets?per_page=100",
+            "--jq", '.[] | "\\(.id) \\(.size) \\(.state) \\(.name)"')
+    if r.returncode:
+        raise ReleaseError(f"the files on release {tag} could not be listed: {r.stderr.strip()[:300]}")
+    files = {}
+    for line in r.stdout.splitlines():
+        parts = line.strip().split(" ", 3)
+        if len(parts) == 4:
+            files[parts[3]] = (parts[0], int(parts[1]), parts[2])
+    return files
+
+
+def _asset_call(repo, method, asset_id, *fields):
+    return _gh("api", "-X", method, f"repos/{repo}/releases/assets/{asset_id}", *fields)
+
+
+def _rename(repo, asset_id, name):
+    return _asset_call(repo, "PATCH", asset_id, "-f", f"name={name}")
+
+
 def release_assets(tags, repo=None):
     """{asset name: bytes} for the files on the releases `tags`. A release that does not exist (HTTP 404) holds
     nothing; any other failure to list raises ReleaseError, so a file is never taken as absent because a listing
-    failed."""
+    failed. Uploads in progress (`<name>.part`) are not listed. One that is whole while `<name>` is missing is an
+    upload stopped between removing the old copy and renaming the new one (release_put): the rename is finished
+    here, and logged, before anything reads the list."""
     repo = _repo(repo)
     held = {}
     for tag in sorted(set(tags)):
-        r = _gh("api", f"repos/{repo}/releases/tags/{tag}", "--jq", ".id")
-        if r.returncode and "HTTP 404" in r.stderr:
-            continue
-        if r.returncode or not r.stdout.strip():
-            raise ReleaseError(f"release {tag} could not be read: {r.stderr.strip()[:300]}")
-        r = _gh("api", "--paginate", f"repos/{repo}/releases/{r.stdout.strip()}/assets?per_page=100",
-                "--jq", '.[] | "\\(.size) \\(.name)"')
-        if r.returncode:
-            raise ReleaseError(f"the files on release {tag} could not be listed: {r.stderr.strip()[:300]}")
-        for line in r.stdout.splitlines():
-            size, _, name = line.strip().partition(" ")
-            if name:
-                held[name] = int(size)
+        files = _release_files(repo, tag)
+        for name, (asset_id, size, state) in (files or {}).items():
+            if not name.endswith(PART):
+                held[name] = size
+                continue
+            final = name[: -len(PART)]
+            if final in files or state != "uploaded":
+                continue   # the old copy is still there, or the upload did not finish: release_put replaces it
+            r = _rename(repo, asset_id, final)
+            if r.returncode:
+                raise ReleaseError(f"{final} is not on release {tag}, but its whole upload {name} is, and could not "
+                                   f"be renamed: {r.stderr.strip()[:300]}; the next run tries again")
+            print(f"{final}: finished the upload a run left as {name} on release {tag} ({size} bytes)")
+            held[final] = size
     return held
 
 
@@ -389,13 +423,48 @@ def check_new_months(months, held, day):
                            "release from there, then run again")
 
 
+def _swap_in(repo, tag, path):
+    """Upload `path` to release `tag` under a temporary name and swap it in for the file of the same name, so a
+    failure at any point leaves the release with its old copy or a whole `<name>.part` that release_assets finishes
+    on the next run, never without the file for the length of an upload (`gh release upload --clobber` removes the
+    old copy first). The release is without `<name>` only between the two short calls that remove the old copy
+    and rename the new one."""
+    name = os.path.basename(path)
+    part = name + PART
+    stale = (_release_files(repo, tag) or {}).get(part)
+    if stale and _asset_call(repo, "DELETE", stale[0]).returncode:
+        raise RuntimeError(f"upload of {name} not started: an earlier {part} on release {tag} could not be removed")
+    with tempfile.TemporaryDirectory(prefix="geo-upload-") as tmp:
+        staged = os.path.join(tmp, part)
+        shutil.copyfile(path, staged)
+        r = _gh("release", "upload", tag, "-R", repo, staged)
+    if r.returncode:
+        raise RuntimeError(f"upload of {name} failed: {r.stderr.strip()[:300]}; the release keeps its copy")
+    files = _release_files(repo, tag) or {}
+    up, want = files.get(part), os.path.getsize(path)
+    if not up or up[1] != want or up[2] != "uploaded":
+        if up:
+            _asset_call(repo, "DELETE", up[0])   # a bad copy of the local file; the release keeps its own
+        got = f"{up[1]} bytes, {up[2]}" if up else "not listed"
+        raise RuntimeError(f"upload of {name} did not arrive whole ({got}, of {want} bytes); the release keeps its copy")
+    old = files.get(name)
+    if old and _asset_call(repo, "DELETE", old[0]).returncode:
+        raise RuntimeError(f"{name}: the old copy on release {tag} could not be removed, so the new one stays as "
+                           f"{part}; the release keeps its copy")
+    r = _rename(repo, up[0], name)
+    if r.returncode:
+        raise RuntimeError(f"{name}: uploaded whole as {part} on release {tag} but not renamed "
+                           f"({r.stderr.strip()[:300]}); the next run finishes the rename")
+
+
 def release_put(paths, repo=None, archive=None):
     """Upload `paths` to their releases geo-YYYY, replacing the files of the same name. First every file the
     releases already hold under those names is downloaded again and checked: a month file that would lose any
     element set (norad, epoch) the release holds is refused, and the release copies about to be replaced go to
     `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). With an archive, the
     files about to go up are copied there too, so the archive alone holds every version the releases have held.
-    Any failure raises ReleaseError before the first upload."""
+    Any failure raises ReleaseError before the first upload. Each file is then swapped in (_swap_in), never
+    uploaded over the old copy."""
     repo = _repo(repo)
     names = [os.path.basename(p) for p in paths]
     held = release_assets({tag_for(n) for n in names}, repo)
@@ -428,6 +497,4 @@ def release_put(paths, repo=None, archive=None):
                     "(space-track.org). Method: orbit/geo_region.py.")
             if r.returncode:
                 raise RuntimeError(f"release {tag} could not be created: {r.stderr.strip()[:300]}")
-        r = _gh("release", "upload", tag, "-R", repo, "--clobber", p)
-        if r.returncode:
-            raise RuntimeError(f"upload of {os.path.basename(p)} failed: {r.stderr.strip()[:300]}")
+        _swap_in(repo, tag, p)
