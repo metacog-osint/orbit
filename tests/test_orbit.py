@@ -606,6 +606,40 @@ class Registers(unittest.TestCase):
         for card in re.findall(r'"href": "#([a-z-]+)"', lead_src):
             self.assertIn(card, table, card)
 
+    # Every id on the single page before the split (site_src/index.html at the parent of 4764758, orbit-2.22).
+    OLD_PAGE_IDS = (
+        "archive-body asat asat-body asat-h asof base-h baseline baseline-body breakup-table breakups bu-h cat-h "
+        "catalog catalog-body decay decay-body decay-h globe globe-note hazard-table hazards hist-n hist-on hist-who "
+        "hist-year hz-h la-h lanes launch-table launches lead lead-h lead-list ledger ledger-body lg-h maneuver-body "
+        "maneuvers map map-card map-h map-info method mn-h obj-q re-h reentries reentry-table rpo rpo-body rpo-h "
+        "sec-baseline sec-changes sec-history sec-launches sec-reentries sec-sources sources src-h tiles "
+        "time-settings tipcheck-body tipcheck-h up-h upcoming upcoming-table view-flat view-globe").split()
+
+    def test_every_old_single_page_link_still_lands(self):
+        """An old /#id link (the hub linked /#src-h) lands on the page that holds the id now, or on the card that
+        took its place: each old id is on the home page, in PAGE_OF on a page that holds it, or in MOVED to an id
+        that is."""
+        import re
+        site = ROOT / "site_src"
+        pages = {p.stem: set(re.findall(r'id="([^"]+)"', p.read_text(encoding="utf-8"))) for p in site.glob("*.html")}
+        js = (site / "app.js").read_text(encoding="utf-8")
+        entries = lambda block: dict(re.findall(r'"?([a-z-]+)"?: "([a-z-]+)"', block))
+        page_of = entries(js[js.index("var PAGE_OF = {"):js.index("function pageOf")])
+        moved = entries(js[js.index("var MOVED = {"):js.index("var PAGE_OF = {")])
+
+        def page(i):
+            i = moved.get(i, i)
+            return i, page_of.get(i) or page_of.get((re.match(r"^[a-z]+-", i) or [""])[0])
+
+        for old in self.OLD_PAGE_IDS:
+            if old in pages["index"]:
+                continue
+            now, pg = page(old)
+            self.assertIsNotNone(pg, old)
+            self.assertIn(now, pages[pg], (old, now, pg))
+        self.assertEqual(page("src-h"), ("src-h", "sources"))
+        self.assertIn('location.replace(pageUrl(pg) + "#" + (MOVED[id] || id))', js)
+
     def test_maneuver_items_carry_the_approved_citation_and_stay_off_the_map(self):
         ev = {"norad": 41744, "name": "USA 270", "object_id": "2016-052A", "country": "US", "regime": "GEO",
               "from": "2026-10-12T18:06:12Z", "to": "2026-11-02T06:44:40Z", "dv_ms": 0.887, "dominant": "in-track",
