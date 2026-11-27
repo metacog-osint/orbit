@@ -1,5 +1,5 @@
 {
-  "about": "Roles shown on the GEO board, by NORAD catalogue number. An object is listed only where published reporting supports the role; each entry cites it. Unlisted objects have no listed role, which says nothing about what they are. Curated by hand; checked 26 Oct 2026 (docs/validation/geo-board.md).",
+  "about": "Roles shown on the GEO board, by NORAD catalogue number. An object is listed only where published reporting supports the role; each entry cites it. Unlisted objects have no listed role, which says nothing about what they are. Curated by hand; checked 26 Oct 2026, widened from Secure World Foundation's RPO sheet 27 Nov 2026 (docs/validation/geo-board.md).",
   "roles": {
     "inspection": "Inspection-capable: publicly reported rendezvous, proximity operations or inspection of other satellites",
     "servicing": "Servicing: docks with client satellites (life extension or refuelling)"
@@ -34,6 +34,36 @@
      "sources": [["Wikipedia: Mission Extension Vehicle", "https://en.wikipedia.org/wiki/Mission_Extension_Vehicle"]]},
     {"id": 46113, "name": "MEV-2", "role": "servicing",
      "basis": "Northrop Grumman Mission Extension Vehicle; docked to Intelsat 10-02 on 12 Apr 2021, undocking planned for 2026",
-     "sources": [["Wikipedia: Intelsat 10-02", "https://en.wikipedia.org/wiki/Intelsat_10-02"], ["Wikipedia: Mission Extension Vehicle", "https://en.wikipedia.org/wiki/Mission_Extension_Vehicle"]]}
+     "sources": [["Wikipedia: Intelsat 10-02", "https://en.wikipedia.org/wiki/Intelsat_10-02"], ["Wikipedia: Mission Extension Vehicle", "https://en.wikipedia.org/wiki/Mission_Extension_Vehicle"]]},
+    {"id": 40099, "name": "USA 253 (GSSAP 1)", "role": "inspection",
+     "basis": "US Space Force GSSAP satellite (launched Jul 2014): operates near GEO and manoeuvres to inspect objects in the belt",
+     "sources": [["Wikipedia: GSSAP", "https://en.wikipedia.org/wiki/Geosynchronous_Space_Situational_Awareness_Program"], ["Air & Space Forces Magazine: GSSAP", "https://www.airandspaceforces.com/weapons/gssap/"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 40100, "name": "USA 254 (GSSAP 2)", "role": "inspection",
+     "basis": "US Space Force GSSAP satellite (launched Jul 2014): operates near GEO and manoeuvres to inspect objects in the belt",
+     "sources": [["Wikipedia: GSSAP", "https://en.wikipedia.org/wiki/Geosynchronous_Space_Situational_Awareness_Program"], ["Air & Space Forces Magazine: GSSAP", "https://www.airandspaceforces.com/weapons/gssap/"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 40101, "name": "USA 255 (ANGELS)", "role": "inspection",
+     "basis": "AFRL experiment launched with GSSAP 1 and 2 in Jul 2014: manoeuvred around its own Delta IV upper stage above GEO, from about 50 km to within a few km; decommissioned Nov 2017",
+     "sources": [["Wikipedia: ANGELS", "https://en.wikipedia.org/wiki/Autonomous_Nanosatellite_Guardian_for_Evaluating_Local_Space"], ["AFRL fact sheet: ANGELS", "https://www.kirtland.af.mil/Portals/52/documents/AFD-131204-039.pdf?ver=2016-06-28-105617-297"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 40258, "name": "LUCH (OLYMP-K 1)", "role": "inspection",
+     "basis": "Russian satellite (launched Sep 2014): parked between Intelsat 901 and Intelsat 7 in 2015, later beside Intelsat 905; France's armed forces minister said it approached Athena-Fidus in 2017. Reported moved to a graveyard orbit in Oct 2025 and partly broken up in Jan 2026",
+     "sources": [["Wikipedia: Olymp-K", "https://en.wikipedia.org/wiki/Olymp-K"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 43874, "name": "TJS-3", "role": "inspection",
+     "basis": "Chinese satellite (launched Dec 2018): manoeuvred in step with a companion first catalogued as its apogee kick motor, then left its slot in May 2019 as the companion took its place; COMSPOC read this as practice at confusing other nations' tracking",
+     "sources": [["Breaking Defense, Oct 2021", "https://breakingdefense.com/2021/10/us-china-russia-test-new-space-war-tactics-sats-buzzing-spoofing-spying/"], ["Wikipedia: Tongxin Jishu Shiyan", "https://en.wikipedia.org/wiki/Tongxin_Jishu_Shiyan"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 43917, "name": "TJS-3 AKM (TJS-3's companion)", "role": "inspection",
+     "basis": "Catalogued as TJS-3's apogee kick motor, but kept station and manoeuvred in step with TJS-3 from Jan 2019 and took its place in May 2019; China has not acknowledged a second object",
+     "sources": [["Breaking Defense, Oct 2021", "https://breakingdefense.com/2021/10/us-china-russia-test-new-space-war-tactics-sats-buzzing-spoofing-spying/"], ["Wikipedia: Tongxin Jishu Shiyan", "https://en.wikipedia.org/wiki/Tongxin_Jishu_Shiyan"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 50321, "name": "SHIYAN 12 01 (SY-12 01)", "role": "inspection",
+     "basis": "Chinese test satellite (launched Dec 2021): when a GSSAP satellite (USA 270) approached in early 2022, the pair moved off in opposite directions and SY-12 02 took up a position to view it (COMSPOC, reported by SpaceNews)",
+     "sources": [["SpaceNews: An in-orbit game of cat and mouse", "https://spacenews.com/an-in-orbit-game-of-cat-and-mouse-close-approaches-prompt-calls-for-communications-and-norms/"], ["Defense One, May 2024", "https://www.defenseone.com/threats/2024/05/fast-movers-meet-chinese-satellites-zoom-around-inspectionsor-interference/396714/"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 50322, "name": "SHIYAN 12 02 (SY-12 02)", "role": "inspection",
+     "basis": "Chinese test satellite (launched Dec 2021): when a GSSAP satellite (USA 270) approached in early 2022, the pair moved off in opposite directions and SY-12 02 moved to a sunlit view of it (COMSPOC, reported by SpaceNews)",
+     "sources": [["SpaceNews: An in-orbit game of cat and mouse", "https://spacenews.com/an-in-orbit-game-of-cat-and-mouse-close-approaches-prompt-calls-for-communications-and-norms/"], ["Defense One, May 2024", "https://www.defenseone.com/threats/2024/05/fast-movers-meet-chinese-satellites-zoom-around-inspectionsor-interference/396714/"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 55247, "name": "LINUSS2", "role": "inspection",
+     "basis": "Lockheed Martin CubeSat (launched Nov 2022 on USSF-44): rendezvous and proximity operations with LINUSS1 above GEO in early 2023, to within about 400 m, as a servicing demonstration",
+     "sources": [["Lockheed Martin, 18 Apr 2023", "https://news.lockheedmartin.com/2023-04-18-Lockheed-Martin-CubeSats-Successfully-Validate-Essential-Maneuvers-for-On-orbit-Servicing"], ["Aviation Week: LINUSS rendezvous within 400 m", "https://aviationweek.com/defense-space/space/lockheeds-linuss-cubesats-demo-rendezvous-within-400-m"], ["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]},
+    {"id": 55264, "name": "LDPE-3A", "role": "inspection",
+     "basis": "US Space Force propulsive ESPA vehicle (launched Jan 2023 on USSF-67): Secure World Foundation lists proximity operations with Shijian-23 in Oct 2024 (the only published report found)",
+     "sources": [["Secure World Foundation, RPO data of the Global Counterspace Capabilities report (sheet updated 17 Feb 2026)", "https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/"]]}
   ]
 }
