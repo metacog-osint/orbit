@@ -354,6 +354,10 @@
     if (c.below_floor) parts.push(c.below_floor + " under the listing floor");
     if (c.low_orbit_off_track) parts.push(c.low_orbit_off_track + " in low orbit, mainly plane change or orbit shape " +
       "and under 1 m/s, where element-set noise is largest");
+    if (c.geo_one_set) parts.push(c.geo_one_set + " at GEO that the next element set did not confirm (one set off " +
+      "the orbit gives a change and its return)");
+    if (c.geo_awaiting) parts.push(c.geo_awaiting + " at GEO waiting for the next element set to confirm " +
+      (c.geo_awaiting === 1 ? "it" : "them"));
     return parts.length ? "Counted, not listed: " + parts.join("; ") + ". " : "";
   }
 

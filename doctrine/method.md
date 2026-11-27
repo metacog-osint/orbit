@@ -248,6 +248,50 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    21:06 by the GEO run of 20:56. The change was listed at 00:57 UTC on 22 Nov. Its next set (22 Nov 15:37 UTC,
    created 19:16) was listed at 20:05 UTC the same day.
 
+## GEO changes wait for a confirming set (`orbit-2.47`, 27 Nov 2026)
+One element set that lies off the orbit gives two marks: a change to that set and a change back from it, with
+opposite signs. On Luch (Olymp) 2's record (13 Mar 2023 to 22 Nov 2026) 42 of 176 listed changes came in 21 such
+pairs: two consecutive single-pair changes with the same main term, the first ending where the second begins,
+whose inclination (cross-track) or semi-major-axis (in-track) changes have opposite signs and cancel to within half
+of the larger.
+1. **The rule (`orbit/maneuver.py`, step 8; GEO only, `CONFIRM_REGIMES`):** a change is listed only once the set
+   after its first marked pair exists and confirms it: the pair from the set before the change to that next set is
+   marked again by the same rule (8 robust deviations of the object's own noise and 0.25 m/s). When it is not, the
+   set that ends the first marked pair alone made the change. That set is left out, counted as `one_set`, and the
+   rule runs again on the rest, so the return mark it gave goes too. A change whose first marked pair ends at the
+   newest set is counted as `awaiting_next_set` and listed when the next set confirms it. Each listed GEO change
+   carries `confirmed_by`, the confirming set's epoch. The card's "Counted, not listed" line gives both counts.
+2. **Why GEO only:** the pattern was measured at GEO. In low orbit the 1 m/s rule for cross-track and eccentricity
+   marks (`orbit-2.8`) already holds back fit noise, and the ISS case lists all five announced reboosts and nothing
+   outside NASA's list without this step.
+3. **What it costs:** a real change is listed one element set later, and the wait is the gap to that set. On the
+   records measured (item 4) the median wait is about 9 to 13 hours: 8.6 h across every judged GEO object, 11.7 h
+   on the SJ-21 case and 12.8 h on Luch 2. Where public sets are sparse it is longer: a median of 23.8 h on the GEO
+   role list, and as long as the next public set takes. The orbit-change page and the GEO page say so. Luch 2's departure from 62°E (first
+   seen in the set of 21 Nov 2026 15:41 UTC, listed at 00:57 UTC on 22 Nov) would have waited for the set of 22 Nov
+   15:37 UTC, listed at 20:05 UTC the same day, about 19 hours later. A real burn undone by a second burn before the
+   next set reads exactly like one set off the orbit and is not listed; the element sets cannot tell the two apart.
+4. **Measured on the record** (delay: the wait the rule adds, from the set before the confirming set to the
+   confirming set; the listing lag in item 9 of "Orbit changes in watched objects" comes on top):
+
+   | Record | Listed before | Listed after | Sets left out | Out-and-back pairs before / after | Delay median / 90% / longest |
+   |---|---|---|---|---|---|
+   | Luch (Olymp) 2 case, 1,349 days | 176 | 119 | 49 | 21 / 1 | 12.8 / 28.4 / 82.9 h |
+   | SJ-21 and BeiDou-2 G2 case, Dec 2021 to Feb 2022 | 17 | 15 | 1 | 1 / 0 | 11.7 / 29.4 / 30.7 h |
+   | The GEO role list (10 objects, 8 judged), Orbit's sets 1 Jul to 27 Nov 2026 | 35 | 27 (2 awaiting) | 6 | 2 / 1 | 23.8 / 88.6 / 119.7 h |
+   | Every judged GEO object in release `geo-2026` (1,748), same span | 8,399 | 6,528 (24 awaiting) | 2,295 | 648 / 104 | 8.6 / 24.1 / 742.7 h |
+
+   SJ-21's tow is still listed (BeiDou-2 G2 raised 1,716 km, SJ-21 raised 1,721 km and returned 1,765 km down); the
+   pair it loses is 27-28 Dec 2021 (0.40 m/s each way across a set 12 minutes after the one before). On Luch 2,
+   every departure and arrival in M. Langbroek's stop table (`docs/validation/luch2-relocations.md`) that had an
+   in-track change of 0.5 m/s or more listed within 2 days still has one (13 of 13; 4 of the 17 dates had none
+   before either). The ISS case is unchanged (5 of 5, 10 listed). Across every judged GEO object, 199 of 6,528
+   listed changes wait more than 48 hours, each because the object's next set came that much later.
+5. **Not measured:** how many of the changes no longer listed were real. No public burn list exists for these
+   objects; the rule removes marks that the next set does not support, which is not proof that nothing happened.
+   The belt board's orbit changes and the GEO callouts' listed-role changes use the same detector, so they follow
+   this rule too; the GEO two-set rule (`orbit-2.38`) is unchanged.
+
 ## Baselines from GCAT's history (`orbit-2.8`)
 Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
 (`gcat.baseline`), shown in the card `#baseline`; not in the feed.
@@ -992,8 +1036,8 @@ with an unexplained difference.
    carries scheduled launches as `launch:upcoming:*` (LA-PIR-3); COP ends Orbit's old items when Orbit is read.
    OR-PIR-3 stays in the register, noted, so older items still resolve.
 3. **Ledger:** Orbit's last `launch-ledger.json` stays on its release `ledger`, frozen, with a "moved to Launch"
-   note in the release text; the private archive keeps its dated copies. `ledger.yml` has no schedule and does nothing
-   when started; it remains while the suite's dispatcher still starts it.
+   note in the release text; the private archive keeps its dated copies. `ledger.yml` was removed once the suite's
+   dispatcher stopped starting it.
 4. **Launches page:** the map and globe draw GCAT's launches of the last 7 days (each with its payloads and their
    orbits, and their paths on the globe); pads, hazard areas, ledger history and Launch's lines are gone. A card
    under the old ids `#upcoming`, `#hazards` and `#ledger` points to Launch, so older links still land.

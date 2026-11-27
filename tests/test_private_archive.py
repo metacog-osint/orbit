@@ -76,15 +76,10 @@ class SetStore(unittest.TestCase):
 
 
 class LedgerWorkflow(unittest.TestCase):
-    def test_retired_ledger_workflow_does_nothing(self):
-        """orbit-2.32 (ideas#69): the ledger is Launch's. The stub stays only while the hub's dispatcher still starts
-        it: no schedule, no Launch Library 2 pull, no write to the frozen release or the private archive."""
-        text = (ROOT / ".github" / "workflows" / "ledger.yml").read_text(encoding="utf-8")
-        self.assertNotIn("schedule:", text)
-        self.assertIn("workflow_dispatch:", text)
-        self.assertIn("contents: read", text)
-        for gone in ("gh release", "tools/orbit.py", "tic_archive.py", "TIC_ARCHIVE_TOKEN"):
-            self.assertNotIn(gone, text)
+    def test_retired_ledger_workflow_is_gone(self):
+        """orbit-2.32: the launch ledger is Launch's. The do-nothing stub went once the hub's dispatcher stopped
+        starting it."""
+        self.assertFalse((ROOT / ".github" / "workflows" / "ledger.yml").exists())
 
     def test_one_snapshot_a_day_and_nothing_replaced(self):
         with tempfile.TemporaryDirectory() as td:

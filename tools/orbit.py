@@ -320,7 +320,9 @@ def _lane_maneuver(raw_dir: Path, prev: dict, getter, reentry_norads=None, **_):
     out = {"attribution": maneuver.ATTRIBUTION, "read_at": read_at, "watched": len(ids), "window_days": rep["window_days"],
            "thresholds": rep["thresholds"], "events": rep["events"],
            "counted_not_listed": {"below_floor": sum(o.get("below_report") or 0 for o in rep["objects"]),
-                                  "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"])},
+                                  "low_orbit_off_track": sum(o.get("leo_off_track") or 0 for o in rep["objects"]),
+                                  "geo_one_set": sum(o.get("one_set") or 0 for o in rep["objects"]),
+                                  "geo_awaiting": sum(o.get("awaiting_next_set") or 0 for o in rep["objects"])},
            "quiet_or_untracked": sum(1 for o in rep["objects"] if not o["events"]),
            "stale": sum(1 for o in rep["objects"] if (o.get("note") or "").startswith("no new"))}
     want = set(reentry_norads or [])

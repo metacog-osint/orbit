@@ -49,6 +49,16 @@ never committed, so CI skips them); `tests/test_orbit.py` covers the logic on sy
   listings (23%) leave it moved by under 0.25 m/s. Two of the 21 pairs do not return to the old orbit. This is
   one object: on SJ-21 the settled-orbit check finds 1 of 12.
 
+## One set off the orbit (the orbit-2.47 change)
+
+From `orbit-2.47` a GEO change is listed only once the set after it confirms it (method: "GEO changes wait for a
+confirming set"). On the cases above: Luch 2 lists 119 changes, not 176, with 49 sets left out as lying off the
+orbit; its out-and-back pairs fall from 21 to 1, and every relocation departure and arrival that had a listed
+in-track change still has one. SJ-21 lists 13, not 15: the 27-28 Dec 2021 pair goes, the tow and return stay. The
+ISS is unchanged (the step applies at GEO only). A listed change waits for its confirming set: on Luch 2 a median
+12.8 hours, 90% within 28.4 hours, longest 82.9 hours. The figures above this section are those of `orbit-2.43`,
+before the step; `tests/test_maneuver_cases.py` pins the new ones.
+
 ## Station-kept GEO satellites held near zero inclination
 
 Seven commercial station-kept satellites, from Orbit's public `geo-elements-2026-07..11` sets (1 Jul to 26 Nov 2026,
