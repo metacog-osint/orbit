@@ -297,7 +297,10 @@ class EndToEnd(unittest.TestCase):
         for f in doc["features"]:
             p = f["properties"]
             self.assertEqual(p["kind"], "observation")
-            self.assertEqual(p["tier"], "routine")
+            if p["tier"] != "routine":  # orbit-2.49: anomalies only against GCAT's history, with their baseline
+                self.assertEqual(p["tier"], "anomaly", p["id"])
+                self.assertTrue(p["id"].startswith(("orbit:baseline:", "orbit:breakup:")), p["id"])
+                self.assertIn("baseline_ref", p)
             self.assertNotIn("probability", p)
 
     def test_failed_lane_keeps_last_good_copy(self):
