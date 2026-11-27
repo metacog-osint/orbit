@@ -6,7 +6,11 @@ The method, for each watched object, over its stored Space-Track element sets (G
   1. One set per epoch: where Space-Track has re-issued an epoch, the later-created set is kept.
   2. For each pair of consecutive sets, the changes in semi-major axis (from mean motion), inclination, right
      ascension of the ascending node and eccentricity, less what the object's own steady drift would give over
-     that interval (the median rate across its pairs: drag decay, nodal precession).
+     that interval (the median rate across its pairs: drag decay, nodal precession). From orbit-2.43 the node's
+     J2 precession is first removed at the rate of each pair's own orbit (node_rate_j2), and the median then takes
+     only what is left (lunar and solar pull, higher zonal terms): one median rate left a decaying orbit's faster
+     precession in long pairs (15 Nov 2026 review: a 4.5-day gap at 450 km and 51.6 deg listed 2.5 m/s
+     cross-track with no burn).
   3. Each change as a velocity: in-track from semi-major axis (v * da / 2a), cross-track from inclination and node
      (v * angle), eccentricity (v * de / 2).
   4. The object's own noise: for each of the three, the median and 1.4826 * median absolute deviation across all
@@ -27,9 +31,11 @@ The method, for each watched object, over its stored Space-Track element sets (G
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
 marks are manoeuvres; a re-fit after a tracking gap, a mis-tagged set, or (in low orbit) a geomagnetic storm's
-drag can give the same. Orbit says which object, when and how much; never why, and never a warning. The
-thresholds are not yet calibrated against announced manoeuvres; `python tools/orbit.py maneuver-case` runs the
-known case (Shijian-21 towing BeiDou-2 G2 to a graveyard orbit, January 2022).
+drag can give the same. Orbit says which object, when and how much; never why, and never a warning. What the
+known cases measure (`python tools/orbit.py maneuver-case sj21|iss|luch2`; docs/validation/maneuver-calibration.md):
+in low orbit all five of NASA's announced ISS reboosts of 2024 and nothing else; at GEO the Shijian-21 tow of BeiDou-2
+G2 (January 2022), and on Luch (Olymp) 2 about a quarter of listed changes in out-and-back pairs, the pattern of a
+single off set. No case covers medium or highly elliptical orbits, or small GEO station-keeping burns.
 """
 from __future__ import annotations
 
@@ -44,6 +50,7 @@ ATTRIBUTION = ("Element sets: Space-Track.org, United States Space Command (USSP
 
 MU = 398600.4418  # km^3/s^2
 RE = 6378.137     # km
+J2 = 0.001082616  # WGS-72, the gravity model SGP4 element sets are fitted with
 SIDEREAL_REV_DAY = 1.0027379093
 Z = 8.0
 FLOOR_MS = 0.05
@@ -142,15 +149,27 @@ def geo_position(s: list) -> dict:
     return {"lon": round(lon, 2), "drift_deg_day": round((s[1] - SIDEREAL_REV_DAY) * 360.0, 3)}
 
 
+def node_rate_j2(a: float, e: float, i_deg: float) -> float:
+    """The first-order secular nodal precession from Earth's oblateness (J2), degrees a day:
+    -1.5 n J2 (Re / p)^2 cos i, with n from a (two-body), p = a (1 - e^2)."""
+    n = math.sqrt(MU / a ** 3)
+    p = a * (1.0 - e * e)
+    return math.degrees(-1.5 * n * J2 * (RE / p) ** 2 * math.cos(math.radians(i_deg))) * 86400.0
+
+
 def _pairs(sets: list) -> list[dict]:
+    """Consecutive set pairs. `dnode` is the node's change less the J2 precession each pair's own orbit gives
+    (orbit-2.43): the mean of the rates at its two sets, times the interval, so a decaying orbit's faster
+    precession is not left in the residual. Wrapped to +-180 degrees only after that removal."""
     out = []
     for p, q in zip(sets, sets[1:]):
         dt = (_dt(q[0]) - _dt(p[0])).total_seconds() / 86400.0
         if dt <= 0:
             continue
         a0, a1 = _a(p[1]), _a(q[1])
+        j2 = (node_rate_j2(a0, p[2], p[3]) + node_rate_j2(a1, q[2], q[3])) / 2 * dt
         out.append({"from": p[0], "to": q[0], "dt": dt, "a": (a0 + a1) / 2, "i": (p[3] + q[3]) / 2,
-                    "da": a1 - a0, "di": q[3] - p[3], "dnode": _wrap180(q[4] - p[4]), "de": q[2] - p[2],
+                    "da": a1 - a0, "di": q[3] - p[3], "dnode": _wrap180(q[4] - p[4] - j2), "de": q[2] - p[2],
                     "p": p, "q": q})
     return out
 
@@ -170,6 +189,26 @@ def _agrees(g: list[dict], p: dict) -> bool:
     semi-major-axis change (a zero change agrees with either sign)."""
     da_g, da_p = sum(q["da"] for q in g), p["da"]
     return _dominant(g) == _dominant([p]) and da_g * da_p >= 0
+
+
+def terms(pairs: list[dict]) -> dict:
+    """Each pair's change as velocities (p["dv"], p["total"]), less the object's own steady drift: the median rate
+    across its pairs of the semi-major axis, inclination, node (after J2) and eccentricity. Returns those rates."""
+    rated = [p for p in pairs if p["dt"] >= MIN_RATE_DT] or pairs
+    rate = {k: median(p[k] / p["dt"] for p in rated) for k in ("da", "di", "dnode", "de")}
+    for p in pairs:
+        v = math.sqrt(MU / p["a"]) * 1000.0  # m/s
+        ja = p["da"] - rate["da"] * p["dt"]
+        ji = math.radians(p["di"] - rate["di"] * p["dt"])
+        # Wrap the residual, not only the raw change: over a long gap the expected precession passes 180 degrees
+        # and an unwrapped residual is off by 360 (a 28.5 deg orbit, 30-day gap, gave 22,902 m/s cross-track).
+        jn = math.radians(_wrap180(p["dnode"] - rate["dnode"] * p["dt"])) * math.sin(math.radians(p["i"]))
+        je = p["de"] - rate["de"] * p["dt"]
+        p["ja"], p["v"] = ja, v
+        p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
+                   "eccentricity": abs(v * je / 2)}
+        p["total"] = math.sqrt(sum(x * x for x in p["dv"].values()))
+    return rate
 
 
 def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
@@ -192,20 +231,7 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     if len(pairs) < MIN_PAIRS:
         out["note"] = out["note"] or f"baseline too short ({len(pairs)} pairs of {MIN_PAIRS})"
         return out
-    rated = [p for p in pairs if p["dt"] >= MIN_RATE_DT] or pairs
-    rate = {k: median(p[k] / p["dt"] for p in rated) for k in ("da", "di", "dnode", "de")}
-    for p in pairs:
-        v = math.sqrt(MU / p["a"]) * 1000.0  # m/s
-        ja = p["da"] - rate["da"] * p["dt"]
-        ji = math.radians(p["di"] - rate["di"] * p["dt"])
-        # Wrap the residual, not only the raw change: over a long gap the expected precession passes 180 degrees
-        # and an unwrapped residual is off by 360 (a 28.5 deg orbit, 30-day gap, gave 22,902 m/s cross-track).
-        jn = math.radians(_wrap180(p["dnode"] - rate["dnode"] * p["dt"])) * math.sin(math.radians(p["i"]))
-        je = p["de"] - rate["de"] * p["dt"]
-        p["ja"], p["v"] = ja, v
-        p["dv"] = {"in-track": abs(v * ja / (2 * p["a"])), "cross-track": v * math.hypot(ji, jn),
-                   "eccentricity": abs(v * je / 2)}
-        p["total"] = math.sqrt(sum(x * x for x in p["dv"].values()))
+    terms(pairs)
     base = {c: _robust([p["dv"][c] for p in pairs]) for c in COMPONENTS}
     out["noise_ms"] = {c: round(base[c][1], 4) for c in COMPONENTS}
     cutoff = _iso(now - timedelta(days=window_days))

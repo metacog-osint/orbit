@@ -224,6 +224,26 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    worded to Tom ("mainly along-track or eccentricity, or cross-track above about 1 m/s") would have kept the
    0.53 m/s eccentricity mark of 28 Apr 2024; the 1 m/s floor applies to eccentricity too, which is what gave the
    "drops all 9" result Tom approved.
+8. **Precession at each pair's own rate (`orbit-2.43`, 27 Nov 2026).** The node's J2 precession is removed first at
+   the rate each pair's own orbit gives (-1.5 n J2 (Re/p)^2 cos i, the mean of its two sets' rates), and the
+   object's median rate then takes only what is left (lunar and solar pull, higher zonal terms). One median rate
+   left a decaying low orbit's faster precession in long pairs: synthetic, no burn, 450 km and 51.6 deg decaying
+   36 m a day, a 4.5-day gap late in a 120-day history listed 2.5 m/s cross-track. With the change it lists nothing;
+   on the three known cases every listed change stays at the same span, totals move by 0.29 m/s at most, and the
+   ISS stays 5 of 5 with none outside NASA's list. Scaling noise by pair length was measured and not adopted (it
+   added a change outside NASA's list). What the known cases measure, detection and probable false listings
+   included: `docs/validation/maneuver-calibration.md`.
+9. **How soon a change is listed (measured 19-27 Nov 2026).** The lane reads Space-Track when an update run starts
+   and the account's hour allows: the hub's dispatch at :55 past 00, 06, 12 and 18 UTC, and every push to main (the
+   run's own cron is a late fallback). A change is listed in the run that first reads its set and goes live with
+   that run's deploy, about 3 minutes later. Of 84 new element sets of watched objects published in that span, the
+   first read came a median 1.6 hours after Space-Track created the set (its `CREATION_DATE`), 90% within 3.8
+   hours, longest 5.7 hours. Expect up to about 6 hours when nothing is pushed, and longer when a GEO run's query
+   takes the account's hour just before a dispatch: 9 of 112 update runs were held that way, two of them dispatch
+   runs (25 Nov 00:55 and 26 Nov 12:55 UTC; the second left 10 hours between reads). Luch (Olymp) 2's set of 21 Nov
+   15:41 UTC was created at 19:16 UTC. The run at 19:47 was held by the hour after the 18:56 read, and the run at
+   21:06 by the GEO run of 20:56. The change was listed at 00:57 UTC on 22 Nov. Its next set (22 Nov 15:37 UTC,
+   created 19:16) was listed at 20:05 UTC the same day.
 
 ## Baselines from GCAT's history (`orbit-2.8`)
 Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the catalog lane at each new GCAT reading
@@ -642,6 +662,14 @@ only a neighbour, so the palette has to pass the dataviz validator with all pair
 panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
 with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against
 magenta, violet or aqua in dark mode). The orbit class stays a filter and a column in the list.
+**The owner colours, all pairs (`orbit-2.44`, 27 Nov 2026).** The four owner tokens now pass `--pairs all` in both
+modes. The dark grey is `#616a75`, darker than the old `#7d8794`, which fell to 13.1 normal-vision and 5.2
+deuteranopia Delta E against the aqua `#199e70`. Dark, on `#131822`: worst pair 9.4 for colour-blind vision (aqua
+and orange) and 16.5 for normal vision (grey and aqua), every token at 3:1 or more. Light, on `#ffffff`, unchanged:
+worst 8.2 (grey and aqua, protanopia) and 16.1. The grey is neutral by design, so the validator's chroma floor is not
+applied to it. In light mode the aqua (2.8:1) and grey (2.3:1) sit under 3:1 on white; every owner chip carries its
+flag and code, and each map's list and selected-object details name the owner, which is the relief the validator
+asks for.
 Rocket bodies and debris have no CelesTrak source. CelesTrak's GP groups (its Current Data page and GP
 documentation, read 27 Nov 2026) hold no whole-catalog, rocket-body or debris group: the only debris groups are three
 single clouds (FENGYUN 1C, IRIDIUM 33, COSMOS 2251), and the special sets are the GEO protected zone and potential
