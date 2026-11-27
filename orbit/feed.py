@@ -489,7 +489,7 @@ def _maneuver_item(e: dict, generated: str, read_at: str, attribution: str) -> d
     return {"type": "Feature", "geometry": None, "properties": props}
 
 
-RELOCATION_METHOD = "orbit-2.30"
+RELOCATION_METHOD = "orbit-2.55"                 # 2.30, departure as the move left it from 2.55
 RELOCATION_PREFIX = "orbit:relocation:"
 RELOCATION_NOTE = ("Arithmetic on the last public element sets, at the last measured rate: not a forecast, and no "
                    "statement of why the satellite moves or where it is going.")

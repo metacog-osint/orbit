@@ -996,7 +996,13 @@ One feed item per move of a listed-role GEO object, updated in place.
 1. **Identity.** `orbit:relocation:<norad>:<estimated start day>`, the same as `subject_id`. The day is the start
    estimated from the first moving set's distance and rate (`geo_tracker.start_estimates`), fixed once that set
    exists; the estimate from the rate change needs a second set and would move the id. A move needs a held stop
-   in Orbit's own sets before it: with none, no item.
+   in Orbit's own sets before it: with none, no item. From `orbit-2.55` (27 Nov 2026, ideas#524) the departure
+   is the stop as the move left it (`geo_tracker.left_stop`): the stop rules join a pause near the stop's
+   longitude to the stop, so a day back under 0.1 deg a day just after the first set over it, seen a run later,
+   moved the last held set and with it the id. Now sets under the line that follow the stop's first set over it,
+   for under 2 days in all, are part of the move. A hold of 2 days or more after it is a stop again: the object is
+   no longer drifting, its item goes, and a later move is a new item. A test pins one id for Luch (Olymp) 2's 2025
+   move at every half day from its first moving set to its stop.
 2. **Steps** (`steps`, each with the sets it rests on): `move_began` (the last held set and the first moving set;
    `last_change` `new` at the first moving set); `braking` (`braking seen`, or `steady` once the stop projection
    holds, which sets `last_change` `changed` at that set); `stopped` (drift under 0.1 deg a day for 2 days, the
