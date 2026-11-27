@@ -642,6 +642,13 @@ only a neighbour, so the palette has to pass the dataviz validator with all pair
 panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
 with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against
 magenta, violet or aqua in dark mode). The orbit class stays a filter and a column in the list.
+Rocket bodies and debris have no CelesTrak source. CelesTrak's GP groups (its Current Data page and GP
+documentation, read 27 Nov 2026) hold no whole-catalog, rocket-body or debris group: the only debris groups are three
+single clouds (FENGYUN 1C, IRIDIUM 33, COSMOS 2251), and the special sets are the GEO protected zone and potential
+decays. The whole catalog's element sets come from Space-Track's GP class, whose blanket approval covers
+redistribution of basic SSA data with citation; reading it would be a new daily query on Orbit's Space-Track account,
+within the request limits Orbit keeps there, so the map does not show these objects until that query is set up. Rocket bodies
+and debris near GEO are already published, with the citation, in the GEO region files (`geo-YYYY` releases).
 
 ## The satellite map's added options (`orbit-2.37`, 26 Nov 2026; ideas#138)
 - **Owner search:** any owner code in the file, typed as the country's name or the code (GCAT's state codes for
