@@ -232,7 +232,10 @@ element sets are not republished. In the feed from 15 Nov 2026 (Tom's yes): one 
    on the three known cases every listed change stays at the same span, totals move by 0.29 m/s at most, and the
    ISS stays 5 of 5 with none outside NASA's list. Scaling noise by pair length was measured and not adopted (it
    added a change outside NASA's list). What the known cases measure, detection and probable false listings
-   included: `docs/validation/maneuver-calibration.md`.
+   included: `docs/validation/maneuver-calibration.md`. Station-kept GEO satellites held near zero inclination:
+   one north-south burn is often listed as several plane changes, because the sets after it jump back and forth in
+   plane before they settle; on six of seven measured satellites the listed total is 2.3-4.4 times the north-south
+   need, and counted by episode it is 1.0-1.6 times. The page states this limit.
 9. **How soon a change is listed (measured 19-27 Nov 2026).** The lane reads Space-Track when an update run starts
    and the account's hour allows: the hub's dispatch at :55 past 00, 06, 12 and 18 UTC, and every push to main (the
    run's own cron is a late fallback). A change is listed in the run that first reads its set and goes live with
