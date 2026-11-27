@@ -1427,6 +1427,18 @@ function main() {
     if (Math.abs(c.inc[1] - c.inc[0]) >= 0.0005) out.push("inclination " + incTxt(c.inc[0]) + " → " + incTxt(c.inc[1]));
     return out;
   }
+  // two-set rule (tools/geo_belt.py two_set_mark, method orbit-2.38): objects with too few sets for Orbit's rule, listed apart
+  const TWO_SET_WORD = { "moved inside the gap": "Moved and stopped inside the gap", "drift changed, held either side": "Drift changed, held on both sides" };
+  const gapTxt = (h) => (h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days");
+  function twoSet(ms, days) {
+    if (!ms.length) return "";
+    return '<h4>Seen between two sets: satellites with too few sets for Orbit’s rule</h4>' +
+      table(["Between", "Satellite", "Owner", "Gap", "What changed"], ms.map((m) => "<tr>" + spanCell(m.between[0], m.between[1]) + "<td>" + pick([m.norad], m.name) + roleTag(m.role) +
+        "</td><td>" + esc(m.owner || "") + '</td><td class="num">' + esc(gapTxt(m.gap_h)) + "</td><td><strong>" + esc(TWO_SET_WORD[m.kind] || KIND_WORD[m.kind] || m.kind) + ".</strong> " +
+        esc("Drift " + rateTxt(m.drift[0]) + " → " + rateTxt(m.drift[1])) + "; longitude " + lonTxt(m.lon[0]) + " → " + lonTxt(m.lon[1]) + ", where a steady change of drift would have put it at " + lonTxt(m.lon_natural) +
+        '. <span class="small muted">' + esc(m.sets + " public sets held; it happened somewhere in the " + gapTxt(m.gap_h) + " between these two.") + "</span></td></tr>")) +
+      '<p class="small">These satellites have too few public element sets for Orbit’s rule, so their changes are listed here, apart from the changes above. A pair of consecutive sets is listed when the drift changed by more than a 0.25 m/s burn would change it, the satellite started or stopped drifting, or its longitude is off the path natural drift explains, each with an allowance that grows with the gap. Pairs that ended in the last ' + days + " days.</p>";
+  }
   function beltTables(b) {
     if (!$("geo-belt-status")) return;
     if (!b || b.error) {
@@ -1453,6 +1465,7 @@ function main() {
     const n = b.change_counts || {}, routine = n["station-keeping"] || 0, nj = b.not_judged || [];
     $("geo-changes").innerHTML = (rare.length ? table(head, rows(rare, true)) : "<p>None other than station-keeping.</p>") +
       (keep.length ? '<details class="globe-more"><summary>Routine station-keeping (' + fmtN(routine) + (routine > keep.length ? ", the newest " + fmtN(keep.length) + " listed" : "") + ")</summary>" + table(head, rows(keep, false)) + "</details>" : "") +
+      twoSet(b.two_set || [], ((b.method || {}).two_set || {}).days || 30) +
       (nj.length ? '<details class="globe-more"><summary>Not judged: too few public element sets (' + fmtN(nj.length) + ")</summary>" +
         table(["Satellite", "Owner", "Sets held", "Last two sets", "Drift", "Inclination"], nj.map((u) => "<tr><td>" + pick([u.norad], u.name) + roleTag(u.role) + "</td><td>" + esc(u.owner || "") +
           '</td><td class="num">' + fmtN(u.sets) + "</td>" + (u.between ? spanCell(u.between[0], u.between[1]) + "<td>" + esc(rateTxt(u.drift[0]) + " → " + rateTxt(u.drift[1])) + "</td><td>" +
