@@ -20,6 +20,9 @@ as Noisefloor's board, with Orbit's own Space-Track element sets.
             Noisefloor's kind from the drift and inclination of the sets on either side: routine station-keeping
             when the object holds its longitude before and after (unless the inclination of an inclined orbit moved
             by INC_CHANGE or more), otherwise started drifting, stopped drifting or drift rate changed.
+  two_set   (orbit-2.38, ideas#252) for the objects the main rule does not judge (under 10 pairs of sets): each pair
+            of consecutive sets ending in the last TWO_SET_DAYS (30) whose drift or mean longitude changed by more
+            than natural drift explains (two_set_mark). Listed apart from `changes`, never merged with them.
 Proximity and orbit changes only, never intent.
 """
 import math
@@ -37,6 +40,13 @@ CHANGE_DAYS = 7
 ROUTINE = "station-keeping"
 MAX_ROUTINE = 300                 # routine station-keeping kept on the page (the newest), as Noisefloor's board
 MAX_CLOSE, MAX_DRIFT = 40, 40
+# Two-set rule (orbit-2.38): thresholds for objects with too few sets for Orbit's rule.
+A_NAT = 0.0017                    # deg a day^2: largest natural drift acceleration at GEO (Earth's triaxiality)
+DEG_DAY_PER_MS = 0.352            # deg a day of drift per m/s of in-track change at GEO (3 x 360.99 / 3075 m/s)
+DRIFT_STEP = 0.25 * DEG_DAY_PER_MS  # 0.088 deg a day: Orbit's 0.25 m/s GEO floor as a drift change
+CLASS_STEP = 0.02                 # deg a day: a class change needs at least this much drift change (Noisefloor's)
+LON_STEP = 0.5                    # deg: mean longitude off the trapezoid of the two drifts
+TWO_SET_DAYS = 30
 
 
 def drift(n):
@@ -75,6 +85,61 @@ def change_kind(before, after):
 
 def _epoch(s):
     return datetime.fromisoformat(s.rstrip("Z")[:26]).replace(tzinfo=timezone.utc)
+
+
+def mean_lon(r):
+    """Mean longitude (east +) of an element set at its epoch: RAAN + argument of perigee + mean anomaly - GMST.
+    Within 0.06 deg of SGP4's day-mean longitude in 99% of the active belt's sets (1 Jul-26 Nov 2026)."""
+    sys.path.insert(0, ROOT)
+    from orbit import maneuver as M
+    return M._wrap180(float(r["raan"]) + float(r["argp"]) + float(r["M"]) - M._gmst_deg(_epoch(r["epoch"])))
+
+
+def two_set_mark(p, q):
+    """The two-set rule on consecutive element sets p and q (dicts with epoch, n, i, raan, argp, M): a dict when
+    their drift or mean longitude changed by more than natural drift explains over the gap, else None.
+      drift      |drift change| >= DRIFT_STEP + A_NAT x gap (days)
+      class      drifting <-> held (DRIFT_KEPT), with |drift change| >= CLASS_STEP + A_NAT x gap
+      longitude  |mean longitude - (first + mean of the two drifts x gap)| >= LON_STEP + A_NAT x gap^2 / 2
+    The mean of the two drifts is the path of a constant acceleration, so natural drift alone leaves only the
+    allowance; a move that started and stopped inside the gap shows here and nowhere else."""
+    dt = (_epoch(q["epoch"]) - _epoch(p["epoch"])).total_seconds() / 86400.0
+    if dt <= 0:
+        return None
+    dp, dq = drift(float(p["n"])), drift(float(q["n"]))
+    lp, lq = mean_lon(p), mean_lon(q)
+    expect = (lp + (dp + dq) / 2.0 * dt + 540.0) % 360.0 - 180.0
+    off = (lq - expect + 540.0) % 360.0 - 180.0
+    kept_p, kept_q = abs(dp) < DRIFT_KEPT, abs(dq) < DRIFT_KEPT
+    allow = {"drift": DRIFT_STEP + A_NAT * dt, "class": CLASS_STEP + A_NAT * dt, "lon": LON_STEP + A_NAT * dt * dt / 2.0}
+    tests = []
+    if abs(dq - dp) >= allow["drift"]:
+        tests.append("drift")
+    if kept_p != kept_q and abs(dq - dp) >= allow["class"]:
+        tests.append("class")
+    if abs(off) >= allow["lon"]:
+        tests.append("longitude")
+    if not tests:
+        return None
+    kind = change_kind({"drift": dp, "i": float(p["i"])}, {"drift": dq, "i": float(q["i"])})
+    if kind == ROUTINE or kind == "inclined orbit changed":
+        kind = "moved inside the gap" if "longitude" in tests else "drift changed, held either side"
+    return {"between": [p["epoch"][:16], q["epoch"][:16]], "gap_h": round(dt * 24.0, 1), "kind": kind, "tests": tests,
+            "drift": [round(dp, 4), round(dq, 4)], "lon": [round(lp, 2), round(lq, 2)], "lon_natural": round(expect, 2),
+            "allow": {k: round(v, 3) for k, v in allow.items()}}
+
+
+def two_set(sets, now, days=TWO_SET_DAYS):
+    """Two-set marks for one object's sets (sorted by epoch), pairs ending in the last `days` days, newest first."""
+    cut = now - timedelta(days=days)
+    out = []
+    for p, q in zip(sets, sets[1:]):
+        if _epoch(q["epoch"]) < cut:
+            continue
+        m = two_set_mark(p, q)
+        if m:
+            out.append(m)
+    return out[::-1]
 
 
 def sgp4_position(o, t):
@@ -127,11 +192,11 @@ def close_pairs(objs, roles, t, position=sgp4_position):
 
 def changes(objs, elsets, roles, now, days=CHANGE_DAYS):
     """Orbit changes by Orbit's rule ending in the last `days` days, every object in `objs`: (changes, counts by kind,
-    objects not judged). An object with under MIN_PAIRS pairs of sets is not judged; its last two sets' drift and
-    inclination are given as they are."""
+    objects not judged, two-set marks). An object with under MIN_PAIRS pairs of sets is not judged; its last two sets'
+    drift and inclination are given as they are, and the two-set rule (two_set) runs on its sets."""
     sys.path.insert(0, ROOT)
     from orbit import maneuver as M
-    out, unjudged = [], []
+    out, unjudged, marks = [], [], []
     for o in objs:
         held = [r for r in elsets.get(o["norad"], []) if _epoch(r["epoch"]) < now]
         sets = [[M._iso(_epoch(r["epoch"])), float(r["n"]), float(r["e"]), float(r["i"]), float(r["raan"]),
@@ -146,6 +211,9 @@ def changes(objs, elsets, roles, now, days=CHANGE_DAYS):
                 u.update(between=[p[0][:16], q[0][:16]], drift=[round(drift(p[1]), 4), round(drift(q[1]), 4)],
                          inc=[round(p[3], 3), round(q[3], 3)])
             unjudged.append(u)
+            for m in two_set(held, now):
+                marks.append({"norad": o["norad"], "name": o["name"], "owner": o.get("owner"),
+                              "role": roles.get(str(o["norad"])), "sets": len(sets), **m})
             continue
         for e in det["events"]:
             p, q = at.get(e["from"]), at.get(e["to"])
@@ -165,7 +233,8 @@ def changes(objs, elsets, roles, now, days=CHANGE_DAYS):
     routine = sorted((c for c in out if c["kind"] == ROUTINE), key=lambda c: c["between"][1])
     counts = {"other": len(rare), ROUTINE: len(routine)}
     keep = sorted(rare + routine[-MAX_ROUTINE:], key=lambda c: (c["between"][1], c["norad"]), reverse=True)
-    return keep, counts, unjudged
+    marks.sort(key=lambda m: (m["between"][1], m["norad"]), reverse=True)
+    return keep, counts, unjudged, marks
 
 
 def build(objs, elsets, roles, now, position=sgp4_position):
@@ -176,7 +245,7 @@ def build(objs, elsets, roles, now, position=sgp4_position):
         o["class"] = classify(o["drift"], o["i"])
     counts = {k: sum(1 for o in objs if o["class"] == k) for k in ("station-kept", "inclined", "drifting")}
     close, same = close_pairs(objs, roles, now, position)
-    ch, ch_counts, unjudged = changes(objs, elsets, roles, now)
+    ch, ch_counts, unjudged, marks = changes(objs, elsets, roles, now)
     drifting = sorted((o for o in objs if o["class"] == "drifting"), key=lambda o: -abs(o["drift"]))
     lon_now = {}
     for o in drifting[:MAX_DRIFT]:
@@ -184,8 +253,10 @@ def build(objs, elsets, roles, now, position=sgp4_position):
         lon_now[o["norad"]] = round(p[1], 2) if p else None
     return {"at_utc": now.strftime("%Y-%m-%dT%H:%MZ"), "objects": len(objs), "counts": counts,
             "method": {"close_km": CLOSE_KM, "drift_kept": DRIFT_KEPT, "inc_kept": INC_KEPT, "inc_change": INC_CHANGE,
-                       "change_days": CHANGE_DAYS, "change_rule": "orbit/maneuver.py"},
+                       "change_days": CHANGE_DAYS, "change_rule": "orbit/maneuver.py",
+                       "two_set": {"days": TWO_SET_DAYS, "drift_step": round(DRIFT_STEP, 3), "class_step": CLASS_STEP,
+                                   "lon_step": LON_STEP, "a_nat": A_NAT}},
             "close_other_owner": close[:MAX_CLOSE], "close_other_owner_count": len(close), "close_same_owner_count": same,
-            "changes": ch, "change_counts": ch_counts, "not_judged": unjudged,
+            "changes": ch, "change_counts": ch_counts, "not_judged": unjudged, "two_set": marks,
             "drifting": [{"norad": o["norad"], "name": o["name"], "owner": o.get("owner"), "lon": lon_now.get(o["norad"]),
                           "drift": round(o["drift"], 4), "role": roles.get(str(o["norad"]))} for o in drifting[:MAX_DRIFT]]}

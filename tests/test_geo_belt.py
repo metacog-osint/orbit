@@ -88,7 +88,7 @@ class Changes(unittest.TestCase):
         jump = NOW - timedelta(days=3)
         el = {1: history(1, jump_at=jump, dn=-0.001), 2: history(2), 3: history(3, days=1)}
         objs = [obj(1), obj(2), obj(3)]
-        ch, counts, unjudged = B.changes(objs, el, {}, NOW)
+        ch, counts, unjudged, _ = B.changes(objs, el, {}, NOW)
         self.assertEqual([c["norad"] for c in ch], [1])
         self.assertEqual(ch[0]["kind"], "started drifting")
         self.assertEqual(ch[0]["dominant"], "in-track")
@@ -100,7 +100,7 @@ class Changes(unittest.TestCase):
 
     def test_old_change_left_out(self):
         el = {1: history(1, jump_at=NOW - timedelta(days=12), dn=-0.001)}
-        ch, _, _ = B.changes([obj(1)], el, {}, NOW)
+        ch, _, _, _ = B.changes([obj(1)], el, {}, NOW)
         self.assertEqual(ch, [])
 
     def test_build_counts(self):
