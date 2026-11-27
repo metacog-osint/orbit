@@ -15,8 +15,10 @@
   --ink: var(--text);
   --line: var(--border);
   --alarm: #b3261e;
-  /* Actor colours (validated colour-blind safe, every pair, on the light panel): US, China, Russia and USSR.
-     Everyone else is neutral and known by flag and code. */
+  /* Actor colours: US, China, Russia and USSR. Everyone else is neutral and known by flag and code. Points on a
+     map are compared with every colour, so both sets pass the dataviz validator with --pairs all (CVD Delta E 8 or
+     more, normal vision 15 or more) on their own panel; light #ffffff, dark #131822 (method.md, "The satellite map").
+     The grey is neutral by design, so the validator's chroma floor does not apply to it. */
   --g-us: #2a78d6;
   --g-cn: #eb6834;
   --g-ru: #1baf7a;
@@ -39,7 +41,7 @@
     --g-us: #3987e5;
     --g-cn: #d95926;
     --g-ru: #199e70;
-    --g-other: #7d8794;
+    --g-other: #616a75;
   }
 }
 * { box-sizing: border-box; }
