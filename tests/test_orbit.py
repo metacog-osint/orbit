@@ -297,7 +297,10 @@ class EndToEnd(unittest.TestCase):
         for f in doc["features"]:
             p = f["properties"]
             self.assertEqual(p["kind"], "observation")
-            self.assertEqual(p["tier"], "routine")
+            if p["tier"] != "routine":  # orbit-2.49: anomalies only against GCAT's history, with their baseline
+                self.assertEqual(p["tier"], "anomaly", p["id"])
+                self.assertTrue(p["id"].startswith(("orbit:baseline:", "orbit:breakup:")), p["id"])
+                self.assertIn("baseline_ref", p)
             self.assertNotIn("probability", p)
 
     def test_failed_lane_keeps_last_good_copy(self):
@@ -792,7 +795,8 @@ class Maneuver(unittest.TestCase):
         # 15 Nov review: one median node rate per object leaves a decaying orbit's faster precession in a long
         # pair. 450 km, 51.6 deg, decaying about 36 m a day, 120 days of sets, a 4.5-day gap two days before now,
         # no burn: before orbit-2.43 this listed a cross-track change; the J2 rate of each pair's own orbit
-        # removes it.
+        # removes it. synth precesses with maneuver.node_rate_j2 itself, so this shows only that the detector is
+        # consistent with that function; test_j2_precession_rate pins the function to values found outside it.
         leo = dict(days=120, per_day=2, n0=15.38, i0=51.6, n_rate=1.2e-4, node_rate="j2", noise_n=2e-6,
                    noise_i=1e-5, noise_node=1e-4)
         recs = [r for r in synth(20, **leo) if not "2026-11-07T12" <= r["EPOCH"][:13] <= "2026-11-11T23"]
@@ -801,10 +805,13 @@ class Maneuver(unittest.TestCase):
         self.assertEqual((d["regime"], d["events"], d["leo_off_track"]), ("LEO", [], 0))
 
     def test_j2_precession_rate(self):
-        # the ISS (about 6,790 km, 51.6 deg) regresses about 5 deg a day; a sun-synchronous orbit at 700 km and
-        # 98.19 deg advances 360 deg a year (0.9856 deg a day)
+        # Values from outside the function. A sun-synchronous orbit's node turns with the mean Sun, 360 deg in a
+        # tropical year of 365.2422 days, and at 700 km that takes 98.19 deg. The ISS (about 6,790 km, 51.6 deg)
+        # regresses about 5 deg a day. At the geostationary radius (42,164 km, n equal to Earth's sidereal
+        # rotation) J2 alone turns the node back about 4.9 deg a year (first-order formula worked by hand).
+        self.assertAlmostEqual(maneuver.node_rate_j2(6378.137 + 700.0, 0.0, 98.19), 360 / 365.2422, delta=0.0005)
         self.assertAlmostEqual(maneuver.node_rate_j2(6790.0, 0.0005, 51.64), -5.0, delta=0.1)
-        self.assertAlmostEqual(maneuver.node_rate_j2(6378.137 + 700.0, 0.0, 98.19), 0.9856, delta=0.005)
+        self.assertAlmostEqual(maneuver.node_rate_j2(42164.0, 0.0, 0.05) * 365.25, -4.90, delta=0.02)
 
     def test_a_change_beyond_orbital_speed_is_counted_never_listed(self):
         leo = dict(per_day=4, n0=15.2, i0=51.6, node_rate="j2", noise_n=2e-5, noise_i=1e-4, noise_node=1e-3)

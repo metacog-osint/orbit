@@ -9,8 +9,9 @@ Space-Track's own rules (space-track.org/documentation, read 14 Nov 2026):
     services ... conditioned on appropriate citation." "Publications of analysis based on USSPACECOM data also
     require appropriate citations."
 
-GP once an hour is the account's limit, not a workflow's. Orbit makes two GP queries on the account: the update
-run's watch-list query and the GEO region's (`geo_region.py`, workflow geo.yml, from 16 Nov 2026). Before asking,
+GP once an hour is the account's limit, not a workflow's. Orbit makes three GP queries on the account: the update
+run's watch-list query, the GEO region's (`geo_region.py`, workflow geo.yml, from 16 Nov 2026) and, once a day, the
+map's rocket bodies and debris (`debrismap.py`, workflow catalog.yml, orbit-2.51); each waits for the other two. Before asking,
 `shared_gp_busy` reads the other workflow's recent runs from GitHub's API: a run still going, or its GP step
 finished within the hour, and Orbit waits for its next run. If GitHub cannot be read, Orbit waits too: the limit is
 kept even when it cannot be checked. The update run checks geo.yml's runs (FOR_MANEUVER), and geo.yml checks the
@@ -60,10 +61,16 @@ GEO_STEP = "GEO region (Space-Track)"
 UPDATE_RUNS = ("https://api.github.com/repos/metacog-osint/orbit/actions/workflows/update.yml/runs"
                "?per_page=5&exclude_pull_requests=true")
 UPDATE_STEP = "Live collection (a failed lane keeps its last good copy and says so on the page)"
+# The map's rocket bodies and debris (orbit/debrismap.py, workflow catalog.yml, orbit-2.51): the account's third GP query.
+CATALOG_RUNS = ("https://api.github.com/repos/metacog-osint/orbit/actions/workflows/catalog.yml/runs"
+                "?per_page=5&exclude_pull_requests=true")
+CATALOG_STEP = "Rocket bodies and debris (Space-Track GP, once a day)"   # = debrismap.STEP (a test holds them equal)
 GEO = (GEO_RUNS, GEO_STEP, "Orbit's GEO region run")
 UPDATE = (UPDATE_RUNS, UPDATE_STEP, "Orbit's update run")
-FOR_MANEUVER = (GEO,)    # what the update run's watch-list query waits for
-FOR_GEO = (UPDATE,)      # what the GEO region query waits for (Noisefloor makes no GP query from 18 Nov 2026)
+CATALOG = (CATALOG_RUNS, CATALOG_STEP, "Orbit's catalog run")
+FOR_MANEUVER = (GEO, CATALOG)    # what the update run's watch-list query waits for
+FOR_GEO = (UPDATE, CATALOG)      # what the GEO region query waits for (Noisefloor makes no GP query from 18 Nov 2026)
+FOR_DEBRIS = (GEO, UPDATE)       # what the map's rocket-body and debris query waits for
 
 
 class NotReady(Exception):
