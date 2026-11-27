@@ -11,9 +11,9 @@ waits for Noisefloor's share of the Space-Track account, and adds baselines from
 the launch ledger; `orbit-2.10` adds each payload's orbit from GCAT, Launch's place check on Orbit's hazard areas,
 and the ledger's history and GCAT gap on the page; `orbit-2.11` starts Orbit's own daily archive and adds the globe.
 
-Every item is an **observation** (measured or reported, no judgment) at tier **routine**. The GCAT baselines are
-shown on the page only; Orbit has no baseline of its own readings yet, so no feed item is called an anomaly, and it
-makes no warnings.
+Every item is an **observation** (measured or reported, no judgment). Most are tier **routine**; from `orbit-2.49`
+two kinds can be tier **anomaly**, each against a baseline from GCAT's own history (see "Anomalies against GCAT's
+history" below). Orbit makes no warnings.
 
 ## Lanes
 
@@ -266,6 +266,39 @@ Tom, 15 Nov 2026 (decision 8, "GCAT history now, rest later"). Computed in the c
 4. **Not from GCAT:** catalog additions by date of cataloging (GCAT keeps no such date) and Orbit's own counts
    (listed orbit changes per object, warnings per area). Those come from Orbit's own daily archive (below, from
    `orbit-2.11`), with baselines after 90 days of it.
+
+## Anomalies against GCAT's history (`orbit-2.49`, 27 Nov 2026)
+Tier anomaly means unusual against Orbit's own baseline, under the feed contract's revision 2.1 rule. It is a count
+or a record, never a warning, a prediction or a judgment of why. Two kinds:
+1. **A 30-day count outside every prior window.** A row of the GCAT baselines (above) whose last 30 days are above
+   or below all 24 windows of 30 days before them becomes one feed item, `orbit:baseline:<series>:<key>`, off-map,
+   linking `/catalog#baseline`. Its `signal` is the recent count against the prior median, with `baseline_n` 24 and
+   `exceedance` 1 in 25 (the smallest 24 windows can show).
+   - **Which side.** Launch attempts (all, by launching country, by GCAT agency) on either side. Payloads and
+     reentries only above: GCAT adds payloads and dates reentries as it learns of them, so a low recent window
+     there can be lag (item 3 above). A low launch count says GCAT lists launches one to three days late.
+   - **Small counts.** Above needs at least 3 in the recent window; below needs at least 3 in every prior window.
+   - **The rule's own flag rate.** `gcat.baseline` counts 24 more windows (four years in all). Each of the 24 prior
+     windows is tested against its own 24 before it, per side; the share that would have been flagged is the
+     row's `flag_rate` and the item's `baseline_ref.flag_rate`. A series the rule flagged on more than 5% of those
+     windows (more than 1 of 24) is not called an anomaly: the kit's cap for a series. A series that grows steadily
+     (most launchers' cadence) is above its past often, so this keeps it out.
+   - **Freshness.** Items are only made while the baseline's recent window ended within 72 hours of the build. GCAT
+     unchanged for longer leaves an old count, so the items drop out until GCAT's next copy.
+   - First measured on GCAT's 27 Nov 2026 copy: 90 rows; the rule fired on 3% of past windows above and 0.4% below,
+     and 11 rows above and 2 below are over the 5% cap. Three rows qualified: the US and SpaceX launch counts below
+     every prior window (8 against 9 to 18, and 7 against 9 to 18; Launch Library 2 also lists 7 SpaceX launches
+     for 29 Oct-27 Nov), and Roskosmos (GCAT agency FKA) above (3 against 0 to 2). Reentries (95 against 109 to
+     277) were below every window but are not flagged on that side.
+2. **A breakup or collision.** A GCAT object with status E (exploded) or C (collided) is rare in GCAT's record:
+   one dated in the 24 windows before 27 Nov 2026. Its feed item (`orbit:breakup:<jcat>`) is tier anomaly for 72
+   hours from the reading that first listed it, the kit's hold for an event, then routine. GCAT dates breakups late,
+   so the hold runs from Orbit's listing (`first_listed` in the snapshot, carried from run to run; `last_change_at`
+   is that listing), not from GCAT's breakup date, which stays the item's `event_start`. The item states how many
+   breakups GCAT dates in the 24 windows before. A first reading with no earlier one dates each by GCAT's breakup
+   date, so the whole record is not called new.
+
+COP reads the tier as it does every program's: an anomaly is unusual against that program's own baseline.
 
 ## Orbit's own daily archive (`orbit-2.11`, 16 Nov 2026)
 Decision 8's second half (Tom, 15 Nov 2026). Each run adds itself to one entry per UTC day (`orbit/archive.py`,

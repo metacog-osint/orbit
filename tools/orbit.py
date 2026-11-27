@@ -124,6 +124,14 @@ def _lane_catalog(raw_dir: Path, prev: dict, getter, force: bool = False, header
         "hygiene": gcat.hygiene(objs),
         "catalog_changes": {},
     }
+    # When Orbit's reading first listed each breakup (orbit-2.49): GCAT dates breakups late, so the feed's anomaly
+    # hold runs from the listing. Carried from the previous snapshot; a first reading has no "before", so it
+    # dates each one by GCAT's own breakup date rather than calling the whole record new.
+    seen = {b["jcat"]: b.get("first_listed") or f"{b['breakup_date'][:10]}T00:00:00Z"
+            for b in prev.get("breakups") or [] if b.get("jcat")}
+    for b in result["breakups"]:
+        b["first_listed"] = seen.get(b["jcat"]) or (
+            recs[0]["fetched_at"] if index_doc else f"{b['breakup_date'][:10]}T00:00:00Z")
     if index_doc:
         result["catalog_changes"] = {"previous_reading_at": index_doc["read_at"],
                                      **gcat.diff(index_doc["objects"], objs, today)}
