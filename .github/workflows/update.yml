@@ -80,6 +80,15 @@ jobs:
       # from this repository's public geo-YYYY releases (written by geo.yml; no Space-Track request here). numpy and
       # sgp4 only for this step (tools/requirements-callouts.txt). A failure leaves the page's loading text, never the
       # rest of the deploy.
+      # The map's rocket bodies and debris (orbit/debrismap.py), written by catalog.yml to release `catalog`; the map
+      # loads it only when its Object type filter asks. Without it the filter says the file is not up yet.
+      - name: Map rocket bodies and debris (release catalog; one request)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download catalog -R "$GITHUB_REPOSITORY" -p sats-rd.json.gz -O "$RUNNER_TEMP/sats-rd.json.gz" --clobber \
+            && gzip -dc "$RUNNER_TEMP/sats-rd.json.gz" > site/data/sats-rd.json \
+            || echo "::warning::no sats-rd.json.gz on release catalog yet; the map's rocket bodies and debris stay off"
       - name: Object pages (the catalog's shards and search index from release catalog; one request)
         run: python tools/orbit.py object-data
       - name: GEO page data and callouts

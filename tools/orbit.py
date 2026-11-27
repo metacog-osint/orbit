@@ -1294,6 +1294,37 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     return 1 if refused or failed else 0
 
 
+def debris_release(data_dir: Path) -> int:
+    """Workflow catalog.yml, its own step (debrismap.STEP): the map's rocket bodies and debris, one Space-Track GP query
+    a UTC day when the account is clear, uploaded to release `catalog` with a dated copy. Not due or not clear: exit 0
+    with a note, the last file staying up."""
+    from orbit import debrismap
+    repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
+    local = data_dir / debrismap.LOCAL
+    local.parent.mkdir(parents=True, exist_ok=True)
+    stcat._gh("release", "download", stcat.RELEASE, "-R", repo, "-p", debrismap.ASSET, "-O", str(local), "--clobber")
+    cred = spacetrack.credentials(ROOT)
+    if not cred:
+        print("No Space-Track credentials.")
+        return 1
+    try:
+        got = debrismap.pull(data_dir, cred)
+    except spacetrack.NotReady as exc:
+        print(f"::notice::Rocket bodies and debris not read: {exc}")
+        return 0
+    doc = got["doc"]
+    print(f"Space-Track GP: {doc['count']:,} rocket bodies and debris ({doc['by_type']}), {doc['unusable']} unusable, "
+          f"{got['requests']} requests.")
+    try:
+        stcat.release_put({debrismap.ASSET: local}, repo)
+        kept = retention.upload_sats_rd(local, datetime.now(timezone.utc).date(), repo)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        return 1
+    print(f"Uploaded {debrismap.ASSET} to release {stcat.RELEASE}" + (f"; kept {kept[0]}." if kept else "."))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Orbit: launches, reentries and catalog changes from public sources.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1339,6 +1370,9 @@ def main(argv=None) -> int:
                                                            "release `catalog`, build, upload (GitHub only)")
     sc.add_argument("--clear-hold", choices=(catsources.CT, catsources.WD),
                     help="with --release: clear a source's hold after a person has looked at the refusal")
+    dg = sub.add_parser("debris-gp", help="the map's rocket bodies and debris: one Space-Track GP query a UTC day, "
+                                          "uploaded to release `catalog` (workflow catalog.yml, GitHub only)")
+    dg.add_argument("--data", default=str(ROOT / "data"))
     cs = sub.add_parser("catalog-sources", help="CelesTrak SATCAT (daily at most) and Wikidata (weekly) for the "
                                                 "catalog, each only when due; local (build step 4)")
     cs.add_argument("--data", default=str(ROOT / "data"))
@@ -1365,6 +1399,8 @@ def main(argv=None) -> int:
     if args.cmd == "spacetrack-catalog":
         return (catalog_release(Path(args.data), args.clear_hold) if args.release
                 else spacetrack_catalog(Path(args.data)))
+    if args.cmd == "debris-gp":
+        return debris_release(Path(args.data))
     if args.cmd == "catalog-sources":
         return catalog_sources(Path(args.data), args.clear_hold)
     if args.cmd == "catalog":
