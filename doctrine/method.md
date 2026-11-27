@@ -824,7 +824,7 @@ above) stands.
 
 ## GEO relocation feed items (`orbit-2.30`, 24 Nov 2026; ideas#323)
 
-Tom, 24 Nov 2026: one feed item per move of a listed-role GEO object, updated in place.
+One feed item per move of a listed-role GEO object, updated in place.
 
 1. **Identity.** `orbit:relocation:<norad>:<estimated start day>`, the same as `subject_id`. The day is the start
    estimated from the first moving set's distance and rate (`geo_tracker.start_estimates`), fixed once that set
@@ -932,8 +932,16 @@ uploaded, when:
 
 1. **A file the release holds does not download whole:** an error, or a size other than the release lists. Absence
    is read from the release's own file list; a list that cannot be read stops the run too.
-2. **A past month's file is missing from its release.** A month file is started only in its own month (or later),
-   never rebuilt for a month that has passed.
+2. **A month's file is missing from its release when the month cannot be new.** A month file is started only in its
+   own month (or later), never rebuilt for a month that has passed. From `orbit-2.41` (27 Nov 2026), a missing file
+   of the current month stops the run too when the release holds a day file (`YYYY-MM-DD.geo-region.json`) of that
+   month: the run that wrote that day file also wrote the month's element sets, so the file was there and has gone.
+   Two ways there: `gh release upload --clobber` removes the old file before it uploads the new one, so an upload
+   that fails in between leaves the release without the file; or a file removed by hand. Before this, the next run
+   took the month as new and rebuilt it from its one reply (reproduced offline: November's 180 sets to 55, exit 0,
+   nothing archived because nothing was replaced). The run's message points to the private archive's copies (lanes
+   `geo-release` and `geo-reply`), from which a person restores the file before the next run. A month's first run,
+   with no day file of the month on the release yet, still starts its file.
 3. **An upload would drop an element set.** Before uploading, the release's copy is downloaded again, and a month
    file that would lose any (NORAD number, epoch) the release holds is refused.
 4. **The private archive copy fails.** Each gp reply goes to the private repository `metacog-osint/tic-archive`
