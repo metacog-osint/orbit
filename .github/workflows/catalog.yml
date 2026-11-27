@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Catalog tests
-        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards tests.test_oscar
+        run: python -m unittest tests.test_catalog tests.test_stcat tests.test_catsources tests.test_catshards tests.test_oscar tests.test_debrismap
       - name: CelesTrak and Wikidata replies from the Actions cache (none on the first run)
         uses: actions/cache/restore@v6
         with:
@@ -61,6 +61,17 @@ jobs:
           SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
           CLEAR_HOLD: ${{ inputs.clear_hold }}
         run: python tools/orbit.py spacetrack-catalog --release ${CLEAR_HOLD:+--clear-hold "$CLEAR_HOLD"}
+      # The satellite map's rocket bodies and debris (orbit/debrismap.py, orbit-2.51): one Space-Track GP query a UTC
+      # day, the account's third GP query. It waits for the update run's and geo.yml's (spacetrack.FOR_DEBRIS), and they
+      # wait for this step by its name, so the name is held in orbit/spacetrack.py (CATALOG_STEP); rename both together.
+      # Not due or not clear: a notice, and the last file stays on release `catalog`.
+      - name: Rocket bodies and debris (Space-Track GP, once a day)
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SPACETRACK_IDENTITY: ${{ secrets.SPACETRACK_IDENTITY }}
+          SPACETRACK_PASSWORD: ${{ secrets.SPACETRACK_PASSWORD }}
+        run: python tools/orbit.py debris-gp
       - name: Keep WMO OSCAR/Space's list for the next run
         if: success() || failure()
         uses: actions/cache/save@v6

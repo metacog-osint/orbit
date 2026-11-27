@@ -6,6 +6,8 @@
 // ringed. Filters and display options live in the URL, so a filtered view is a link. No inline styles or scripts (CSP).
 // orbit-2.37 (ideas#138): owner search, a launch-date range, GLONASS, Guowang and Qianfan, orbit lines for every object
 // shown (the first 300 in the list's order), and a clock that can be shifted 24 h either way or run 60 times faster.
+// orbit-2.51: an Object type filter. Rocket bodies and debris (data/sats-rd.json, one Space-Track GP query a
+// day) are off by default and load only when asked for; switching them on or off reloads the page with the new link.
 import { json2satrec } from "./vendor/satellite.js/io.js";
 import { propagate, gstime } from "./vendor/satellite.js/propagation.js";
 import { eciToEcf } from "./vendor/satellite.js/transforms.js";
@@ -13,7 +15,8 @@ import { loadCesium, token, baseLayer, path } from "./globe.js";
 
 const REFRESH_MS = 2000, PLAY_REFRESH_MS = 200, SLICE_MS = 7, LIST_MAX = 200, LINES_MAX = 300, DAY_MS = 86400000;
 const SHIFT_MAX_MIN = 1440, PLAY_RATE = 60, LINE_STEPS = 90;
-const OWNERS = ["us", "cn", "ru", "other"], CLASSES = ["leo", "meo", "geo", "heo"];
+const OWNERS = ["us", "cn", "ru", "other"], CLASSES = ["leo", "meo", "geo", "heo"], KINDS = ["p", "r", "d"];
+const KIND_NAME = { p: "Payload", r: "Rocket body", d: "Debris" };
 // ideas#264: an owner's name in place of its bare code. SU is the Soviet Union; other non-country codes stay as GCAT prints them.
 let REGION = null;
 try { REGION = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) { REGION = null; }
@@ -75,6 +78,7 @@ function readState() {
   };
   return {
     own: list("own", OWNERS), cls: list("cls", CLASSES), con: q.get("con") || "",
+    obj: q.has("obj") ? list("obj", KINDS) : new Set(["p"]),   // payloads only unless the link asks for more
     nostar: q.get("nostar") === "1", recent: q.get("new") === "1", marked: q.get("marked") === "1",
     cc: (q.get("cc") || "").toUpperCase(),
     from: DAY_RX.test(q.get("from") || "") ? q.get("from") : "", to: DAY_RX.test(q.get("to") || "") ? q.get("to") : "",
@@ -89,6 +93,7 @@ function writeState(s) {
   const put = (k, v) => { if (v == null) q.delete(k); else q.set(k, v); };
   put("own", s.own.size === OWNERS.length ? null : [...s.own].join(","));
   put("cls", s.cls.size === CLASSES.length ? null : [...s.cls].join(","));
+  put("obj", s.obj.size === 1 && s.obj.has("p") ? null : KINDS.filter((k) => s.obj.has(k)).join(","));
   put("con", s.con || null);
   put("cc", s.cc || null);
   put("from", s.from || null);
@@ -127,9 +132,19 @@ async function start() {
     return;
   }
   const f = Object.fromEntries(doc.fields.map((k, i) => [k, i]));
-  const rows = doc.rows, N = rows.length;
-  const marks = marksFrom(snap || {});
   const state = readState();
+  // Rocket bodies and debris: a second file in the same row format, read only when the Object type filter asks.
+  const wantRd = state.obj.has("r") || state.obj.has("d");
+  let rd = null;
+  if (wantRd) {
+    try { rd = await getJson("data/sats-rd.json"); } catch (e) { rd = null; }
+    if (!rd || !Array.isArray(rd.rows)) rd = null;
+  }
+  const P = doc.rows.length;   // rows from P on are rocket bodies and debris
+  const rows = rd ? doc.rows.concat(rd.rows.map((x) => doc.fields.map((k) => x[rd.fields.indexOf(k)]))) : doc.rows;
+  const N = rows.length;
+  const kindOf = (i) => (i < P ? "p" : rows[i][f.type] === "R" ? "r" : "d");
+  const marks = marksFrom(snap || {});
   const cutoff = new Date(Date.now() - 30 * DAY_MS).toISOString().slice(0, 10);
   const vis = new Uint8Array(N), bad = new Uint8Array(N);
   const byNorad = new Map(rows.map((r, i) => [r[f.norad], i]));
@@ -141,6 +156,7 @@ async function start() {
 
   function passes(i) {
     const r = rows[i], m = markOf(i), con = r[f.con];
+    if (!state.obj.has(kindOf(i))) return false;
     if (!state.own.has(r[f.group]) || !state.cls.has(r[f.cls])) return false;
     if (state.nostar && con === "starlink") return false;
     if (state.con === "none" ? con : state.con && con !== state.con) return false;
@@ -190,6 +206,16 @@ async function start() {
   };
   boxes("own", state.own);
   boxes("cls", state.cls);
+  boxes("obj", state.obj);
+  // Object type: payloads filter in place; rocket bodies and debris need their file, so changing those reloads.
+  document.querySelectorAll('input[data-sm="obj"]').forEach((b) => {
+    b.addEventListener("change", () => {
+      if (b.checked) state.obj.add(b.value); else state.obj.delete(b.value);
+      writeState(state);
+      if ((state.obj.has("r") || state.obj.has("d")) !== wantRd) { location.reload(); return; }
+      changed();
+    });
+  });
   flag("sm-nostar", "nostar");
   flag("sm-recent", "recent");
   flag("sm-marked", "marked");
@@ -284,6 +310,9 @@ async function start() {
   }
 
   $("sm-reset").addEventListener("click", () => {
+    state.obj = new Set(["p"]);
+    document.querySelectorAll('input[data-sm="obj"]').forEach((b) => { b.checked = b.value === "p"; });
+    if (wantRd) { writeState(state); location.reload(); return; }
     state.own = new Set(OWNERS); state.cls = new Set(CLASSES); state.con = ""; conSel.value = "";
     state.cc = state.from = state.to = ""; ccIn.value = fromIn.value = toIn.value = "";
     state.nostar = state.recent = state.marked = false;
@@ -317,7 +346,7 @@ async function start() {
       btn.addEventListener("click", () => select(i, true));
       name.append(btn);
       const owner = make("td");
-      owner.append(make("span", "sw g-" + r[f.group]), document.createTextNode(r[f.cc] ? ownerName(r[f.cc]) : "not in GCAT"));
+      owner.append(make("span", "sw g-" + r[f.group]), document.createTextNode(r[f.cc] ? ownerName(r[f.cc]) : i < P ? "not in GCAT" : "not stated"));
       tr.append(name, make("td", "num", r[f.norad]), owner, make("td", null, CLASS_NAME[r[f.cls]] || r[f.cls]),
         make("td", null, r[f.launch] || ""), make("td", null, m ? [...m].map((k) => MARK_NAME[k]).join(", ") : ""));
       frag.append(tr);
@@ -481,7 +510,9 @@ async function start() {
     const row = (k, v) => { if (v) dl.append(make("dt", null, k), make("dd", null, v)); };
     row("NORAD", String(r[f.norad]));
     row("COSPAR", r[f.cospar]);
-    row("Owner", r[f.cc] ? (ownerName(r[f.cc]) === r[f.cc] ? r[f.cc] : ownerName(r[f.cc]) + " (" + r[f.cc] + ")") : "Not in GCAT");
+    row("Type", KIND_NAME[kindOf(i)]);
+    row("Owner", r[f.cc] ? (ownerName(r[f.cc]) === r[f.cc] ? r[f.cc] : ownerName(r[f.cc]) + " (" + r[f.cc] + ")")
+      : i < P ? "Not in GCAT" : "Not stated");
     row("Orbit", CLASS_NAME[r[f.cls]] || r[f.cls]);
     row("Constellation", CON_NAME[r[f.con]]);
     row("Launched", r[f.launch]);
@@ -551,7 +582,9 @@ async function start() {
   rebind();
   refilter();
   if (state.n != null && byNorad.has(state.n)) { selected = byNorad.get(state.n); sideCard(selected); }
-  $("sm-read").textContent = "Read " + when(doc.read_at) + ".";
+  $("sm-read").textContent = "Read " + when(doc.read_at) + "."
+    + (rd ? ` Rocket bodies and debris (${rd.rows.length.toLocaleString()}) read ${when(rd.read_at)}. ${rd.credit}` : "");
+  if (wantRd && !rd) say("The rocket-body and debris file is not on the site yet. It is read from Space-Track once a day.");
   showClock();
 
   // Cesium last: the filters and the list work without WebGL.

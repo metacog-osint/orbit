@@ -124,6 +124,12 @@
         <label>Owner <input type="search" id="sm-cc" list="sm-cc-list" size="18" autocomplete="off"
           placeholder="Country or code"></label><datalist id="sm-cc-list"></datalist>
       </fieldset>
+      <fieldset class="sm-group"><legend>Object type</legend>
+        <label><input type="checkbox" data-sm="obj" value="p" checked>Payloads</label>
+        <label><input type="checkbox" data-sm="obj" value="r">Rocket bodies</label>
+        <label><input type="checkbox" data-sm="obj" value="d">Debris</label>
+        <span class="small muted">Rocket bodies and debris (Space-Track, read once a day) load when switched on.</span>
+      </fieldset>
       <fieldset class="sm-group"><legend>Orbit</legend>
         <label><input type="checkbox" data-sm="cls" value="leo" checked>LEO</label>
         <label><input type="checkbox" data-sm="cls" value="meo" checked>MEO</label>
@@ -177,7 +183,8 @@
     (<a href="https://docs.google.com/spreadsheets/d/1pHzvC-zGjF34Jrd6TdmM4odTL_MinBBoS_ld9X3jsW4/">sheet</a>),
     CC BY-NC 4.0, dates read by Orbit. Satellite element sets from Space-Track.org, United States Space Command
     (USSPACECOM), 18th Space Defense Squadron; orbit-change analysis is Orbit's own. Map element sets from <a href="https://celestrak.org">CelesTrak</a>, GP group "active", from the 18th Space Defense
-    Squadron's GP data; globe by <a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a>, positions by satellite.js. Publicly available information only.</p>
+    Squadron's GP data; rocket bodies and debris from Space-Track.org (USSPACECOM, 18th Space Defense Squadron), under
+    USSPACECOM's blanket approval for basic SSA data, not for operational use; globe by <a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a>, positions by satellite.js. Publicly available information only.</p>
 </footer>
 <script src="search.js"></script>
 <script src="app.js"></script>

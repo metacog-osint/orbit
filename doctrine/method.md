@@ -685,6 +685,30 @@ DIGUI-nn; China SatNet's test satellites, HULIANWANG JISHU SHIYAN, are not count
 Guowang, 275 Qianfan. Published as `/data/sats.json` (`orbit-sats/1`: `fields` and `rows`, rounded to what SGP4 on a map needs);
 the snapshot keeps counts only. The map that draws it is the next step of ideas#71; until then the file is unused.
 
+## Rocket bodies and debris on the map (`orbit-2.51`, 27 Nov 2026)
+CelesTrak publishes no whole-catalog, rocket-body or debris GP group, so these come from Space-Track: **one GP query a
+UTC day** in `catalog.yml`'s run, its own step "Rocket bodies and debris (Space-Track GP, once a day)"
+(`orbit/debrismap.py`, `python tools/orbit.py debris-gp`). The query asks class `gp` for `OBJECT_TYPE` ROCKET BODY or
+DEBRIS, no decay date, an element set from the last 30 days, and only the columns the map draws (`predicates`); three
+requests (log in, the query, log out). It is the account's third GP query, so the hourly rule now holds across three:
+the update run's watch-list query and `geo.yml`'s GEO region query each also wait for this step, and this step waits
+for both (`spacetrack.FOR_MANEUVER`, `FOR_GEO`, `FOR_DEBRIS`; the check runs after the clear-minute wait, just before
+the query). A run that finds the day already read, or another GP query under an hour old, asks nothing; `catalog.yml`
+starts three times a day, so a skipped start is read at the next. A reply with no usable row keeps the last file.
+
+Rows take the map's own format (`orbit-sats/1`, the fields of `/data/sats.json`): type `R` or `D` in `type`;
+Space-Track's COUNTRY_CODE read through the catalog's code table (`stcat.COUNTRY_TO_STATE`) to GCAT's state and ISO
+code, so the owner groups and the owner search treat these rows as they treat payloads (CIS is the Russia/USSR group,
+shown as SU); a code the table lacks is kept as written, group `other`. Space-Track's own LAUNCH_DATE. No
+constellation. Published as `sats-rd.json.gz` on the public release `catalog`, with a dated copy a day on release
+`sats-rd-archive-YYYY-MM`; the update run copies it to `/data/sats-rd.json`. Credit: the disclaimer's citation
+(`doctrine/spacetrack-disclaimer.md` section 3), carried in the file and shown on the page when the rows are loaded.
+
+On the map, an **Object type** filter: Payloads (on), Rocket bodies and Debris (**off by default**). The second file is
+read only when Rocket bodies or Debris is on (link parameter `obj`, e.g. `?obj=p,r,d`); switching those on or off, or
+Reset with them on, reloads the page with the new link. The card gives each object's type; an owner Space-Track does
+not state reads "Not stated". Near-GEO rocket bodies and debris were already public in the GEO region files.
+
 ## Retention (18 Nov 2026: no program loses data; views may filter, storage keeps all)
 Public releases, one per month and kind, unique asset names, never clobbered (`orbit/retention.py`, `tests/test_retention.py`);
 only what is already public or open-licensed goes there. Nothing from Space-Track element sets or case reads.
@@ -695,6 +719,8 @@ only what is already public or open-licensed goes there. Nothing from Space-Trac
   owner changes, late groups; no 50-item cut) as `catalog-changes-<read time>.jsonl.gz` on release `catalog-changes-YYYY-MM`.
   The published lists keep their cut of 50.
 - TIC catalog: `catalog.yml` keeps `catalog-<Monday>.json.gz` once a week on release `catalog-archive-YYYY-MM`.
+- Map rocket bodies and debris (`orbit-2.51`): `catalog.yml` keeps `sats-rd-<day>.json.gz` for each day read on
+  release `sats-rd-archive-YYYY-MM` (Space-Track basic SSA data, published with the citation).
 - Ended NAVAREA warnings: Cordon is the record (it commits `data/navarea.json` hourly and logs changes in its history
   log); Orbit's `navwarn` lane keeps only the areas in force and the daily archive's area keys. No second store.
 - Needs a private store, not built (Space-Track data and the watch list may not go in a public repo): the element-set
@@ -716,8 +742,8 @@ the last-30-days group), with a finding only. Display: globe or flat map, the se
 track, labels on marked objects when zoomed in. Filters and display options are kept in the URL. A table lists the
 first 200 shown objects, those with a finding first. A missing file (Pages answers it with index.html) shows a note,
 and without WebGL the filters and the list still work.
-**Not built from the approved design:** colour by orbit class, and rocket bodies and debris (not in the active
-group). Colour by orbit class was dropped on 26 Nov 2026: points on a map are compared with every other colour, not
+**Not built from the approved design:** colour by orbit class. (Rocket bodies and debris, not in the active group,
+came in `orbit-2.51`: see "Rocket bodies and debris on the map" below.) Colour by orbit class was dropped on 26 Nov 2026: points on a map are compared with every other colour, not
 only a neighbour, so the palette has to pass the dataviz validator with all pairs (`--pairs all`), in light (white
 panel) and dark (`#131822`). No four hues from the reference palette's eight do so in both modes, and three hues
 with the neutral grey fail too (the grey falls under 15 normal-vision Delta E, and under 6 for deuteranopia, against

@@ -229,7 +229,8 @@ RELEASE_NOTES = (
     "for search. catalog-rules.json: what each source, field, basis and flag means. spacetrack-decay.json.gz: every "
     "Space-Track decay message Orbit holds (class decay, kept so the history is never downloaded again). "
     "spacetrack-catalog.json: the last read's date and counts. catalog-sources.json: the last CelesTrak and "
-    "Wikidata reads.\n\n"
+    "Wikidata reads. sats-rd.json.gz: rocket bodies and debris on orbit for the satellite map (one Space-Track GP "
+    "query a day, orbit/debrismap.py; dated copies on releases sats-rd-archive-YYYY-MM).\n\n"
     "Sources: " + "GCAT (J. McDowell, planet4589.org/space/gcat), CC BY 4.0. " + CITATION + " Satellite catalog "
     "records also from CelesTrak SATCAT (T.S. Kelso, celestrak.org), credited; CelesTrak states no licence. Names "
     "and COSPAR IDs also from Wikidata (CC0), each with its item's Q-id.")
