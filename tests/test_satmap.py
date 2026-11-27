@@ -58,7 +58,13 @@ class SatMap(unittest.TestCase):
         self.assertEqual(satmap.orbit_class(0.5, 0.01), "other")
         cons = {r["con"] for r in self.rows.values()}
         self.assertTrue({"starlink", "gps", "beidou", "oneweb"} <= cons)
-        self.assertIsNone(satmap.constellation("COSMOS 2433"))  # GLONASS isn't named by name
+        self.assertIsNone(satmap.constellation("COSMOS 2433"))  # no series in brackets: not counted
+        self.assertEqual(satmap.constellation("COSMOS 2433 [GLONASS-M]"), "glonass")
+        self.assertEqual(satmap.constellation("COSMOS 2547 [GLONASS-K2]"), "glonass")
+        self.assertEqual(satmap.constellation("HULIANWANG DIGUI-17"), "guowang")
+        self.assertIsNone(satmap.constellation("HULIANWANG JISHU SHIYAN 4A"))  # a test satellite, not Guowang
+        self.assertEqual(satmap.constellation("QIANFAN-12"), "qianfan")
+        self.assertEqual(satmap.constellation("QIANFAN 16 OBJECT A"), "qianfan")
 
     def test_a_reply_that_is_not_gp_csv_fails(self):
         with self.assertRaises(ValueError):

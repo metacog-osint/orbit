@@ -4,12 +4,15 @@
 // (entities do not hold 17,000 objects) and are propagated a slice per frame, so the page keeps responding. Objects
 // Orbit has a finding on (orbit changes, RPO history, breakups, new in the last 30 days, TIP in window) are larger and
 // ringed. Filters and display options live in the URL, so a filtered view is a link. No inline styles or scripts (CSP).
+// orbit-2.37 (ideas#138): owner search, a launch-date range, GLONASS, Guowang and Qianfan, orbit lines for every object
+// shown (the first 300 in the list's order), and a clock that can be shifted 24 h either way or run 60 times faster.
 import { json2satrec } from "./vendor/satellite.js/io.js";
 import { propagate, gstime } from "./vendor/satellite.js/propagation.js";
 import { eciToEcf } from "./vendor/satellite.js/transforms.js";
 import { loadCesium, token, baseLayer, path } from "./globe.js";
 
-const REFRESH_MS = 2000, SLICE_MS = 7, LIST_MAX = 200, DAY_MS = 86400000;
+const REFRESH_MS = 2000, PLAY_REFRESH_MS = 200, SLICE_MS = 7, LIST_MAX = 200, LINES_MAX = 300, DAY_MS = 86400000;
+const SHIFT_MAX_MIN = 1440, PLAY_RATE = 60, LINE_STEPS = 90;
 const OWNERS = ["us", "cn", "ru", "other"], CLASSES = ["leo", "meo", "geo", "heo"];
 // ideas#264: an owner's name in place of its bare code. SU is the Soviet Union; other non-country codes stay as GCAT prints them.
 let REGION = null;
@@ -23,7 +26,8 @@ function ownerName(cc) {
 }
 const CLASS_NAME = { leo: "LEO", meo: "MEO", geo: "GEO", heo: "HEO", other: "Other" };
 const CON_NAME = { starlink: "Starlink", oneweb: "OneWeb", kuiper: "Kuiper", iridium: "Iridium", gps: "GPS",
-  galileo: "Galileo", beidou: "BeiDou" };
+  galileo: "Galileo", beidou: "BeiDou", glonass: "GLONASS", guowang: "Guowang", qianfan: "Qianfan" };
+const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
 const MARK_NAME = { change: "Orbit change", rpo: "RPO history", breakup: "Breakup", new: "New in 30 days", tip: "TIP in window" };
 const MARK_LINK = { change: "changes.html#maneuvers", rpo: "changes.html#rpo", breakup: "catalog.html#breakups",
   new: "catalog.html#catalog", tip: "reentries.html#decay" };
@@ -72,7 +76,10 @@ function readState() {
   return {
     own: list("own", OWNERS), cls: list("cls", CLASSES), con: q.get("con") || "",
     nostar: q.get("nostar") === "1", recent: q.get("new") === "1", marked: q.get("marked") === "1",
-    view: q.get("view") === "2d" ? "2d" : "3d", lines: q.get("lines") !== "0", track: q.get("track") !== "0",
+    cc: (q.get("cc") || "").toUpperCase(),
+    from: DAY_RX.test(q.get("from") || "") ? q.get("from") : "", to: DAY_RX.test(q.get("to") || "") ? q.get("to") : "",
+    view: q.get("view") === "2d" ? "2d" : "3d", track: q.get("track") !== "0",
+    lines: q.get("lines") === "0" ? "off" : q.get("lines") === "all" ? "all" : "sel",
     labels: q.get("labels") !== "0", n: Number(q.get("n")) || null,
   };
 }
@@ -83,11 +90,14 @@ function writeState(s) {
   put("own", s.own.size === OWNERS.length ? null : [...s.own].join(","));
   put("cls", s.cls.size === CLASSES.length ? null : [...s.cls].join(","));
   put("con", s.con || null);
+  put("cc", s.cc || null);
+  put("from", s.from || null);
+  put("to", s.to || null);
   put("nostar", s.nostar ? "1" : null);
   put("new", s.recent ? "1" : null);
   put("marked", s.marked ? "1" : null);
   put("view", s.view === "2d" ? "2d" : null);
-  put("lines", s.lines ? null : "0");
+  put("lines", s.lines === "off" ? "0" : s.lines === "all" ? "all" : null);
   put("track", s.track ? null : "0");
   put("labels", s.labels ? null : "0");
   put("n", s.n || null);
@@ -136,7 +146,37 @@ async function start() {
     if (state.con === "none" ? con : state.con && con !== state.con) return false;
     if (state.marked && !m) return false;
     if (state.recent && !((r[f.launch] && r[f.launch] >= cutoff) || (m && m.has("new")))) return false;
+    if (state.cc && r[f.cc] !== state.cc) return false;
+    if (state.from || state.to) {
+      // GCAT gives some dates to the month or year only: such a date passes when any day of it is in the range.
+      const d = r[f.launch];
+      if (!d) return false;
+      const lo = (d + "-01-01").slice(0, 10), hi = d.length >= 10 ? d.slice(0, 10) : d.length === 7 ? d + "-31" : d + "-12-31";
+      if (state.from && hi < state.from) return false;
+      if (state.to && lo > state.to) return false;
+    }
     return true;
+  }
+
+  // The clock: real time, shifted, or running faster. The places, lines and tracks all use simNow().
+  const clock = { real: Date.now(), sim: Date.now(), rate: 1 };
+  const simNow = () => new Date(clock.sim + (Date.now() - clock.real) * clock.rate);
+  const shiftMin = () => Math.round((simNow().getTime() - Date.now()) / 60000);
+  function setClock(offsetMin, rate) {
+    const now = Date.now();
+    clock.real = now;
+    clock.sim = now + offsetMin * 60000;
+    clock.rate = rate;
+  }
+  function showClock() {
+    const off = shiftMin(), abs = Math.abs(off), h = Math.floor(abs / 60), m = abs % 60;
+    const span = (h ? h + " h" : "") + (h && m ? " " : "") + (m || !h ? m + " min" : "");
+    const rel = off === 0 ? "now" : span + (off > 0 ? " from now" : " ago");
+    $("sm-time-out").textContent = "Places for " + when(simNow().toISOString().slice(0, 19)) + " (" + rel + ")"
+      + (clock.rate !== 1 ? ", running 60 times faster." : ".");
+    const sl = $("sm-shift");
+    if (document.activeElement !== sl) sl.value = String(Math.max(-SHIFT_MAX_MIN, Math.min(SHIFT_MAX_MIN, off)));
+    $("sm-play").setAttribute("aria-pressed", String(clock.rate !== 1));
   }
 
   // Controls ---------------------------------------------------------------------------------------------------
@@ -153,7 +193,9 @@ async function start() {
   flag("sm-nostar", "nostar");
   flag("sm-recent", "recent");
   flag("sm-marked", "marked");
-  flag("sm-lines", "lines", () => { writeState(state); drawSelected(); });
+  const linesSel = $("sm-lines");
+  linesSel.value = state.lines;
+  linesSel.addEventListener("change", () => { state.lines = linesSel.value; writeState(state); drawSelected(); drawLines(); });
   flag("sm-track", "track", () => { writeState(state); drawSelected(); });
   flag("sm-labels", "labels", () => { writeState(state); applyVisible(); });
   const conSel = $("sm-con");
@@ -163,8 +205,87 @@ async function start() {
     if (state.con === "starlink") { state.nostar = false; $("sm-nostar").checked = false; }
     changed();
   });
+  // Owner search: any owner code in the file, by its name or its code.
+  const ccIn = $("sm-cc"), ccCount = new Map();
+  for (const r of rows) if (r[f.cc]) ccCount.set(r[f.cc], (ccCount.get(r[f.cc]) || 0) + 1);
+  const ccLabel = (cc) => (ownerName(cc) === cc ? cc : ownerName(cc) + " (" + cc + ")");
+  {
+    const dl = $("sm-cc-list"), frag = document.createDocumentFragment();
+    for (const cc of [...ccCount.keys()].sort((a, b) => ccLabel(a).localeCompare(ccLabel(b)))) {
+      const o = make("option");
+      o.value = ccLabel(cc);
+      o.label = ccCount.get(cc).toLocaleString() + " objects";
+      frag.append(o);
+    }
+    dl.replaceChildren(frag);
+  }
+  function ccFrom(text) {
+    const t = text.trim();
+    if (!t) return "";
+    const paren = /\(([^()]+)\)\s*$/.exec(t);
+    if (paren && ccCount.has(paren[1].toUpperCase())) return paren[1].toUpperCase();
+    if (ccCount.has(t.toUpperCase())) return t.toUpperCase();
+    const low = t.toLowerCase();
+    for (const cc of ccCount.keys()) if (ownerName(cc).toLowerCase() === low) return cc;
+    return null;
+  }
+  ccIn.value = state.cc ? ccLabel(state.cc) : "";
+  const ccSet = () => {
+    const cc = ccFrom(ccIn.value);
+    if (cc === null) { say("No owner in the file matches \u201c" + ccIn.value.trim() + "\u201d. Pick one from the list."); return; }
+    say("");
+    state.cc = cc;
+    if (cc) {  // the owner's colour group is switched on, or the search would show nothing
+      const g = (rows.find((r) => r[f.cc] === cc) || [])[f.group];
+      if (g && !state.own.has(g)) {
+        state.own.add(g);
+        const box = document.querySelector(`input[data-sm="own"][value="${g}"]`);
+        if (box) box.checked = true;
+      }
+    }
+    changed();
+  };
+  ccIn.addEventListener("change", ccSet);
+  ccIn.addEventListener("search", ccSet);
+
+  // Launch-date range.
+  const fromIn = $("sm-from"), toIn = $("sm-to");
+  fromIn.value = state.from;
+  toIn.value = state.to;
+  const range = () => {
+    state.from = DAY_RX.test(fromIn.value) ? fromIn.value : "";
+    state.to = DAY_RX.test(toIn.value) ? toIn.value : "";
+    changed();
+  };
+  fromIn.addEventListener("change", range);
+  toIn.addEventListener("change", range);
+  $("sm-year").addEventListener("click", () => {
+    fromIn.value = new Date().toISOString().slice(0, 4) + "-01-01";
+    toIn.value = "";
+    range();
+  });
+
+  // Time.
+  const shiftIn = $("sm-shift");
+  shiftIn.addEventListener("input", () => { setClock(Number(shiftIn.value) || 0, clock.rate); timeMoved(); });
+  $("sm-now").addEventListener("click", () => { setClock(0, 1); shiftIn.value = "0"; timeMoved(); });
+  $("sm-play").addEventListener("click", () => {
+    const off = shiftMin();
+    setClock(off >= SHIFT_MAX_MIN ? -SHIFT_MAX_MIN : off, clock.rate === 1 ? PLAY_RATE : 1);
+    timeMoved();
+  });
+  let timeTimer = null;
+  function timeMoved() {
+    showClock();
+    if (!points) return;
+    if (!cycle) { clearTimeout(nextCycle); beginCycle(); }
+    clearTimeout(timeTimer);
+    timeTimer = setTimeout(() => { drawSelected(); drawLines(); }, 120);
+  }
+
   $("sm-reset").addEventListener("click", () => {
     state.own = new Set(OWNERS); state.cls = new Set(CLASSES); state.con = ""; conSel.value = "";
+    state.cc = state.from = state.to = ""; ccIn.value = fromIn.value = toIn.value = "";
     state.nostar = state.recent = state.marked = false;
     document.querySelectorAll('input[data-sm="own"],input[data-sm="cls"]').forEach((b) => { b.checked = true; });
     ["sm-nostar", "sm-recent", "sm-marked"].forEach((id) => { $(id).checked = false; });
@@ -183,9 +304,11 @@ async function start() {
 
   // The list: the accessible view of what the map shows ---------------------------------------------------------
   const tbody = $("sm-rows");
+  let listOrder = [];
   function drawList(shown) {
     const order = shown.slice().sort((a, b) => (markOf(a) ? 0 : 1) - (markOf(b) ? 0 : 1)
       || String(rows[a][f.name]).localeCompare(String(rows[b][f.name])));
+    listOrder = order;
     const frag = document.createDocumentFragment();
     for (const i of order.slice(0, LIST_MAX)) {
       const r = rows[i], tr = make("tr"), m = markOf(i);
@@ -206,7 +329,8 @@ async function start() {
   }
 
   // The globe ---------------------------------------------------------------------------------------------------
-  let C = null, widget = null, points = null, labels = null, recs = null, ptOf = null, lblOf = new Map(), selected = null;
+  let C = null, widget = null, points = null, labels = null, lines = null, recs = null, ptOf = null, lblOf = new Map(), selected = null;
+  let nextCycle = null, linesAt = 0, lineMats = null;
   const selEntities = [];
 
   function colours() {
@@ -242,7 +366,7 @@ async function start() {
   let cycle = null;
   const stats = { objects: N, lastRefreshMs: null, busyMs: null, failed: 0 };
   function beginCycle() {
-    const now = new Date();
+    const now = simNow();
     cycle = { now, g: gstime(now), at: 0, t0: performance.now(), busy: 0 };
     requestAnimationFrame(step);
   }
@@ -274,8 +398,15 @@ async function start() {
     stats.lastRefreshMs = Math.round(performance.now() - c.t0);
     stats.busyMs = Math.round(c.busy);
     cycle = null;
+    if (clock.rate !== 1) {
+      if (shiftMin() >= SHIFT_MAX_MIN) setClock(SHIFT_MAX_MIN, 1);  // the run stops at the end of the shift range
+      showClock();
+      if (performance.now() - linesAt > 3000) { drawSelected(); drawLines(); }
+    } else if (state.lines === "all" && performance.now() - linesAt > 60000) {
+      drawLines();
+    }
     widget.scene.requestRender();
-    setTimeout(beginCycle, Math.max(0, REFRESH_MS - stats.lastRefreshMs));
+    nextCycle = setTimeout(beginCycle, Math.max(0, (clock.rate !== 1 ? PLAY_REFRESH_MS : REFRESH_MS) - stats.lastRefreshMs));
   }
   function makeRec(i) {
     const r = rows[i];
@@ -292,9 +423,9 @@ async function start() {
     if (!widget) return;
     selEntities.splice(0).forEach((e) => widget.entities.remove(e));
     if (selected != null) {
-      const p = path(elementsOf(selected), new Date());
+      const p = path(elementsOf(selected), simNow());
       const col = (colours()[rows[selected][f.group]] || colours().other);
-      if (p && state.lines && state.view === "3d") {
+      if (p && state.lines !== "off" && state.view === "3d") {
         selEntities.push(widget.entities.add({ polyline: { positions: p.orbit.map((x) => new C.Cartesian3(x[0], x[1], x[2])),
           width: 1.8, arcType: C.ArcType.NONE, material: col.withAlpha(0.9) } }));
       }
@@ -303,6 +434,37 @@ async function start() {
           width: 1.2, arcType: C.ArcType.GEODESIC, material: new C.PolylineDashMaterialProperty({ color: col.withAlpha(0.7), dashLength: 8 }) } }));
       }
     }
+    widget.scene.requestRender();
+  }
+
+  // Orbit lines for every object shown, the first LINES_MAX in the list's order (objects with a finding first).
+  // One PolylineCollection and one material per owner colour, so the lines draw in a few batches.
+  function drawLines() {
+    linesAt = performance.now();
+    const note = $("sm-lines-note");
+    if (!lines) { note.textContent = ""; return; }
+    lines.removeAll();
+    if (state.lines !== "all" || state.view !== "3d") {
+      note.textContent = state.lines === "all" && state.view !== "3d" ? "Orbit lines are drawn on the globe only." : "";
+      widget.scene.requestRender();
+      return;
+    }
+    const c = colours(), now = simNow();
+    lineMats = {};
+    for (const k of OWNERS) lineMats[k] = C.Material.fromType("Color", { color: c[k].withAlpha(0.45) });
+    let drawn = 0;
+    const pick = listOrder.filter((i) => i !== selected && !bad[i]).slice(0, LINES_MAX);
+    for (const i of pick) {
+      const p = path(elementsOf(i), now, LINE_STEPS);
+      if (!p) continue;
+      lines.add({ positions: p.orbit.map((x) => new C.Cartesian3(x[0], x[1], x[2])), width: 1,
+        material: lineMats[rows[i][f.group]] || lineMats.other });
+      drawn++;
+    }
+    const total = listOrder.length;
+    note.textContent = total > LINES_MAX
+      ? `Orbit lines for the first ${LINES_MAX} of ${total.toLocaleString()} objects shown, those with a finding first.`
+      : `Orbit lines for all ${drawn.toLocaleString()} objects shown.`;
     widget.scene.requestRender();
   }
 
@@ -381,7 +543,8 @@ async function start() {
     clearTimeout(timer);
     timer = setTimeout(() => {
       refilter();
-      if (points && !cycle) beginCycle();  // newly shown objects get a position now, not at the next tick
+      drawLines();
+      if (points && !cycle) { clearTimeout(nextCycle); beginCycle(); }  // newly shown objects get a place now
     }, 60);
   }
 
@@ -389,6 +552,7 @@ async function start() {
   refilter();
   if (state.n != null && byNorad.has(state.n)) { selected = byNorad.get(state.n); sideCard(selected); }
   $("sm-read").textContent = "Read " + when(doc.read_at) + ".";
+  showClock();
 
   // Cesium last: the filters and the list work without WebGL.
   try {
@@ -406,6 +570,7 @@ async function start() {
     if (!base.ion) box.parentElement.append(make("p", "fallback-note small muted", "Imagery: Natural Earth II (Cesium ion not reached)."));
     points = widget.scene.primitives.add(new C.PointPrimitiveCollection());
     labels = widget.scene.primitives.add(new C.LabelCollection());
+    lines = widget.scene.primitives.add(new C.PolylineCollection());
     recs = new Array(N);
     ptOf = new Array(N);
     for (let i = 0; i < N; i++) ptOf[i] = points.add({ id: i, show: false, position: C.Cartesian3.ZERO, pixelSize: 2.5 });
@@ -431,6 +596,7 @@ async function start() {
         showView();
         if (k === "2d") widget.scene.morphTo2D(0.6); else widget.scene.morphTo3D(0.6);
         drawSelected();
+        drawLines();
       });
     }
     widget.scene.morphComplete.addEventListener(() => widget.scene.requestRender());
@@ -447,8 +613,9 @@ async function start() {
     }, C.ScreenSpaceEventType.MOUSE_MOVE);
 
     if (selected != null) drawSelected();
-    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paint(); drawSelected(); });
-    new MutationObserver(() => { paint(); drawSelected(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    drawLines();
+    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paint(); drawSelected(); drawLines(); });
+    new MutationObserver(() => { paint(); drawSelected(); drawLines(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     window.__orbitSatMap = stats;
     beginCycle();
   } catch (e) {
