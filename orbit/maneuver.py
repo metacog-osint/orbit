@@ -32,6 +32,13 @@ The method, for each watched object, over its stored Space-Track element sets (G
      to the set after its first marked pair, the change again reaches Z deviations and 0.25 m/s. When it does not,
      that one set lay off the orbit (it gives a change and its return); the set is left out, counted as `one_set`,
      and the rule runs again. A change at the newest set is counted as `awaiting_next_set` until the next set.
+  9. At GEO, listed cross-track changes less than EPISODE_DAYS (2) apart are one north-south episode, listed once at
+     its net size (orbit-2.54): the median orbit of the EPISODE_SETS (3) sets before its first change against the 3
+     sets after its last, as a plane change (inclination vector), with the object's steady drift (lunar and solar
+     pull on the plane) removed over the time between them. In the days after a station-keeping burn the published sets jump
+     back and forth in plane before they settle, and each jump was listed; the net size is what the burn left. An
+     episode whose net size is under the GEO floor is counted (`episode_below_report`), not listed; one with fewer
+     than 3 sets after it waits (`awaiting_settle`). In-track and eccentricity changes are listed as before.
 
 What a mark means: the published orbit moved by more than this object's element sets usually move. Most such
 marks are manoeuvres; a re-fit after a tracking gap, a single element set fitted off the orbit, a mis-tagged set,
@@ -70,6 +77,9 @@ KEEP_DAYS = 120     # the analysis reads the sets of the last 120 days (view());
 STALE_DAYS = 3      # no new set for this long is named: an untracked object looks exactly like a quiet one
 GAP_LABEL_H = 48    # a change measured across a gap this long or longer is labelled: it happened somewhere inside it
 CONFIRM_REGIMES = ("GEO",)  # a change is listed once the next set confirms it (orbit-2.47); see confirmed()
+EPISODE_REGIMES = ("GEO",)  # cross-track changes close together are one episode at its net size (orbit-2.54)
+EPISODE_DAYS = 2.0          # listed cross-track changes less than this apart (end of one to start of the next)
+EPISODE_SETS = 3            # sets either side whose median orbit gives the episode's net change
 J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
 COMPONENTS = ("in-track", "cross-track", "eccentricity")
 
@@ -237,7 +247,100 @@ def detect(obj: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
         out["sets"] = len(sets) + len(off)
         out["one_set"] = len(off)          # changes the next set did not confirm: counted, not listed
         out["one_set_epochs"] = off
+    if out["regime"] in EPISODE_REGIMES and out["events"]:
+        episodes(out, sets)
     return out
+
+
+def _hvec(s: list) -> tuple[float, float]:
+    """The inclination vector (sin i cos node, sin i sin node): near zero inclination it moves smoothly where the
+    node alone swings through tens of degrees."""
+    i, o = math.radians(s[3]), math.radians(s[4])
+    return math.sin(i) * math.cos(o), math.sin(i) * math.sin(o)
+
+
+def _settled(sets: list, t: list) -> dict:
+    """Median inclination vector and semi-major axis of a few sets, at the median of their epochs."""
+    h = [_hvec(s) for s in sets]
+    ts = sorted(t)
+    k = len(ts) // 2
+    mid = ts[k] if len(ts) % 2 else ts[k - 1] + (ts[k] - ts[k - 1]) / 2
+    return {"hx": median(x for x, _ in h), "hy": median(y for _, y in h), "a": median(_a(s[1]) for s in sets),
+            "i": median(s[3] for s in sets), "t": mid}
+
+
+def _net(sets: list, t: list, k0: int, k1: int, rate: dict) -> tuple[float, float]:
+    """Net plane change (m/s) and inclination change (deg) from the EPISODE_SETS sets ending at index k0 to those
+    starting at index k1, the steady drift of the inclination vector removed. The caller checks both sides hold
+    EPISODE_SETS sets."""
+    b = _settled(sets[k0 + 1 - EPISODE_SETS:k0 + 1], t[k0 + 1 - EPISODE_SETS:k0 + 1])
+    a = _settled(sets[k1:k1 + EPISODE_SETS], t[k1:k1 + EPISODE_SETS])
+    dt = (a["t"] - b["t"]).total_seconds() / 86400.0
+    sma = (a["a"] + b["a"]) / 2
+    v = math.sqrt(MU / sma) * 1000.0
+    dh = math.hypot(a["hx"] - b["hx"] - rate["hx"] * dt, a["hy"] - b["hy"] - rate["hy"] * dt)
+    return v * dh, a["i"] - b["i"]
+
+
+def episodes(out: dict, sets: list) -> None:
+    """Step 9 (orbit-2.54): the listed cross-track changes of a GEO object, grouped into episodes (less than
+    EPISODE_DAYS from the end of one to the start of the next), each listed once at its net size. A change measured
+    across a tracking gap (`gap`, GAP_LABEL_H) is left as listed: sparse sets give no settled orbit either side, and
+    chained gap changes would make one episode of weeks. So is an episode with fewer than EPISODE_SETS sets before
+    it (the start of the record). Changes in place in out["events"]; counts in out["episode_merged"],
+    out["episode_below_report"] and out["awaiting_settle"]."""
+    t = [_dt(s[0]) for s in sets]
+    idx = {s[0]: k for k, s in enumerate(sets)}
+    rated = [(p, q, (tq - tp).total_seconds() / 86400.0) for p, q, tp, tq in zip(sets, sets[1:], t, t[1:])]
+    rated = [(p, q, dt) for p, q, dt in rated if dt >= MIN_RATE_DT]
+    rate = {"hx": median((_hvec(q)[0] - _hvec(p)[0]) / dt for p, q, dt in rated),
+            "hy": median((_hvec(q)[1] - _hvec(p)[1]) / dt for p, q, dt in rated)}
+    grouped = lambda e: e["dominant"] == "cross-track" and not e.get("gap")
+    ct = sorted((e for e in out["events"] if grouped(e)), key=lambda e: e["from"])
+    groups: list[list[dict]] = []
+    for e in ct:
+        if groups and (_dt(e["from"]) - _dt(groups[-1][-1]["to"])).total_seconds() / 86400.0 < EPISODE_DAYS:
+            groups[-1].append(e)
+        else:
+            groups.append([e])
+    keep = [e for e in out["events"] if not grouped(e)]
+    out["episode_merged"] = 0           # listed cross-track changes folded into an episode with others
+    out["episode_below_report"] = 0     # episodes whose net change is under the floor: counted, not listed
+    out["awaiting_settle"] = 0          # episodes without EPISODE_SETS sets after them yet
+    floor = REPORT_MS.get(out["regime"], FLOOR_MS)
+    for g in groups:
+        first, last = g[0], g[-1]
+        k0, k1 = idx[first["from"]], idx[last["to"]]
+        if k0 + 1 < EPISODE_SETS:
+            keep.extend(g)  # the start of the record: no settled orbit before it, listed as before
+            continue
+        if k1 + EPISODE_SETS > len(sets):
+            out["awaiting_settle"] += 1
+            out.setdefault("awaiting", []).append({"from": first["from"], "to": last["to"]})
+            continue
+        total, di = _net(sets, t, k0, k1, rate)  # the plane change alone: an in-track burn nearby is listed apart
+        if total < floor:
+            out["episode_below_report"] += 1
+            continue
+        out["episode_merged"] += len(g) - 1
+        ev = {"from": first["from"], "to": last["to"], "dv_ms": round(total, 3),
+              "dv_sma_ms": round(sum(e["dv_sma_ms"] for e in g), 3),
+              "dominant": "cross-track", "da_km": round(sum(e["da_km"] for e in g), 2),
+              "di_deg": round(di, 4),
+              "z": max(e["z"] for e in g), "pairs": sum(e["pairs"] for e in g),
+              "longest_gap_h": max(e["longest_gap_h"] for e in g),
+              "episode": {"changes": len(g), "listed_ms": round(sum(e["dv_ms"] for e in g), 3),
+                          "sets_each_side": EPISODE_SETS}}
+        gaps = [e["gap"] for e in g if e.get("gap")]
+        if gaps:
+            ev["gap"] = max(gaps, key=lambda x: x["hours"])
+        if first.get("geo") and last.get("geo"):
+            ev["geo"] = {"lon_before": first["geo"]["lon_before"], "lon_after": last["geo"]["lon_after"],
+                         "drift_before": first["geo"]["drift_before"], "drift_after": last["geo"]["drift_after"]}
+        if last.get("confirmed_by"):
+            ev["confirmed_by"] = last["confirmed_by"]
+        keep.append(ev)
+    out["events"] = sorted(keep, key=lambda e: e["from"])
 
 
 def _confirmed(g: list[dict], sets: list, idx: dict, rate: dict, base: dict, reg: str):
@@ -371,4 +474,6 @@ def report(store: dict, now: datetime, window_days: int = WINDOW_DAYS) -> dict:
     return {"objects": objs, "events": events, "window_days": window_days,
             "thresholds": {"z": Z, "floor_ms": FLOOR_MS, "report_ms": REPORT_MS, "leo_off_track_ms": LEO_OFF_TRACK_MS,
                            "confirm_regimes": list(CONFIRM_REGIMES),
+                           "episode_regimes": list(EPISODE_REGIMES), "episode_days": EPISODE_DAYS,
+                           "episode_sets": EPISODE_SETS,
                            "min_pairs": MIN_PAIRS, "merge_days": MERGE_DAYS}}

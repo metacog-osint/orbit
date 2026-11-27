@@ -94,6 +94,11 @@ with the steady drift removed.
 - **`orbit-2.47` (one off set confirmed by the next set) removes few of these:** 38 to 34 on IS-22, 35 to 31 on
   SES-11, 42 to 36 on Turksat 4B, since the off sets come several in a row.
 - No operator publishes these burns, so which individual listings are real is not known. The page states the limit.
+- **`orbit-2.54` lists each episode once at its net size** (method.md, "GEO north-south episodes at their net
+  size"): on these seven, cross-track listings 31 to 11 on SES-11, 35 to 19 on Turksat 4B, 34 to 17 on IS-22, 21 to
+  14 on Astra 2G, 27 to 18 on IS-15, 31 to 19 on Galaxy 35 and 11 unchanged on Eutelsat 70B (counts after
+  `orbit-2.47`, over 1 Jul to 27 Nov 2026); totals 25.6, 35.2, 26.3, 29.7, 17.9, 22.0 and 22.8 m/s, 1.1-1.6 times the
+  north-south need above.
 
 ## Long gaps (the orbit-2.43 change)
 

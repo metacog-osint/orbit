@@ -75,7 +75,10 @@ class KnownCases(unittest.TestCase):
         g2 = [e for e in by[34779]["events"] if e["da_km"] > 1000]
         self.assertEqual(len(g2), 1)  # BeiDou-2 G2 raised to the graveyard, 22-27 Jan 2022
         sj = by[49330]["events"]
-        self.assertEqual(len(sj), 13)  # orbit-2.47: the out-and-back pair of 27-28 Dec 2021 (one set) is not listed
+        # orbit-2.47: the out-and-back pair of 27-28 Dec 2021 (one set) is not listed (15 to 13); orbit-2.54: two
+        # plane changes whose net size across 3 sets either side is under 0.25 m/s are counted, not listed (13 to 11)
+        self.assertEqual(len(sj), 11)
+        self.assertEqual((by[49330]["episode_below_report"], by[49330]["episode_merged"]), (2, 0))
         self.assertEqual((by[49330]["one_set"], by[49330]["one_set_epochs"]), (1, ["2021-12-27T14:50:09Z"]))
         self.assertEqual(out_and_back(sj), 0)
         self.assertTrue(all(e.get("confirmed_by") for o in rep["objects"] for e in o["events"]))
@@ -89,7 +92,10 @@ class KnownCases(unittest.TestCase):
         for e in o["events"]:
             terms[e["dominant"]] = terms.get(e["dominant"], 0) + 1
         # orbit-2.47: 176 listed before the confirming set; 49 sets left out as one set off the orbit
-        self.assertEqual(terms, {"in-track": 40, "cross-track": 71, "eccentricity": 8})
+        # orbit-2.54: 71 cross-track changes come to 39 listings (24 folded into episodes, 6 episodes netting under
+        # 0.25 m/s); in-track (the relocations) and eccentricity unchanged
+        self.assertEqual(terms, {"in-track": 40, "cross-track": 39, "eccentricity": 8})
+        self.assertEqual((o["episode_merged"], o["episode_below_report"], o["awaiting_settle"]), (24, 6, 0))
         self.assertEqual((o["below_report"], o["one_set"], o["awaiting_next_set"]), (168, 49, 0))
         self.assertEqual(out_and_back(o["events"]), 1)  # 21 before
 

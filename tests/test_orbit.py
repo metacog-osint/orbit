@@ -817,6 +817,61 @@ class Maneuver(unittest.TestCase):
         self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track"])
         self.assertAlmostEqual(d["events"][0]["dv_ms"], 0.54, delta=0.06)
 
+    def ns_burn(self, norad, jumps=(0.02, 0.02, 0.0, 0.0, 0.02, 0.02), di=0.03, day=30.0, **kw):
+        """A north-south burn of `di` degrees at `day`, then sets after it lying off the new plane by `jumps`
+        degrees in turn (SYNTHETIC: the back-and-forth seen in station-kept GEO sets after a burn)."""
+        recs = synth(norad, i0=1.0, burns=[(day, 0.0, di)], **kw)
+        k = next(j for j, r in enumerate(recs) if float(r["INCLINATION"]) > 1.0 + di / 2)
+        for j, off in enumerate(jumps, start=k + 1):
+            recs[j]["INCLINATION"] = f"{float(recs[j]['INCLINATION']) + off:.6f}"
+        return recs
+
+    def test_geo_north_south_episode_is_listed_once_at_its_net_size(self):
+        # orbit-2.54: the burn and the jumps after it were listed as several plane changes; one episode now
+        recs = self.ns_burn(30)
+        maneuver.EPISODE_REGIMES, keep = (), maneuver.EPISODE_REGIMES
+        try:
+            before = self.detect(recs)
+        finally:
+            maneuver.EPISODE_REGIMES = keep
+        self.assertGreaterEqual(len(before["events"]), 3, before["events"])
+        self.assertGreater(sum(e["dv_ms"] for e in before["events"]), 3.0)
+        d = self.detect(recs)
+        self.assertEqual(len(d["events"]), 1, d["events"])
+        ev = d["events"][0]
+        self.assertEqual(ev["dominant"], "cross-track")
+        self.assertAlmostEqual(ev["dv_ms"], 1.61, delta=0.15)            # 0.03 deg at 3,075 m/s
+        self.assertAlmostEqual(ev["di_deg"], 0.03, delta=0.003)
+        self.assertEqual(ev["episode"]["changes"], len(before["events"]))
+        self.assertEqual(d["episode_merged"], len(before["events"]) - 1)
+        self.assertEqual((d["episode_below_report"], d["awaiting_settle"]), (0, 0))
+        self.assertEqual(ev["from"], before["events"][0]["from"])
+        self.assertEqual(ev["to"], before["events"][-1]["to"])
+
+    def test_geo_episodes_apart_and_in_track_changes_stay_separate(self):
+        recs = synth(31, i0=1.0, burns=[(20.0, 0.0, 0.02), (26.0, 0.0, 0.02), (21.0, dn_for(0.5), 0.0)])
+        d = self.detect(recs)
+        self.assertEqual([e["dominant"] for e in d["events"]], ["cross-track", "in-track", "cross-track"],
+                         d["events"])
+        self.assertEqual(d["episode_merged"], 0)
+        self.assertAlmostEqual(d["events"][1]["dv_ms"], 0.5, delta=0.05)   # in-track: as listed before
+
+    def test_geo_episode_that_went_nowhere_is_counted_not_listed(self):
+        # a plane change and its return two sets later: each is listed, the net is nothing
+        recs = synth(32, i0=1.0)
+        for j in (60, 61):
+            recs[j]["INCLINATION"] = f"{float(recs[j]['INCLINATION']) + 0.02:.6f}"
+        d = self.detect(recs)
+        self.assertEqual((d["events"], d["episode_below_report"]), ([], 1))
+
+    def test_geo_episode_waits_for_three_sets_after_it(self):
+        recs = self.ns_burn(33, jumps=(), day=38.9)                       # two sets after the burn so far
+        d = self.detect(recs)
+        self.assertEqual((d["events"], d["awaiting_settle"]), ([], 1))
+        self.assertEqual(maneuver.EPISODE_REGIMES, ("GEO",))
+        self.assertEqual(maneuver.report({"33": next(iter(maneuver.merge({}, recs, NOW_M).values()))},
+                                         NOW_M)["thresholds"]["episode_days"], 2.0)
+
     def test_leo_drag_decay_and_precession_are_not_changes(self):
         d = self.detect(synth(4, per_day=4, n0=15.2, i0=51.6, n_rate=0.002, node_rate="j2", noise_n=2e-5,
                               noise_i=1e-4, noise_node=1e-3))

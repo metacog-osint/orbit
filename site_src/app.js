@@ -358,6 +358,13 @@
       "the orbit gives a change and its return)");
     if (c.geo_awaiting) parts.push(c.geo_awaiting + " at GEO waiting for the next element set to confirm " +
       (c.geo_awaiting === 1 ? "it" : "them"));
+    if (c.geo_episode_merged) parts.push(c.geo_episode_merged + " GEO plane changes listed inside a north-south " +
+      "episode instead, at the episode's net size");
+    if (c.geo_episode_below) parts.push(c.geo_episode_below + " GEO north-south " +
+      (c.geo_episode_below === 1 ? "episode" : "episodes") + " whose net change is under the listing floor");
+    if (c.geo_awaiting_settle) parts.push(c.geo_awaiting_settle + " GEO north-south " +
+      (c.geo_awaiting_settle === 1 ? "episode" : "episodes") + " waiting for three element sets after " +
+      (c.geo_awaiting_settle === 1 ? "it" : "them"));
     return parts.length ? "Counted, not listed: " + parts.join("; ") + ". " : "";
   }
 
