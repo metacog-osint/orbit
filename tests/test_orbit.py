@@ -710,8 +710,9 @@ class Maneuver(unittest.TestCase):
         self.assertNotIn("gap", self.detect(synth(11, burns=[(30.0, dn_for(0.5), 0.0)]))["events"][0])
 
     def test_marks_under_a_day_apart_join_only_when_they_agree(self):
-        # orbit-2.6: a lowering then a raising half a day later are two changes; two raisings are one
-        d = self.detect(synth(12, burns=[(30.0, dn_for(0.5), 0.0), (30.5, -dn_for(0.5), 0.0)]))
+        # orbit-2.6: a lowering then a raising half a day later are two changes; two raisings are one. (The raising
+        # is twice the lowering: one that only undid it reads as a single set off the orbit, orbit-2.47.)
+        d = self.detect(synth(12, burns=[(30.0, dn_for(0.5), 0.0), (30.5, -dn_for(1.0), 0.0)]))
         self.assertEqual([e["da_km"] < 0 for e in d["events"]], [True, False], d["events"])
         d = self.detect(synth(13, burns=[(30.0, dn_for(0.5), 0.0), (30.5, dn_for(0.5), 0.0)]))
         self.assertEqual(len(d["events"]), 1, d["events"])
@@ -735,6 +736,43 @@ class Maneuver(unittest.TestCase):
         self.assertEqual(sc["extra"], [late, other, storm])
         self.assertEqual(sc["in_storm"], [storm])
         self.assertEqual(maneuver.score([late], ann[1:2], 14)["hits"], 1)  # 12 h 49 m apart: inside 14 h
+
+    def test_geo_one_set_off_the_orbit_is_not_listed(self):
+        # orbit-2.47: one set lying off the orbit gives a change and its return; the set after does not confirm it
+        recs = synth(20)
+        recs[60]["MEAN_MOTION"] = f"{float(recs[60]['MEAN_MOTION']) + dn_for(0.6):.8f}"
+        maneuver.CONFIRM_REGIMES, keep = (), maneuver.CONFIRM_REGIMES
+        try:
+            before = self.detect(recs)
+        finally:
+            maneuver.CONFIRM_REGIMES = keep
+        self.assertEqual(len(before["events"]), 2, before["events"])          # out and back, as listed before
+        self.assertLess(before["events"][0]["da_km"] * before["events"][1]["da_km"], 0)
+        d = self.detect(recs)
+        self.assertEqual((d["events"], d["one_set"]), ([], 1))
+        self.assertEqual(d["one_set_epochs"], [maneuver._iso(maneuver._dt(recs[60]["EPOCH"]))])
+        self.assertEqual(d["sets"], len(recs))
+
+    def test_geo_change_is_listed_once_the_next_set_confirms_it(self):
+        recs = synth(21, burns=[(39.5, dn_for(0.5), 0.0)])             # the burn reaches only the newest set
+        d = self.detect(recs)
+        self.assertEqual((d["events"], d["awaiting_next_set"]), ([], 1))
+        self.assertEqual(d["awaiting"][0]["to"], maneuver._iso(maneuver._dt(recs[-1]["EPOCH"])))
+        more = synth(21, days=40.5, burns=[(39.5, dn_for(0.5), 0.0)], end=NOW_M + timedelta(hours=12))
+        d = maneuver.detect(next(iter(maneuver.merge({}, more, NOW_M + timedelta(hours=12)).values())),
+                            NOW_M + timedelta(hours=12))
+        self.assertEqual(len(d["events"]), 1, d["events"])
+        ev = d["events"][0]
+        self.assertEqual(ev["confirmed_by"], maneuver._iso(maneuver._dt(more[-1]["EPOCH"])))
+        self.assertAlmostEqual(ev["dv_ms"], 0.5, delta=0.05)
+        self.assertEqual(d["awaiting_next_set"], 0)
+
+    def test_low_orbit_changes_need_no_confirming_set(self):
+        self.assertEqual(maneuver.CONFIRM_REGIMES, ("GEO",))
+        d = self.detect(synth(22, per_day=4, n0=15.2, i0=51.6, node_rate="j2", noise_n=2e-5, noise_i=1e-4,
+                              noise_node=1e-3, burns=[(39.9, 0.004, 0.0)]))
+        self.assertEqual(d["regime"], "LEO")
+        self.assertNotIn("one_set", d)
 
     def test_geo_plane_change_is_cross_track(self):
         d = self.detect(synth(3, i0=1.0, burns=[(25.0, 0.0, 0.01)]))  # 0.01 deg: about 0.54 m/s
