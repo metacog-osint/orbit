@@ -179,3 +179,61 @@
   note: "Attributed: Eutelsat's documents do not name Hot Bird 13B as 33F; the link rests on the launch month and the position."
   added_by: tic-analyst
   added: 2026-11-25
+
+# 26 Nov 2026: the two SWF names left unlinked at build step 5. Evidence from Orbit's catalog built 26 Nov 2026
+# 17:35 UTC (GCAT, Space-Track SATCAT 17:30 UTC, CelesTrak SATCAT file of 09:02 UTC, Wikidata of 25 Nov).
+
+- jcat: A04907
+  name: "Prowler"
+  swf_key: "Prowler"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, row '1990-1998', chaser (launch site Cape Canaveral, GEO)"
+  read: 2026-11-26
+  evidence:
+    - "GCAT names A04907 'PROWLER' (auxcat): 1990-097E, launched 1990-11-15 (STS-38), owner NRO, GEO/ID orbit 35,584 x 36,023 km at 5.76 deg (elements of 2000-06-13)"
+    - "Wikidata Q14940655 'Prowler' gives COSPAR ID (P247) 1990-097E, GCAT's piece for A04907; its NORAD number (P377) 20963 is 1990-097B, which GCAT, Space-Track and CelesTrak all name USA 67 (GCAT PLName 'QUASAR 8', AltNames 'SDS B-2 GEO')"
+    - "SWF's row: launched from a Space Shuttle mission in 1990, GEO, Cape Canaveral; its cited source is SeeSat-L's 'Unknown GEO Object 2000-653A / 90007 Identified as Prowler', the analyst object of the 2000 elements GCAT holds"
+  note: "No NORAD number: Space-Track publishes none for Prowler. Wikidata's P377 on Q14940655 disagrees with its own P247."
+  added_by: tic-analyst
+  added: 2026-11-26
+
+# Cosmos 2535 to 2538 (2019-039, launched 2019-07-10, Plesetsk): Space-Track and CelesTrak name 44422, 44423 and
+# 44424 COSMOS 2536, 2537 and 2538; GCAT names them Kosmos-2537, 2538 and 2536. Nothing Orbit holds settles which
+# number carries which name (no orbit history for 2019-2020, when SWF's rows place Cosmos 2536 beside Cosmos 2535),
+# so SWF's "Cosmos 2536" stays unlinked and the three names are recorded as open swaps.
+
+- swap: "Cosmos 2536"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44422, as: "COSMOS 2536"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44422, as: "COSMOS 2536"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44424, as: "Kosmos-2536"}
+  status: open
+  evidence:
+    - "All three numbers are 2019-039 (B, C, D) in every source; 44421 (2019-039A) is Cosmos 2535 in all three"
+    - "44422 decayed 2024-06-21 (all three sources agree); 44424 is still in orbit, CelesTrak 471 x 527 km at 97.58 deg"
+    - "GCAT's payload notes differ by number: 44422 'Naprazheniye No. 2?', 44424 'Nivelir No. 5?' (both marked uncertain)"
+  added_by: tic-analyst
+  added: 2026-11-26
+
+- swap: "Cosmos 2537"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44423, as: "COSMOS 2537"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44423, as: "COSMOS 2537"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44422, as: "Kosmos-2537"}
+  status: open
+  evidence:
+    - "44423 (2019-039C) decayed 2023-10-06 (GCAT, CelesTrak; Space-Track 2023-10-07); 44422 (2019-039B) decayed 2024-06-21"
+  added_by: tic-analyst
+  added: 2026-11-26
+
+- swap: "Cosmos 2538"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44424, as: "COSMOS 2538"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44424, as: "COSMOS 2538"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44423, as: "Kosmos-2538"}
+  status: open
+  evidence:
+    - "44424 (2019-039D) is still in orbit; 44423 (2019-039C) decayed 2023-10-06 (GCAT, CelesTrak; Space-Track 2023-10-07)"
+  added_by: tic-analyst
+  added: 2026-11-26

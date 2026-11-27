@@ -1,0 +1,160 @@
+{
+ "schema": "tic-catalog-names/1",
+ "read": "2026-11-26",
+ "catalog_schema": "tic-catalog/1",
+ "sources": {
+  "gcat-mcdowell": "2026-11-26",
+  "space-track": "2026-11-26",
+  "celestrak-satcat": "2026-11-26",
+  "wikidata": "2026-11-25",
+  "wmo-oscar-space": "2026-11-21",
+  "aliases": "2026-11-25"
+ },
+ "objects": [
+  [
+   "20963",
+   20963,
+   "S20963",
+   "payload",
+   "1990-11-15",
+   null,
+   "USA 67 (QUASAR 8)",
+   [
+    "USA 67",
+    "QUASAR 8",
+    "SDS B-2 GEO",
+    "Prowler",
+    "Prowler (satellite)"
+   ]
+  ],
+  [
+   "39208",
+   39208,
+   "S39208",
+   "payload",
+   "2013-07-19",
+   null,
+   "PAYLOAD A",
+   [
+    "PAYLOAD A",
+    "Shiyan Weixing 7",
+    "Tansuo 4A",
+    "SHIYAN-7 (SY-7)"
+   ]
+  ],
+  [
+   "39209",
+   39209,
+   "S39209",
+   "payload",
+   "2013-07-19",
+   null,
+   "PAYLOAD B",
+   [
+    "PAYLOAD B",
+    "Chuangxin-3",
+    "Tansuo 3?",
+    "CHUANGXIN-3 (CX-3)"
+   ]
+  ],
+  [
+   "39210",
+   39210,
+   "S39210",
+   "payload",
+   "2013-07-19",
+   null,
+   "PAYLOAD C",
+   [
+    "PAYLOAD C",
+    "Shi Jian 15",
+    "Tansuo 5?",
+    "SHIJIAN-15 (SJ-15)",
+    "Shijian-15",
+    "Shijian 15",
+    "SJ-15"
+   ]
+  ],
+  [
+   "44421",
+   44421,
+   "S44421",
+   "payload",
+   "2019-07-10",
+   null,
+   "COSMOS 2535",
+   [
+    "COSMOS 2535",
+    "Kosmos-2535",
+    "Burevestnik No. 1?"
+   ]
+  ],
+  [
+   "44422",
+   44422,
+   "S44422",
+   "payload",
+   "2019-07-10",
+   "2024-06-21",
+   "COSMOS 2536",
+   [
+    "COSMOS 2536",
+    "Kosmos-2537",
+    "Naprazheniye No. 2?"
+   ]
+  ],
+  [
+   "44423",
+   44423,
+   "S44423",
+   "payload",
+   "2019-07-10",
+   "2023-10-07",
+   "COSMOS 2537",
+   [
+    "COSMOS 2537",
+    "Kosmos-2538",
+    "KYuA No. 2?"
+   ]
+  ],
+  [
+   "44424",
+   44424,
+   "S44424",
+   "payload",
+   "2019-07-10",
+   null,
+   "COSMOS 2538",
+   [
+    "COSMOS 2538",
+    "Kosmos-2536",
+    "Nivelir No. 5?"
+   ]
+  ],
+  [
+   "49113",
+   49113,
+   "S49113",
+   "payload",
+   "2021-08-24",
+   null,
+   "PAYLOAD B",
+   [
+    "PAYLOAD B",
+    "Test satellite"
+   ]
+  ],
+  [
+   "A04907",
+   null,
+   "A04907",
+   "payload",
+   "1990-11-15",
+   null,
+   "PROWLER",
+   [
+    "PROWLER"
+   ]
+  ]
+ ]
+}
