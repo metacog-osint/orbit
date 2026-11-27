@@ -22,14 +22,6 @@ def launch(**over):
     return x
 
 
-def upcoming(**over):
-    x = {"id": "abc", "net": "2026-12-01T10:30:00Z", "window_end": "2026-12-01T12:30:00Z", "name": "R | M", "status": "Go",
-         "status_name": "Go", "net_precision": "Minute", "pad": "P", "location": "L", "provider": "Pr", "mission_type": "",
-         "orbit_name": "", "last_updated": "2026-11-22T19:47:17Z", "lat": None, "lon": None}
-    x.update(over)
-    return x
-
-
 class Items(unittest.TestCase):
     def props(self, feature):
         return feature["properties"]
@@ -43,15 +35,6 @@ class Items(unittest.TestCase):
     def test_uncertain_launch_is_a_day(self):
         p = self.props(feed._launch_item(launch(time_uncertain=True), NOW, NOW))
         self.assertEqual((p["event_start"], p["event_time_precision"]), ("2026-11-22T00:00:00Z", "day"))
-
-    def test_upcoming_window_and_month_precision(self):
-        p = self.props(feed._upcoming_item(upcoming(), NOW, NOW))
-        self.assertEqual((p["event_start"], p["event_end"], p["last_change"]),
-                         ("2026-12-01T10:30:00Z", "2026-12-01T12:30:00Z", "changed"))
-        p = self.props(feed._upcoming_item(upcoming(net_precision="Month", net="2026-12-31T23:59:00Z",
-                                                    window_end="2026-12-31T23:59:00Z"), NOW, NOW))
-        self.assertEqual((p["event_start"], p["event_time_precision"]), ("2026-12-01T00:00:00Z", "month"))
-        self.assertNotIn("event_end", p)
 
     def test_reentry_subject_holds_across_days(self):
         rows = [{"type": "payload", "state": "US", "name": "A", "reentry_date": "2026-11-18", "country": "US"},
@@ -78,14 +61,13 @@ class Header(unittest.TestCase):
     def test_header_and_health(self):
         snap = {"generated_at": NOW, "lanes": {
             "catalog": {"status": "ok", "fetched_at": NOW},
-            "upcoming": {"status": "failed", "failed_at": NOW, "fetched_at": PREV, "error": "timeout", "failures": 2,
-                         "from_previous": True},
-            "maneuver": {"status": "off", "checked_at": NOW}},
-            "launches": [launch()], "upcoming": []}
+            "maneuver": {"status": "failed", "failed_at": NOW, "fetched_at": PREV, "error": "timeout", "failures": 2,
+                         "from_previous": True}},
+            "launches": [launch()]}
         doc = feed.build_feed(snap)
         self.assertEqual((doc["contract_rev"], doc["kit"]), ("2.1", KIT))
         self.assertEqual(contract.check_health(doc["health"], strict=True), [])
-        self.assertEqual(doc["health"]["ll2-thespacedevs"]["failures"], 2)
+        self.assertEqual(doc["health"]["space-track"]["failures"], 2)
         self.assertEqual(doc["health"]["gcat-mcdowell"]["data_as_of"], "2026-11-22T12:23:56Z")
 
 

@@ -31,7 +31,8 @@ WINDOWS = {1: 15, 7: 60, 30: 240, 90: 720}       # days shown: minutes between s
 EVENT_DAYS = 30                                   # arrivals and departures listed on the page
 GEO_ALT, RE = 35786.0, 6378.137
 OBJ_COLS = ["norad", "name", "cospar", "type", "owner", "launch", "rcs", "region", "active", "epoch", "n", "e", "i", "raan",
-            "argp", "M", "bstar"]
+            "argp", "M", "bstar", "lon"]                # lon: degrees east at the build time (ideas#366)
+HELD_DAYS = 320                                   # stays read this far back (+45 days, read_elsets), at most
 CITE = "Orbital data: USSPACECOM (space-track.org); basic SSA data, redistributed with citation"
 RPO_CITE = ("Secure World Foundation, Global Counterspace Capabilities (2026), \"History of Robotic Rendezvous and "
             "Proximity Operations in Space\" (CC BY-NC 4.0)")
@@ -230,6 +231,150 @@ def movers(objs, elsets, rmap, now):
         return {"error": f"{type(e).__name__}: {e}"}
 
 
+def catalog_names(site, objs):
+    """Other names of each object from the TIC catalog's search index, which the update run unpacks into
+    site/data/catalog/ in the step before this one (orbit.py object-data; no request here). {norad: [names]}, only
+    objects with another name; {} when the index is missing, so the page builds without them (ideas#360)."""
+    sys.path.insert(0, ROOT)
+    from orbit import names, namepos
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+    except (OSError, ValueError) as e:
+        print(f"geo page: no catalog search index ({type(e).__name__}); other names left out")
+        return {}
+    want = {o[0]: o[1] for o in objs}
+    out = {}
+    for r in namepos.rows(doc):
+        k = str(r.get("key") or "")
+        if not k.isdigit() or int(k) not in want:
+            continue
+        also = names.others(want[int(k)], {"display": r.get("name"), "names": list(r.get("other_names") or [])})
+        if also:
+            out[int(k)] = also
+    return out
+
+
+def catalog_status(site):
+    """{norad: {compact name: (status, until)}} for the names the alias file marks current or former, from the same
+    search index as catalog_names; {} when the index is missing or marks none."""
+    sys.path.insert(0, ROOT)
+    from orbit import namepos
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+        return {int(k): v for k, v in namepos.statuses(doc).items() if k.isdigit()}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def catalog_now(site):
+    """{norad: declared current name} from the search index's `now_names` (ideas#379); {} when missing."""
+    try:
+        with open(os.path.join(site, "data", "catalog", "search.json"), encoding="utf-8") as f:
+            doc = json.load(f)
+        return {int(k): v for k, v in (doc.get("now_names") or {}).items() if k.isdigit() and v}
+    except (OSError, ValueError, TypeError, AttributeError):
+        return {}
+
+
+def lons_now(region, now):
+    """{norad: longitude in degrees east at `now`} from each object's newest set (the `lon` column of globe.json,
+    ideas#366: slot search reads it, so the CLI needs no SGP4). An object whose set SGP4 refuses is left out."""
+    cols = region["object_cols"]
+    out = {}
+    for row in region["objects"]:
+        r = dict(zip(cols, row))
+        try:
+            p = earth_fixed(satrec(r), now)
+        except Exception as e:  # noqa: BLE001: one object's failure leaves its longitude out, not the page
+            print(f"geo page: no longitude for {r.get('norad')} ({type(e).__name__})")
+            continue
+        if p:
+            out[r["norad"]] = round(p[0], 2)
+    return out
+
+
+HOLD_DEG, HOLD_MIN_DAYS, HOLD_GAP_DAYS, HOLD_STALE_DAYS = 0.5, 7, 3, 10
+
+
+def held_stays(elsets, payloads, first, last):
+    """Where each payload held a longitude, from every element set held (ideas#366, "who held this slot and when").
+    One sample a day at 12:00 UTC from the set in force (skipped when that set is over HOLD_STALE_DAYS old or drifts
+    0.1 deg a day or more, the belt board's line). A stay is a run of such days, none more than HOLD_GAP_DAYS apart,
+    each within HOLD_DEG of the run's first day; runs shorter than HOLD_MIN_DAYS are dropped. Rows [norad, first day,
+    last day, mean lon, min lon, max lon]. Payloads only: debris and rocket bodies hold no slot."""
+    import geo_belt
+    days = [first + timedelta(days=k) for k in range((last - first).days + 1)]
+    rows = []
+    for norad in sorted(payloads):
+        sets = elsets.get(norad) or []
+        at, cur, sr, samples = -1, None, None, []
+        for d in days:
+            iso = d.strftime("%Y-%m-%dT%H:%M:%S")
+            while at + 1 < len(sets) and sets[at + 1]["epoch"][:19] <= iso:
+                at += 1
+            if at < 0:
+                continue
+            s = sets[at]
+            if (d - datetime.fromisoformat(s["epoch"][:19])).days > HOLD_STALE_DAYS or abs(geo_belt.drift(s["n"])) >= geo_belt.DRIFT_KEPT:
+                continue
+            if cur != at:
+                sr, cur = satrec(s), at
+            p = earth_fixed(sr, d)
+            if p:
+                samples.append((d, p[0]))
+        run = []
+        for d, lon in samples + [(None, None)]:
+            if d is not None and run and (d - run[-1][0]).days <= HOLD_GAP_DAYS and abs((lon - run[0][1] + 540) % 360 - 180) <= HOLD_DEG:
+                run.append((d, lon))
+                continue
+            if run and (run[-1][0] - run[0][0]).days + 1 >= HOLD_MIN_DAYS:
+                l0 = run[0][1]
+                offs = [(x - l0 + 540) % 360 - 180 for _, x in run]
+                wrap = lambda x: round((x + 540) % 360 - 180, 2)  # noqa: E731
+                rows.append([norad, run[0][0].strftime("%Y-%m-%d"), run[-1][0].strftime("%Y-%m-%d"),
+                             wrap(l0 + sum(offs) / len(offs)), wrap(l0 + min(offs)), wrap(l0 + max(offs))])
+            run = [(d, lon)] if d is not None else []
+    return rows
+
+
+def held_block(release, region, elsets_all, now):
+    """globe.json "held": the stays from the first day of the element history to today."""
+    cols = region["object_cols"]
+    payloads = {r[cols.index("norad")] for r in region["objects"] if r[cols.index("type")] == "PAYLOAD"}
+    epochs = [s["epoch"] for v in elsets_all.values() for s in v[:1]]
+    if not epochs:
+        return {"error": "no element history"}
+    first = datetime.fromisoformat(min(epochs)[:10]).replace(hour=12)
+    last = now.replace(hour=12, minute=0) if now.hour >= 12 else (now - timedelta(days=1)).replace(hour=12, minute=0)
+    rows = held_stays(elsets_all, payloads, first, last)
+    return {"from": first.strftime("%Y-%m-%d"), "to": last.strftime("%Y-%m-%d"), "hold_deg": HOLD_DEG,
+            "min_days": HOLD_MIN_DAYS, "cols": ["norad", "from", "to", "lon", "lo", "hi"], "rows": rows}
+
+
+def name_positions(region, objs, other, now, lons=None, status=None):
+    """Names that state a longitude ("Eutelsat 12 West G", "EUTE 36B"), each with the object's longitude from its
+    newest set at the build time (ideas#361; orbit/namepos.py). Rows [norad, name, stated lon, lon now, degrees
+    apart, status, until]; lon now None when SGP4 fails, status and until "" unless the alias file marks the name
+    current or former (`status`: catalog_status)."""
+    sys.path.insert(0, ROOT)
+    from orbit import namepos
+    if lons is None:
+        lons = lons_now(region, now)
+    rows = []
+    for o in objs:
+        every = [o[1]] + list(other.get(o[0]) or [])
+        if not any(namepos.stated_lon(n) for n in every):
+            continue
+        lon = lons.get(o[0])
+        for rec in namepos.positions(every, lon):
+            st, until = ((status or {}).get(o[0]) or {}).get(namepos.compact(rec["name"]), ("", ""))
+            rows.append([o[0], rec["name"], rec["stated_lon"], lon, rec.get("apart_deg"), st, until])
+    return {"tolerance_deg": namepos.TOLERANCE_DEG, "at_utc": now.strftime("%Y-%m-%dT%H:%MZ"),
+            "cols": ["norad", "name", "stated_lon", "lon", "apart_deg", "status", "until"], "rows": rows}
+
+
 def build(release, site, now=None, snapshot=None):
     now = (now or datetime.now(timezone.utc)).replace(tzinfo=None, second=0, microsecond=0)
     region = newest(glob.glob(os.path.join(release, "*.geo-region.json")), lambda d: "objects" in d)
@@ -242,12 +387,15 @@ def build(release, site, now=None, snapshot=None):
         o = dict(zip(cols, row))
         objs.append([o["norad"], o["name"], o["cospar"], o["type"], o["owner"], o["launch"], o["rcs"], o["region"],
                      1 if o["norad"] in active else 0, o["epoch"][:19], round(o["n"], 8), round(o["e"], 7), round(o["i"], 4),
-                     round(o["raan"], 4), round(o["argp"], 4), round(o["M"], 4), o.get("bstar") or 0.0])
+                     round(o["raan"], 4), round(o["argp"], 4), round(o["M"], 4), o.get("bstar") or 0.0, None])
+    lons = lons_now(region, now)
+    for o in objs:
+        o[-1] = lons.get(o[0])
     out_dir = os.path.join(site, "data", "geo")
     os.makedirs(out_dir, exist_ok=True)
     meta = {}
     end = now.replace(minute=now.minute - now.minute % 15)
-    elsets = read_elsets(release, end - timedelta(days=max(WINDOWS)))
+    elsets = read_elsets(release, end - timedelta(days=max(max(WINDOWS), HELD_DAYS)))
     norads = [o[0] for o in objs]
     for days, step in WINDOWS.items():
         e = end.replace(minute=0) - timedelta(hours=end.hour % (step // 60)) if step >= 60 else end
@@ -264,12 +412,26 @@ def build(release, site, now=None, snapshot=None):
         owners = {o[4]: names[o[4]] for o in objs if o[4] in names}
     except (OSError, ValueError, KeyError):
         pass
+    other = catalog_names(site, objs)
+    try:
+        namepos_block = name_positions(region, objs, other, now, lons, catalog_status(site))
+    except Exception as e:  # noqa: BLE001: reported on the page and in the log
+        print(f"geo page: name positions skipped: {e!r}")
+        namepos_block = {"error": f"{type(e).__name__}: {e}"}
+    try:
+        held = held_block(release, region, elsets, now)
+    except Exception as e:  # noqa: BLE001: reported on the page and in the log
+        print(f"geo page: held stays skipped: {e!r}")
+        held = {"error": f"{type(e).__name__}: {e}"}
     doc = {"built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "region_day": region["day"], "owners": owners,
            "elements_fetched_utc": region.get("fetched_utc"), "active_from": region.get("day") if active else None,
            "source": CITE, "definitions": region.get("definitions"), "counts": region.get("counts"),
            "cols": OBJ_COLS, "objects": objs, "tracks": meta, "roles": roles(),
            "region": region_events(release, region["day"]), "rpo": rpo_pairs(snapshot, objs),
-           "belt": belt(region, active, elsets, now)}
+           "belt": belt(region, active, elsets, now),
+           "names": {str(k): v for k, v in sorted(other.items())},
+           "now_names": {str(k): v for k, v in sorted(catalog_now(site).items()) if k in {o[0] for o in objs}},
+           "name_positions": namepos_block, "held": held}
     with open(os.path.join(out_dir, "globe.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
     # the relocation tracker alone, small, for the object pages (method orbit-2.27)
@@ -312,6 +474,13 @@ def main():
         print(f"geo page: no snapshot at {snap_path}; RPO pairs left out")
     d = build(args[1], site, snapshot=snapshot)
     sizes = {k: os.path.getsize(os.path.join(site, "data", "geo", v["file"])) // 1024 for k, v in d["tracks"].items()}
+    npb = d.get("name_positions") or {}
+    print(f"names: {len(d['names'])} objects with other names; {len(npb.get('rows') or [])} names state a longitude, "
+          f"{sum(1 for r in npb.get('rows') or [] if r[4] is not None and r[4] > npb.get('tolerance_deg', 1))} of them "
+          f"more than {npb.get('tolerance_deg')}° from the object")
+    hb = d.get("held") or {}
+    print(f"held stays: {len(hb.get('rows') or [])} stays of {len({r[0] for r in hb.get('rows') or []})} payloads, "
+          f"{hb.get('from')} to {hb.get('to')}" if "error" not in hb else f"held stays: {hb['error']}")
     print(f"geo page: {len(d['objects'])} objects; tracks KB by window (days): {sizes}; "
           f"{len(d['region']['events'])} events in {EVENT_DAYS} days; {len(d['rpo']['pairs'])} RPO pairs")
     b = d.get("belt") or {}

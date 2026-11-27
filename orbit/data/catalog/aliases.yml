@@ -1,7 +1,8 @@
 # TIC satellite catalog: hand-kept aliases (design note the private planning notes, section 3).
 # One claim per entry, reviewed by diff. Never edit an entry to change its number: add `withdrawn: <date>` and
 # `reason`, and add a new entry. Every link needs evidence beyond a name. Read by orbit/aliases.py (a YAML subset:
-# scalars, quoted strings, [flow lists] and block lists of strings).
+# scalars, quoted strings, [flow lists] and block lists of strings). A name entry may say `status: current` or
+# `status: former` (with `until: YYYY-MM-DD`, the day it stopped being the name).
 #
 # Build step 5 (17 Nov 2026): the five test objects of section 7. Evidence from the catalog built that day from
 # Space-Track SATCAT (18:09 UTC), GCAT of 15 Nov, CelesTrak SATCAT (file of 16 Nov 20:34 UTC) and Wikidata
@@ -75,3 +76,164 @@
     - "SWF's row 'Jul 2014 - Present' starts with the launch of GSSAP 1 and 2 (2014-043, 2014-07-28)"
   added_by: tic-analyst
   added: 2026-11-17
+
+# 25 Nov 2026: Eutelsat 12 West G (looked up by that name). Space-Track and CelesTrak still name 33459
+# 'EUTELSAT HOTBIRD 13C' and GCAT keeps 'Hot Bird 9', so a name search found nothing. Operator declarations below.
+# Disagreement kept on record: Advanced Television (Chris Forrester, 3 Feb 2026, "Intelsat eyes Eutelsat satellite")
+# gives '50 WA' the history of Eutelsat W2M (48B, 28B, Afghansat 1), the satellite launched with Hot Bird 9 on the
+# same Ariane 5 (2008-065B, 33460, now in the graveyard band in Orbit's GEO record); Eutelsat's own documents tie 50 WA
+# to 12 West G and so to Hot Bird 13C.
+
+- norad: 33459
+  name: "Eutelsat 50 West A"
+  status: current
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat Universal Registration Document 2025-26 (23 Oct 2026), section 1.3.1 p. 26, fleet table p. 30, accounts note p. 268"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'On 19 December 2025: the satellite EUTELSAT 50WA (previously EUTELSAT 12WG) has been relocated and declared operational at 50.3° West for the benefit of a third-party Operator' (URD 2025-26 p. 26)"
+    - "Fleet table, 30 June 2026: EUTELSAT 50 WEST A, 50.3° West, Americas, 55 Ku, launched December 2008 (URD 2025-26 p. 30)"
+    - "Space-Track/CelesTrak elements of 33459 put it at 50.3° W every day of Orbit's GEO record from 27 Oct to 25 Nov 2026, inclination 3.3-3.4°; Intelsat plans inclined-orbit operation there (Advanced Television, 3 Feb 2026)"
+  note: "Third-party operator per Eutelsat; Intelsat (SES) asked the FCC to relicense it to US control (Advanced Television, 3 Feb 2026). Approval not confirmed."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 33459
+  name: "Eutelsat 12 West G"
+  status: former
+  until: 2025-12-19
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat Group Universal Registration Document 2022-23 (30 Jun 2023), p. 26 and fleet table p. 31"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'the satellite EUTELSAT HOTBIRD 13C (HB9) was relocated to 12.5° West under the name EUTELSAT 12 WEST G and commissioned at this position on 19 June 2023' (URD 2022-23 p. 26)"
+    - "Space-Track SATNAME and CelesTrak OBJECT_NAME of 33459 (2008-065A) are 'EUTELSAT HOTBIRD 13C'; GCAT names it 'Hot Bird 9'"
+    - "Wikidata Q1378836 'Eutelsat 12 West G' carries P377 33459, with aliases 'Hot Bird 13C' and 'Hot Bird 9'"
+  note: "Former name: held at 12.5° W from 19 Jun 2023 until the move to 50.3° W declared operational on 19 Dec 2025."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+# 25 Nov 2026, ideas#366: the active satellites in the GEO page's "Names that state another position" table.
+# Eutelsat URD 2025-26 (23 Oct 2026, printed page numbers; PDF page = printed + 2):
+#   https://www.eutelsat.com/system/files/2026-10/DOC_EUTELSAT_Universal-Registration-Document_2025-26_EN_231026.pdf
+# Eutelsat URD 2024-25 (30 Oct 2025):
+#   https://www.eutelsat.com/system/files/2026-10/DOC_Investors_Universal-Registration-Document_FY24-25_EN_301025.pdf
+# Positions: Orbit's GEO element record from 1 Jul 2026 (geo.html "held it", orbit-2.31).
+# Reviewed, no entry (unresolved, 25 Nov 2026):
+# - 37836 EUTELSAT 16A: at 16 deg E in the URD 2025-26 fleet table (30 Jun 2026, p. 28); Orbit's sets hold 16.0 deg E
+#   to 25 Sep 2026, then drift west about 0.9 deg a day (40.5 deg W on 25 Nov). No Eutelsat statement found on a
+#   retirement, move or new name (URD 2025-26 events p. 24; H1 2025-26 report); eutelsat.com news pages refused (403).
+# - 39163 EUTELSAT 7B: Eutelsat's 7B (7 deg E, launched May 2013: URD 2025-26 p. 28; 7B brochure Jan 2026). Orbit's
+#   sets hold 7.0 deg E to 2 Sep 2026 and 16.0 deg E from 13 Sep. No Eutelsat name for it at 16 deg E found; the
+#   catalog's 'Eutelsat 16D' and 'EUTE 3D' are not in any Eutelsat document read (3D appears only in a list of launch
+#   authorisations, URD 2025-26 PDF p. 240, with no link to 7B).
+# - 39612 EXPRESS AT1: RSCC, 6 Mar 2026 (rscc.ru/news/1430/): failed at 56 deg E on 4 Mar and "can be considered
+#   lost". Orbit's sets: drifting east about 0.12 deg a day, 85.6 deg E on 25 Nov. 'EUTELSAT 56A' was Eutelsat's
+#   capacity name; Eutelsat ended the lease on 12 Mar 2026 (Eutelsat press release, 12 Mar 2026). Former name.
+# - 39613 EXPRESS AT2: RSCC's page 'Ekspress-AT2 (56 deg E)' (rscc.ru/infrastructure/satellites/ekspress-at2-56-vd/);
+#   in service at 56 deg E from 8 Apr 2026 in AT1's place (RSCC via Telesputnik, 8 Apr 2026); Orbit's sets hold 56.0
+#   deg E. 'EUTELSAT 140A' was Eutelsat's capacity name at 140 deg E, lease ended 12 Mar 2026. Former name.
+# No source read puts the AT1 and AT2 numbers the other way round.
+
+- norad: 36101
+  name: "Eutelsat 50A"
+  status: current
+  basis: declared
+  source: operator-pages
+  source_ref: "Eutelsat URD 2024-25, p. 24 and accounts note; URD 2025-26, p. 24 and fleet table p. 28"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat: 'On 11 December 2024: the satellite EUTELSAT 50A (previously EUTELSAT 36B) has been relocated and declared operational at 50.5° East for the benefit of a third-party Operator' (URD 2024-25 p. 24)"
+    - "Eutelsat: 'On 1 January 2026: the satellite EUTELSAT 50A, deployed at 50.5° East in December 2024, is now operated in inclined orbit' (URD 2025-26 p. 24); fleet table, 30 June 2026: EUTELSAT 50A, 50.5° East, launched November 2009 (p. 28)"
+    - "Space-Track SATNAME of 36101 (2009-065A, launched 24 Nov 2009) is 'EUTE 36B (EUTE W7)'; Orbit's GEO sets hold it at 50.5-50.6° E every day from 1 Jul to 25 Nov 2026"
+  note: "Current name. Former names Eutelsat 36B and Eutelsat W7."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 28924
+  name: "Eutelsat 174A"
+  basis: attributed
+  source: operator-pages
+  source_ref: "Eutelsat URD 2025-26, fleet table p. 28 and PDF pp. 329, 347"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat's fleet table, 30 June 2026: EUTELSAT 174A, 174° East, launched December 2005; no EUTELSAT 172A listed (URD 2025-26 p. 28)"
+    - "Eutelsat: 'GE-23 satellite (renamed EUTELSAT 172A)' (URD 2025-26 PDF p. 329); 28924 (2005-052A, launched 29 Dec 2005) is GE 23 / AMC 23 in Space-Track ('EUTE 172A (GE 23)')"
+    - "Orbit's GEO sets hold 28924 at 173.9-174.2° E from 2 Jul to 25 Nov 2026"
+  note: "Attributed: Eutelsat names the 174° E satellite but does not state the rename from 172A; the link rests on the launch date, the position and 172A's absence from the fleet table."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+- norad: 29270
+  name: "Eutelsat 33F"
+  basis: attributed
+  source: operator-pages
+  source_ref: "Eutelsat URD 2025-26, fleet table p. 28; URD 2024-25, p. 24"
+  read: 2026-11-25
+  evidence:
+    - "Eutelsat's fleet table, 30 June 2026: EUTELSAT 33F, 33.1° East, launched August 2006 (URD 2025-26 p. 28)"
+    - "Eutelsat: 'the satellite EUTELSAT 33F, deployed at 33° East in September 2023, is now operated in inclined orbit' (URD 2024-25 p. 24)"
+    - "29270 (2006-032A, launched 4 Aug 2006) is Hot Bird 8 / Hot Bird 13B in Space-Track ('EUTE HOT BIRD 13B (HB 8)'); Orbit's GEO sets hold it at 33.1° E from 1 Jul to 25 Nov 2026"
+  note: "Attributed: Eutelsat's documents do not name Hot Bird 13B as 33F; the link rests on the launch month and the position."
+  added_by: tic-analyst
+  added: 2026-11-25
+
+# 26 Nov 2026: the two SWF names left unlinked at build step 5. Evidence from Orbit's catalog built 26 Nov 2026
+# 17:35 UTC (GCAT, Space-Track SATCAT 17:30 UTC, CelesTrak SATCAT file of 09:02 UTC, Wikidata of 25 Nov).
+
+- jcat: A04907
+  name: "Prowler"
+  swf_key: "Prowler"
+  basis: attributed
+  source: swf-rpo
+  source_ref: "RPO sheet, Military/Intelligence tab, row '1990-1998', chaser (launch site Cape Canaveral, GEO)"
+  read: 2026-11-26
+  evidence:
+    - "GCAT names A04907 'PROWLER' (auxcat): 1990-097E, launched 1990-11-15 (STS-38), owner NRO, GEO/ID orbit 35,584 x 36,023 km at 5.76 deg (elements of 2000-06-13)"
+    - "Wikidata Q14940655 'Prowler' gives COSPAR ID (P247) 1990-097E, GCAT's piece for A04907; its NORAD number (P377) 20963 is 1990-097B, which GCAT, Space-Track and CelesTrak all name USA 67 (GCAT PLName 'QUASAR 8', AltNames 'SDS B-2 GEO')"
+    - "SWF's row: launched from a Space Shuttle mission in 1990, GEO, Cape Canaveral; its cited source is SeeSat-L's 'Unknown GEO Object 2000-653A / 90007 Identified as Prowler', the analyst object of the 2000 elements GCAT holds"
+  note: "No NORAD number: Space-Track publishes none for Prowler. Wikidata's P377 on Q14940655 disagrees with its own P247."
+  added_by: tic-analyst
+  added: 2026-11-26
+
+# Cosmos 2535 to 2538 (2019-039, launched 2019-07-10, Plesetsk): Space-Track and CelesTrak name 44422, 44423 and
+# 44424 COSMOS 2536, 2537 and 2538; GCAT names them Kosmos-2537, 2538 and 2536. Nothing Orbit holds settles which
+# number carries which name (no orbit history for 2019-2020, when SWF's rows place Cosmos 2536 beside Cosmos 2535),
+# so SWF's "Cosmos 2536" stays unlinked and the three names are recorded as open swaps.
+
+- swap: "Cosmos 2536"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44422, as: "COSMOS 2536"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44422, as: "COSMOS 2536"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44424, as: "Kosmos-2536"}
+  status: open
+  evidence:
+    - "All three numbers are 2019-039 (B, C, D) in every source; 44421 (2019-039A) is Cosmos 2535 in all three"
+    - "44422 decayed 2024-06-21 (all three sources agree); 44424 is still in orbit, CelesTrak 471 x 527 km at 97.58 deg"
+    - "GCAT's payload notes differ by number: 44422 'Naprazheniye No. 2?', 44424 'Nivelir No. 5?' (both marked uncertain)"
+  added_by: tic-analyst
+  added: 2026-11-26
+
+- swap: "Cosmos 2537"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44423, as: "COSMOS 2537"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44423, as: "COSMOS 2537"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44422, as: "Kosmos-2537"}
+  status: open
+  evidence:
+    - "44423 (2019-039C) decayed 2023-10-06 (GCAT, CelesTrak; Space-Track 2023-10-07); 44422 (2019-039B) decayed 2024-06-21"
+  added_by: tic-analyst
+  added: 2026-11-26
+
+- swap: "Cosmos 2538"
+  claims:
+    - {source: space-track, read: 2026-11-26, norad: 44424, as: "COSMOS 2538"}
+    - {source: celestrak-satcat, read: 2026-11-26, norad: 44424, as: "COSMOS 2538"}
+    - {source: gcat-mcdowell, read: 2026-11-26, norad: 44423, as: "Kosmos-2538"}
+  status: open
+  evidence:
+    - "44424 (2019-039D) is still in orbit; 44423 (2019-039C) decayed 2023-10-06 (GCAT, CelesTrak; Space-Track 2023-10-07)"
+  added_by: tic-analyst
+  added: 2026-11-26

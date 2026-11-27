@@ -62,3 +62,21 @@ class GatewayLayer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BuildOnly(unittest.TestCase):
+    """--only rebuilds named cases and keeps the rest from the last build, at the same positions time."""
+
+    def args(self, out, only, when="2026-11-24T16:00:00Z"):
+        import argparse
+        return argparse.Namespace(only=only, when=when, out=str(out), gateways=None, day_file="unused",
+                                  tle_dir="unused", published=None)
+
+    def test_unknown_case_is_refused(self):
+        with self.assertRaises(SystemExit):
+            fpt.cmd_build(self.args(ROOT / "site_src" / "footprints-data.json", ["no-such-case"]))
+
+    def test_a_different_positions_time_is_refused(self):
+        with self.assertRaises(SystemExit) as e:
+            fpt.cmd_build(self.args(ROOT / "site_src" / "footprints-data.json", ["geo-wide-galaxy31"], when="2020-01-01T00:00:00Z"))
+        self.assertIn("--when", str(e.exception))

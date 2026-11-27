@@ -1,4 +1,4 @@
-"""Footprints prototype (ideas#232): builds the data for site_src/footprints.html. Published as
+"""Footprints page (ideas#232): builds the data for site_src/footprints.html. Published as
 site_src/footprints-data.json (Tom, 24 Nov 2026: publish), built here from the research folder and committed.
 
     python tools/footprints.py build --day-file DAY.geo-region.json --tle-dir DIR [--published DIR] --out FILE
@@ -456,7 +456,21 @@ def cmd_build(a):
     when = datetime.fromisoformat(a.when.replace("Z", "+00:00")) if a.when else datetime.now(timezone.utc).replace(microsecond=0)
     out = []
     gw = json.loads(pathlib.Path(a.gateways).read_text(encoding="utf-8")) if a.gateways else None
+    only = set(a.only or [])
+    if only - {c["id"] for c in cases["cases"]}:
+        raise SystemExit(f"--only names no such case: {sorted(only - {c['id'] for c in cases['cases']})}")
+    kept = {}
+    if only:                                           # rebuild these cases, keep every other one as last built
+        prev = json.loads(pathlib.Path(a.out).read_text(encoding="utf-8"))
+        if prev["positions_at"] != iso(when):
+            raise SystemExit(f"--only needs --when {prev['positions_at']} (the time the kept cases were built at)")
+        kept = {c["id"]: c for c in prev["cases"]}
     for case in cases["cases"]:
+        if only and case["id"] not in only:
+            if case["id"] not in kept:
+                raise SystemExit(f"{case['id']} is not in {a.out}; build it too with --only")
+            out.append(kept[case["id"]])
+            continue
         if case["class"] == "LEO constellation":
             out.append(leo_case(case, a.tle_dir, when))
         else:
@@ -464,7 +478,7 @@ def cmd_build(a):
         if gw:
             add_gateways(case, out[-1], gw, datetime.now(timezone.utc).date())
         print(case["id"], "layers:", [l["id"] for l in out[-1]["layers"]], "scores:", len(out[-1].get("scores", [])))
-    doc = {"schema": "orbit-footprints/0", "prototype": True, "generated_at": iso(datetime.now(timezone.utc)), "positions_at": iso(when),
+    doc = {"schema": "orbit-footprints/0", "generated_at": iso(datetime.now(timezone.utc)), "positions_at": iso(when),
            "kinds": KINDS, "cases": out}
     path = pathlib.Path(a.out)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -501,6 +515,7 @@ def main():
     s.add_argument("--when", help="UTC time for positions, ISO 8601 (default now)")
     s.add_argument("--gateways", help="earth stations by satellite, from tools/ibfs_gateways.py")
     s.add_argument("--out", default=str(ROOT / "data" / "footprints" / "footprints.json"))
+    s.add_argument("--only", nargs="+", metavar="CASE", help="rebuild only these case ids; the rest are kept from --out")
     s.set_defaults(fn=cmd_build)
     s = sub.add_parser("gateways")
     s.add_argument("--gateways", required=True)

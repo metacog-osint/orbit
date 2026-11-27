@@ -3,7 +3,6 @@
 Every item is an observation (measured or reported, no judgment) at tier "routine": Orbit has no baseline
 of its own readings yet, so nothing is called an anomaly (see doctrine/method.md). Items:
   - orbital launches GCAT dates in the last 7 days (one item each, at the launch site);
-  - launches scheduled in the next 14 days (Launch Library 2, one item each, at the pad);
   - reentries GCAT dates in the last 7 days (one summary item, off-map);
   - catalog changes since Orbit's previous reading: new objects from launches more than 30 days old (one item
     per launch), and owner or state changes (one item);
@@ -12,6 +11,8 @@ of its own readings yet, so nothing is called an anomaly (see doctrine/method.md
   - GEO relocations of listed-role objects (orbit-2.30, ideas#323): one item per move, updated in place, off-map,
     from the GEO page's tracker (tools/geo_tracker.py). tools/geo_page.py adds them to site/data/feed.geojson after
     the tracker runs, since the tracker is built after the feed in the same run (relocation_features below).
+Scheduled launches (orbit:upcoming:*, Launch Library 2) left the feed in orbit-2.32: Launch's feed carries them as
+launch:upcoming:* (ideas#69).
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ from tic_doctrine import CONTRACT, __version__ as KIT_VERSION, geo  # noqa: E402
 from orbit import names, notable  # noqa: E402
 
 SITE = "https://orbit.theintelligence.company"
-METHOD = "orbit-2.26"
+METHOD = "orbit-2.32"
 LANGUAGE_KEY = "https://github.com/metacog-osint/tic-doctrine/blob/main/docs/language-key.md"
 LAUNCH_DAYS = 7
 REENTRY_DAYS = 7
@@ -42,16 +43,6 @@ SRC_GCAT = {
     "grade": "A2",
     "independence_group": "gcat",
     "source_type": "registry",
-}
-SRC_LL2 = {
-    "id": "ll2-thespacedevs",
-    "publisher": "The Space Devs (Launch Library 2)",
-    "title": "Launch Library 2: upcoming launches",
-    "url": "https://thespacedevs.com/llapi",
-    "licence": "Free access stated by The Space Devs; no data licence stated (read 13 Nov 2026)",
-    "grade": "B2",
-    "independence_group": "thespacedevs",
-    "source_type": "aggregator",
 }
 
 
@@ -96,10 +87,6 @@ def _base(generated: str, valid_hours: int = 48) -> dict:
     }
 
 
-NET_PRECISION = {"Hour": "hour", "Day": "day", "Month": "month", "Week": "day", "Quarter": "month", "Year": "month",
-                 "Fiscal Year": "month"}          # LL2's words; finer ones (Minute, Second) need no precision
-
-
 def _floor(iso: str, precision: str | None) -> str:
     """A time at the start of its period, as the contract's event_time_precision reads it."""
     if precision == "month":
@@ -119,8 +106,7 @@ def _day(value) -> str | None:
 def _change(kind: str, at: str | None, generated: str) -> dict:
     """last_change from the source's own date, never after this build. Orbit keeps no log of its feed items, so an
     item says what its source dates: a launch, a breakup or an orbit change is new at its own time, a catalog change
-    at the reading that found it, and a Launch Library record or the rolling reentry count changed when last edited
-    or last added to."""
+    at the reading that found it, and the rolling reentry count changed when last added to."""
     return {"last_change": kind, "last_change_at": min(at, generated)} if at else {"last_change": "none"}
 
 
@@ -166,43 +152,6 @@ def _launch_item(x: dict, generated: str, accessed: str) -> dict:
         "sources": [{**SRC_GCAT, "accessed_at": accessed}],
     }
     geom = {"type": "Point", "coordinates": [site["lon"], site["lat"]]} if site else None
-    if not geom:
-        props["precision_class"] = "none"
-    return {"type": "Feature", "geometry": geom, "properties": props}
-
-
-def _upcoming_item(x: dict, generated: str, accessed: str) -> dict:
-    net = x["net"]
-    end = x.get("window_end") or net
-    valid = max(_dt(end) + timedelta(hours=6), _dt(generated) + timedelta(hours=6))
-    mission_bits = [b for b in (x["mission_type"], x["orbit_name"]) if b]
-    precision = NET_PRECISION.get(x.get("net_precision") or "")
-    start, stop = _floor(net, precision), _floor(end, precision)
-    props = {
-        **_base(generated),
-        "id": f"orbit:upcoming:{x['id']}",
-        "subject_id": f"orbit:upcoming:{x['id']}",
-        "event_start": start,
-        **({"event_end": stop} if stop > start else {}),
-        **({"event_time_precision": precision} if precision else {}),
-        **_change("changed", x.get("last_updated"), generated),
-        "title": f"Scheduled launch: {x['name']} ({x['status']}), {net[:16].replace('T', ' ')} UTC",
-        "summary": (f"Launch Library 2 lists {x['name']} for {net[:16].replace('T', ' ')} UTC "
-                    f"(status {x['status_name'] or x['status']}; NET precision {x['net_precision'] or 'not given'}) "
-                    f"from {x['pad']}, {x['location']}. Provider {x['provider']}."
-                    + (f" Mission: {', '.join(mission_bits)}." if mission_bits else "")
-                    + " A scheduled time is the provider's or press's, not Orbit's, and often moves."),
-        "data_as_of": x.get("last_updated") or accessed,
-        "valid_until": _iso(valid),
-        "countries": _countries(x.get("pad_country"), *(x.get("provider_countries") or []),
-                                geo.country_at(x["lat"], x["lon"]) if x.get("lat") is not None else None),
-        "requirement_ids": ["OR-PIR-3"],
-        "coverage_fraction": 1.0,
-        "precision_class": "point",
-        "visual": {"type": "table", "url": f"{SITE}/launches#upcoming"},
-        "sources": [{**SRC_LL2, "url": x.get("ll2_url") or SRC_LL2["url"], "accessed_at": accessed}],
-    }
-    geom = {"type": "Point", "coordinates": [x["lon"], x["lat"]]} if x.get("lat") is not None else None
     if not geom:
         props["precision_class"] = "none"
     return {"type": "Feature", "geometry": geom, "properties": props}
@@ -520,7 +469,7 @@ def merge_relocations(feed_doc: dict, tracker: dict) -> dict:
 
 # Each item's first source id and the collect lane that reads it. A lane that fails keeps its last good copy in the
 # feed (from_previous), so readers need to know which source was really read on this run.
-SOURCE_LANES = {"gcat-mcdowell": "catalog", "ll2-thespacedevs": "upcoming", "space-track": "maneuver"}
+SOURCE_LANES = {"gcat-mcdowell": "catalog", "space-track": "maneuver"}
 
 
 def source_health(snap: dict, features: list | None = None) -> dict:
@@ -568,20 +517,12 @@ def build_feed(snap: dict) -> dict:
     generated = snap["generated_at"]
     now = _dt(generated)
     cat_at = ((snap.get("lanes") or {}).get("catalog") or {}).get("fetched_at") or generated
-    up_at = ((snap.get("lanes") or {}).get("upcoming") or {}).get("fetched_at") or generated
     features = []
 
     launch_since = (now - timedelta(days=LAUNCH_DAYS)).date().isoformat()
     for x in snap.get("launches") or []:
         if x["date"] >= launch_since:
             features.append(_launch_item(x, generated, cat_at))
-
-    for x in snap.get("upcoming") or []:
-        try:
-            if _dt(x.get("window_end") or x["net"]) >= now:
-                features.append(_upcoming_item(x, generated, up_at))
-        except (TypeError, ValueError):
-            continue
 
     re_since = (now - timedelta(days=REENTRY_DAYS)).date().isoformat()
     rows = [r for r in snap.get("reentries") or [] if r["reentry_date"] >= re_since]
@@ -612,12 +553,10 @@ def build_feed(snap: dict) -> dict:
         "program": "orbit",
         "generated_at": generated,
         "method_version": METHOD,
-        "licence": "GCAT data CC BY 4.0 (J. McDowell, planet4589.org/space/gcat); Launch Library 2 data from "
-                   "The Space Devs (free access, no licence stated)" + (
+        "licence": "GCAT data CC BY 4.0 (J. McDowell, planet4589.org/space/gcat)" + (
                        "; Space-Track element sets redistributed under USSPACECOM's blanket approval for basic SSA "
                        "data, with citation" if man.get("events") else ""),
-        "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat) "
-                       "and Launch Library 2 (The Space Devs)" + credit,
+        "attribution": "Orbit, The Intelligence Company. Data from GCAT (J. McDowell, planet4589.org/space/gcat)" + credit,
         "language_key": LANGUAGE_KEY,
         "health": source_health(snap, features),
         "features": features,

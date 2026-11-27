@@ -85,6 +85,14 @@
     ((obj && obj.decayed) || []).forEach(function (x) { if (x.value) gone[x.source] = 1; });
     return r.filter(function (x) { return gone[x.source]; });  // GCAT gives a date for docked or grouped objects too
   }
+  function nowName() {
+    var shown = (obj.name || "").trim().toLowerCase(), got = "";
+    recs("names").forEach(function (x) {
+      var v = (x.value || "").trim();
+      if (!got && v && x.status === "current" && x.basis === "declared" && v.toLowerCase() !== shown) got = v;
+    });
+    return got;
+  }
   function label(src) { var s = (rules && rules.sources || {})[src] || {}; return s.label || src; }
   function rankOf(src) { var i = ((rules && rules.rank) || []).indexOf(src); return i < 0 ? 99 : i; }
 
@@ -98,6 +106,8 @@
     var name = obj ? obj.name : holdingsName() || (NUMBERED ? "NORAD " + KEY : KEY);
     document.title = name + " · Orbit · The Intelligence Company";
     document.getElementById("obj-name").textContent = name;
+    var now = obj ? nowName() : "";  // the operator's declared current name, beside the catalogue's (ideas#379)
+    if (now) document.getElementById("obj-name").appendChild(el("span", "small muted", " now " + now));
     var subl = document.getElementById("obj-sub"), facts = document.getElementById("obj-facts");
     subl.textContent = ""; facts.textContent = "";
     var bits = [NUMBERED ? "NORAD " + KEY : "GCAT " + KEY + " (no NORAD number)"];
@@ -438,6 +448,7 @@
     if ((R.fields || {}).name) box.appendChild(el("p", "small muted", R.fields.name));
     var rows = recs("names").sort(function (a, b) { return rankOf(a.source) - rankOf(b.source); }).map(function (x) {
       var nm = el("span", "", x.value + (x.uncertain ? " ?" : ""));
+      if (x.status) nm.appendChild(el("div", "pl", x.status + " name" + (x.until ? ", until " + day(x.until) : "")));
       if (x.qualifier) nm.appendChild(el("div", "pl", "qualifier " + x.qualifier + " (the source's own, kept as written)"));
       var src = el("span", "", label(x.source));
       if (x.field) { var f = el("div", "pl", x.field); f.title = NF[x.field] || ""; src.appendChild(f); }

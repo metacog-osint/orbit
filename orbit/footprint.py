@@ -476,6 +476,112 @@ def carve_gims_blocks(data, max_bores=20, max_conts=60):
     return out
 
 
+JET_PAGE = 4096
+
+
+def _jet_rows(data, page=JET_PAGE):
+    """{(page, row): bytes} for every live row on every data page of an Access (Jet 4) file, read straight from
+    the bytes: page type 0x01, row count at byte 12, a two-byte offset per row from byte 14 (low 13 bits the
+    start, 0x8000 deleted), rows stored from the page's end backwards, so each row ends where the one before it
+    starts."""
+    rows = {}
+    for pg in range(1, len(data) // page):
+        p = data[pg * page:(pg + 1) * page]
+        if p[0] != 1 or p[1] != 1:
+            continue
+        (n,) = struct.unpack_from("<H", p, 12)
+        if not 0 < n <= (page - 14) // 2:
+            continue
+        end = page
+        for i in range(n):
+            (o,) = struct.unpack_from("<H", p, 14 + 2 * i)
+            start = o & 0x1FFF
+            if not o & 0x8000 and 14 + 2 * n <= start < end:
+                rows[(pg, i)] = bytes(p[start:end])
+            if 0 < start < end:
+                end = start
+    return rows
+
+
+def _jet_text(b):
+    """Jet 4 text: 0xFF 0xFE starts compressed text, one byte a character; a zero byte switches between that and
+    two-byte UTF-16 characters."""
+    out, compressed, i = [], True, 0
+    while i < len(b):
+        if b[i] == 0:
+            compressed, i = not compressed, i + 1
+        elif compressed:
+            out.append(chr(b[i]))
+            i += 1
+        elif i + 1 < len(b):
+            out.append(b[i:i + 2].decode("utf-16-le", "replace"))
+            i += 2
+        else:
+            break
+    return "".join(out)
+
+
+def gims_long_blocks(data, page=JET_PAGE):
+    """Every diagram data block in a GIMS database (.mdb) that the Access engine will not open, including blocks
+    longer than one page, which `carve_gims_blocks` cannot find. Returns [{beam_id, emi_rcp, polar, block}] in
+    file order, each block once per beam.
+
+    Access stores a long value outside its row: the row holds a 12-byte descriptor (3-byte length, a flag byte, 0
+    for a value spread over pages, then a 4-byte pointer, row number in the low byte and page above it) and each
+    page's piece starts with a 4-byte pointer to the next piece, 0 on the last. This reads the rows from the raw
+    pages, finds descriptors whose chain decodes exactly in `parse_gims_block`'s layout, and takes the beam's
+    name, direction and polarisation from the text just before the descriptor in the same row. That text,
+    inferred on 25 Nov 2026 from Intelsat's filings (Galaxy 31, SAT-RPL-20201109-00130; Galaxy 34's, which the
+    Access engine opens, matched in length and content), reads beam name, then E or R, then the polarisation
+    code, then "COCO"; when it does not end that way the names are None. The format is not documented by the
+    ITU."""
+    rows = _jet_rows(data, page)
+
+    def chain(key, need):
+        out, seen = b"", set()
+        while key and len(out) < need:
+            if key in seen or key not in rows or len(rows[key]) < 4:
+                return None
+            seen.add(key)
+            row = rows[key]
+            out += row[4:]
+            (nxt,) = struct.unpack_from("<I", row, 0)
+            key = (nxt >> 8, nxt & 0xFF) if nxt else None
+        return out if len(out) >= need else None
+
+    found, seen = [], set()
+    for here in sorted(rows):
+        b = rows[here]
+        i = 0
+        while i <= len(b) - 12:
+            length = b[i] | b[i + 1] << 8 | b[i + 2] << 16
+            (ptr,) = struct.unpack_from("<I", b, i + 4)
+            key = (ptr >> 8, ptr & 0xFF)
+            if b[i + 3] == 0 and length >= 40 and key != here and key in rows:
+                payload = chain(key, length)
+                beam = None
+                if payload is not None:
+                    try:
+                        beam = parse_gims_block(payload[:length])
+                    except ValueError:
+                        beam = None
+                if beam is not None:
+                    mark = b.rfind(b"\xff\xfe", 0, i)
+                    text = _jet_text(b[mark + 2:i]) if mark >= 0 else ""
+                    names = (None, None, None)
+                    if len(text) >= 7 and text.endswith("COCO") and text[-6] in "ER":
+                        names = (text[:-6], text[-6], text[-5])
+                    item = (names, payload[:length])
+                    if item not in seen:
+                        seen.add(item)
+                        found.append({"beam_id": names[0], "emi_rcp": names[1], "polar": names[2],
+                                      "block": payload[:length]})
+                    i += 12
+                    continue
+            i += 1
+    return found
+
+
 def parse_eirp_kml(text, beam_id=None):
     """Contours from an operator's KML footprint file, where each Placemark named like "Contour 43 dBW" holds one
     or more polygons (read 24 Nov 2026 from Arabsat's Badr-8 files: downlink EIRP in dBW, Polygon or

@@ -5,15 +5,22 @@ Design: the private planning notes, section 3. One claim per entry, reviewed by 
 - a **name** for one object: `norad` (or `jcat` for an object with no number), `name`, `basis`, `source` (an id
   from doctrine/sources.json), `read`, `evidence` (a list: a link needs evidence beyond a name), and optionally
   `swf_key` (SWF's exact text) with `swf_date` (SWF's date text, when one name means different objects on
-  different rows: SWF's "Olymp" is 40258 on the Oct 2014 row and 55841 on the Mar 2023 row);
-- a **program**: `swf_key`, `program`, `members` (NORAD numbers), `basis`, `source`, `read`, `evidence`.
+  different rows: SWF's "Olymp" is 40258 on the Oct 2014 row and 55841 on the Mar 2023 row). `status` says whether
+  the name is the object's `current` or `former` name (left out when not established); a former name may carry
+  `until`, the day it stopped being the name;
+- a **program**: `swf_key`, `program`, `members` (NORAD numbers), `basis`, `source`, `read`, `evidence`;
+- a **swap**: `swap` (the payload name in dispute), `claims` (a list of flow mappings, one per source: `source`,
+  `read`, `norad` and `as`, the source's own spelling), `status` (`open`, or `settled` with `settled_by`, a source
+  id, and `settled`, its date), `evidence`. It records that sources give one payload name to different numbers;
+  nothing is reassigned and feeds keep the numbers ("names never move numbers").
 
 An entry is never edited to change a number: a wrong one gets `withdrawn: <date>` and `reason`, stays in the file,
-and is skipped. Piece-swap entries (section 3, `swap:`) are not read yet.
+and is skipped.
 
 The file is a small YAML subset, read with the standard library: a top-level list of mappings; values are quoted
-strings, numbers, bare words, flow lists (`[40099, 40100]`) or block lists of scalars. Anything else is an error
-with its line number, never a guess.
+strings, numbers, bare words, flow lists (`[40099, 40100]`), block lists of scalars, or block lists of one-line flow
+mappings of scalars (`- {source: space-track, norad: 44422}`). Anything else is an error with its line number,
+never a guess.
 """
 from __future__ import annotations
 
@@ -24,10 +31,15 @@ from pathlib import Path
 PATH = Path(__file__).resolve().parent / "data" / "catalog" / "aliases.yml"
 SOURCE = "aliases"
 BASES = ("declared", "attributed", "catalog")
+STATUSES = ("current", "former")
 NAME_KEYS = {"norad", "jcat", "name", "basis", "source", "source_ref", "read", "evidence", "added_by", "added",
-             "swf_key", "swf_date", "withdrawn", "reason", "note"}
+             "swf_key", "swf_date", "withdrawn", "reason", "note", "status", "until"}
 PROGRAM_KEYS = {"swf_key", "program", "members", "basis", "source", "source_ref", "read", "evidence", "added_by",
                 "added", "withdrawn", "reason", "note"}
+SWAP_KEYS = {"swap", "claims", "status", "settled_by", "settled", "evidence", "added_by", "added", "withdrawn",
+             "reason", "note"}
+CLAIM_KEYS = {"source", "read", "norad", "as"}
+SWAP_STATUSES = ("open", "settled")
 _KEY = re.compile(r"^([a-z_][a-z0-9_]*):(?:\s+(.*))?$")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -105,8 +117,49 @@ def _flow_list(t: str, ln: int) -> list:
     return [_scalar(p, ln) for p in parts]
 
 
+def _split_flow(inner: str, ln: int) -> list[str]:
+    parts, buf, q = [], "", None
+    for c in inner:
+        if q:
+            buf += c
+            if c == q:
+                q = None
+        elif c in "\"'":
+            q = c
+            buf += c
+        elif c == ",":
+            parts.append(buf)
+            buf = ""
+        elif c in "[]{}":
+            raise AliasError(f"line {ln}: nested lists and mappings are not in the subset")
+        else:
+            buf += c
+    parts.append(buf)
+    return parts
+
+
+def _flow_map(t: str, ln: int) -> dict:
+    """A one-line flow mapping of scalars: `{source: space-track, norad: 44422, as: "COSMOS 2536"}`."""
+    inner = t.strip()[1:-1].strip()
+    out: dict = {}
+    if not inner:
+        return out
+    for part in _split_flow(inner, ln):
+        m = re.match(r"^\s*([a-z_][a-z0-9_]*):\s+(.+)$", part)
+        if not m:
+            raise AliasError(f"line {ln}: expected 'key: value' in a flow mapping, got {part.strip()!r}")
+        if m.group(1) in out:
+            raise AliasError(f"line {ln}: '{m.group(1)}' given twice in one mapping")
+        out[m.group(1)] = _scalar(m.group(2), ln)
+    return out
+
+
 def _value(t: str, ln: int):
     t = t.strip()
+    if t.startswith("{"):
+        if not t.endswith("}"):
+            raise AliasError(f"line {ln}: a flow mapping must close on its line")
+        return _flow_map(t, ln)
     if t.startswith("["):
         if not t.endswith("]"):
             raise AliasError(f"line {ln}: a flow list must close on its line")
@@ -174,7 +227,14 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
     for e in entries:
         where = f"aliases.yml line {e.get('line')}"
         if "swap" in e:
-            raise AliasError(f"{where}: swap entries are not read yet (design note section 3)")
+            _check_swap(e, where, source_ids)
+            if "withdrawn" not in e:
+                k = ("swap", e["swap"].lower())
+                if k in seen_names:
+                    raise AliasError(f"{where}: the same claim twice")
+                seen_names.add(k)
+                live.append(e)
+            continue
         program = "program" in e
         allowed = PROGRAM_KEYS if program else NAME_KEYS
         extra = set(e) - allowed - {"line"}
@@ -192,7 +252,7 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
         ev = e["evidence"]
         if not (isinstance(ev, list) and ev and all(isinstance(x, str) and x.strip() for x in ev)):
             raise AliasError(f"{where}: evidence must be a list of at least one statement")
-        for k in ("read", "added", "withdrawn"):
+        for k in ("read", "added", "withdrawn", "until"):
             _check_date(e, k, where)
         if "withdrawn" in e and not e.get("reason"):
             raise AliasError(f"{where}: a withdrawn entry needs a reason")
@@ -211,6 +271,10 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
                 raise AliasError(f"{where}: name must be text")
             if "swf_date" in e and "swf_key" not in e:
                 raise AliasError(f"{where}: swf_date needs swf_key")
+            if "status" in e and e["status"] not in STATUSES:
+                raise AliasError(f"{where}: status must be one of {STATUSES}")
+            if "until" in e and e.get("status") != "former":
+                raise AliasError(f"{where}: until needs status: former")
         if "withdrawn" in e:
             continue
         if not program:
@@ -220,6 +284,72 @@ def validate(entries: list[dict], source_ids: set[str] | None = None) -> list[di
             seen_names.add(k)
         live.append(e)
     return live
+
+
+def _check_swap(e: dict, where: str, source_ids: set[str] | None) -> None:
+    extra = set(e) - SWAP_KEYS - {"line"}
+    if extra:
+        raise AliasError(f"{where}: unknown keys {sorted(extra)}")
+    missing = [k for k in ("swap", "claims", "status", "evidence") if k not in e]
+    if missing:
+        raise AliasError(f"{where}: missing {missing}")
+    if not isinstance(e["swap"], str) or not e["swap"].strip():
+        raise AliasError(f"{where}: swap must be the payload name in dispute")
+    claims = e["claims"]
+    if not (isinstance(claims, list) and len(claims) >= 2 and all(isinstance(c, dict) for c in claims)):
+        raise AliasError(f"{where}: claims must be a list of at least two mappings")
+    for c in claims:
+        extra = set(c) - CLAIM_KEYS
+        missing = sorted(CLAIM_KEYS - set(c))
+        if extra or missing:
+            raise AliasError(f"{where}: a claim needs exactly {sorted(CLAIM_KEYS)} (extra {sorted(extra)}, "
+                             f"missing {missing})")
+        if not (isinstance(c["norad"], int) and c["norad"] > 0):
+            raise AliasError(f"{where}: a claim's norad must be a number")
+        if not (isinstance(c["read"], str) and _DATE.match(c["read"])):
+            raise AliasError(f"{where}: a claim's read must be a date YYYY-MM-DD")
+        if not isinstance(c["as"], str) or not c["as"].strip():
+            raise AliasError(f"{where}: a claim's as must be the source's own text")
+        if source_ids is not None and c["source"] not in source_ids:
+            raise AliasError(f"{where}: source '{c['source']}' is not in doctrine/sources.json")
+    srcs = [c["source"] for c in claims]
+    if len(set(srcs)) != len(srcs):
+        raise AliasError(f"{where}: one claim per source")
+    if len({c["norad"] for c in claims}) < 2:
+        raise AliasError(f"{where}: a swap needs claims on at least two numbers")
+    if e["status"] not in SWAP_STATUSES:
+        raise AliasError(f"{where}: status must be one of {SWAP_STATUSES}")
+    if (e["status"] == "settled") != ("settled_by" in e and "settled" in e):
+        raise AliasError(f"{where}: a settled swap needs settled_by and settled, an open one neither")
+    if "settled_by" in e and source_ids is not None and e["settled_by"] not in source_ids:
+        raise AliasError(f"{where}: source '{e['settled_by']}' is not in doctrine/sources.json")
+    ev = e["evidence"]
+    if not (isinstance(ev, list) and ev and all(isinstance(x, str) and x.strip() for x in ev)):
+        raise AliasError(f"{where}: evidence must be a list of at least one statement")
+    for k in ("added", "withdrawn", "settled"):
+        _check_date(e, k, where)
+    if "withdrawn" in e and not e.get("reason"):
+        raise AliasError(f"{where}: a withdrawn entry needs a reason")
+
+
+def is_swap(e: dict) -> bool:
+    return "swap" in e
+
+
+def read_of(e: dict) -> str:
+    """The day an entry's claim was read: its `read`, or for a swap the latest of its claims' reads."""
+    return max(c["read"] for c in e["claims"]) if is_swap(e) else e["read"]
+
+
+def swap_record(e: dict) -> dict:
+    """A swap entry in the catalog's `swaps` shape: {name, claims: {source: [numbers]}, status}, plus each source's
+    own spelling (`as`), the alias file's line (`ref`) and `by: aliases`."""
+    out = {"name": e["swap"].lower(), "claims": {c["source"]: [str(c["norad"])] for c in e["claims"]},
+           "as": {c["source"]: c["as"] for c in e["claims"]}, "status": e["status"], "by": SOURCE,
+           "ref": f"aliases.yml:{e['line']}"}
+    if e["status"] == "settled":
+        out["settled_by"], out["settled"] = e["settled_by"], e["settled"]
+    return out
 
 
 def load(path: Path | str | None = None, source_ids: set[str] | None = None) -> list[dict]:
@@ -249,4 +379,7 @@ def name_record(e: dict) -> dict:
            "basis": e["basis"], "cited": e["source"]}
     if e.get("source_ref"):
         out["cited_ref"] = e["source_ref"]
+    for k in ("status", "until"):
+        if k in e:
+            out[k] = e[k]
     return out

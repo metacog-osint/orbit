@@ -17,43 +17,48 @@
       "name": "Launch (The Intelligence Company's launch-closure program): its place check on Orbit's own hazard areas and scheduled launches",
       "url": "https://launch.theintelligence.company",
       "licence": "The suite's own program, published openly (launch.theintelligence.company/data/snapshot.json). Orbit uses only Launch's match rows on Orbit's areas: the level (time and place, grouped, time), azimuth, distance and implied inclination. Each underlying item keeps its source's terms (NGA, Launch Library 2, GCAT).",
-      "use": "ingest",
+      "use": "excluded",
       "grade": "B2",
       "independence_group": "tic-launch",
       "commercial_ok": "unknown",
-      "note": "orbit-2.10 (Tom's 'do all four', 16 Nov 2026): one request a run. Grade is Orbit's call: Launch's method is published and tested (B); a place match is a geometric coincidence with its pad's closure history, not a confirmation that an area is for a launch (2)."
+      "note": "orbit-2.10 (Tom's 'do all four', 16 Nov 2026): one request a run. Grade is Orbit's call: Launch's method is published and tested (B); a place match is a geometric coincidence with its pad's closure history, not a confirmation that an area is for a launch (2). Not read from orbit-2.32 (25 Nov 2026, ideas#69): the pairs lane retired with Orbit's hazard areas; Launch draws its own matches.",
+      "retired": "orbit-2.32"
     },
     {
       "id": "ll2-thespacedevs",
       "name": "Launch Library 2, The Space Devs: upcoming launches, and every launch since 1 Jan 2024 (Orbit's ledger)",
       "url": "https://thespacedevs.com/llapi",
       "licence": "Free access to the whole database (\"the entire database is accessible to everyone, for free\", thespacedevs.com/llapi, read 16 Nov 2026), 15 requests an hour without a key. No separate data licence is stated; Tom, 15 Nov 2026: freely available, so Orbit uses and republishes it with credit (the ledger on Orbit's public release). Images not used: each carries its own licence.",
-      "use": "ingest",
+      "use": "excluded",
       "grade": "B2",
       "independence_group": "thespacedevs",
-      "commercial_ok": "unknown"
+      "commercial_ok": "unknown",
+      "retired": "orbit-2.32",
+      "note": "Launch's from orbit-2.32 (25 Nov 2026, ideas#69): Orbit's upcoming and ledger lanes retired; Launch reads Launch Library 2 for the schedule and the ledger. Orbit's last ledger file stays on its release `ledger`, frozen."
     },
     {
       "id": "snapi-thespacedevs",
       "name": "Spaceflight News API (Spaceflight News API and The Space Devs): headlines tied to Launch Library 2 launches",
       "url": "https://www.spaceflightnewsapi.net/",
-      "licence": "No licence, terms of use or rate limit stated (site read 15 Nov 2026; footer 'Copyright © 2026 Spaceflight News API & The Space Devs'). Orbit keeps links only: headline, outlet, time and the link to the outlet's page; no summaries, no images. Asked in Tom's email to The Space Devs (15 Nov 2026).",
-      "use": "ingest",
+      "licence": "No licence, terms of use or rate limit stated (site read 15 Nov 2026; footer 'Copyright \u00a9 2026 Spaceflight News API & The Space Devs'). Orbit keeps links only: headline, outlet, time and the link to the outlet's page; no summaries, no images. Asked in Tom's email to The Space Devs (15 Nov 2026).",
+      "use": "excluded",
       "grade": "B3",
       "independence_group": "thespacedevs",
       "commercial_ok": "unknown",
-      "note": "orbit-2.5 (Tom's 'Yes, links only', 15 Nov 2026): one request a run, filtered to the scheduled launches' Launch Library 2 ids. Grade is Orbit's call: the API usually links the right launch (B); the headlines are the outlets' own reporting, not checked (3)."
+      "note": "orbit-2.5 (Tom's 'Yes, links only', 15 Nov 2026): one request a run, filtered to the scheduled launches' Launch Library 2 ids. Grade is Orbit's call: the API usually links the right launch (B); the headlines are the outlets' own reporting, not checked (3). Launch's from orbit-2.32 (25 Nov 2026, ideas#69): Orbit's news lane retired; Launch shows the headlines under each scheduled launch.",
+      "retired": "orbit-2.32"
     },
     {
       "id": "nga-msi",
       "name": "NGA Maritime Safety Information: in-force daily memoranda for HYDROPAC, HYDROLANT, HYDROARC, NAVAREA IV and NAVAREA XII (launch hazard and space-debris warnings)",
       "url": "https://msi.nga.mil/NavWarnings",
       "licence": "US Government work (17 U.S.C. 105). NGA's own terms page could not be read: the MSI portal and API answer 503 'under maintenance' (since at least 6 Nov 2026); the memoranda are served from that maintenance page. The memoranda say they supplement, and do not replace, IMO/SOLAS broadcasts (read 13 Nov 2026).",
-      "use": "ingest",
+      "use": "excluded",
       "grade": "A2",
       "independence_group": "nga",
       "commercial_ok": "unknown",
-      "note": "Official coordinator for NAVAREA IV and XII; HYDROPAC/HYDROLANT/HYDROARC rebroadcast other coordinators' warnings. Read the MSI API (broadcast-warn) when it returns."
+      "note": "Official coordinator for NAVAREA IV and XII; HYDROPAC/HYDROLANT/HYDROARC rebroadcast other coordinators' warnings. Read the MSI API (broadcast-warn) when it returns. Not read by Orbit from orbit-2.32 (25 Nov 2026, ideas#69): its navwarn lane retired. The suite reads NGA's warnings through Cordon; Launch draws launch closures.",
+      "retired": "orbit-2.32"
     },
     {
       "id": "jcg-navarea11",
@@ -64,13 +69,13 @@
       "grade": "A2",
       "independence_group": "jcg",
       "commercial_ok": true,
-      "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST. Not read since 14 Nov 2026: the site's robots.txt disallows /TUHO/ (where the list and messages sit) for every crawler but the National Diet Library's. Read 13-14 Nov 2026 before that was seen."
+      "note": "NAVAREA XI coordinator: western North Pacific, including waters off China. Titles Japanese, warning text English; issue times stamped JST. Not read since 14 Nov 2026: the site's robots.txt disallows /TUHO/ (where the list and messages sit) for every crawler but the National Diet Library's. Read 13-14 Nov 2026 before that was seen. The navwarn lane this served retired in orbit-2.32 (25 Nov 2026, ideas#69)."
     },
     {
       "id": "swf-counterspace",
       "name": "Secure World Foundation, Global Counterspace Capabilities (2026): History of ASAT Testing in Space (Google Sheets CSV export)",
       "url": "https://www.swfound.org/publications-and-reports/2026-global-counterspace-capabilities-report",
-      "licence": "CC BY-NC 4.0 ('Global Counterspace Capabilities © 2026 by Secure World Foundation is licensed under Attribution-NonCommercial 4.0 International', read on the report page, which links this sheet, 13 Nov 2026); credit as 'Secure World Foundation, Global Counterspace Capabilities (2026), CC BY-NC 4.0'. Non-commercial use only.",
+      "licence": "CC BY-NC 4.0 ('Global Counterspace Capabilities \u00a9 2026 by Secure World Foundation is licensed under Attribution-NonCommercial 4.0 International', read on the report page, which links this sheet, 13 Nov 2026); credit as 'Secure World Foundation, Global Counterspace Capabilities (2026), CC BY-NC 4.0'. Non-commercial use only.",
       "use": "ingest",
       "grade": "B2",
       "independence_group": "swf",
@@ -147,7 +152,7 @@
       "id": "wmo-oscar-space",
       "name": "WMO OSCAR/Space: Earth-observation and weather satellites (operator, programme, orbit, status)",
       "url": "https://space.oscar.wmo.int/",
-      "licence": "'All information available on these pages may be used and redistributed freely, … any publication using this information should acknowledge WMO' (space.oscar.wmo.int/pages/disclaimer, read 16 Nov 2026); '© World Meteorological Organization 2011-2026'; no warranty. Credit: 'WMO OSCAR/Space'.",
+      "licence": "'All information available on these pages may be used and redistributed freely, \u2026 any publication using this information should acknowledge WMO' (space.oscar.wmo.int/pages/disclaimer, read 16 Nov 2026); '\u00a9 World Meteorological Organization 2011-2026'; no warranty. Credit: 'WMO OSCAR/Space'.",
       "use": "ingest",
       "grade": "A2",
       "independence_group": "wmo",
@@ -170,7 +175,7 @@
       "id": "gunter-space-page",
       "name": "Gunter's Space Page (G.D. Krebs): spacecraft and programme pages",
       "url": "https://space.skyrocket.de/",
-      "licence": "Terms of use (space.skyrocket.de/about/terms-of-use.htm, updated 27 Jul 2026, read 16 Nov 2026): 'All rights reserved'; no republishing or 'systematic extraction' without written consent; 'Automated scraping … prohibited'; use 'to inform your own analysis, research, or reports' allowed; citations need full page title, publisher, canonical URL and retrieval date. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "licence": "Terms of use (space.skyrocket.de/about/terms-of-use.htm, updated 27 Jul 2026, read 16 Nov 2026): 'All rights reserved'; no republishing or 'systematic extraction' without written consent; 'Automated scraping \u2026 prohibited'; use 'to inform your own analysis, research, or reports' allowed; citations need full page title, publisher, canonical URL and retrieval date. Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
       "use": "link",
       "grade": "B2",
       "independence_group": "gunter",
@@ -180,7 +185,7 @@
       "id": "orbital-focus",
       "name": "Orbital Focus (Robert Christy): launch lists, GEO and sun-synchronous lists, manoeuvre histories",
       "url": "https://orbitalfocus.uk/",
-      "licence": "'Copyright © Robert Christy, all rights reserved'; 'Reproduction of this web page or any of its content without permission from the website owner is prohibited' (orbitalfocus.uk, read 16 Nov 2026). Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
+      "licence": "'Copyright \u00a9 Robert Christy, all rights reserved'; 'Reproduction of this web page or any of its content without permission from the website owner is prohibited' (orbitalfocus.uk, read 16 Nov 2026). Cited one object at a time, by hand in data/catalog/aliases.yml, with page title, publisher, URL and retrieval date; never scraped and never copied as a list (Tom, 16 Nov 2026: 'we will cite names and include data as needed, always with proper citations').",
       "use": "link",
       "grade": "B2",
       "independence_group": "orbital-focus",

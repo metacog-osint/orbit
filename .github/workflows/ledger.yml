@@ -1,66 +1,18 @@
 name: ledger
-# Orbit's launch ledger, hourly (Tom, 15 Nov 2026): one Launch Library 2 pull of 14 launches from the newest saved
-# one on, which verifies it and adds what follows (orbit/ledger.py), and at most one by-id lookup. The ledger lives
-# on this repository's public release `ledger` as launch-ledger.json, so the suite's programs can read it
-# (https://github.com/metacog-osint/orbit/releases/download/ledger/launch-ledger.json); Orbit's own update run reads
-# it from there too.
+# Retired in orbit-2.32 (25 Nov 2026, ideas#69): the launch ledger moved to the suite's Launch program, which reads
+# Launch Library 2 itself (launch.theintelligence.company; its release `ledger`, ll2-ledger.json). Orbit's last
+# launch-ledger.json stays on this repository's release `ledger`, frozen, with a "moved to Launch" note.
 #
-# Started by the hub's tic-dispatch Worker at :45 past every UTC hour (:55 at 01, 05, 09, 13, 17 and 21 UTC, Blackout's);
-# GitHub fires this account's schedules 4-9 hours late, so the cron below is only the fallback. Launch Library 2
-# allows 15 requests an hour without a key; this job makes one or two. A failed pull (a 429 included) changes
-# nothing and is not retried: the next hour tries again.
-#
-# No Space-Track, no deploy: this job never touches the shared Space-Track account or Cloudflare Pages.
+# It has no schedule of its own and does nothing; it remains while the suite's tic-dispatch Worker still starts
+# it at :45 past the hour.
 on:
-  schedule:
-    - cron: "45 * * * *"
   workflow_dispatch:
 permissions:
-  contents: write
-concurrency:
-  group: ledger
-  cancel-in-progress: false
+  contents: read
 jobs:
   ledger:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with: { python-version: "3.12" }
-      - name: Ledger tests
-        run: python -m unittest tests.test_ledger
-      - name: The ledger from the release (none before the first run)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p data/state
-          if gh release view ledger --json assets -q '.assets[].name' 2>/dev/null | grep -qx launch-ledger.json; then
-            # the release holds a ledger: a failed download stops the job rather than starting over from 1 Jan 2024
-            gh release download ledger --pattern launch-ledger.json --dir data/state --clobber
-          else
-            echo "::warning::No ledger on the release yet: this run starts it from 1 Jan 2024."
-          fi
-      - name: One Launch Library 2 pull
-        id: pull
-        run: python tools/orbit.py ledger
-      - name: Publish the ledger
-        if: steps.pull.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view ledger >/dev/null 2>&1 || gh release create ledger --title "Launch ledger" --latest=false \
-            --notes "Orbit's launch ledger: every launch since 1 Jan 2024 from Launch Library 2 (The Space Devs, thespacedevs.com), checked hourly. launch-ledger.json; schema orbit-ledger/1 (orbit/ledger.py). Launch data: Launch Library 2, The Space Devs."
-          gh release upload ledger data/state/launch-ledger.json --clobber
-      # The release holds one copy, replaced on each change. Keep a dated copy in the PRIVATE tic-archive repo at most
-      # once a day (ideas#54, Tom, 21 Nov 2026): release orbit-ledger-YYYY-MM, nothing replaced, an unchanged ledger
-      # skipped. Runs after the publish, so a failure turns the run red but never holds the ledger back.
-      - name: Private archive (dated daily copy of the ledger, to tic-archive)
-        env:
-          GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::error::secret TIC_ARCHIVE_TOKEN is not set, so the ledger did not go to the private archive"; exit 1
-          fi
-          python tools/tic_archive.py put --program orbit --lane ledger --src data/state \
-            --include launch-ledger.json --min-interval-hours 23
+      - name: Moved to Launch
+        run: echo "::notice::Orbit's launch ledger moved to Launch (ideas#69); nothing to do here."

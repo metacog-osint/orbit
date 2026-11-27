@@ -48,32 +48,35 @@ class Block(unittest.TestCase):
     def test_a_failed_lane_keeping_its_last_good_copy_is_not_read(self):
         h = feed.source_health(snap(
             catalog={"status": "ok", "fetched_at": NOW},
-            upcoming={"status": "failed", "error": "OSError: network down", "failed_at": NOW, "from_previous": True,
+            maneuver={"status": "failed", "error": "OSError: network down", "failed_at": NOW, "from_previous": True,
                       "fetched_at": "2026-11-15T12:00:00Z"}))
-        up = h["ll2-thespacedevs"]
+        up = h["space-track"]
         self.assertEqual((up["state"], up["last_ok"], up["checked_at"]), ("failing", "2026-11-15T12:00:00Z", NOW))
         self.assertIn("last good copy kept", up["detail"])
         self.assertEqual(history.lanes_ok(h), {"gcat-mcdowell"})
 
     def test_a_failed_lane_is_not_read_even_when_its_times_match(self):
         # The state decides when a fetch time and a failure time happen to be equal.
-        h = feed.source_health(snap(upcoming={"status": "failed", "failed_at": NOW, "fetched_at": NOW}))
+        h = feed.source_health(snap(maneuver={"status": "failed", "failed_at": NOW, "fetched_at": NOW}))
         self.assertEqual(history.lanes_ok(h), set())
 
     def test_off_not_run_and_absent_lanes(self):
         h = feed.source_health(snap(maneuver={"status": "off", "reason": "no credentials", "checked_at": NOW},
-                                    upcoming={"status": "not run"}))
-        self.assertEqual((h["space-track"]["state"], h["ll2-thespacedevs"]["state"]), ("never", "never"))
-        self.assertEqual((h["space-track"]["detail"], h["ll2-thespacedevs"]["detail"]),
+                                    catalog={"status": "not run"}))
+        self.assertEqual((h["space-track"]["state"], h["gcat-mcdowell"]["state"]), ("never", "never"))
+        self.assertEqual((h["space-track"]["detail"], h["gcat-mcdowell"]["detail"]),
                          ("off: no credentials", "not run"))
-        self.assertNotIn("gcat-mcdowell", h, "a lane with no record carries no items, so it has no entry")
         self.assertEqual(history.lanes_ok(h), set())
+        h = feed.source_health(snap(maneuver={"status": "off", "reason": "no credentials", "checked_at": NOW}))
+        self.assertNotIn("gcat-mcdowell", h, "a lane with no record carries no items, so it has no entry")
+        # orbit-2.32: an old snapshot's retired schedule lane names no source (ideas#69)
+        self.assertNotIn("ll2-thespacedevs", feed.source_health(snap(upcoming={"status": "ok", "fetched_at": NOW})))
 
     def test_a_lane_carried_from_an_earlier_run_is_not_read(self):
         # collect --only keeps the other lanes' records with from_previous: an old ok must not read as this run's.
-        h = feed.source_health(snap(upcoming={"status": "ok", "fetched_at": "2026-11-15T12:00:00Z",
+        h = feed.source_health(snap(maneuver={"status": "ok", "fetched_at": "2026-11-15T12:00:00Z",
                                               "from_previous": True}))
-        up = h["ll2-thespacedevs"]
+        up = h["space-track"]
         self.assertEqual((up["state"], up["last_ok"], up["checked_at"]), ("stale", "2026-11-15T12:00:00Z", NOW))
         self.assertEqual(history.lanes_ok(h), set())
 
@@ -82,8 +85,7 @@ class Block(unittest.TestCase):
         kit = {"fresh", "late", "stale", "failing", "never", "up"}
         h = feed.source_health(snap(
             catalog={"status": "unchanged", "checked_at": NOW},
-            upcoming={"status": "failed", "failed_at": NOW, "fetched_at": "2026-11-15T12:00:00Z", "from_previous": True},
-            maneuver={"status": "off", "reason": "no credentials", "checked_at": NOW}))
+            maneuver={"status": "failed", "failed_at": NOW, "fetched_at": "2026-11-15T12:00:00Z", "from_previous": True}))
         self.assertTrue({v["state"] for v in h.values()} <= kit, h)
         for status in ("not run", None, "something new"):
             h = feed.source_health(snap(catalog={"status": status}))
@@ -102,7 +104,7 @@ class Collected(unittest.TestCase):
 
     def test_a_failed_run_marks_the_kept_sources_unread(self):
         good = feed.build_feed(self.e.run_collect())
-        self.assertEqual(history.lanes_ok(good["health"]), {"gcat-mcdowell", "ll2-thespacedevs"})
+        self.assertEqual(history.lanes_ok(good["health"]), {"gcat-mcdowell"})
         self.e.fail = True
         self.e.stamp = "Sat, 14 Nov 2026 00:23:02 GMT"
         kept = feed.build_feed(self.e.run_collect())

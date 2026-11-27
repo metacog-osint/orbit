@@ -150,3 +150,14 @@ worktree `_worktrees\orbit-sat-catalog`, from origin/main `14c1579`.
   reviewer never enter the catalog. Local build from the stored 18 Nov read: 285 links, 492 names, 285 operators,
   285 statuses, none missing; one status disagreement (42901 VENUS: CelesTrak `-`, OSCAR Operational). 380 tests
   pass, check PASS. The first catalog.yml run after the merge reads OSCAR once (about 2 minutes extra).
+- **Small alias items (26 Nov 2026, method `orbit-2.35`):** the alias file reads `swap` entries (`swap`, the
+  disputed payload name; `claims`, one-line flow mappings `{source, read, norad, as}`, one per source; `status` open,
+  or settled with `settled_by` and `settled`; `evidence`). `catalog.merge_swaps` adds them to the build's `swaps`
+  (with `as`, `by: aliases` and `ref`), so the shards and the object page show them; nothing is reassigned. Three
+  open swaps: Cosmos 2536, 2537 and 2538 (2019-039B-D, 44422-44424), which Space-Track and CelesTrak name in number
+  order and GCAT rotates by one. No stored orbit history settles which number is which, so SWF's "Cosmos 2536" stays
+  unlinked. Prowler links by alias to GCAT's A04907 (1990-097E, launched 1990-11-15, GEO): Wikidata's Prowler item
+  gives that COSPAR ID, while its NORAD number 20963 is 1990-097B, USA 67 in GCAT, Space-Track and CelesTrak.
+  Space-Track's "PAYLOAD A" to "PAYLOAD C" placeholders are designations now (basis `catalog`), so 39210 shows as
+  "PAYLOAD C (Shi Jian 15)". Tests `tests/test_alias_swaps.py` on real rows of the 26 Nov catalog
+  (`tests/fixtures/catalog_{objects,names}_20261126.json`); 501 tests pass, check PASS.

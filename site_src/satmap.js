@@ -456,4 +456,23 @@ async function start() {
   }
 }
 
-start();
+// The globe, the satellite file and CesiumJS are the page's heaviest part, so nothing is fetched until the section is
+// scrolled near or the button is pressed (ideas#200).
+{
+  let began = false;
+  let io = null;
+  const go = () => {
+    if (began) return;
+    began = true;
+    if (io) io.disconnect();
+    const p = $("sm-preview");
+    if (p) p.remove();
+    start();
+  };
+  if ("IntersectionObserver" in window) {
+    io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) go(); }, { rootMargin: "0px" });
+    io.observe($("sm-preview"));
+  } else go();
+  const btn = $("sm-load");
+  if (btn) btn.addEventListener("click", go);
+}

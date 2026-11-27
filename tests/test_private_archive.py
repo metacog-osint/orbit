@@ -76,17 +76,15 @@ class SetStore(unittest.TestCase):
 
 
 class LedgerWorkflow(unittest.TestCase):
-    def test_dated_daily_copy_after_the_publish_with_its_own_token(self):
+    def test_retired_ledger_workflow_does_nothing(self):
+        """orbit-2.32 (ideas#69): the ledger is Launch's. The stub stays only while the hub's dispatcher still starts
+        it: no schedule, no Launch Library 2 pull, no write to the frozen release or the private archive."""
         text = (ROOT / ".github" / "workflows" / "ledger.yml").read_text(encoding="utf-8")
-        publish = text.index("- name: Publish the ledger")
-        step = text.index("- name: Private archive (dated daily copy of the ledger, to tic-archive)")
-        self.assertLess(publish, step)
-        block = text[step:]
-        self.assertIn("GH_TOKEN: ${{ secrets.TIC_ARCHIVE_TOKEN }}", block)
-        self.assertNotIn("github.token", block)
-        self.assertIn("--lane ledger --src data/state", block)
-        self.assertIn("--include launch-ledger.json --min-interval-hours 23", block)
-        self.assertNotIn("if:", block.split("run:")[0])     # runs whether or not this hour changed the ledger
+        self.assertNotIn("schedule:", text)
+        self.assertIn("workflow_dispatch:", text)
+        self.assertIn("contents: read", text)
+        for gone in ("gh release", "tools/orbit.py", "tic_archive.py", "TIC_ARCHIVE_TOKEN"):
+            self.assertNotIn(gone, text)
 
     def test_one_snapshot_a_day_and_nothing_replaced(self):
         with tempfile.TemporaryDirectory() as td:
