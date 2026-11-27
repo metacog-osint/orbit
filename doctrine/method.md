@@ -1082,3 +1082,15 @@ satellites with no recent public set" (`#set-gaps`); one line in the daily lead.
    Luch 2 only. Day file of 21 Nov (read 20:57Z): both come back after 37 days. Day file of 22 Nov: USA 324 and USA
    325 pass 7 days, as that file's "quiet" events also record. At 03:00Z on 27 Nov 2026, three are listed: USA 270
    (newest set 24.8 days old), USA 271 (24.6) and USA 325 (11.7).
+## The GEO role list: sources that were opened (`orbit-2.48`, 27 Nov 2026)
+Every entry in `site_src/geo_roles.json` rests on a source that was opened and says what the basis says. A source
+the list cites but could not open (a paywall, an HTTP 403 to scripts) is written `[label, URL, "not opened"]`; the
+page adds "(not opened)" to its label. An entry none of whose sources was opened is refused by `check_roles`
+(`orbit/notable.py`, run by `orbit.py check` and held by `tests/test_geo_role_sources.py`) and, should one reach
+the file, is left off the page and out of the notable rule. A role is never listed on a source nobody read.
+SJ-17 (41838): its earlier basis cited a SpacePolicyOnline article (5 Feb 2022) that covers SJ-21 and never names
+SJ-17. The basis now rests on SWF's fact sheet "Chinese Military and Intelligence Rendezvous and Proximity
+Operations" (June 2026): China declared the satellite a test of advanced technologies; SWF reports it circumnavigated
+ChinaSat-5A in Nov 2016, came within 1.5 km of ChinaSat-1C on 29 Jul 2018, and made RPO with ChinaSat-6B and
+Shijian-20 in 2020. The Space Review (Matthew Mowthorpe and Markos Trichas, 1 Aug 2022) and Defense One (David D.
+Chen and Peter W. Singer, 20 May 2024) report the same approaches.

@@ -150,7 +150,55 @@ def roles_index(roles_doc: dict | None) -> dict[int, dict]:
     words = (roles_doc or {}).get("roles") or {}
     return {int(o["id"]): {"role": o["role"], "role_text": words.get(o["role"]) or o["role"],
                            "basis": o.get("basis"), "sources": o.get("sources") or []}
-            for o in (roles_doc or {}).get("objects") or []}
+            for o in (roles_doc or {}).get("objects") or [] if opened_sources(o)}
+
+
+NOT_OPENED = "not opened"  # third item of a source the list cites but its reviewer could not open (paywall, 403)
+
+
+def opened_sources(o: dict) -> list:
+    """An entry's sources that were opened, leaving out those marked [label, URL, NOT_OPENED]."""
+    return [s for s in o.get("sources") or [] if not (isinstance(s, list) and len(s) == 3 and s[2] == NOT_OPENED)]
+
+
+def check_roles(roles_doc: dict | None) -> list[str]:
+    """Problems in site_src/geo_roles.json, one line each; [] when every entry holds. Each object needs a unique
+    catalog number, a name, a listed role, a basis and its sources, each [label, https URL], or
+    [label, https URL, "not opened"] for one cited but not opened. An entry none of whose sources was opened
+    is refused: the list shows a role only where a source someone read supports it."""
+    doc = roles_doc or {}
+    words = doc.get("roles") or {}
+    objs = doc.get("objects")
+    if not isinstance(objs, list) or not objs:
+        return ["geo_roles: no objects"]
+    errs, seen = [], set()
+    for i, o in enumerate(objs):
+        if not isinstance(o, dict):
+            errs.append(f"geo_roles[{i}]: not an object")
+            continue
+        n = o.get("id")
+        at = f"geo_roles[{i}] {n}"
+        if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+            errs.append(f"{at}: id is not a catalog number")
+        elif n in seen:
+            errs.append(f"{at}: listed twice")
+        seen.add(n)
+        for k in ("name", "basis"):
+            if not str(o.get(k) or "").strip():
+                errs.append(f"{at}: no {k}")
+        if o.get("role") not in words:
+            errs.append(f"{at}: role {o.get('role')!r} is not one of {sorted(words)}")
+        src = o.get("sources")
+        if not isinstance(src, list) or not src:
+            errs.append(f"{at}: no source")
+            continue
+        for s in src:
+            if not (isinstance(s, list) and len(s) in (2, 3) and str(s[0]).strip()
+                    and str(s[1]).startswith("https://") and (len(s) == 2 or s[2] == NOT_OPENED)):
+                errs.append(f"{at}: source {s!r} is not [label, https URL] or [label, https URL, {NOT_OPENED!r}]")
+        if not opened_sources(o):
+            errs.append(f"{at}: no opened source: every source is marked {NOT_OPENED!r}, so the role is not listed")
+    return errs
 
 
 def mark(ev: dict, roles: dict[int, dict]) -> dict | None:
