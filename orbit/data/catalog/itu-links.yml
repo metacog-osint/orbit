@@ -1,0 +1,23 @@
+# TIC satellite catalog: ITU satellite network filings linked to NORAD numbers by review (method orbit-2.42,
+# doctrine/itu-filings.md). Read by orbit/itu.py (load_links); the build writes the reviewed entries to
+# site/data/itu-links.json for the object pages.
+#
+# The ITU gives no NORAD number and no satellite name for a filing. A network name ("EUTELSAT 3-12.5W") is the
+# administration's label for a filing, not a satellite's name, and a filing for a slot is a claim to orbit position
+# and spectrum, not evidence that a satellite is there. So every entry here is TIC's attribution, with its evidence,
+# and the network name never becomes one of the object's names in the catalog.
+#
+# One entry per link from one filing to one object:
+#   norad, network (ITU's sat_name, as ITU gives it), adm (ITU's administration code), org (ITU's ntwk_org, if any),
+#   slot (the filing's nominal longitude, degrees east, west negative), ntc_id (ITU's notice id, if known),
+#   from / to (the dates the object served the filing, when the evidence gives them: a satellite moves between
+#   filings and slots), basis, evidence (a list of statements, each with its source and link), proposed_by, proposed.
+# basis: declared (an operator's or administration's own document names both the satellite and the filing),
+#   res40-dates (the Resolution 40 in-position or departure dates match this object's own move in public element
+#   sets), by-hand.
+# ONLY ENTRIES WITH `reviewed_by` AND `reviewed` REACH A PAGE: a person adds both after checking the entry by diff.
+# Never edit an entry to change its number: add `withdrawn: <date>` and `reason`, and add a new entry.
+#
+# Source: ITU Space Explorer and the ITU-R Resolution 40 table, (c) ITU, used for non-commercial research with the
+# source acknowledged (itu.int terms of use). `python tools/orbit.py find <slot> --itu` lists a slot's filings and
+# Resolution 40 statements locally for a reviewer.
