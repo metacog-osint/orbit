@@ -35,6 +35,7 @@ import json
 import math
 import os
 import subprocess
+import tempfile
 from datetime import datetime, timedelta
 
 from orbit import spacetrack
@@ -298,22 +299,103 @@ def tag_for(name):
     return "geo-" + stem[:4]
 
 
+class ReleaseError(RuntimeError):
+    """A file the release holds could not be read whole, or an upload would lose element sets the release holds, or
+    the copy of a file about to be replaced could not be archived. Nothing is uploaded; the run fails."""
+
+
 def _gh(*args):
     return subprocess.run(["gh", *args], capture_output=True, text=True)
 
 
-def release_get(names, out, repo=None):
-    """Download release files that exist; missing ones (or a missing release) are skipped."""
-    repo = repo or os.environ.get("GITHUB_REPOSITORY", REPO)
+def _repo(repo):
+    return repo or os.environ.get("GITHUB_REPOSITORY", REPO)
+
+
+def release_assets(tags, repo=None):
+    """{asset name: bytes} for the files on the releases `tags`. A release that does not exist (HTTP 404) holds
+    nothing; any other failure to list raises ReleaseError, so a file is never taken as absent because a listing
+    failed."""
+    repo = _repo(repo)
+    held = {}
+    for tag in sorted(set(tags)):
+        r = _gh("api", f"repos/{repo}/releases/tags/{tag}", "--jq", ".id")
+        if r.returncode and "HTTP 404" in r.stderr:
+            continue
+        if r.returncode or not r.stdout.strip():
+            raise ReleaseError(f"release {tag} could not be read: {r.stderr.strip()[:300]}")
+        r = _gh("api", "--paginate", f"repos/{repo}/releases/{r.stdout.strip()}/assets?per_page=100",
+                "--jq", '.[] | "\\(.size) \\(.name)"')
+        if r.returncode:
+            raise ReleaseError(f"the files on release {tag} could not be listed: {r.stderr.strip()[:300]}")
+        for line in r.stdout.splitlines():
+            size, _, name = line.strip().partition(" ")
+            if name:
+                held[name] = int(size)
+    return held
+
+
+def release_get(names, out, repo=None, held=None):
+    """Download into `out` the files in `names` that the releases hold (`held`, from release_assets; listed here
+    when not given). A file the release holds that does not download whole (an error, or a size other than the
+    listed one) raises ReleaseError. Files the release does not hold are skipped. Returns the names downloaded."""
+    repo = _repo(repo)
+    if held is None:
+        held = release_assets({tag_for(n) for n in names}, repo)
     got = []
     for name in names:
-        if not _gh("release", "download", tag_for(name), "-R", repo, "-p", name, "-D", out, "--clobber").returncode:
-            got.append(name)
+        if name not in held:
+            continue
+        r = _gh("release", "download", tag_for(name), "-R", repo, "-p", name, "-D", out, "--clobber")
+        p = os.path.join(out, name)
+        size = os.path.getsize(p) if os.path.exists(p) else None
+        if r.returncode or size != held[name]:
+            why = r.stderr.strip()[:300] if r.returncode else f"{size} of {held[name]} bytes"
+            raise ReleaseError(f"{name} is on release {tag_for(name)} but did not download whole ({why})")
+        got.append(name)
     return got
 
 
-def release_put(paths, repo=None):
-    repo = repo or os.environ.get("GITHUB_REPOSITORY", REPO)
+def element_keys(path):
+    """The (norad, epoch) of every element set in a month file."""
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        doc = json.load(f)
+    k, e = doc["cols"].index("norad"), doc["cols"].index("epoch")
+    return {(row[k], row[e]) for row in doc["rows"]}
+
+
+def check_new_months(months, held, day):
+    """A month file the release does not hold is started only for `day`'s month or a later one. A past month that
+    is not on the release is a lost file or a wrong listing, never a month to rebuild from one reply's sets."""
+    gone = [m for m in sorted(months) if elements_name(m) not in held and m < month_of(day)]
+    if gone:
+        raise ReleaseError(f"{', '.join(map(elements_name, gone))} not on the release, though the month has passed; "
+                           "a past month is never rebuilt from one reply")
+
+
+def release_put(paths, repo=None, archive=None):
+    """Upload `paths` to their releases geo-YYYY, replacing the files of the same name. First every file the
+    releases already hold under those names is downloaded again and checked: a month file that would lose any
+    element set (norad, epoch) the release holds is refused, and the release copies about to be replaced go to
+    `archive(folder)`, which must succeed (geo_pull: a dated copy in the private tic-archive). Any failure raises
+    ReleaseError before the first upload."""
+    repo = _repo(repo)
+    names = [os.path.basename(p) for p in paths]
+    held = release_assets({tag_for(n) for n in names}, repo)
+    with tempfile.TemporaryDirectory(prefix="geo-replaced-") as tmp:
+        replaced = release_get([n for n in names if n in held], tmp, repo, held)
+        for p in paths:
+            name = os.path.basename(p)
+            if name in replaced and name.startswith("geo-elements-"):
+                old = element_keys(os.path.join(tmp, name))
+                lost = old - element_keys(p)
+                if lost:
+                    raise ReleaseError(f"{name}: the upload would drop {len(lost):,} of the {len(old):,} element sets "
+                                       f"on release {tag_for(name)}; refused, nothing uploaded")
+        if replaced:
+            if archive is None:
+                raise ReleaseError(f"{', '.join(replaced)} would be replaced with no archive copy; refused")
+            archive(tmp)
     for p in paths:
         tag = tag_for(os.path.basename(p))
         if _gh("release", "view", tag, "-R", repo).returncode:

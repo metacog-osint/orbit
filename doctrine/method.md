@@ -892,3 +892,25 @@ with an unexplained difference.
 3. **Placeholders.** Space-Track's "PAYLOAD A" to "PAYLOAD C" (for example SJ-15, 39210) are treated like
    "OBJECT A": shown, with the best-ranked real name beside them ("PAYLOAD C (Shi Jian 15)"), and not used to find
    name swaps.
+
+## GEO uploads never lose what the releases hold (`orbit-2.36`, 26 Nov 2026)
+
+Each GEO run (workflow `geo.yml`, `python tools/orbit.py geo --upload`) downloads the files it extends from the
+public releases `geo-YYYY`, adds the day's element sets and replaces them. Until this version, a failed download
+was treated as a missing file, so the month file was rebuilt from that one reply's sets and uploaded over the
+release's copy (reproduced offline: 300 sets to 5). No loss had happened. The run now stops, exit 1 with nothing
+uploaded, when:
+
+1. **A file the release holds does not download whole:** an error, or a size other than the release lists. Absence
+   is read from the release's own file list; a list that cannot be read stops the run too.
+2. **A past month's file is missing from its release.** A month file is started only in its own month (or later),
+   never rebuilt for a month that has passed.
+3. **An upload would drop an element set.** Before uploading, the release's copy is downloaded again, and a month
+   file that would lose any (NORAD number, epoch) the release holds is refused.
+4. **The private archive copy fails.** Each gp reply goes to the private repository `metacog-osint/tic-archive`
+   (`tools/tic_archive.py`, lane `geo-reply`) right after the query, so a stopped run's sets are kept. Every release
+   file is copied there (lane `geo-release`) before it is replaced: dated snapshots, nothing replaced in the
+   archive. The raw replies stay private, as the update run's do.
+
+`tools/geo_import.py` (the one-off import from Noisefloor) passes no archive, so a re-run cannot replace a file
+the release holds. Tests: `tests/test_geo_region.py`, classes `ReleaseGuard` and `ArchiveCopy`.
