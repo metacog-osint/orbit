@@ -951,6 +951,16 @@ def _tic_archive(lane: str, src) -> None:
 
 
 GEO_ARCHIVE = _tic_archive  # (lane, folder) -> None, raises on failure; replaceable in tests
+CATALOG_ARCHIVE = _tic_archive  # the same, for catalog.yml's copies (lane catalog-release)
+
+
+def _archive_files(archive, lane: str, files: dict) -> None:
+    """{asset name: local path} into a fresh folder, then `archive(lane, folder)`: the folder holds exactly those
+    files under their release names, so a later copy of the same release files shares their bytes."""
+    with tempfile.TemporaryDirectory(prefix=f"{lane}-") as tmp:
+        for name, p in files.items():
+            shutil.copyfile(p, Path(tmp) / name)
+        archive(lane, tmp)
 
 
 def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
@@ -962,7 +972,7 @@ def geo_pull(day: str, out: Path, upload: bool, getter=None) -> int:
     An upload never loses what the releases hold. Exit 1, with nothing uploaded, when a file a release holds does
     not download whole, a past month's file is missing from its release, an upload would drop an element set the
     release holds, or a copy to the private tic-archive fails: each gp reply goes there (lane geo-reply) before
-    anything else, and every release file before it is replaced (lane geo-release)."""
+    anything else, and every release file before it is replaced and as it is uploaded (lane geo-release)."""
     out.mkdir(parents=True, exist_ok=True)
     try:
         return _geo_pull(day, out, upload, getter)
@@ -1202,7 +1212,9 @@ def archive_upload(data_dir: Path) -> int:
 def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     """Workflow catalog.yml: the decay store and state from the public release `catalog`, one Space-Track read when
     due, GCAT's catalogs (one request each), the catalog built and uploaded with the store and state. Not due: exit 0
-    with a note. The release exists but its decay store will not download: exit 1, nothing read."""
+    with a note. The release exists but its decay store will not download: exit 1, nothing read. Every version of
+    the release's files goes to the private tic-archive (lane catalog-release): the files as the release holds them
+    before a due read (a failure stops the run, nothing read), and the files uploaded."""
     repo = os.environ.get("GITHUB_REPOSITORY", geo_region.REPO)
     held = stcat.release_exists(repo)
     if held and stcat.DECAY_ASSET not in stcat.release_get(data_dir, repo):
@@ -1215,8 +1227,21 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     if not cred:
         print("No Space-Track credentials.")
         return 1
+    now = datetime.now(timezone.utc)
+    if held and stcat.due(now, stcat.read_json(data_dir / stcat.STATE, {})) is None:
+        # Private archive (lane catalog-release): a read is due, so this run replaces the release's files. First a
+        # copy of them as the release holds them now; normally the last run's copy of its uploads, so no new bytes.
+        # A failure stops the run before Space-Track is read, so the once-a-day read is never spent on a run that
+        # cannot keep what it replaces.
+        try:
+            with tempfile.TemporaryDirectory(prefix="catalog-held-") as tmp:
+                stcat.release_copy(Path(tmp), repo)
+                CATALOG_ARCHIVE("catalog-release", tmp)
+        except RuntimeError as exc:
+            print(f"::error::{exc}; Space-Track not read, nothing replaced")
+            return 1
     try:
-        got = stcat.pull(data_dir, cred, history_held=held)
+        got = stcat.pull(data_dir, cred, now=now, history_held=held)
     except spacetrack.NotReady as exc:
         print(f"::notice::Not read: {exc}")
         if clear_hold:
@@ -1239,15 +1264,24 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
     out = data_dir / "catalog" / stcat.CATALOG_ASSET
     if catalog_local(raw, out, data_dir):
         return 1
-    stcat.release_put({stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
-                       **{n: out.parent / n for n in (catshards.SHARDS_ASSET, catshards.SEARCH_ASSET,
-                                                      catshards.RULES_ASSET)},
-                       stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
-                       stcat.STATE_ASSET: data_dir / stcat.STATE,
-                       stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}, repo)
+    files = {stcat.CATALOG_ASSET: out, stcat.NAMES_ASSET: out.parent / stcat.NAMES_ASSET,
+             **{n: out.parent / n for n in (catshards.SHARDS_ASSET, catshards.SEARCH_ASSET, catshards.RULES_ASSET)},
+             stcat.DECAY_ASSET: data_dir / stcat.DECAY_STORE,
+             stcat.STATE_ASSET: data_dir / stcat.STATE,
+             stcat.SOURCES_STATE_ASSET: data_dir / catsources.STATE}
+    stcat.release_put(files, repo)
     print(f"Uploaded {stcat.CATALOG_ASSET}, {stcat.NAMES_ASSET}, {catshards.SHARDS_ASSET}, {catshards.SEARCH_ASSET}, "
           f"{catshards.RULES_ASSET}, {stcat.DECAY_ASSET}, {stcat.STATE_ASSET} and "
           f"{stcat.SOURCES_STATE_ASSET} to release {stcat.RELEASE}.")
+    # Private archive: the files just uploaded, so the archive holds every day's catalog (the release keeps only the
+    # newest, the weekly copy below one a week). A failure fails the run after the live files are up; the next due
+    # run's copy of the release, before it replaces anything, then keeps them.
+    failed = False
+    try:
+        _archive_files(CATALOG_ARCHIVE, "catalog-release", files)
+    except RuntimeError as exc:
+        print(f"::error::{exc}")
+        failed = True
     # retention (18 Nov 2026): the catalog is replaced every build, so keep one dated copy a week (already public on
     # release `catalog`); a failure fails the run, after the live files are up
     try:
@@ -1257,7 +1291,7 @@ def catalog_release(data_dir: Path, clear_hold: str | None = None) -> int:
         return 1
     if wk:
         print(f"Kept the weekly copy {wk[0]}.")
-    return 1 if refused else 0
+    return 1 if refused or failed else 0
 
 
 def main(argv=None) -> int:
