@@ -9,7 +9,7 @@
   var q = new URLSearchParams(location.search);
   var KEY = (q.get("n") || q.get("j") || "").trim().toUpperCase().replace(/^S0*(?=\d)/, "").replace(/^0+(?=\d)/, "");
   var NUMBERED = /^\d+$/.test(KEY);
-  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null, movers = null, itu = null;
+  var shard = null, rules = null, man = null, snap = null, arc = null, obj = null, movers = null, itu = null, unreg = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -305,6 +305,17 @@
     return null;
   }
   function ituLinks(n) { return n && itu && itu.objects ? itu.objects[n] || [] : []; }
+  // Registrations with the United Nations reviewed for this object's COSPAR id (method orbit-2.50)
+  function registrations() {
+    var out = [], seen = {};
+    recs("intldes").forEach(function (r) {
+      var c = String(r.value || "").toUpperCase();
+      if (seen[c] || !unreg || !unreg.objects || !unreg.objects[c]) return;
+      seen[c] = true;
+      unreg.objects[c].forEach(function (x) { out.push(x); });
+    });
+    return out;
+  }
   function filedFor(lon) { return lon === 0 ? "0°" : Math.abs(lon) + "° " + (lon < 0 ? "W" : "E"); }
   function holds() {
     var box = document.getElementById("obj-holds");
@@ -406,6 +417,14 @@
         var w = r.when || {};
         return [(w.start || r.date_text || "") + (w.end && w.end !== w.start ? " to " + w.end : "") + (w.ongoing ? ", ongoing" : ""),
           isT ? "target or client" : "chaser or servicer", o, r.mission_type || "", r.orbit || ""];
+      })));
+    }
+    var un = registrations();
+    if (un.length) {
+      any = true;
+      var su = sub(box, "Registered with the United Nations", unreg.about);
+      su.appendChild(table(["Declared name", "Declared by", "Registration document", "GSO location registered", "Read"], un.map(function (x) {
+        return [x.name, x.state + " to the UN Register", link(x.symbol, x.link, true), x.gso || "not given", day(x.read)];
       })));
     }
     // ITU filings linked to this object by review (method orbit-2.42): the reviewed entries of itu-links.yml only
@@ -564,6 +583,13 @@
         ul.appendChild(li2);
       }
     }
+    if (registrations().length) {
+      var li4 = el("li");
+      li4.appendChild(el("strong", "", "UN Register"));
+      li4.appendChild(document.createTextNode(": " + unreg.credit + ". "));
+      li4.appendChild(link("UNOOSA Online Index", unreg.index, true));
+      ul.appendChild(li4);
+    }
     var nk = NUMBERED ? KEY : obj && obj.norad != null ? String(obj.norad) : null;
     if (ituLinks(nk).length) {
       var li3 = el("li");
@@ -593,8 +619,8 @@
     return;
   }
   Promise.all([getJson("data/catalog/" + shardName(KEY)), getJson("data/catalog/rules.json"), getJson("data/catalog/index.json"),
-    getJson("data/snapshot.json"), getJson("data/archive.json"), getJson("data/geo/movers.json"), getJson("data/itu-links.json")]).then(function (r) {
-    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4]; movers = r[5]; itu = r[6];
+    getJson("data/snapshot.json"), getJson("data/archive.json"), getJson("data/geo/movers.json"), getJson("data/itu-links.json"), getJson("data/un-register.json")]).then(function (r) {
+    rules = r[1]; man = r[2]; snap = r[3]; arc = r[4]; movers = r[5]; itu = r[6]; unreg = r[7];
     shard = r[0] && rules ? r[0] : r[0] === null && rules && man ? { missing: true, sources: {}, swaps: [] } : null;
     obj = shard && !shard.missing ? (shard.objects || {})[KEY] || null : null;
     if (shard && !obj) shard.missing = true;  // the shard is here but this key is not in it
