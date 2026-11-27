@@ -85,6 +85,14 @@ class Page(unittest.TestCase):
         self.assertIn(digest, script)                       # edit the import map, update the hash
         self.assertNotIn("cdn.", html)                      # three.js and satellite.js are self-hosted
 
+    def test_two_set_list_drawn_apart(self):
+        # method orbit-2.38: belt.two_set has its own heading inside the changes section, never merged into its tables
+        js = (ROOT / "site_src" / "geo" / "globe.js").read_text(encoding="utf-8")
+        self.assertIn("twoSet(b.two_set || []", js)
+        self.assertIn("Seen between two sets", js)
+        html = (ROOT / "site_src" / "geo.html").read_text(encoding="utf-8")
+        self.assertIn("a second rule that needs only two sets", html)
+
     def test_vendored_three_and_no_inline_styles(self):
         three = ROOT / "site_src" / "vendor" / "three"
         for f in ("build/three.module.min.js", "build/three.core.min.js", "examples/jsm/controls/OrbitControls.js", "LICENSE"):
