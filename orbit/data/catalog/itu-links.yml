@@ -21,3 +21,115 @@
 # Source: ITU Space Explorer and the ITU-R Resolution 40 table, (c) ITU, used for non-commercial research with the
 # source acknowledged (itu.int terms of use). `python tools/orbit.py find <slot> --itu` lists a slot's filings and
 # Resolution 40 statements locally for a reviewer.
+
+# Proposed 28 Nov 2026, none reviewed. Every statement below was read on that date (UTC) unless it says otherwise.
+
+# 33459. ITU records read: Space Explorer notice list, regulatory status and the Resolution 40 table. The satellite's
+# own dates come from Eutelsat's registration documents (see the alias entry for 33459 in aliases.yml).
+- norad: 33459
+  network: "EUTELSAT 3-12.5W"
+  adm: F
+  org: EUT
+  slot: -12.5
+  ntc_id: 99500228
+  from: 2023-06-19
+  to: 2025-10-29
+  basis: by-hand
+  evidence:
+    - "Eutelsat Universal Registration Document 2022-23, p. 26, as cited in orbit PR 41 (not re-read for this entry): Hot Bird 13C (HB9) moved to 12.5 W as 12 West G and was commissioned there on 19 Jun 2023"
+    - "ITU Space Explorer regulatory status of EUTELSAT 3-12.5W (notice 99500228, France/EUT; Master Register: yes; brought into use: yes, full): suspended in full (256/256 groups), both suspension dates 29.10.2025"
+    - "ITU Resolution 40 table: the station of F-SAT-N-E-13E left 12.5 W on 29.10.2025 (its row names 12.5 W as the previous position)"
+    - "Eutelsat Universal Registration Document 2025-26, p. 26 and p. 30: EUTELSAT 50WA (previously EUTELSAT 12WG) relocated and declared operational at 50.3 W on 19 Dec 2025, for a third-party operator"
+    - "Inferred, not stated by ITU or Eutelsat: that 33459 is the station that left on 29.10.2025. The filing was brought into use in 1999 and 2003 (ITU in-use dates 09.08.1999 and 15.09.2003), so other satellites served it before. The 'from' date is the commissioning date in Eutelsat's document and the 'to' date is ITU's suspension date. No element-set history was read for the departure."
+  proposed_by: claude-code
+  proposed: 2026-11-28
+
+- norad: 33459
+  network: "NEW DAWN 35-1"
+  adm: PNG
+  slot: -50
+  from: 2025-12-16
+  basis: by-hand
+  evidence:
+    - "ITU Resolution 40 table: NEW DAWN 35-1 (Papua New Guinea) in position at 50 W from 16.12.2025 (notification for the Master Register, 11.2); the station came from 12.5 W, filing F-SAT-N-E-13E, left 29.10.2025"
+    - "ITU Space Explorer: NEW DAWN 35-1 has a coordination request (9.6) received 2019-05-14 (notice 119520134) and a Resolution 49 due diligence record received 2026-01-13 (notice 126590003); Resolution 49 spacecraft details are behind an ITU login and were not read"
+    - "Eutelsat Universal Registration Document 2025-26, p. 26: EUTELSAT 50WA (formerly EUTELSAT 12 WEST G) positioned at 50.3 W and in operational service for a third-party operator on 19 Dec 2025, three days after ITU's in-position date"
+    - "Orbit's GEO record (read 27 Nov 2026): 33459 holds 50.2 W. No source read names Papua New Guinea or New Dawn as the third-party operator; that is inferred from the slot and the dates."
+  proposed_by: claude-code
+  proposed: 2026-11-28
+  note: "The administration filing the notification is Papua New Guinea; the satellite is Eutelsat's. Intelsat has asked the FCC to relicense it (Advanced Television, 3 Feb 2026), which this entry does not rely on."
+
+- norad: 33459
+  network: "F-SAT-E-BSS-12W"
+  adm: F
+  slot: -12.5
+  from: 2023-06-19
+  basis: by-hand
+  evidence:
+    - "ITU Resolution 40 table: F-SAT-E-BSS-12W (France, Appendix 30/30A plan notification, Article 5.2.10) in position at 12.5 W from 19.06.2023, not moved from another filing's slot"
+    - "Eutelsat Universal Registration Document 2022-23, p. 26, as cited in orbit PR 41 (not re-read): 12 West G commissioned at 12.5 W on 19 Jun 2023, the same date"
+    - "Weak: a date match only. The same filing has other in-position statements (2017 from 80.5 E, 2021 from 48 E) for other stations, and no Eutelsat document read ties 12 West G to a broadcasting-plan filing."
+  proposed_by: claude-code
+  proposed: 2026-11-28
+
+# The four Blagovest satellites (Russia). Russia filed BV-SAT-12E, -45E, -70E and -128E, each notified and brought
+# into use. No source read states that BV stands for Blagovest or that these filings are the satellites'; the link
+# rests on the slots: each satellite sits within 0.1 deg of one filing's nominal longitude, and no other Russian
+# filing has a Resolution 40 in-position statement at that slot. Orbit's GEO record starts 1 Jul 2026 and gives only
+# the current slot; earlier arrival dates were not read, and the ITU in-position dates are later than the launches,
+# so they are the administration's declaration dates, not arrival dates.
+- norad: 42907
+  network: "BV-SAT-45E"
+  adm: RUS
+  slot: 45
+  ntc_id: 120500268
+  basis: by-hand
+  evidence:
+    - "Orbit's GEO record (read 27 Nov 2026): COSMOS 2520 (Blagovest 11L, names from GCAT and Wikidata) holding 45.0 E from 1 Jul 2026 to now (its held-the-slot list: within 0.5 deg for 7 days or more, mean longitude given)"
+    - "ITU Space Explorer notice 120500268, BV-SAT-45E, Russian Federation, notification (11.2) received 2021-08-03; Master Register yes, brought into use yes (full, 110/110 groups), not suspended"
+    - "ITU Resolution 40 table: BV-SAT-45E in position at 45 E from 29.12.2020; the station left 45 E on 01.10.2023 for IRANSAT-43.5E and IRANSAT-B-43.5E (Iran), in position 06.10.2023"
+    - "Contradiction to resolve: Orbit's record shows COSMOS 2520 at 45 E now, 3 years after ITU's departure statement, and the filing remains active. The departed station may be another satellite, or Russia's statement may not describe a physical move. Read element-set history for 2023 before review."
+  proposed_by: claude-code
+  proposed: 2026-11-28
+
+- norad: 43432
+  network: "BV-SAT-128E"
+  adm: RUS
+  slot: 128
+  ntc_id: 119500367
+  basis: by-hand
+  evidence:
+    - "Orbit's GEO record (read 27 Nov 2026): COSMOS 2526 (Blagovest 12L) holding 128.1 E from 3 Jul 2026 to now (its held-the-slot list: within 0.5 deg for 7 days or more, mean longitude given)"
+    - "ITU Space Explorer notice 119500367, BV-SAT-128E, Russian Federation, notification (11.2) received 2021-08-03; Master Register yes, brought into use yes (full, 110/110 groups), not suspended"
+    - "ITU Resolution 40 table: BV-SAT-128E in position at 128 E from 10.08.2020, not moved from another filing's slot; the only Russian in-position statement at 128 E"
+    - "RussianSpaceWeb's Blagovest overview lists 45 E and 128 E as the programme's positions without assigning satellites to them (read 27 Nov 2026); that agrees with the slot but does not tie 12L to 128 E"
+  proposed_by: claude-code
+  proposed: 2026-11-28
+
+- norad: 43867
+  network: "BV-SAT-70E"
+  adm: RUS
+  slot: 70
+  ntc_id: 121500061
+  basis: by-hand
+  evidence:
+    - "Orbit's GEO record (read 27 Nov 2026): COSMOS 2533 (Blagovest 13L) holding 70.0 E from 1 Jul 2026 to now (its held-the-slot list: within 0.5 deg for 7 days or more, mean longitude given)"
+    - "ITU Space Explorer notice 121500061, BV-SAT-70E, Russian Federation, notification (11.2) received 2021-12-14; Master Register yes, brought into use yes (full, 110/110 groups), not suspended"
+    - "ITU Resolution 40 table: BV-SAT-70E in position at 70 E from 20.07.2022, not moved from another filing's slot; the only Russian in-position statement at 70 E"
+    - "No public source read states 13L's operating slot; the link is the measured longitude and the filing only"
+  proposed_by: claude-code
+  proposed: 2026-11-28
+
+- norad: 44457
+  network: "BV-SAT-12E"
+  adm: RUS
+  slot: 12
+  ntc_id: 121500060
+  basis: by-hand
+  evidence:
+    - "Orbit's GEO record (read 27 Nov 2026): COSMOS 2539 (Blagovest 14L) holding 12.0 E from 4 Jul 2026 to now (its held-the-slot list: within 0.5 deg for 7 days or more, mean longitude given)"
+    - "ITU Space Explorer notice 121500060, BV-SAT-12E, Russian Federation, notification (11.2) received 2021-12-14; Master Register yes, brought into use yes (full, 110/110 groups, in use 15.09.2022), not suspended"
+    - "ITU Resolution 40 table: BV-SAT-12E in position at 12 E from 15.09.2022, not moved from another filing's slot; the only Russian in-position statement at 12 E"
+    - "No source read gives 14L's operating slot (RussianSpaceWeb gives only its launch and insertion; Wikipedia's table lists other positions and was not used)"
+  proposed_by: claude-code
+  proposed: 2026-11-28
